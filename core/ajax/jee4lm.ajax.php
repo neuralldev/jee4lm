@@ -24,7 +24,7 @@ try {
     }
     log::add(__CLASS__, 'debug', ' action request =  '.init('action'));
 
-    if (init('action') == 'getLM') {
+    if (init('action') == 'getjee4lm') {
         $cm = jee4lm::byId(init('id'));
         if (!is_object($cm)) {
             throw new Exception(__('Plugin inconnu vérifier l\'id', __FILE__));
