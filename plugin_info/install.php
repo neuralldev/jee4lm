@@ -22,7 +22,7 @@ function jee4lm_install() {
   $cron = cron::byClassAndFunction('jee4lm', 'pull');
   if (!is_object($cron)) {
       $cron = new cron();
-      $cron->setClass('jee4lm');
+      $cron->setClass('jee4heat');
       $cron->setFunction('pull');
       $cron->setEnable(1);
       $cron->setDeamon(0);
@@ -52,4 +52,4 @@ function jee4lm_remove() {
   }
 }
 
-
+?>
