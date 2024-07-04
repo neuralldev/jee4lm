@@ -51,5 +51,3 @@ function jee4lm_remove() {
       $cron->remove();
   }
 }
-
-?>
