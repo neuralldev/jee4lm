@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/../../../core/php/core.inc.php';
 
-const LMAPI = "api.lamarzocco.com";
 
 class jee4lm extends eqLogic {
     public function pull($_options = null)
@@ -50,7 +49,7 @@ class jee4lm extends eqLogic {
 
         // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://"+LMAPI+"/auth");
+        curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $username, 'password' => $password]));
@@ -78,7 +77,7 @@ class jee4lm extends eqLogic {
             }
     
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "https://"+LMAPI+"/status");
+            curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/status");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $auth_token"]);
             $response = curl_exec($ch);
@@ -170,7 +169,7 @@ class jee4lm extends eqLogic {
           log::add(__CLASS__, 'debug', ' add record for ' . $Name);
           if (!is_object($Command)) {
             // basic settings
-            $Command = new jee4heatCmd();
+            $Command = new jee4lmCmd();
             // $Command->setId(null);
             $Command->setLogicalId($_logicalId);
             $Command->setEqLogic_id($this->getId());
