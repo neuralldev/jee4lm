@@ -1,0 +1,15 @@
+{
+    "plugins\/jee4lm\/class\/php\/jee4lm.class.php": {
+        "Etat": "Etat",
+        "Message": "Message",
+        "Etat Equipement": "Etat Equipement",
+        "Débloquer": "Débloquer",
+        "Rafraichir": "Rafraichir",
+        "Aucun": "Aucun",
+        "Catégorie": "Catégorie",
+        "Activer": "Activer",
+        "Visible": "Visible",
+        "Commentaire": "Commentaire",
+        "Options": "Options"
+    }
+}

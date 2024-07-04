@@ -1,0 +1,19 @@
+ 
+ {
+    "name": "Linea Mini",
+    "configuration" : {
+        "model" : "linea mini",
+        "type" : "coffee machine",
+        "clientid" : "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg",
+        "clientsecret": "2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s"
+    },
+    "commands": [ 
+      {"name": "Nb de shots", "type": "info", "subtype": "numeric",  "logicalId": "lmshots", "unit": "", "warningif": "", "dangerif": "", "template": "tile"},
+      {"name": "Température café", "type": "info", "subtype": "numeric",  "logicalId": "cofeetemperature", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "", "template": "tile", "history": "1"},
+      {"name": "Consigne vapeur", "type": "info", "subtype": "numeric",  "logicalId": "steamtarget", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "", "template": "tile", "history": "1","min": "85", "max": "105"},
+      {"name": "Température vapeur", "type": "info", "subtype": "numeric",  "logicalId": "steamtemperature", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "", "template": "tile", "history": "1"},
+      {"name": "Consigne café", "type": "info", "subtype": "numeric",  "logicalId": "coffeetarget", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "", "template": "tile", "history": "1","min": "50", "max": "120"}
+    ]
+  }
+  
+   
