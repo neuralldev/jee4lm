@@ -55,7 +55,7 @@ class jee4lm extends eqLogic {
   }
 
 /***************************************************************************/
-
+/*
     public function authenticate() {
         $username = $this->getConfiguration('username');
         $password = $this->getConfiguration('password');
@@ -109,6 +109,7 @@ class jee4lm extends eqLogic {
         log::add(__CLASS__, 'debug', 'getLMValue: equipment is not enabled in Jeedom');
         return FALSE;
     }
+        */
     public static function cron()
     {
       log::add(__CLASS__, 'debug', 'cron start');
@@ -117,7 +118,7 @@ class jee4lm extends eqLogic {
           if (($token = $jee4lm->getConfiguration('auth_token')) != '') {
             $id = $jee4lm->getId();
             log::add(__CLASS__, 'debug', "cron for ID=" . $id);
-              $status_return = $jee4lm->getLMValue($jee4lm); // send query
+             // $status_return = $jee4lm->getLMValue($jee4lm); // send query
               if ($status_return !="")
                   log::add(__CLASS__, 'debug', 'LM has returned =' . $status_return);
                 else
@@ -129,7 +130,7 @@ class jee4lm extends eqLogic {
       }
       log::add(__CLASS__, 'debug', 'cron end');
     }
-
+/*
     public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible=1, $SubType = 'other', $min=null, $max=null, $step=null)
     {
       log::add(__CLASS__, 'debug', ' add action ' . $actionName);
@@ -235,6 +236,7 @@ class jee4lm extends eqLogic {
         log::add(__CLASS__, 'debug', ' addcommand end');
         return $Command;
       }
+        */
       private function toggleVisible($_logicalId, $state)
       {
         $Command = $this->getCmd(null, $_logicalId);
@@ -260,7 +262,7 @@ class jee4lm extends eqLogic {
       public function postSave()
       {
         log::add(__CLASS__, 'debug', 'postsave start');
-    
+/*    
         $_eqName = $this->getName();
         log::add(__CLASS__, 'info', 'Sauvegarde de l\'équipement [postSave()] : ' . $_eqName);
         $order = 1;
@@ -319,7 +321,7 @@ class jee4lm extends eqLogic {
     $Equipement->AddCommand(__('Etat', __FILE__), 'jee4lm_state', "info", "binary", 'binary', '', '', 1, 'default', 'default', 'default', 'default', $order, '0', true, 'default', null, 2, null, null, null, 0);
     log::add(__CLASS__, 'debug', 'check refresh in postsave');
 
-    /* create on, off, unblock and refresh actions */
+    /* create on, off, unblock and refresh actions 
     $Equipement->AddAction("jee4lm_on", "ON");
     $Equipement->AddAction("jee4lm_off", "OFF");
     $Equipement->AddAction("refresh", __('Rafraichir', __FILE__));
@@ -328,6 +330,7 @@ class jee4lm extends eqLogic {
     log::add(__CLASS__, 'debug', 'postsave stop');
     // now refresh
     $this->getInformations();
+    */
   }
 
   public function preUpdate()
@@ -337,7 +340,7 @@ class jee4lm extends eqLogic {
     if ($this->getConfiguration('host') == '') {
       throw new Exception(__((__('Le champ host ne peut être vide pour l\'équipement ', __FILE__)) . $this->getName(), __FILE__));
     }
-    $this->authenticate();
+//    $this->authenticate();
     log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
@@ -358,7 +361,7 @@ class jee4lm extends eqLogic {
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    return $this->getLMValue($this);
+   // return $this->getLMValue($this);
     //log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
@@ -367,53 +370,6 @@ class jee4lm extends eqLogic {
     log::add(__CLASS__, 'debug', 'getjee4lm' . "");
     $this->checkAndUpdateCmd('jee4lm', "");
   }
-
-  public static function templateWidget(){
-    $returned = array('action' => array('string' => array()), 'info' => array('string' => array()));
-    $returned['action']['other']['mylock'] = array(
-      'template' => 'tmplicon',
-      'replace' => array(
-        '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ouvert\'></i>',
-        '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
-      )
-    );
-    $returned['info']['string']['mypellets'] = array(
-      'template' => 'tmplmultistate',
-      'test' => array(
-        array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
-        array('operation' => '#value# >= 1 && #value# <= 9','state_light' => '#value#','state_dark' => '#value#'),
-        array('operation' => '#value# == 10 && #value# <= 5','state_light' => 'extinction','state_dark' => 'extinction'),
-        array('operation' => '#value# == 255','state_light' => 'Allumage', 'state_dark' => 'Allumage')
-      )
-    );
-    $returned['info']['string']['mypower'] = array(
-      'template' => 'tmplmultistate',
-      'test' => array(
-        array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
-        array('operation' => '#value# >= 1 && #value# <= 3','state_light' => '#value# Basse','state_dark' => '#value# Basse'),
-        array('operation' => '#value# >= 4 && #value# <= 5','state_light' => '#value# Moyenne','state_dark' => '#value# Moyenne'),
-        array('operation' => '#value# == 6','state_light' => '#value# Haute','state_dark' => '#value# Haute'),
-        array('operation' => '#value# == 7','state_light' => 'Auto', 'state_dark' => 'Auto')
-      )
-    );
-    $returned['info']['binary']['mylocked'] = array(
-      'template' => 'tmplicon',
-      'replace' => array(
-        '#_icon_on_#' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>',
-        '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
-        )
-    );
-    $returned['info']['numeric']['myerror'] = array(
-      'template' => 'tmplmultistate',
-      'test' => array(
-        array('operation' => '#value# == 0','state_light' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>','state_dark' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>'),
-        array('operation' => '#value# != 0','state_light' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>','state_dark' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>')
-      )
-    );
-    return $returned;
-  }
-  
-
 }
 
 
@@ -431,10 +387,10 @@ class jee4lmCmd extends cmd {
       log::add(__CLASS__, 'debug', 'execute action ' . $action);
       switch ($action) {
           case 'refresh':
-            $this->getEqLogic()->getInformations();
+           // $this->getEqLogic()->getInformations();
             break;
           case 'getStatus':
-            return $this->getEqLogic()->getInformations();
+            // return $this->getEqLogic()->getInformations();
       }
     }
 }
