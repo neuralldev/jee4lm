@@ -19,22 +19,19 @@
 require_once __DIR__ . '/../../../core/php/core.inc.php';
 
 function jee4lm_install() {
-/*
   $cron = cron::byClassAndFunction('jee4lm', 'pull');
   if (!is_object($cron)) {
       $cron = new cron();
-      $cron->setClass('jee4heat');
+      $cron->setClass('jee4lm');
       $cron->setFunction('pull');
       $cron->setEnable(1);
       $cron->setDeamon(0);
       $cron->setSchedule('* 1 * * *');
       $cron->save();
   }
-      */
 }
 
 function jee4lm_update() {
-/*
   $cron = cron::byClassAndFunction('jee4lm', 'pull');
   if (!is_object($cron)) {
       $cron = new cron();
@@ -46,7 +43,6 @@ function jee4lm_update() {
       $cron->save();
   }
   $cron->stop();
-  */
 }
 
 function jee4lm_remove() {
