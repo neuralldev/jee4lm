@@ -24,21 +24,6 @@ try {
     }
     log::add(__CLASS__, 'debug', ' action request =  '.init('action'));
 
-    if (init('action') == 'getjee4lm') {
-        $cm = jee4lm::byId(init('id'));
-        if (!is_object($cm)) {
-            throw new Exception(__('Plugin inconnu vérifier l\'id', __FILE__));
-        }
-        $return = utils::o2a($cm);
-        $return['cmd'] = array();
-        foreach ($cm->getCmd() as $cmd) {
-            $cmd_info = utils::o2a($cmd);
-            $cmd_info['value'] = $cmd->execCmd(null, 0);
-            $return['cmd'][] = $cmd_info;
-        }
-        ajax::success($return);
-    }
-
     if (init('action') == 'autoDEL_eq') {
         $eqLogic = jee4lm::byId(init('id'));
         if (!is_object($eqLogic)) {

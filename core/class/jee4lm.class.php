@@ -15,22 +15,37 @@ class jee4lm extends eqLogic {
       return;
     }
   
+    /**
+     * supprime toutes les informations, pour cela cherche les 3 types d'information 
+     */
     public static function deadCmd()
   {
     log::add(__CLASS__, 'debug', 'deadcmd start');
     $return = array();
     foreach (eqLogic::byType('jee4lm') as $jee4lm) {
       foreach ($jee4lm->getCmd() as $cmd) {
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('modele', ''), $matches);
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('username', ''), $matches);
         foreach ($matches[1] as $cmd_id) {
           if (!cmd::byId(str_replace('#', '', $cmd_id))) {
             $return[] = array('detail' => __('jee4lm', __FILE__) . ' ' . $jee4lm->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
           }
         }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('ip', ''), $matches);
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('password', ''), $matches);
         foreach ($matches[1] as $cmd_id) {
           if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __('jee4lm', __FILE__) . ' ' . $jee4lm->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('IP', __FILE__), 'who' => '#' . $cmd_id . '#');
+            $return[] = array('detail' => __('jee4lm', __FILE__) . ' ' . $jee4lm->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
+          }
+        }
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('host', ''), $matches);
+        foreach ($matches[1] as $cmd_id) {
+          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
+            $return[] = array('detail' => __('jee4lm', __FILE__) . ' ' . $jee4lm->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
+          }
+        }
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('auth_token', ''), $matches);
+        foreach ($matches[1] as $cmd_id) {
+          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
+            $return[] = array('detail' => __('jee4lm', __FILE__) . ' ' . $jee4lm->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
           }
         }
       }
@@ -92,7 +107,7 @@ class jee4lm extends eqLogic {
         }        
         // if jeedom equipment is not eanbled, then do nothing but do not return an error
         log::add(__CLASS__, 'debug', 'getLMValue: equipment is not enabled in Jeedom');
-        return TRUE;
+        return FALSE;
     }
     public static function cron()
     {
@@ -343,8 +358,8 @@ class jee4lm extends eqLogic {
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    $this->getLMValue($this);
-    log::add(__CLASS__, 'debug', 'getinformation stop');
+    return $this->getLMValue($this);
+    //log::add(__CLASS__, 'debug', 'getinformation stop');
   }
 
   public function getjee4lm()
@@ -354,15 +369,15 @@ class jee4lm extends eqLogic {
   }
 
   public static function templateWidget(){
-    $return = array('action' => array('string' => array()), 'info' => array('string' => array()));
-    $return['action']['other']['mylock'] = array(
+    $returned = array('action' => array('string' => array()), 'info' => array('string' => array()));
+    $returned['action']['other']['mylock'] = array(
       'template' => 'tmplicon',
       'replace' => array(
         '#_icon_on_#' => '<i class=\'icon_green icon jeedom-lock-ouvert\'></i>',
         '#_icon_off_#' => '<i class=\'icon_red icon jeedom-lock-ferme\'></i>'
       )
     );
-    $return['info']['string']['mypellets'] = array(
+    $returned['info']['string']['mypellets'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
@@ -371,7 +386,7 @@ class jee4lm extends eqLogic {
         array('operation' => '#value# == 255','state_light' => 'Allumage', 'state_dark' => 'Allumage')
       )
     );
-    $return['info']['string']['mypower'] = array(
+    $returned['info']['string']['mypower'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
@@ -381,21 +396,21 @@ class jee4lm extends eqLogic {
         array('operation' => '#value# == 7','state_light' => 'Auto', 'state_dark' => 'Auto')
       )
     );
-    $return['info']['binary']['mylocked'] = array(
+    $returned['info']['binary']['mylocked'] = array(
       'template' => 'tmplicon',
       'replace' => array(
         '#_icon_on_#' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>',
         '#_icon_off_#' => '<span style="font-size:20px!important;color:red;"><br/>Oui</span>'
         )
     );
-    $return['info']['numeric']['myerror'] = array(
+    $returned['info']['numeric']['myerror'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>','state_dark' => '<span style="font-size:20px!important;color:green;"><br/>Non</span>'),
         array('operation' => '#value# != 0','state_light' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>','state_dark' => '<span style="font-size:20px!important;color:red;"><br/>#value#</span>')
       )
     );
-    return $return;
+    return $returned;
   }
   
 
@@ -411,16 +426,16 @@ class jee4lmCmd extends cmd {
       }
       return false;
     }
-      public function execute($_options = null) {
-        $action = $this->getLogicalId();
-        log::add(__CLASS__, 'debug', 'execute action ' . $action);
-        switch ($action) {
-            case 'refresh':
-              $this->getEqLogic()->getInformations();
-              break;
-            case 'getStatus':
-                return $this->getEqLogic()->getLMValue();
-        }
+    public function execute($_options = null) {
+      $action = $this->getLogicalId();
+      log::add(__CLASS__, 'debug', 'execute action ' . $action);
+      switch ($action) {
+          case 'refresh':
+            $this->getEqLogic()->getInformations();
+            break;
+          case 'getStatus':
+            return $this->getEqLogic()->getInformations();
+      }
     }
 }
 
