@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../../core/php/core.inc.php';
 
 
 class jee4lm extends eqLogic {
+    /*
     public function pull($_options = null)
     {
       log::add(__CLASS__, 'debug', 'pull start');
@@ -14,6 +15,7 @@ class jee4lm extends eqLogic {
       log::add(__CLASS__, 'debug', 'pull end');
       return;
     }
+      */
   
     /**
      * supprime toutes les informations, pour cela cherche les 3 types d'information 
@@ -109,7 +111,7 @@ class jee4lm extends eqLogic {
         log::add(__CLASS__, 'debug', 'getLMValue: equipment is not enabled in Jeedom');
         return FALSE;
     }
-        */
+/*        
     public static function cron()
     {
       log::add(__CLASS__, 'debug', 'cron start');
@@ -130,6 +132,8 @@ class jee4lm extends eqLogic {
       }
       log::add(__CLASS__, 'debug', 'cron end');
     }
+      */
+      
 /*
     public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible=1, $SubType = 'other', $min=null, $max=null, $step=null)
     {
