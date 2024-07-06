@@ -7,7 +7,7 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
-    log::add(__CLASS__, 'debug', ' action request =  '.init('action'));
+    log::add(__CLASS__, 'debug', ' action request =  ' . init('action'));
 
     if (init('action') == 'autoDEL_eq') {
         $eqLogic = jee4lm::byId(init('id'));
@@ -22,7 +22,6 @@ try {
     }
 
     throw new Exception(__('{{Aucune méthode correspondante à}} : ', __FILE__) . init('action'));
-    /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
     if (version_compare(jeedom::version(), '4.4', '>=')) {
         ajax::error(displayException($e), $e->getCode());

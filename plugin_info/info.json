@@ -1,11 +1,12 @@
 {
 	"id" : "jee4lm",
 	"name" : "jee4lm",
+    "pluginVersion": "4.4.8",
 	"description" : "Ce plugin permet de se connecter via le cloud LaMarzocco",
     "utilization": "Connectez votrz machine à café La Marzocco",
 	"licence" : "AGPL",
 	"author" : "neuralldev",
-	"require" : "4.0",
+	"require" : "4.3",
     "hasDependency" : false,
 	"category": "automation",
 	"language" : ["fr_FR"],
@@ -19,8 +20,10 @@
         "v4",
         "luna"
     ],
-    "hasOwnDeamon": false,
+    "link": {
+        "forum": "https://github.com/neuralldev/jee4lm",
+        "video": ""
+    },
     "changelog" : "tbd",
     "documentation" : "tbd"
 }
-
