@@ -109,10 +109,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
 						<div class="col-lg-6">
 							<legend><i class="fas fa-wrench"></i> {{Paramètres généraux}}</legend>
 							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Nom équipement}}</label>
+								<label class="col-sm-4 control-label">{{Nom de l'équipement}}</label>
 								<div class="col-sm-6">
 									<input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display:none;">
-									<input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom équipement}}">
+									<input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de l'équipement}}">
 								</div>
 							</div>
 							<div class="form-group">
@@ -149,32 +149,26 @@ $eqLogics = eqLogic::byType($plugin->getId());
 									<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
 								</div>
 							</div>
+
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
 							<div class="form-group">
-                                 <label class="col-md-4 control-label">{{host}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Adresse IP de la machine La Marzocco}}"></i></sup>
-								</label>
-								<div class="col-md-6">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="host" type="text" placeholder="{{adresse ip de la machine à café La Marzocco}}">
-									<span style="font-size: 75%;">({{exemple : 192.168.1.23}})</span>
-								</div>
+                                    <label class="col-md-4 control-label">{{Modèle}}
+										<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le Modèle de l'équipement}}"></i></sup>
+									</label>
+                                    <div class="col-md-6">
+                                        <select id="modeleEq" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="modele">
+                                            <option value="generic">{{Générique}}</option>
+                                            <option value="godin_artemis">{{Godin Artemis}}</option>
+                                        </select>
+                                    </div>
                             </div>
 							<div class="form-group">
-                                 <label class="col-md-4 control-label">{{compte}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le compte utilisé sur le cloud La Marzocco}}"></i></sup>
+								<label class="col-md-4 control-label">{{Adresse IP}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez l'adresse IP de l'équipement}}"></i></sup>
 								</label>
 								<div class="col-md-6">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="username" type="text" placeholder="{{compte cloud LaMarzocco}}">
-									<span style="font-size: 75%;">({{exemple : login}})</span>
-								</div>
-                            </div>
-							<div class="form-group">
-								<label class="col-md-4 control-label">{{mot de passe}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe du compte cloud La Marzocco}}"></i></sup>
-								</label>
-								<div class="col-md-6">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="password" type="text" placeholder="{{mot de passe cloud La Marzocco}}">
-									<span style="font-size: 75%;">({{exemple : password}})</span>
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="ip" type="text" placeholder="{{saisir l'adresse IP de l'équipement}}">
+									<span style="font-size: 75%;">({{exemple : 192.168.101.37}})</span>
 								</div>
 							</div>
 							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
