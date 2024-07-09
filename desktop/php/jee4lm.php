@@ -6,7 +6,7 @@ if (!isConnect('admin')) {
 $plugin = plugin::byId('jee4lm');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
-?>
+?> 
 
 <div class="row row-overflow">
 	<!-- Page d'accueil du plugin -->
