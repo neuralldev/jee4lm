@@ -19,8 +19,8 @@
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 function jee4lm_install() {
-    $pluginVersion = jee4lm::getPluginVersion();
-    config::save('pluginVersion', $pluginVersion, 'jee4lm');
+    //$pluginVersion = jee4lm::getPluginVersion();
+    //config::save('pluginVersion', $pluginVersion, 'jee4lm');
   
     $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
     if (!is_object($cronLocal)) {
@@ -40,8 +40,8 @@ function jee4lm_install() {
 }
 
 function jee4lm_update() {
-    $pluginVersion = jee4lm::getPluginVersion();
-    config::save('pluginVersion', $pluginVersion, 'jee4lm');
+   // $pluginVersion = jee4lm::getPluginVersion();
+   // config::save('pluginVersion', $pluginVersion, 'jee4lm');
 
     $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
     if (!is_object($cronLocal)) {
@@ -66,4 +66,4 @@ function jee4lm_remove() {
     if (is_object($cron)) 
         $cron->remove();
 }
-?>
+
