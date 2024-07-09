@@ -5,8 +5,22 @@ require_once __DIR__ . '/../../../core/php/core.inc.php';
 class jee4lm extends eqLogic
 {
 
+
+  public function pull($_options = null)
+  {
+    log::add(__CLASS__, 'debug', 'pull start');
+    $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
+    if (is_object($cron)) {
+      $cron->remove();
+    }
+    log::add(__CLASS__, 'debug', 'pull end');
+    return;
+  }
+
+
   public static function deadCmd()
   {
+    
     log::add(__CLASS__, 'debug', 'deadcmd start');
     $return = array();
     foreach (eqLogic::byType(__CLASS__) as $eql) {
