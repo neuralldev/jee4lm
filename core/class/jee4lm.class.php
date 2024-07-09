@@ -92,7 +92,7 @@ class jee4lm extends eqLogic
 
   public function getjee4lm()
   {
-    log::add(__CLASS__, 'debug', 'getjee4lm' . "");
+    log::add(__CLASS__, 'debug', "getjee4lm");
     $this->checkAndUpdateCmd(__CLASS__, "");
   }
 }
