@@ -152,17 +152,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
 							<div class="form-group">
-                                    <label class="col-md-4 control-label">{{Modèle}}
-										<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le Modèle de l'équipement}}"></i></sup>
-									</label>
-                                    <div class="col-md-6">
-                                        <select id="modeleEq" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="modele">
-                                            <option value="generic">{{Générique}}</option>
-                                            <option value="godin_artemis">{{Godin Artemis}}</option>
-                                        </select>
-                                    </div>
-                            </div>
-							<div class="form-group">
 								<label class="col-md-4 control-label">{{Adresse IP}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez l'adresse IP de l'équipement}}"></i></sup>
 								</label>
