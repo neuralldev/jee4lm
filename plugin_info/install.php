@@ -16,11 +16,9 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
+ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 function jee4lm_install() {
-    //$pluginVersion = jee4lm::getPluginVersion();
-    //config::save('pluginVersion', $pluginVersion, 'jee4lm');
   
     $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
     if (!is_object($cronLocal)) {
@@ -40,8 +38,6 @@ function jee4lm_install() {
 }
 
 function jee4lm_update() {
-   // $pluginVersion = jee4lm::getPluginVersion();
-   // config::save('pluginVersion', $pluginVersion, 'jee4lm');
 
     $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
     if (!is_object($cronLocal)) {

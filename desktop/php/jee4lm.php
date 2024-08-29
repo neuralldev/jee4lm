@@ -153,15 +153,41 @@ $eqLogics = eqLogic::byType($plugin->getId());
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
 							<div class="form-group">
 								<label class="col-md-4 control-label">{{Adresse IP}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez l'adresse IP de l'équipement}}"></i></sup>
+									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez l'adresse IP de la machine}}"></i></sup>
 								</label>
 								<div class="col-md-6">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="ip" type="text" placeholder="{{saisir l'adresse IP de l'équipement}}">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="host" type="text" placeholder="{{entrez l'adresse IP de la machine}}">
+									<span style="font-size: 75%;">({{exemple : 192.168.101.35}})</span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-md-4 control-label">{{Utilisateur}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le login utilisé sur le site La Marzocco}}"></i></sup>
+								</label>
+								<div class="col-md-6">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="username" type="text" placeholder="{{entrez le compte}}">
+									<span style="font-size: 75%;">({{exemple : adresse.email@domaine.fr}})</span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-md-4 control-label">{{Mot de passe}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe associé au compte La Marzocco}}"></i></sup>
+								</label>
+								<div class="col-md-6">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="password" type="password" placeholder="{{entrez le mot de passe}}">
 									<span style="font-size: 75%;">({{exemple : 192.168.101.37}})</span>
 								</div>
 							</div>
-							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
-							<!-- La fonction cron de la classe du plugin doit contenir le code prévu pour que ce champ soit fonctionnel -->
+							<div class="form-group">
+								<label class="col-md-4 control-label">{{token}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{token appt}}"></i></sup>
+								</label>
+								<div class="col-md-6">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="auth_token" type="text" placeholder="{{token app}}">
+									<span style="font-size: 75%;">({{exemple : **** }})</span>
+								</div>
+							</div>
+
 						</div>
 						<!-- Partie droite de l'onglet "Équipement" -->
 						<!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
