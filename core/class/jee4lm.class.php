@@ -174,6 +174,8 @@ class jee4lm extends eqLogic
     }
     $url ="https://".$host.":".LMDEFAULT_PORT_LOCAL;
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
+    log::add(__CLASS__, 'debug', 'authenticate query url='.$url);
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
@@ -188,8 +190,7 @@ class jee4lm extends eqLogic
       $err_no = curl_errno($ch);
       log::add(__CLASS__, 'debug', "authenticate error no=$err_no message=$error_msg");
     }
-    else
-      $this->setConfiguration('auth_token', json_decode($response, true)['token']);
+    $this->setConfiguration('auth_token', json_decode($response, true)['token']);
     log::add(__CLASS__, 'debug', 'authenticate stop');
   }
 
