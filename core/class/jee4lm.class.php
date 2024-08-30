@@ -183,7 +183,6 @@ class jee4lm extends eqLogic
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['CLIENT_ID' => LMCLIENT_ID, 'CLIENT_SECRET' => LMCLIENT_SECRET]));
     $response = curl_exec($ch);
-    curl_close($ch);
     if (!$response) {
       log::add(__CLASS__, 'debug', 'authenticate error, cannot fetch token');
       $error_msg = curl_error($ch);
@@ -194,6 +193,7 @@ class jee4lm extends eqLogic
       $items = json_decode($response, true);
       $this->setConfiguration('auth_token', $items['token']);
     }
+    curl_close($ch);
     log::add(__CLASS__, 'debug', 'authenticate stop');
   }
 
