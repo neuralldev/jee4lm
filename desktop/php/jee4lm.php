@@ -178,16 +178,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 									<span style="font-size: 75%;">({{exemple : 192.168.101.37}})</span>
 								</div>
 							</div>
-							<div class="form-group">
-								<label class="col-md-4 control-label">{{token}}
-									<sup><i class="fas fa-question-circle tooltips" title="{{token appt}}"></i></sup>
-								</label>
-								<div class="col-md-6">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="auth_token" type="text" placeholder="{{token app}}">
-									<span style="font-size: 75%;">({{exemple : **** }})</span>
-								</div>
-							</div>
-
 						</div>
 						<!-- Partie droite de l'onglet "Équipement" -->
 						<!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
