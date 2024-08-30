@@ -167,7 +167,7 @@ class jee4lm extends eqLogic
 //     log::add(__CLASS__, 'debug', 'token storage cleared');
 //      return;
 //    }
-    $host = $this->getConfiguration('host', null);
+    $host = "https://cms.lamarzocco.io/oauth/v2/token";
     $username = $this->getConfiguration('username', null);
     $password = $this->getConfiguration('password', null);
 
@@ -175,14 +175,12 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
       return;
     }
-    $url = $host.'/status';
+    $url = $host;
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'authenticate query url='.$url);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_PORT, LMDEFAULT_PORT_LOCAL);
-        // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
     curl_setopt($ch, CURLOPT_POST, 1);
