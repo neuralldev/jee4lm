@@ -209,6 +209,15 @@ class jee4lm extends eqLogic
 
   public static function detect() 
   {
+    log::add(__CLASS__, 'debug', '[detect] start');
+    $userID = config::byKey('userID','jee4lm');
+    $password = config::byKey('userPwd','jee4lm');
+    $token = config::byKey('accessToken','jee4lm');
+    if ($userID=='' || $password =='' || $token=='') {
+      log::add(__CLASS__, 'debug', '[detect] login not done, exit');
+      return false;
+    }
+    return true;
     // try to detect the machines only if token succeeded
   }
 

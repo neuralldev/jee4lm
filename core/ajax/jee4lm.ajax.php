@@ -14,13 +14,15 @@ try {
         if (jee4lm::login(init('username'),init('password')))
             ajax::success();
         else
-           throw new Exception(__('informations de connexion incorrectes : ', __FILE__));
+           throw new Exception(__('informations de connexion incorrectes', __FILE__));
     }
 
     if (init('action') == 'sync') {
-        jee4lm::detect();
+        if (jee4lm::detect())
             ajax::success();
-    }
+        else
+            throw new Exception(__("la détection ne peut se faire qu'une fois la connexion réussie", __FILE__));
+     }
       
     
     if (init('action') == 'autoDEL_eq') {
