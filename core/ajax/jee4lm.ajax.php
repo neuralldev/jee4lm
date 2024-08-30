@@ -11,8 +11,10 @@ try {
     ajax::init();
 
     if (init('action') == 'login') {
-        jee4lm::login(init('username'),init('password'));
+        if (jee4lm::login(init('username'),init('password')))
             ajax::success();
+        else
+           throw new Exception(__('informations de connexion incorrectes : ', __FILE__));
     }
 
     if (init('action') == 'sync') {

@@ -202,7 +202,9 @@ class jee4lm extends eqLogic
       config::save('userId', $_username, 'jee4lm');
       config::save('userPwd', $_password, 'jee4lm');
       cache::set('jee4lm::sessionToken', $data['access_token'], 3600);  
+      return true;
     }
+    return false;
   }
 
   public static function detect() 
