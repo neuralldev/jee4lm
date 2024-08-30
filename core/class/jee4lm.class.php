@@ -168,11 +168,17 @@ class jee4lm extends eqLogic
       return;
     }
 
-//    $host = $this->getConfiguration('host', null);
+    $host = $this->getConfiguration('host', null);
+    if ($host=="") {
+      log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
+      return;
+    }
 
+    $url ="https://$host:8081";
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
+    curl_setopt($ch, CURLOPT_URL, $url);
+//    curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $username, 'password' => $password]));
