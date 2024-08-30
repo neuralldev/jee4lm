@@ -226,9 +226,75 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', '[detect] token='.json_encode($token));
     $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
-    if ($data["error"] !="")
+    if ($data["error"] =="")
       return false;
-    else
+    foreach ($data['data']['fleet'] as $machines) {
+      log::add(__CLASS__, 'debug', 'detect found '.$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['serialNumber']);
+    }
+    /*
+    detect=
+    {"status":true,
+    "status_code":200,
+    "data":
+      {"uuid":"78df57ee-3d7c-4081-9bea-c466e93d74c6",
+      "name":"gluzman thierry",
+      "active":true,
+      "country":{
+        "uuid":"d73b3872-985d-4b0b-8934-a41358495af8",
+        "name":"France",
+        "alpha2Code":"FR",
+        "country":"fr_FR"},
+      "email":"gluzmanandco@gmail.com",
+      "image":null,
+      "role":{
+        "uuid":"e1516a97-a7fe-4a16-8aa4-a7c54b64a7f6",
+        "name":"Customer",
+        "role":"ROLE_CUSTOMER",
+        "description":"Default role for user registered with mobile application"
+      },
+      "surname":null,"
+      username":"gluzmanandco@gmail.com",
+      "authenticationType":"INTERNAL",
+      "customerAuthenticationType":[],
+      "birthday":null,
+      "businessSector":null,
+      "disposalCommercial":true,
+      "disposalThirdParty":true,
+      "disposalProfile":true,
+      "emailConfirmed":true,
+      "fleet":[
+        {"uuid":"0c4354ae-44d6-44a2-bb0e-e875f67be18b",
+        "name":"LM049632",
+        "communicationKey":"4f902aeb455cc285f2f9c3e096951758dd13043c252741ecf67246cd2655ef75",
+        "customer":"gluzmanandco@gmail.com",
+        "machine":{
+          "uuid":"600b7183-a4fd-41b0-8a28-7fadf23bc021",
+          "name":null,
+          "model":{
+            "uuid":"9c8752bb-1272-472b-a853-0786d5c4acce",
+            "name":"Linea Mini",
+            "description":"Linea Mini",
+            "slug":"linea_mini"
+            },
+          "ownerNumber":1,
+          "serialNumber":"LM049632",
+          "type":"MACHINE_INSTANCE"
+        },
+        "paringDate":"2023-10-13T11:31:35+00:00",
+        "machineUse":{
+          "uuid":"000b6014-ace4-4bed-81d3-0c18d06cebd8",
+          "name":"1. Domicile",
+          "country":{
+            "uuid":"d73b3872-985d-4b0b-8934-a41358495af8",
+            "name":"France",
+            "alpha2Code":"FR",
+            "country":"fr_FR"},
+            "description":null
+          }
+          }
+        ],
+        "gender":null,"hobbies":[],"ownMachine":1,"privacy":null,"socialNetworkId":null,"business":null,"businessType":null,"coffeeRoaster":null,"countryOther":null,"areaOperation":null,"brandServiced":null,"personOfContact":null,"phoneModel":null,"id":133029}}
+    */
       return true;
   }
 
