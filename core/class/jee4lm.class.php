@@ -199,6 +199,7 @@ class jee4lm extends eqLogic
     '&client_secret='.LMCLIENT_SECRET, 
     'POST');
     log::add(__CLASS__, 'debug', '[login] ' . json_encode($data, true));
+    cache::set('jee4lm::access_token',""); 
     if ($data['access_token']!='') {
       log::add(__CLASS__, 'debug', '[login] valid');
       config::save('refreshToken', $data['refresh_token'], 'jee4lm');
@@ -214,22 +215,21 @@ class jee4lm extends eqLogic
   public static function detect() 
   {
     log::add(__CLASS__, 'debug', '[detect] start');
-    $userID = config::byKey('userID','jee4lm');
-    $password = config::byKey('userPwd','jee4lm');
     $mc = cache::byKey('jee4lm::access_token');
     $token = trim($mc->getValue());
     // try to detect the machines only if token succeeded
-    if ($userID=='' || $password =='' || $token=='') {
-      log::add(__CLASS__, 'debug', "[detect] login=$userID");
-      log::add(__CLASS__, 'debug', "[detect] password=$password");
-      log::add(__CLASS__, 'debug', "[detect] token=$token");
-      log::add(__CLASS__, 'debug', '[detect] login not done, exit');
+    if ($token=='') {
+      log::add(__CLASS__, 'debug', '[detect] login not done or token empty, exit');
       return false;
     }
-    log::add(__CLASS__, 'debug', '[detect] tokern='.$token);
+    $token=config::byKey('accessToken','jee4lm');
+    log::add(__CLASS__, 'debug', '[detect] token='.$token);
     $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
-    return true;
+    if ($data["error"] !="")
+      return false;
+    else
+      return true;
   }
 
   public function getInformations()
