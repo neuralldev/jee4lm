@@ -29,7 +29,7 @@ class jee4lm extends eqLogic
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
     if ($_type=="POST") {
       curl_setopt($ch, CURLOPT_POST, 1);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
     }
     $response = curl_exec($ch);
     if (!$response) {
