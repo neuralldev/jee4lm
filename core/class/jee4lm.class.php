@@ -223,7 +223,7 @@ class jee4lm extends eqLogic
       return false;
     }
     $token=config::byKey('accessToken','jee4lm');
-    log::add(__CLASS__, 'debug', '[detect] token='.$token);
+    log::add(__CLASS__, 'debug', '[detect] token='.json_encode($token));
     $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
     if ($data["error"] !="")
