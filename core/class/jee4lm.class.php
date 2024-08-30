@@ -168,6 +168,9 @@ class jee4lm extends eqLogic
 //      return;
 //    }
     $host = $this->getConfiguration('host', null);
+    $username = $this->getConfiguration('username', null);
+    $password = $this->getConfiguration('password', null);
+
     if ($host=="") {
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
       return;
@@ -181,8 +184,17 @@ class jee4lm extends eqLogic
     curl_setopt($ch, CURLOPT_PORT, LMDEFAULT_PORT_LOCAL);
         // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => LMCLIENT_ID, 'password' => LMCLIENT_SECRET]));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(
+        ['username'  => $username, 
+        'password'   => $password,
+        'grant_type' => 'password', 
+        'client_id'  => LMCLIENT_ID,
+        'client_secret' => LMCLIENT_SECRET
+         ]
+      ));
+
     $response = curl_exec($ch);
     if (!$response) {
       log::add(__CLASS__, 'debug', 'authenticate error, cannot fetch token');
@@ -192,8 +204,8 @@ class jee4lm extends eqLogic
     } else {
       log::add(__CLASS__, 'debug', "authenticate response=".$response);
       $items = json_decode($response, true);
-      if (isset($items['token']))
-        $this->setConfiguration('auth_token', $items['token']);
+      if (isset($items['access_token']))
+        $this->setConfiguration('auth_token', $items['access_token']);
       else
         log::add(__CLASS__, 'debug', "no token found in response");
       }
