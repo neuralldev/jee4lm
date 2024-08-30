@@ -18,7 +18,7 @@ class jee4lm extends eqLogic
   $CONF_USE_BLUETOOTH = "use_bluetooth";
   */
 
-  public static function request($_path, $_data = null, $_type = 'GET') {
+  public static function request($_path, $_data = null, $_type = 'GET', $_header= null) {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'request query url='.$_path);
     log::add(__CLASS__, 'debug', 'request data='.$_data);
@@ -26,7 +26,10 @@ class jee4lm extends eqLogic
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $_path);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
+    if ($_header == null)
+      curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
+    else
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $_header);
     if ($_type=="POST") {
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
@@ -222,6 +225,8 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', '[detect] login not done, exit');
       return false;
     }
+    $data = self::request('https://cms.lamarzocco.io/api/customer/fleet',null,'GET',["Authorization : Bearer {access_token}"]);
+    log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
     return true;
   }
 
