@@ -1,4 +1,5 @@
 <?php
+
 /* This file is part of Jeedom.
 *
 * Jeedom is free software: you can redistribute it and/or modify
@@ -15,50 +16,44 @@
 * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
-
-include_file('core', 'authentification', 'php');
-if (!isConnect()) {
-  include_file('desktop', '404', 'php');
-  die();
+if (!isConnect('admin')) {
+  throw new Exception('{{401 - Accès non autorisé}}');
 }
 ?>
+
+<div id='div_jee4lmLoginAlert' style="display: none;"></div>
 <form class="form-horizontal">
   <fieldset>
-    <legend>{{Configuration connection cloud La Marzocco}}</legend>
-    <div class="form-group">
-      <label class="col-sm-3 control-label">{{Connection}}</label>
-      <div class="col-sm-7">
-        <a class="btn btn-default" id="bt_loginToLMCloud">{{Se connecter}}</a>
+    <div class="form-group netatmomode internal">
+      <label class="col-sm-2 control-label">{{Nom d'utilisateur}}</label>
+      <div class="col-sm-3">
+        <input type="text" class="form-control" id="in_jee4lmLogin_username" placeholder="{{Nom d'utilisateur sur le cloud La Marzocco}}" />
+      </div>
+    </div>
+    <div class="form-group netatmomode internal">
+      <label class="col-sm-2 control-label">{{Mot de passe}}</label>
+      <div class="col-sm-3">
+        <input type="password" class="form-control" id="in_jee4lmLogin_password" placeholder="{{Mot de passe}}" />
       </div>
     </div>
     <div class="form-group">
-      <label class="col-lg-3 control-label">{{Détection}}</label>
-      <div class="col-lg-4">
-        <a class="btn btn-default" id="bt_syncWithLMCloud"><i class="fas fa-sync"></i> {{Détecter mes équipements}}</a>
+      <label class="col-sm-2 control-label"></label>
+      <div class="col-sm-7">
+        <a class="btn btn-success" id="bt_validateLoginToLMCloud">{{Valider}}</a>
       </div>
     </div>
   </fieldset>
 </form>
 
 <script>
-  $('#bt_loginToLMCloud').off('click').on('click', function() {
-     jeeDialog.dialog({
-              id: 'jee_LMModal',
-              title: '{{Connexion de Jeedom au Cloud La Marzocco}}',
-              width: '85vw',
-              height: '51vw',
-              top: '8vh',
-              contentUrl: 'index.php?v=d&modal=login&plugin=jee4lm'
-      }) 
-  })
-  
-  $('#bt_syncWithLMCloud').on('click', function() {
+  $('#bt_validateLoginToLMCloud').off('click').on('click', function() {
     $.ajax({
       type: "POST",
       url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
       data: {
-        action: "sync",
+        action: "login",
+        username: $('#in_jee4lmLogin_username').value(),
+        password: $('#in_jee4lmLogin_password').value()
       },
       dataType: 'json',
       error: function(request, status, error) {
@@ -66,17 +61,17 @@ if (!isConnect()) {
       },
       success: function(data) {
         if (data.state != 'ok') {
-          $('#div_alert').showAlert({
+          $('#div_jee4lmLoginAlert').showAlert({
             message: data.result,
             level: 'danger'
           });
           return;
         }
-        $('#div_alert').showAlert({
-          message: '{{Détection réussie}}',
+        $('#div_jee4lmLoginAlert').showAlert({
+          message: '{{Connexion réussie}}',
           level: 'success'
         });
       }
     });
-  });
+  })
 </script>
