@@ -226,7 +226,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', '[detect] token='.json_encode($token));
     $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
-    if ($data["error"] =="")
+    if ($data["status"] != true)
       return false;
     foreach ($data['data']['fleet'] as $machines) {
       log::add(__CLASS__, 'debug', 'detect found '.$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['serialNumber']);
