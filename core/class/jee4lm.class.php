@@ -172,13 +172,14 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
       return;
     }
-    $url = "https://".$host.":".LMDEFAULT_PORT_LOCAL.'/auth';
+    $url = $host;
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'authenticate query url='.$url);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
-    // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
+    curl_setopt($ch, CURLOPT_PORT, LMDEFAULT_PORT_LOCAL);
+        // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['CLIENT_ID' => LMCLIENT_ID, 'CLIENT_SECRET' => LMCLIENT_SECRET]));
