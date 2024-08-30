@@ -7,8 +7,20 @@ try {
     if (!isConnect('admin')) {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
-    log::add(__CLASS__, 'debug', ' action request =  ' . init('action'));
+    log::add('jee4lm', 'debug', ' action request =  ' . init('action'));
+    ajax::init();
 
+    if (init('action') == 'login') {
+        if(jee4lm::login(init('username'),init('password')))
+            ajax::success();
+    }
+
+    if (init('action') == 'sync') {
+        if (jee4lm::detect()) 
+            ajax::success();
+    }
+      
+    
     if (init('action') == 'autoDEL_eq') {
         $eqLogic = jee4lm::byId(init('id'));
         if (!is_object($eqLogic)) {

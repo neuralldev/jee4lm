@@ -99,7 +99,6 @@ class jee4lm extends eqLogic
   public function preUpdate()
   {
     log::add(__CLASS__, 'debug', 'preupdate start');
-    $this->authenticate();
     log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
@@ -122,6 +121,30 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'backflush start');
     log::add(__CLASS__, 'debug', 'backflush stop');
   }
+  public static function login($_username, $_password)
+  {
+    // login to LM cloud attempt to get the token 
+    $data = self::request('https://cms.lamarzocco.io/oauth/v2/token', array(
+      'username' => $_username,
+      'password' => $_password,
+      'grant_type' => 'password',
+      'client_id'=> LMCLIENT_ID,
+      'client_secret' => LMCLIENT_SECRET
+    ), 'POST');
+    log::add(__CLASS__, 'debug', '[login] ' . json_encode($data));
+    config::save('refreshToken', $data['refresh_token'], 'jee4lm');
+    config::save('accessToken', $data['access_token'], 'jee4lm');
+    config::save('userId', $_username, 'jee4lm');
+    config::save('userPwd', $_password, 'jee4lm');
+    cache::set('jee4lm::sessionToken', $data['access_token'], 3600);
+ 
+  }
+
+  public static function detect() 
+  {
+    // try to detect the machines only if token succeeded
+  }
+
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
