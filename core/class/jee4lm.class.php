@@ -182,7 +182,7 @@ class jee4lm extends eqLogic
         // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['CLIENT_ID' => LMCLIENT_ID, 'CLIENT_SECRET' => LMCLIENT_SECRET]));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => LMCLIENT_ID, 'password' => LMCLIENT_SECRET]));
     $response = curl_exec($ch);
     if (!$response) {
       log::add(__CLASS__, 'debug', 'authenticate error, cannot fetch token');
@@ -192,8 +192,11 @@ class jee4lm extends eqLogic
     } else {
       log::add(__CLASS__, 'debug', "authenticate response=".$response);
       $items = json_decode($response, true);
-      $this->setConfiguration('auth_token', $items['token']);
-    }
+      if (isset($items['token']))
+        $this->setConfiguration('auth_token', $items['token']);
+      else
+        log::add(__CLASS__, 'debug', "no token found in response");
+      }
     curl_close($ch);
     log::add(__CLASS__, 'debug', 'authenticate stop');
   }
