@@ -2,14 +2,14 @@
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
+const 
+LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg", 
+LMCLIENT_SECRET ="2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s",
+LMDEFAULT_PORT_LOCAL = 8081;
 
 class jee4lm extends eqLogic
 {
 
-  const 
-  CLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg", 
-  CLIENT_SECRET ="2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s",
-  DEFAULT_PORT_LOCAL = 8081;
   
   /*
   $MACHINE_NAME = "machine_name";
@@ -158,28 +158,28 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'authenticate start');
 
     // Add logic to authenticate with La Marzocco API
-    $username = $this->getConfiguration('username');
-    $password = $this->getConfiguration('password');
-    log::add(__CLASS__, 'debug', "try to log with u=$username p=$password");
-    if ($username=="" || $password=="") {
-      log::add(__CLASS__, 'debug', 'cannot authenticate as there is no user/password defined');
-      $this->setConfiguration('auth_token', '');
-      log::add(__CLASS__, 'debug', 'token storage cleared');
-      return;
-    }
+//    $username = $this->getConfiguration('username');
+//    $password = $this->getConfiguration('password');
+//    log::add(__CLASS__, 'debug', "try to log with u=$username p=$password");
+//    if ($username=="" || $password=="") {
+//      log::add(__CLASS__, 'debug', 'cannot authenticate as there is no user/password defined');
+//      $this->setConfiguration('auth_token', '');
+//     log::add(__CLASS__, 'debug', 'token storage cleared');
+//      return;
+//    }
     $host = $this->getConfiguration('host', null);
     if ($host=="") {
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
       return;
     }
-    $url ="https://$host:8081";
+    $url ="https://".$host.":".LMDEFAULT_PORT_LOCAL;
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $username, 'password' => $password]));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['CLIENT_ID' => LMCLIENT_ID, 'CLIENT_SECRET' => LMCLIENT_SECRET]));
     $response = curl_exec($ch);
     curl_close($ch);
     if (!$response) {
