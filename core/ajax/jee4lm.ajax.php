@@ -11,12 +11,12 @@ try {
     ajax::init();
 
     if (init('action') == 'login') {
-        if(jee4lm::login(init('username'),init('password')))
+        jee4lm::login(init('username'),init('password'));
             ajax::success();
     }
 
     if (init('action') == 'sync') {
-        if (jee4lm::detect()) 
+        jee4lm::detect();
             ajax::success();
     }
       
@@ -33,7 +33,7 @@ try {
         ajax::success();
     }
 
-    throw new Exception(__('{{Aucune méthode correspondante à}} : ', __FILE__) . init('action'));
+    throw new Exception(__('Aucune méthode correspondant à : ', __FILE__) . init('action'));
 } catch (Exception $e) {
     if (version_compare(jeedom::version(), '4.4', '>=')) {
         ajax::error(displayException($e), $e->getCode());
