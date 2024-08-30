@@ -229,7 +229,7 @@ class jee4lm extends eqLogic
     if ($data["status"] != true)
       return false;
     foreach ($data['data']['fleet'] as $machines) {
-      log::add(__CLASS__, 'debug', 'detect found '.$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['serialNumber']);
+      log::add(__CLASS__, 'debug', 'detect found '.$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['machine']['serialNumber']);
     }
     /*
     detect=
