@@ -167,34 +167,31 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'token storage cleared');
       return;
     }
-
     $host = $this->getConfiguration('host', null);
     if ($host=="") {
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
       return;
     }
-
     $url ="https://$host:8081";
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
-//    curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
+    // curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/auth");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $username, 'password' => $password]));
     $response = curl_exec($ch);
     curl_close($ch);
-
     if (!$response) {
       log::add(__CLASS__, 'debug', 'authenticate error, cannot fetch token');
       $error_msg = curl_error($ch);
-      log::add(__CLASS__, 'debug', "authenticate error message=$error_msg");
+      $err_no = curl_errno($ch);
+      log::add(__CLASS__, 'debug', "authenticate error no=$err_no message=$error_msg");
     }
     else
       $this->setConfiguration('auth_token', json_decode($response, true)['token']);
     log::add(__CLASS__, 'debug', 'authenticate stop');
-
-}
+  }
 
 }
 
