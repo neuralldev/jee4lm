@@ -172,7 +172,7 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
       return;
     }
-    $url = $host;
+    $url = "https://".$host;
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'authenticate query url='.$url);
 
