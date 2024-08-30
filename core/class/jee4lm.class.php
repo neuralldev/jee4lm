@@ -160,6 +160,7 @@ class jee4lm extends eqLogic
     // Add logic to authenticate with La Marzocco API
     $username = $this->getConfiguration('username');
     $password = $this->getConfiguration('password');
+    log::add(__CLASS__, 'debug', "try to log with u=$username p=$password");
     if ($username=="" || $password=="") {
       log::add(__CLASS__, 'debug', 'cannot authenticate as there is no user/password defined');
       $this->setConfiguration('auth_token', '');
@@ -178,8 +179,11 @@ class jee4lm extends eqLogic
     $response = curl_exec($ch);
     curl_close($ch);
 
-    if (!$response) 
+    if (!$response) {
       log::add(__CLASS__, 'debug', 'authenticate error, cannot fetch token');
+      $error_msg = curl_error($ch);
+      log::add(__CLASS__, 'debug', "authenticate error message=$error_msg");
+    }
     else
       $this->setConfiguration('auth_token', json_decode($response, true)['token']);
     log::add(__CLASS__, 'debug', 'authenticate stop');
