@@ -201,7 +201,7 @@ class jee4lm extends eqLogic
       config::save('accessToken', $data['access_token'], 'jee4lm');
       config::save('userId', $_username, 'jee4lm');
       config::save('userPwd', $_password, 'jee4lm');
-      cache::set('jee4lm::sessionToken', $data['access_token'], 3600);  
+      cache::set('jee4lm::access_token', $data['access_token'], 3600);  
       return true;
     }
     return false;
@@ -212,13 +212,17 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', '[detect] start');
     $userID = config::byKey('userID','jee4lm');
     $password = config::byKey('userPwd','jee4lm');
-    $token = config::byKey('accessToken','jee4lm');
+    $mc = cache::byKey('jee4lm::access_token');
+    $token = trim($mc->getValue());
+    // try to detect the machines only if token succeeded
     if ($userID=='' || $password =='' || $token=='') {
+      log::add(__CLASS__, 'debug', "[detect] login=$userID");
+      log::add(__CLASS__, 'debug', "[detect] password=$password");
+      log::add(__CLASS__, 'debug', "[detect] token=$token");
       log::add(__CLASS__, 'debug', '[detect] login not done, exit');
       return false;
     }
     return true;
-    // try to detect the machines only if token succeeded
   }
 
   public function getInformations()
