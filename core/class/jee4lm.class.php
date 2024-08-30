@@ -179,19 +179,22 @@ class jee4lm extends eqLogic
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'authenticate query url='.$url);
 
+    $data = json_encode(
+      ['username'  => $username, 
+      'password'   => $password,
+      'grant_type' => 'password', 
+      'client_id'  => LMCLIENT_ID,
+      'client_secret' => LMCLIENT_SECRET
+       ]
+    );
+    log::add(__CLASS__, 'debug', 'authenticate data='.$data);
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(
-        ['username'  => $username, 
-        'password'   => $password,
-        'grant_type' => 'password', 
-        'client_id'  => LMCLIENT_ID,
-        'client_secret' => LMCLIENT_SECRET
-         ]
-      ));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 
     $response = curl_exec($ch);
     if (!$response) {
