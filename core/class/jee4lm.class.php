@@ -198,8 +198,9 @@ class jee4lm extends eqLogic
     '&client_id='.LMCLIENT_ID.
     '&client_secret='.LMCLIENT_SECRET, 
     'POST');
-    log::add(__CLASS__, 'debug', '[login] ' . json_encode($data));
-    if (isset($data['access_token'])) {
+    log::add(__CLASS__, 'debug', '[login] ' . json_encode($data, true));
+    if ($data['access_token']!='') {
+      log::add(__CLASS__, 'debug', '[login] valid');
       config::save('refreshToken', $data['refresh_token'], 'jee4lm');
       config::save('accessToken', $data['access_token'], 'jee4lm');
       config::save('userId', $_username, 'jee4lm');
