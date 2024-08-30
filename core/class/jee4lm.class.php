@@ -183,9 +183,9 @@ class jee4lm extends eqLogic
       'username='.$username. 
       '&password='.$password.
       '&grant_type=password'. 
-      'client_id='.LMCLIENT_ID.
-      'client_secret='.LMCLIENT_SECRET;
-      
+      '&client_id='.LMCLIENT_ID.
+      '&client_secret='.LMCLIENT_SECRET;
+
     log::add(__CLASS__, 'debug', 'authenticate data='.$data);
 
     $ch = curl_init();
