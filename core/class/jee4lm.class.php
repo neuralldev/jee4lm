@@ -18,6 +18,70 @@ class jee4lm extends eqLogic
   $CONF_USE_BLUETOOTH = "use_bluetooth";
   */
 
+  public static function request($_path, $_data = null, $_type = 'GET') {
+    // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
+    log::add(__CLASS__, 'debug', 'request query url='.$_path);
+    log::add(__CLASS__, 'debug', 'request data='.$_data);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $_path);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
+    if ($_type=="POST") {
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    }
+    $response = curl_exec($ch);
+    if (!$response) {
+      log::add(__CLASS__, 'debug', 'request error, cannot fetch info');
+      $error_msg = curl_error($ch);
+      $err_no = curl_errno($ch);
+      log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
+    } else 
+      log::add(__CLASS__, 'debug', "request response=".$response);
+    curl_close($ch);
+    log::add(__CLASS__, 'debug', 'request stop');
+    return $response;
+
+/*
+    if ($_path != '/login' && $_path != '/refresh') {
+      $mc = cache::byKey('ajaxSystem::sessionToken');
+      $sessionToken = $mc->getValue();
+      if (trim($mc->getValue()) == '') {
+        $sessionToken = self::refreshToken();
+      }
+      $url .= '&session_token=' . $sessionToken;
+    }
+    if ($_data !== null && $_type == 'GET') {
+      $url .= '&options=' . urlencode(json_encode($_data));
+    }
+    $request_http = new com_http($url);
+    $request_http->setHeader(array(
+      'Content-Type: application/json',
+      'Autorization: ' . sha512(mb_strtolower(config::byKey('market::username')) . ':' . config::byKey('market::password'))
+    ));
+    log::add('ajaxSystem', 'debug', '[request] ' . $url . ' => ' . json_encode($_data));
+    if ($_type == 'POST') {
+      $request_http->setPost(json_encode($_data));
+    }
+    if ($_type == 'PUT') {
+      $request_http->setPut(json_encode($_data));
+    }
+    $return = json_decode($request_http->exec(30, 1), true);
+    $return = is_json($return, $return);
+    if (isset($return['error'])) {
+      throw new \Exception(__('Erreur lors de la requete à Ajax System : ', __FILE__) . json_encode($return));
+    }
+    if (isset($return['errors'])) {
+      throw new \Exception(__('Erreur lors de la requete à Ajax System : ', __FILE__) . json_encode($return));
+    }
+    if (isset($return['body'])) {
+      return $return['body'];
+    }
+    return $return;
+    */
+  }
+
   public function pull($_options = null)
   {
     log::add(__CLASS__, 'debug', 'pull start');
@@ -124,20 +188,21 @@ class jee4lm extends eqLogic
   public static function login($_username, $_password)
   {
     // login to LM cloud attempt to get the token 
-    $data = self::request('https://cms.lamarzocco.io/oauth/v2/token', array(
-      'username' => $_username,
-      'password' => $_password,
-      'grant_type' => 'password',
-      'client_id'=> LMCLIENT_ID,
-      'client_secret' => LMCLIENT_SECRET
-    ), 'POST');
+    $data = self::request('https://cms.lamarzocco.io/oauth/v2/token', 
+    'username='.$_username. 
+    '&password='.$_password.
+    '&grant_type=password'. 
+    '&client_id='.LMCLIENT_ID.
+    '&client_secret='.LMCLIENT_SECRET, 
+    'POST');
     log::add(__CLASS__, 'debug', '[login] ' . json_encode($data));
-    config::save('refreshToken', $data['refresh_token'], 'jee4lm');
-    config::save('accessToken', $data['access_token'], 'jee4lm');
-    config::save('userId', $_username, 'jee4lm');
-    config::save('userPwd', $_password, 'jee4lm');
-    cache::set('jee4lm::sessionToken', $data['access_token'], 3600);
- 
+    if (isset($data['access_token'])) {
+      config::save('refreshToken', $data['refresh_token'], 'jee4lm');
+      config::save('accessToken', $data['access_token'], 'jee4lm');
+      config::save('userId', $_username, 'jee4lm');
+      config::save('userPwd', $_password, 'jee4lm');
+      cache::set('jee4lm::sessionToken', $data['access_token'], 3600);  
+    }
   }
 
   public static function detect() 
