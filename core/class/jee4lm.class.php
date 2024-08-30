@@ -226,7 +226,7 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', '[detect] login not done, exit');
       return false;
     }
-    $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization : Bearer {access_token}"]);
+    $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization : Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
     return true;
   }
