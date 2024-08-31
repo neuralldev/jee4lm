@@ -9,7 +9,9 @@ LMDEFAULT_PORT_LOCAL = 8081,
 LMMACHINE_TYPE = ['linea-mini','micra','gs3'],
 LMFILTER_MACHINE_TYPE='MACHINE_INSTANCE',
 LMCLOUD_TOKEN = 'https://cms.lamarzocco.io/oauth/v2/token',
-LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer';
+LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer',
+LMCLOUD_GW_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home",
+LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines";
 
 class jee4lm extends eqLogic
 {
@@ -216,6 +218,21 @@ class jee4lm extends eqLogic
     return false;
   }
 
+public static function LMgetConfiguration($serial) {
+  log::add(__CLASS__, 'debug', 'read configuration');
+  $mc = cache::byKey('jee4lm::access_token');
+  $token = trim($mc->getValue());
+  // try to detect the machines only if token succeeded
+  if ($token=='') {
+    log::add(__CLASS__, 'debug', '[get config] login not done or token empty, exit');
+    return false;
+  }
+  $token=config::byKey('accessToken','jee4lm');
+   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'.'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
+  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+  return true;
+}
+
   public static function detect() 
   {
     log::add(__CLASS__, 'debug', '[detect] start');
@@ -260,6 +277,8 @@ class jee4lm extends eqLogic
         $eqLogic->setLogicalId($uuid);
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
+        // now get configuration of machine
+        self::LMgetConfiguration($$machines['machine']['serialNumber']);
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
