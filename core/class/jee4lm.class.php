@@ -407,7 +407,7 @@ public function toggleMain() {
 
 }
 
-public function applyModuleConfiguration() {
+public static function applyModuleConfiguration() {
   $this->setConfiguration('applyDevice', $this->getConfiguration('type'));
   $this->save();
   if ($this->getConfiguration('type') == '') {
@@ -484,6 +484,7 @@ public static function devicesParameters($_device = '') {
         $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);     
         self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
         $eqLogic->save();
+        self::applyModuleConfiguration();
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
