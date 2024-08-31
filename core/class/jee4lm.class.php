@@ -297,16 +297,16 @@ public static function readConfiguration($eq) {
       $reglage = $g['doses'][0];
       
       $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','other', null, null,null,1);
-      $cmd->event($reglage['doseIndex']); 
+      $cmd->event($reglage['groupDoseMode']); 
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
 
       $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','other', null, null,null,1);
-      $cmd->event($reglage['doseType']); 
+      $cmd->event($reglage['groupDoseType']); 
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
  
-      $cmd=$eq->AddCommand("Groupe Dose max",'bbwdoseB','info','numeric', null, "g",null,1);
-      $cmd->event($reglage['stopTarget']); 
-      log::add(__CLASS__, 'debug', 'groupDoseStop='.$reglage['stopTarget']);
+      $cmd=$eq->AddCommand("Groupe Dose max",'groupDoseMax','info','numeric', null, "g",null,1);
+      $cmd->event($reglage['groupDoseMax']); 
+      log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
       $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', null, null,null,1);
       $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
@@ -377,112 +377,14 @@ public static function readConfiguration($eq) {
     }
   }
   /*
-  {"status":true,
-  "data":
-  {
-  "version":"v1",
-  "preinfusionModesAvailable":["ByDoseType"],
-  "machineCapabilities":
-    [{"family":"LINEA",
-    "groupsNumber":1,
-    "coffeeBoilersNumber":1,
-    "hasCupWarmer":false,
-    "steamBoilersNumber":1,
-    "teaDosesNumber":1,
-    "machineModes":[
-      "BrewingMode","StandBy"],
-    "schedulingType":"smartWakeUpSleep"}
-    ],
-  "machine_sn":"Sn2307902283",
-  "machine_hw":"0",
-  "isPlumbedIn":false,
-  "isBackFlushEnabled":false,
-  "standByTime":0,
-  "tankStatus":true,
-  "settings":[],
-  "recipes":[
-    {"id":"Recipe1",
-     "dose_mode":"Mass",
-     "recipe_doses":[
-      {"id":"A","target":30},
-      {"id":"B","target":45}
-      ]
-    }
-  ],
-  "recipeAssignment":[
-    {"dose_index":"DoseA",
-    "recipe_id":"Recipe1",
-    "recipe_dose":"A",
-    "group":"Group1"}
-  ],
-  "groupCapabilities":[
-    {"capabilities":
-      {"groupType":"AV_Group",
-      "groupNumber":"Group1",
-      "boilerId":"CoffeeBoiler1",
-      "hasScale":false,
-      "hasFlowmeter":false,
-      "numberOfDoses":1
-    },
-    "doses":[
-      {"groupNumber":"Group1",
-      "doseIndex":"DoseA",
-      "doseType":"MassType",
-      "stopTarget":30}
-    ],
-    "doseMode":{
-      "groupNumber":"Group1",
-      "brewingType":"ManualType"}
-    }
-  ],
-  "machineMode":"StandBy",
-  "teaDoses":
-    {"DoseA":{
-      "doseIndex":"DoseA",
-      "stopTarget":0}
-    },
-  "scale":
-    {"connected":false,
-    "address":"44:b7:d0:74:5f:90",
-    "name":"LMZ-745F90",
-    "battery":65},
-  "boilers":[
-    {"id":"SteamBoiler",
-    "isEnabled":false,
-    "target":0,
-    "current":0},
-    {"id":"CoffeeBoiler1",
-    "isEnabled":true,
-    "target":89,
-    "current":84}
-  ],
-  "boilerTargetTemperature":
-    {"SteamBoiler":0,"CoffeeBoiler1":89},
-  "preinfusionMode":
-    {"Group1":
-      {"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}
-    },
-  "preinfusionSettings":{
-    "mode":"Enabled",
-    "Group1":[
-      {"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}
-      ]
-  },
-  "wakeUpSleepEntries":[
-    {"id":"T6aLl42",
-    "days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
-    "steam":false,
-    "enabled":false,
-    "timeOn":"24:0","timeOff":"24:0"}
-  ],
-  "smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},
-  "clock":"2024-08-30T16:09:06",
-  "firmwareVersions":[
-    {"name":"machine_firmware","fw_version":"2.12"},
-    {"name":"gateway_firmware","fw_version":"v3.6-rc4"}
-  ]
-  }
-}
+ config={"status":true,"data":
+ {"version":"v1",
+ "preinfusionModesAvailable":["ByDoseType"],
+ "machineCapabilities":[{"family":"LINEA","groupsNumber":1,"coffeeBoilersNumber":1,"hasCupWarmer":false,"steamBoilersNumber":1,"teaDosesNumber":1,"machineModes":["BrewingMode","StandBy"],"schedulingType":"smartWakeUpSleep"}],
+ "machine_sn":"Sn2307902283","machine_hw":"0","isPlumbedIn":false,"isBackFlushEnabled":false,"standByTime":0,"tankStatus":true,"settings":[],
+ "recipes":[{"id":"Recipe1","dose_mode":"Mass",
+ "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],"groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},"doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],"machineMode":"StandBy","teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},"scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},"boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},{"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},"preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
+2223|[2024-08-31 14:49:02] DEBUG  
   */
   return true;
 }
