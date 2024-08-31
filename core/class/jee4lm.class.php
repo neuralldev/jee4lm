@@ -53,42 +53,66 @@ class jee4lm extends eqLogic
     return json_decode($response,true);
   }
 
-  public function checkToken() {
-    $token=config::byKey('accessToken', 'jee4lm');
+  public static function login($_username, $_password)
+  {
+    // login to LM cloud attempt to get the token 
+    $data = self::request(LMCLOUD_TOKEN, 
+    'username='.$_username. 
+    '&password='.$_password.
+    '&grant_type=password'. 
+    '&client_id='.LMCLIENT_ID.
+    '&client_secret='.LMCLIENT_SECRET, 
+    'POST');
+    log::add(__CLASS__, 'debug', 'login ' . json_encode($data, true));
+    cache::delete('jee4lm::access_token'); 
+    config::save('refreshToken', '', 'jee4lm');
+    config::save('accessToken', '', 'jee4lm');
+  if ($data['access_token']!='') {
+      config::save('refreshToken', $data['refresh_token'], 'jee4lm');
+      config::save('accessToken', $data['access_token'], 'jee4lm');
+      config::save('userId', $_username, 'jee4lm');
+      config::save('userPwd', $_password, 'jee4lm');
+      cache::set('jee4lm::access_token', $data['access_token'], 300);
+      log::add(__CLASS__, 'debug', 'login valid');
+      return $data['access_token'];
+    }
+    return '';
+  }
+  public static function refreshToken() {
     $refresh=config::byKey('refreshToken', 'jee4lm');
     $_username=config::byKey('userId', 'jee4lm');
     $_password=config::byKey('userPwd', 'jee4lm');
-    $mc = cache::byKey('jee4lm::access_token');
-    $cachetoken = trim($mc->getValue());
-    log::add(__CLASS__, 'debug', 'cache token='.$cachetoken);
-    // try to detect the machines only if token succeeded
-    if ($cachetoken == '') {
-      log::add(__CLASS__, 'debug', 'refresh token');
-      $data = self::request(LMCLOUD_TOKEN, 
-      'username='.$_username. 
-      '&password='.$_password.
-      '&grant_type=password'. 
+    config::save('refreshToken', '', 'jee4lm');
+    config::save('accessToken', '', 'jee4lm');
+  // try to detect the machines only if token succeeded
+    log::add(__CLASS__, 'debug', 'refresh token');
+    $data = self::request(LMCLOUD_TOKEN, 
+      'grant_type=refresh_token'.
+      '&refresh_token='.$refresh. 
       '&client_id='.LMCLIENT_ID.
       '&client_secret='.LMCLIENT_SECRET, 
       'POST');
-      log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
-      cache::set('jee4lm::access_token',""); 
-      if ($data['access_token']!='') {
-        config::save('refreshToken', $data['refresh_token'], 'jee4lm');
-        config::save('accessToken', $data['access_token'], 'jee4lm');
-        cache::set('jee4lm::access_token', $data['access_token'], 3600);    
-        $token=$data['access_token'];
-        $refresh=$data['refresh_token'];
-      } else {
-        $token='';
-        $refresh='';
-      } 
-    }  
-    config::save('refreshToken', $refresh, 'jee4lm');
-    config::save('accessToken', $token, 'jee4lm');
-  
-    return $token;
+    log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
+    cache::delete('jee4lm::access_token'); 
+    if ($data['access_token']!='') {
+      cache::set('jee4lm::access_token', $data['access_token'], 300);    
+      config::save('refreshToken',  $data['refresh_token'], 'jee4lm');
+      config::save('accessToken', $data['access_token'], 'jee4lm');
+      return $data['access_token'];
+    }    
+    return '';
   }
+
+  public static function getToken() {
+    $mc = cache::byKey('jee4lm::access_token');
+    $access_token = $mc->getValue();
+    if (config::byKey('accessToken', 'jee4lm')=='') // no login performed yet
+      return '';
+    if ($access_token =='') 
+      $access_token = self::refreshToken();
+    return $access_token;
+  }
+
   /*
   la fonction CRON permet d'interroger les registres toutes les minutes. 
   le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
@@ -107,8 +131,8 @@ class jee4lm extends eqLogic
           log::add(__CLASS__, 'debug', "cron     serial=" . $serial);
           log::add(__CLASS__, 'debug', "cron     slug=" . $slug);
           if ($slug!= '') {
-            $lm_return = $jee4lm->checkToken(); // send query fro token
-            if ($lm_return !="ERROR")
+            $token = self::getToken(); // send query for token and refresh it if necessary
+            if ($token !='')
               if ($jee4lm->readconfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
                 log::add(__CLASS__, 'debug', 'cron ok');
               else
@@ -224,42 +248,12 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'backflush start');
     log::add(__CLASS__, 'debug', 'backflush stop');
   }
-  public static function login($_username, $_password)
-  {
-    // login to LM cloud attempt to get the token 
-    $data = self::request(LMCLOUD_TOKEN, 
-    'username='.$_username. 
-    '&password='.$_password.
-    '&grant_type=password'. 
-    '&client_id='.LMCLIENT_ID.
-    '&client_secret='.LMCLIENT_SECRET, 
-    'POST');
-    log::add(__CLASS__, 'debug', '[login] ' . json_encode($data, true));
-    cache::set('jee4lm::access_token',""); 
-    if ($data['access_token']!='') {
-      log::add(__CLASS__, 'debug', '[login] valid');
-      config::save('refreshToken', $data['refresh_token'], 'jee4lm');
-      config::save('accessToken', $data['access_token'], 'jee4lm');
-      config::save('userId', $_username, 'jee4lm');
-      config::save('userPwd', $_password, 'jee4lm');
-      cache::set('jee4lm::access_token', $data['access_token'], 3600);  
-      return true;
-    }
-    return false;
-  }
 
 public static function readConfiguration($eq) {
   log::add(__CLASS__, 'debug', 'read configuration');
-  $mc = cache::byKey('jee4lm::access_token');
-  $token = trim($mc->getValue());
-  // try to detect the machines only if token succeeded
-  if ($token=='') {
-    log::add(__CLASS__, 'debug', '[get config] login not done or token empty, exit');
-    return false;
-  }
   $serial=$eq->getConfiguration('serialNumber'); 
-  $token=config::byKey('accessToken','jee4lm'); 
-   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
+  $token=self::getToken();
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   if ($data['status']== true) {
     $machine = $data['data'];
@@ -362,10 +356,22 @@ public static function readConfiguration($eq) {
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
+      $cmd=$eq->AddCommand("Préinfusion",'preinfusionmode','info','binary', null, null,null,1);
+      $cmd->event($preinfusion['mode']=='Enabled'); 
       log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
+
+      $cmd=$eq->AddCommand("Prétrempage",'prewet','info','binary', null, null,null,1);
+      $cmd->event($preinfusion['Group1'][0]['preWetTime']>0 && $preinfusion['Group1'][0]['preWetHoldTime'] >0); 
+
+      $cmd=$eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's',null,1);
+      $cmd->event($preinfusion['Group1'][0]['preWetTime']); 
       log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
+
+      $cmd=$eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's',null,1);
+      $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
-      log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
+      
+//      log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
       $fw = $machine['firmwareVersions'];
       $cmd=$eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
       $cmd->event($fw[0]['fw_version']); 
@@ -383,7 +389,13 @@ public static function readConfiguration($eq) {
  "machineCapabilities":[{"family":"LINEA","groupsNumber":1,"coffeeBoilersNumber":1,"hasCupWarmer":false,"steamBoilersNumber":1,"teaDosesNumber":1,"machineModes":["BrewingMode","StandBy"],"schedulingType":"smartWakeUpSleep"}],
  "machine_sn":"Sn2307902283","machine_hw":"0","isPlumbedIn":false,"isBackFlushEnabled":false,"standByTime":0,"tankStatus":true,"settings":[],
  "recipes":[{"id":"Recipe1","dose_mode":"Mass",
- "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],"groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},"doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],"machineMode":"StandBy","teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},"scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},"boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},{"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},"preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
+ "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],
+ "groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},
+ "doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],
+ "machineMode":"StandBy",
+ "teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},"scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},"boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},
+ {"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},
+ "preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
 2223|[2024-08-31 14:49:02] DEBUG  
   */
   return true;
@@ -483,15 +495,12 @@ public function toggleMain() {
   public static function detect() 
   {
     log::add(__CLASS__, 'debug', '[detect] start');
-    $mc = cache::byKey('jee4lm::access_token');
-    $token = trim($mc->getValue());
+    $token = self::getToken();
     // try to detect the machines only if token succeeded
     if ($token=='') {
       log::add(__CLASS__, 'debug', '[detect] login not done or token empty, exit');
       return false;
     }
-    $token=config::byKey('accessToken','jee4lm');
-    log::add(__CLASS__, 'debug', '[detect] token='.json_encode($token));
     $data = self::request(LMCLOUD_CUSTOMER,null,'GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
     if ($data["status"] != true)
@@ -604,8 +613,6 @@ public function toggleMain() {
     foreach ($machines as $machine) {
       $serial = $machine->getConfiguration('serialNumber', 'jee4lm');
       log::add(__CLASS__, 'debug', "fetched $serial");
-
-
     }
     log::add(__CLASS__, 'debug', 'getinformation stop');
     return true;
