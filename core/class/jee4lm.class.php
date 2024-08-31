@@ -144,6 +144,7 @@ class jee4lm extends eqLogic
     }
     log::add(__CLASS__, 'debug', 'cron end');
   }
+
   public static function pull($_options = null)
   {
     log::add(__CLASS__, 'debug', 'pull start');
@@ -152,10 +153,8 @@ class jee4lm extends eqLogic
       $cron->remove();
     }
     log::add(__CLASS__, 'debug', 'pull end');
-    
+  }
    
-
-
   public static function deadCmd()
   {
     
