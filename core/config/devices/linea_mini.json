@@ -1,0 +1,243 @@
+{
+    "name": "Linea Mini",
+    "configuration": {
+        "battery_type": ""
+    },
+    "commands": [
+        {
+            "name": "Température",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 1,
+            "logicalId": "temperature",
+            "generic_type": "TEMPERATURE",
+            "unite": "°C"
+        },
+        {
+            "name": "Main",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "machinemode",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "PlumlbedIn",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "plumbedin",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "Backflushing",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "backflushing",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "Tankwarning",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "tankempty",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "Mode",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "Mode",
+            "configuration": {
+                "repeatEventManagement": "always"
+            }
+        },
+        {
+            "name": "BBWDose1",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "BBWDoseA",
+            "configuration": {
+                "repeatEventManagement": "always"
+            }
+        },
+        {
+            "name": "BBWDose2",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "BBWDoseB",
+            "configuration": {
+                "repeatEventManagement": "always"
+            }
+        },
+        {
+            "name": "CurrentGroupMode",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "GroupMode",
+            "configuration": {
+                "repeatEventManagement": "always"
+            }
+        },
+        {
+            "name": "CurrentGroupDoseMode",
+            "type": "info",
+            "subtype": "other",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "GroupDoseMode",
+            "configuration": {
+                "repeatEventManagement": "always"
+            }
+        },
+        {
+            "name": "CurrentGroupDoseWeight",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "GroupDoseWeight",
+            "configuration": {
+                "repeatEventManagement": "always"
+            }
+        },
+        {
+            "name": "isBBW",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "isbbwused",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "isScaleConnected",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "isscaleconnected",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "scalename",
+            "type": "info",
+            "subtype": "other",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "scalename",
+            "configuration": {
+                "repeatEventManagement": "never"
+            }
+        },
+        {
+            "name": "ScaleBattery",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "isscaleconnected",
+            "generic_type": "TEMPERATURE",
+            "unite": "°C"
+        },
+        {
+            "name": "isSteamBoilerEnabled",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "issteamboilerenabled"
+        },
+        {
+            "name": "SteamboilerTarget",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "steamtarget",
+            "generic_type": "TEMPERATURE",
+            "unite": "°C"
+        },
+        {
+            "name": "SteamboilerCurrent",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "steamcurrent",
+            "generic_type": "TEMPERATURE",
+            "unite": "°C"
+        },
+        {
+            "name": "isCoffeeBoilerEnabled",
+            "type": "info",
+            "subtype": "binary",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "iscoffeeboilerenabled"
+        },
+        {
+            "name": "CoffeeboilerTarget",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "coffeetarget",
+            "generic_type": "TEMPERATURE",
+            "unite": "°C"
+        },
+        {
+            "name": "CoffeeboilerCurrent",
+            "type": "info",
+            "subtype": "numeric",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "coffeecurrent",
+            "generic_type": "TEMPERATURE",
+            "unite": "°C"
+        },
+        {
+            "name": "fwversion",
+            "type": "info",
+            "subtype": "other",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "fwversion"
+        },
+        {
+            "name": "gwversion",
+            "type": "info",
+            "subtype": "other",
+            "isVisible": 1,
+            "isHistorized": 0,
+            "logicalId": "gwversion"
+        }
+    ]
+}

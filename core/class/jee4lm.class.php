@@ -247,7 +247,7 @@ public static function LMgetConfiguration($serial, $eq) {
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
       log::add(__CLASS__, 'debug', 'groupDoseStop='.$reglage['stopTarget']);
-      log::add(__CLASS__, 'debug', 'actualmode='.$machine['machineMode']);
+      log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
       log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
       log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
       log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
@@ -269,14 +269,14 @@ public static function LMgetConfiguration($serial, $eq) {
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
-      log::add(__CLASS__, 'debug', 'preinfusion='.($preinfusion['mode']=='Enabled'));
+      log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
       log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
       log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
       $fw = $machine['firmwareVersions'];
       log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
       log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
-
+      log::add(__CLASS__, 'debug', 'main='.($machine['machineMode']=="StandBy"?false:true));
     }
   }
   /*
@@ -390,6 +390,54 @@ public static function LMgetConfiguration($serial, $eq) {
   return true;
 }
 
+public function toggleMain() {
+  log::add(__CLASS__, 'debug', 'toggle Main start');
+  $mc = cache::byKey('jee4lm::access_token');
+  $token = trim($mc->getValue());
+  // try to detect the machines only if token succeeded
+  if ($token=='') {
+    log::add(__CLASS__, 'debug', '[detect] login not done or token empty, exit');
+    return false;
+  }
+  $token=config::byKey('accessToken','jee4lm');
+  $serial=config::byKey('serialNumber','jee4lm');
+  $status=(true?"BrewingMode":"Standby");
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status',"status=".$status,'POST',["Authorization: Bearer $token"]);
+  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+
+}
+
+public function applyModuleConfiguration() {
+  $this->setConfiguration('applyDevice', $this->getConfiguration('type'));
+  $this->save();
+  if ($this->getConfiguration('type') == '') {
+    return true;
+  }
+  $device = self::devicesParameters($this->getConfiguration('type'));
+  if (!is_array($device)) {
+    return true;
+  }
+  $this->import($device, true);
+}
+
+public static function devicesParameters($_device = '') {
+  $return = array();
+  $files = ls(__DIR__ . '/../config/devices', '*.json', false, array('files', 'quiet'));
+  foreach ($files as $file) {
+    try {
+      $return[str_replace('.json', '', $file)] = is_json(file_get_contents(__DIR__ . '/../config/devices/' . $file), false);
+    } catch (Exception $e) {
+    }
+  }
+  if (isset($_device) && $_device != '') {
+    if (isset($return[$_device])) {
+      return $return[$_device];
+    }
+    return array();
+  }
+  return $return;
+}
+
   public static function detect() 
   {
     log::add(__CLASS__, 'debug', '[detect] start');
@@ -433,6 +481,7 @@ public static function LMgetConfiguration($serial, $eq) {
         $eqLogic->setLogicalId($uuid);
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // now get configuration of machine
+        $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);     
         self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
         $eqLogic->save();
       }
@@ -616,7 +665,9 @@ class jee4lmCmd extends cmd
     switch ($action) {
       case 'refresh':
         return $eq->getInformations();
-      case 'start_backflush':
+        case 'toggleonoff':
+          return $eq->toggleMain();
+        case 'start_backflush':
         return $eq->startBackflush();
       case 'getStatus':
         return $eq->getInformations();
