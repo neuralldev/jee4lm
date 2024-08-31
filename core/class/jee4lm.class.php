@@ -266,59 +266,99 @@ public static function readConfiguration($eq) {
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
       log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
       
-      $eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);      
+      $cmd=$eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);  
+      $cmd->event($machine['isPlumbedIn']);    
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
-      $eq->AddCommand("Etat Backflush",'backflush','info','binary', null, null,null,1);
+
+      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', null, null,null,1);
+      $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
-      $eq->AddCommand("Réservoir plein",'tankStatus','info','binary', null, null,null,1);
+
+      $cmd=$eq->AddCommand("Réservoir plein",'tankStatus','info','binary', null, null,null,1);
+      $cmd->event($machine['tankStatus']);    
       log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
+
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
+
+      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','other', null, null,null,1);
+      $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
-      $eq->AddCommand("BBW Etat",'bbwmode','info','other', null, null,null,1);
+
+      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', null, "g",null,1);
+      $cmd->event($bbw['recipe_doses'][0]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
-      $eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', null, "g",null,1);
+
+      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', null, "g",null,1);
+      $cmd->event($bbw['recipe_doses'][1]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
-      $eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', null, "g",null,1);
+
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
+      
+      $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','other', null, null,null,1);
+      $cmd->event($reglage['doseIndex']); 
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
-      $eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','other', null, null,null,1);
+
+      $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','other', null, null,null,1);
+      $cmd->event($reglage['doseType']); 
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
-      $eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','other', null, null,null,1);
+ 
+      $cmd=$eq->AddCommand("Groupe Dose max",'bbwdoseB','info','numeric', null, "g",null,1);
+      $cmd->event($reglage['stopTarget']); 
       log::add(__CLASS__, 'debug', 'groupDoseStop='.$reglage['stopTarget']);
-      $eq->AddCommand("Groupe Dose max",'bbwdoseB','info','numeric', null, "g",null,1);
+      
+      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', null, null,null,1);
+      $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
-      $eq->AddCommand("Etat",'machinemode','info','binary', null, null,null,1);
+
+      $cmd=$eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,1);
+      $cmd->event(($machine['scale']['address']==''?false:true)); 
       log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
-      $eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,1);
+
+      $cmd=$eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', null, null,null,1);
+      $cmd->event($machine['scale']['connected']); 
       log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
-      $eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', null, null,null,1);
+
       log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
       $eq->setConfiguration("scalemac",$machine['scale']['address']);
+
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       $eq->setConfiguration("scalename",$machine['scale']['name']);
+
+      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",null,1);
+      $cmd->event($machine['scale']['battery']); 
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
-      $eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",null,1);
+
       $boilers = $machine['boilers'];
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
+          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', null, null,null,1);
+          $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
-          $eq->AddCommand("Vapeur activée",'steamenabled','info','binary', null, null,null,1);
+
+          $cmd=$eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C',null,1);
+          $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
-          $eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C',null,1);
+
+          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','binary', null, '°C',null,1);
+          $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
-          $eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','binary', null, '°C',null,1);
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
+          $cmd=$eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,null,1);
+          $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
-          $eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,null,1);
+
+          $cmd=$eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C',null,1);
+          $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
-          $eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C',null,1);
-          log::add(__CLASS__, 'debug', 'coffeeurrent='.$boiler['current']);
-          $eq->AddCommand("Cafetière temperature actuelle",'coffeeurrent','info','numeric', null, '°C',null,1);
+
+          $cmd=$eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C',null,1);
+          $cmd->event($boiler['current']); 
+          log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
@@ -327,10 +367,13 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
       log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
       $fw = $machine['firmwareVersions'];
+      $cmd=$eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
+      $cmd->event($fw[0]['fw_version']); 
       log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
-      $eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
+
+      $cmd=$eq->AddCommand("Version Gateway",'gwversion','info','other', null, null,null,1);
+      $cmd->event($fw[1]['fw_version']); 
       log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
-      $eq->AddCommand("Version Gateway",'gwversion','info','other', null, null,null,1);
     }
   }
   /*
