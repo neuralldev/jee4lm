@@ -237,30 +237,33 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'type='.$machines['machine']['type']);
       if ($machines['machine']['type'] == LMFILTER_MACHINE_TYPE) {
         $d = DateTime::createFromFormat(DateTime::ATOM, $machines['paringDate']);
-        log::add(__CLASS__, 'debug', 'slug='.($slug=$machines['machine']['slug']));
-        log::add(__CLASS__, 'debug', 'key='.$machines['machine']['communicationKey']);
+        log::add(__CLASS__, 'debug', 'slug='.($slug=$machines['machine']['model']['slug']));
+        log::add(__CLASS__, 'debug', 'key='.$machines['communicationKey']);
         log::add(__CLASS__, 'debug', 'detect paired on '.$d->format("d/m/y"));  
+        // now check if machine is already created as an eqlogic
+        $eqLogic = eqLogic::byLogicalId($uuid, 'jee4lm');
+        if (!is_object($eqLogic)) {
+          $eqLogic = new jee4lm();
+          $eqLogic->setEqType_name('jee4lm');
+          $eqLogic->setIsEnable(1);
+          $eqLogic->setName($machines['name']);
+          $eqLogic->setCategory('other', 1);
+          $eqLogic->setIsVisible(1);
+          log::add(__CLASS__, 'debug', 'uuid created');
+        } else
+          log::add(__CLASS__, 'debug', 'uuid update only');
+        $eqLogic->setConfiguration('type', $slug);
+        $eqLogic->setConfiguration('communicationKey', $machines['communicationKey']);
+        $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
+        $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);     
+        $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
+        $eqLogic->setLogicalId($uuid);
+        $eqLogic->save();
+        log::add(__CLASS__, 'debug', 'eqlogic saved');
       }
-      // now check if machine is already created as an eqlogic
-      $eqLogic = eqLogic::byLogicalId($uuid, 'jee4lm');
-      if (!is_object($eqLogic)) {
-        $eqLogic = new jee4lm();
-        $eqLogic->setEqType_name('jee4lm');
-        $eqLogic->setIsEnable(1);
-        $eqLogic->setName($machines['name']);
-        $eqLogic->setCategory('other', 1);
-        $eqLogic->setIsVisible(1);
-        log::add(__CLASS__, 'debug', 'uuid created');
-      } else
-        log::add(__CLASS__, 'debug', 'uuid update only');
-      $eqLogic->setConfiguration('type', $slug);
-      $eqLogic->setConfiguration('communicationKey', $machines['machine']['communicationKey']);
-      $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
-      $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);     
-      $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
-      $eqLogic->setLogicalId($uuid);
-      $eqLogic->save();
+      log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
+    log::add(__CLASS__, 'debug', 'end parsing');
     /*
     detect=
     {"status":true,
