@@ -227,7 +227,7 @@ public static function LMgetConfiguration($serial) {
     log::add(__CLASS__, 'debug', '[get config] login not done or token empty, exit');
     return false;
   }
-  $token=config::byKey('accessToken','jee4lm');
+  $token=config::byKey('accessToken','jee4lm'); 
    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   return true;
