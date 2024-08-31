@@ -157,7 +157,7 @@ class jee4lm extends eqLogic
    
   public static function deadCmd()
   {
-    
+     
     log::add(__CLASS__, 'debug', 'deadcmd start');
     $return = array();
     foreach (eqLogic::byType(__CLASS__) as $eql) {
