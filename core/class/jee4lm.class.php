@@ -139,7 +139,7 @@ class jee4lm extends eqLogic
                 log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
           }
         } 
-      } else
+      } else 
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
     log::add(__CLASS__, 'debug', 'cron end');
