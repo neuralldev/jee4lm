@@ -297,15 +297,15 @@ public static function readConfiguration($eq) {
       $reglage = $g['doses'][0];
       
       $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','other', null, null,null,1);
-      $cmd->event($reglage['groupDoseMode']); 
+      $cmd->event($reglage['doseIndex']); 
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
 
       $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','other', null, null,null,1);
-      $cmd->event($reglage['groupDoseType']); 
+      $cmd->event($reglage['doseType']); 
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
  
       $cmd=$eq->AddCommand("Groupe Dose max",'groupDoseMax','info','numeric', null, "g",null,1);
-      $cmd->event($reglage['groupDoseMax']); 
+      $cmd->event($reglage['stopTarget']); 
       log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
       $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', null, null,null,1);
