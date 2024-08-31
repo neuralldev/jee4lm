@@ -232,7 +232,7 @@ public static function LMgetConfiguration($serial, $eq) {
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   if ($data['status']== true) {
     $machine = $data['data'];
-    if ($machine['machineCapabilities']['family']=='LINEA') { // linea mini
+    if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
       log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
       log::add(__CLASS__, 'debug', 'plumbedin='.$machine['isPlumbedIn']);
       log::add(__CLASS__, 'debug', 'backflush in process='.$machine['isBackFlushEnabled']);
