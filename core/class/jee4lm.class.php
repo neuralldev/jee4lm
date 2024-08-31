@@ -265,38 +265,60 @@ public static function readConfiguration($eq) {
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
       log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
+      
+      $eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);      
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
-      log::add(__CLASS__, 'debug', 'backflush in process='.($machine['isBackFlushEnabled']?'yes':'no'));
+      $eq->AddCommand("Etat Backflush",'backflush','info','binary', null, null,null,1);
+      log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
+      $eq->AddCommand("Réservoir plein",'tankStatus','info','binary', null, null,null,1);
       log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+      $eq->AddCommand("BBW Etat",'bbwmode','info','other', null, null,null,1);
       log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
+      $eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', null, "g",null,1);
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
+      $eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', null, "g",null,1);
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
+      $eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','other', null, null,null,1);
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
+      $eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','other', null, null,null,1);
       log::add(__CLASS__, 'debug', 'groupDoseStop='.$reglage['stopTarget']);
+      $eq->AddCommand("Groupe Dose max",'bbwdoseB','info','numeric', null, "g",null,1);
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
+      $eq->AddCommand("Etat",'machinemode','info','binary', null, null,null,1);
       log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
+      $eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,1);
       log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
+      $eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', null, null,null,1);
       log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
+      $eq->setConfiguration("scalemac",$machine['scale']['address']);
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
+      $eq->setConfiguration("scalename",$machine['scale']['name']);
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
+      $eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",null,1);
       $boilers = $machine['boilers'];
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
+          $eq->AddCommand("Vapeur activée",'steamenabled','info','binary', null, null,null,1);
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
+          $eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C',null,1);
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+          $eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','binary', null, '°C',null,1);
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
-          log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
-          log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
-          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+          log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
+          $eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,null,1);
+          log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
+          $eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C',null,1);
+          log::add(__CLASS__, 'debug', 'coffeeurrent='.$boiler['current']);
+          $eq->AddCommand("Cafetière temperature actuelle",'coffeeurrent','info','numeric', null, '°C',null,1);
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
@@ -306,8 +328,9 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
       $fw = $machine['firmwareVersions'];
       log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
+      $eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
       log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
-      log::add(__CLASS__, 'debug', 'main='.($machine['machineMode']=="StandBy"?false:true));
+      $eq->AddCommand("Version Gateway",'gwversion','info','other', null, null,null,1);
     }
   }
   /*
@@ -420,6 +443,80 @@ public static function readConfiguration($eq) {
   */
   return true;
 }
+
+
+public function AddCommand(
+  $Name,$_logicalId,$Type = 'info',$SubType = 'binary',$Template = null, $unite = null,$generic_type = null,$IsVisible = 1,$icon = 'default',$forceLineB = 'default', $valuemin = 'default',
+  $valuemax = 'default', $_order = null, $IsHistorized =0, $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
+  {
+
+ 
+  $createCmd = true;
+  $Command = $this->getCmd(null, $_logicalId);
+  if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
+    $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
+    if (is_object($Command)) {
+      $createCmd = false;
+      log::add(__CLASS__, 'debug', ' command already exists ');
+    }
+  }
+
+  if ($createCmd) {
+    log::add(__CLASS__, 'debug', ' add record for ' . $Name);
+    if (!is_object($Command)) {
+      // basic settings
+      $Command = new jee4lmCmd();
+      // $Command->setId(null);
+      $Command->setLogicalId($_logicalId);
+      $Command->setEqLogic_id($this->getId());
+      $Command->setName($Name);
+      $Command->setType($Type);
+      $Command->setSubType($SubType);
+    }
+    
+    $Command->setIsVisible($IsVisible);
+    if ($IsHistorized!=null) $Command->setIsHistorized(strval($IsHistorized));
+    if ($Template != null) {
+      $Command->setTemplate('dashboard', $Template);
+      $Command->setTemplate('mobile', $Template);
+    }
+    if ($unite != null && $SubType == 'numeric')
+      $Command->setUnite($unite);
+    if ($icon != 'default')
+      $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
+    if ($forceLineB != 'default')
+      $Command->setdisplay('forceReturnLineBefore', 1);
+    if ($_iconname != 'default')
+      $Command->setdisplay('showIconAndNamedashboard', 1);
+    if ($_noiconname != null)
+      $Command->setdisplay('showNameOndashboard', 0);
+    if ($_calculValueOffset != null)
+      $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+    if ($_historizeRound != null)
+      $Command->setConfiguration('historizeRound', $_historizeRound);
+    if ($generic_type != null)
+      $Command->setGeneric_type($generic_type);
+    if ($repeatevent == true && $Type == 'info')
+      $Command->setConfiguration('repeatEventManagement', 'never');
+    if ($valuemin != 'default')
+      $Command->setConfiguration('minValue', $valuemin);
+    if ($valuemax != 'default')
+      $Command->setConfiguration('maxValue', $valuemax);
+    if ($_warning != null)
+      $Command->setDisplay("warningif", $_warning);
+    if ($_order != null)
+      $Command->setOrder($_order);
+    if ($_danger != null)
+      $Command->setDisplay("dangerif", $_danger);
+    if ($_invert != null)
+      $Command->setDisplay('invertBinary', $_invert);      
+    $Command->save();
+    log::add(__CLASS__, 'debug', 'command saved');
+  }
+  log::add(__CLASS__, 'debug', ' addcommand end');
+  return $Command;
+}
+
 
 public function toggleMain() {
   log::add(__CLASS__, 'debug', 'toggle Main start');
