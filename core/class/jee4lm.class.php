@@ -234,14 +234,14 @@ public static function LMgetConfiguration($serial, $eq) {
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
       log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
-      log::add(__CLASS__, 'debug', 'plumbedin='.$machine['isPlumbedIn']);
-      log::add(__CLASS__, 'debug', 'backflush in process='.$machine['isBackFlushEnabled']);
-      log::add(__CLASS__, 'debug', 'tankStatus='.$machine['tankStatus']);
+      log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
+      log::add(__CLASS__, 'debug', 'backflush in process='.($machine['isBackFlushEnabled']?'yes':'no'));
+      log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
-      log::add(__CLASS__, 'debug', 'bbwmode'.$bbwset['recipe_dose']);
-      log::add(__CLASS__, 'debug', 'bbwdoseA='.$machine['recipe_doses'][0]['target']);
-      log::add(__CLASS__, 'debug', 'bbwdoseB='.$machine['recipe_doses'][0]['target']);
+      log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+      log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
+      log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
@@ -308,7 +308,8 @@ public static function LMgetConfiguration($serial, $eq) {
      "dose_mode":"Mass",
      "recipe_doses":[
       {"id":"A","target":30},
-      {"id":"B","target":45}]
+      {"id":"B","target":45}
+      ]
     }
   ],
   "recipeAssignment":[
