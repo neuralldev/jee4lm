@@ -682,6 +682,29 @@ public function toggleMain() {
     log::add(__CLASS__, 'debug', 'authenticate stop');
   }
 
+  public static function getPluginVersion()
+    {
+        $pluginVersion = '0.0.0';
+		try {
+			if (!file_exists(dirname(__FILE__) . '/../../plugin_info/info.json')) {
+				log::add(__CLASS__, 'warning', '[VERSION] fichier info.json manquant');
+			}
+			$data = json_decode(file_get_contents(dirname(__FILE__) . '/../../plugin_info/info.json'), true);
+			if (!is_array($data)) {
+				log::add(__CLASS__, 'warning', '[VERSION] Impossible de décoder le fichier info.json');
+			}
+			try {
+				$pluginVersion = $data['pluginVersion'];
+			} catch (\Exception $e) {
+				log::add(__CLASS__, 'warning', '[VERSION] Impossible de récupérer la version du plugin');
+			}
+		}
+		catch (\Exception $e) {
+			log::add(__CLASS__, 'warning', '[VERSION] Get ERROR :: ' . $e->getMessage());
+		}
+		log::add(__CLASS__, 'info', '[VERSION] PluginVersion :: ' . $pluginVersion);
+        return $pluginVersion;
+    }
 }
 
 class jee4lmCmd extends cmd

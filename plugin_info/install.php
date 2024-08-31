@@ -19,7 +19,7 @@
  require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
 function jee4lm_install() {
-  
+  /*
     $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
     if (!is_object($cronLocal)) {
       $cronLocal = new cron();
@@ -34,11 +34,11 @@ function jee4lm_install() {
 
     if (config::byKey('configPull', 'jee4lm') == '') 
       config::save('configPull', '1', 'jee4lm');
-    
+    */
 }
 
 function jee4lm_update() {
-
+/*
     $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
     if (!is_object($cronLocal)) {
       $cronLocal = new cron();
@@ -54,12 +54,14 @@ function jee4lm_update() {
     if (config::byKey('configPull', 'jee4lm') == '') 
       config::save('configPull', '1', 'jee4lm');
     
-
+*/
 }
 
 function jee4lm_remove() {
+/*
     $cron = cron::byClassAndFunction('jee4lm', 'pull');
     if (is_object($cron)) 
         $cron->remove();
+*/
 }
 
