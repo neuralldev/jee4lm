@@ -99,9 +99,8 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'cron start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
-        if (($modele = $jee4lm->getConfiguration('serialNumber')) != '') {
+        if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
-          $serial = $jee4lm->getConfiguration('serialNumber');
           $slug= $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
           log::add(__CLASS__, 'debug', "cron for ID=" . $id);
