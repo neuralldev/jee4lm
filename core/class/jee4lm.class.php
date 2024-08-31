@@ -228,7 +228,7 @@ public static function LMgetConfiguration($serial) {
     return false;
   }
   $token=config::byKey('accessToken','jee4lm');
-   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'.'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
+   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'./'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   return true;
 }
@@ -278,7 +278,7 @@ public static function LMgetConfiguration($serial) {
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // now get configuration of machine
-        self::LMgetConfiguration($$machines['machine']['serialNumber']);
+        self::LMgetConfiguration($machines['machine']['serialNumber']);
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
