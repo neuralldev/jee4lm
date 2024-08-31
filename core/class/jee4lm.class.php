@@ -5,7 +5,11 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 const 
 LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg", 
 LMCLIENT_SECRET ="2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s",
-LMDEFAULT_PORT_LOCAL = 8081;
+LMDEFAULT_PORT_LOCAL = 8081,
+LMMACHINE_TYPE = ['linea-mini','micra','gs3'],
+LMFILTER_MACHINE_TYPE='MACHINE_TYPE',
+LMCLOUD_TOKEN = 'https://cms.lamarzocco.io/oauth/v2/token',
+LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer';
 
 class jee4lm extends eqLogic
 {
@@ -191,7 +195,7 @@ class jee4lm extends eqLogic
   public static function login($_username, $_password)
   {
     // login to LM cloud attempt to get the token 
-    $data = self::request('https://cms.lamarzocco.io/oauth/v2/token', 
+    $data = self::request(LMCLOUD_TOKEN, 
     'username='.$_username. 
     '&password='.$_password.
     '&grant_type=password'. 
@@ -224,13 +228,37 @@ class jee4lm extends eqLogic
     }
     $token=config::byKey('accessToken','jee4lm');
     log::add(__CLASS__, 'debug', '[detect] token='.json_encode($token));
-    $data = self::request('https://cms.lamarzocco.io/api/customer',null,'GET',["Authorization: Bearer $token"]);
+    $data = self::request(LMCLOUD_CUSTOMER,null,'GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
     if ($data["status"] != true)
       return false;
     foreach ($data['data']['fleet'] as $machines) {
-      log::add(__CLASS__, 'debug', 'detect found '.$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['machine']['serialNumber']);
-    }
+      log::add(__CLASS__, 'debug', 'detect found '.($uuid=$machines['uuid'])." ".$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['machine']['serialNumber']);
+      log::add(__CLASS__, 'debug', 'type='.$machines['machine']['type']);
+      if ($machines['machine']['type'] == LMFILTER_MACHINE_TYPE) {
+        $d = DateTime::createFromFormat(DateTime::ATOM, $machines['paringDate']);
+        log::add(__CLASS__, 'debug', 'slug='.($slug=$machines['machine']['slug']));
+        log::add(__CLASS__, 'debug', 'key='.$machines['machine']['communicationKey']);
+        log::add(__CLASS__, 'debug', 'detect paired on '.$d->format("d/m/y"));  
+      }
+      // now check if machine is already created as an eqlogic
+      $eqLogic = eqLogic::byLogicalId($uuid, 'jee4lm');
+      if (!is_object($eqLogic)) {
+        $eqLogic = new jee4lm();
+        $eqLogic->setEqType_name('jee4lm');
+        $eqLogic->setIsEnable(1);
+        $eqLogic->setName($machines['name']);
+        $eqLogic->setCategory('other', 1);
+        $eqLogic->setIsVisible(1);
+      }
+      $eqLogic->setConfiguration('type', $slug);
+      $eqLogic->setConfiguration('communicationKey', $machines['machine']['communicationKey']);
+      $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
+      $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);     
+      $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
+      $eqLogic->setLogicalId($uuid);
+      $eqLogic->save();
+    } 
     /*
     detect=
     {"status":true,
