@@ -249,7 +249,7 @@ public static function LMgetConfiguration($serial, $eq) {
       log::add(__CLASS__, 'debug', 'groupDoseStop='.$reglage['stopTarget']);
       log::add(__CLASS__, 'debug', 'actualmode='.$machine['machineMode']);
       log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
-      log::add(__CLASS__, 'debug', 'isscaleconnected='.$machine['scale']['connected']);
+      log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
       log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
@@ -257,13 +257,13 @@ public static function LMgetConfiguration($serial, $eq) {
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
-          log::add(__CLASS__, 'debug', 'steamenabled='.$boiler['isEnabled']);
+          log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no)'));
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
-          log::add(__CLASS__, 'debug', 'steamenabled='.$boiler['isEnabled']);
+          log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
         }
