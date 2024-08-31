@@ -178,6 +178,7 @@ class jee4lm extends eqLogic
   public function postUpdate()
   {
     log::add(__CLASS__, 'debug', 'postupdate start');
+    $this->applyModuleConfiguration();
     log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
@@ -407,7 +408,7 @@ public function toggleMain() {
 
 }
 
-public static function applyModuleConfiguration() {
+public function applyModuleConfiguration() {
   $this->setConfiguration('applyDevice', $this->getConfiguration('type'));
   $this->save();
   if ($this->getConfiguration('type') == '') {
@@ -481,10 +482,9 @@ public static function devicesParameters($_device = '') {
         $eqLogic->setLogicalId($uuid);
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // now get configuration of machine
-        $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);     
+        $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
         self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
         $eqLogic->save();
-        self::applyModuleConfiguration();
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
