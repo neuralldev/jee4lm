@@ -51,46 +51,76 @@ class jee4lm extends eqLogic
     curl_close($ch);
     log::add(__CLASS__, 'debug', 'request stop');
     return json_decode($response,true);
-
-/*
-    if ($_path != '/login' && $_path != '/refresh') {
-      $mc = cache::byKey('ajaxSystem::sessionToken');
-      $sessionToken = $mc->getValue();
-      if (trim($mc->getValue()) == '') {
-        $sessionToken = self::refreshToken();
-      }
-      $url .= '&session_token=' . $sessionToken;
-    }
-    if ($_data !== null && $_type == 'GET') {
-      $url .= '&options=' . urlencode(json_encode($_data));
-    }
-    $request_http = new com_http($url);
-    $request_http->setHeader(array(
-      'Content-Type: application/json',
-      'Autorization: ' . sha512(mb_strtolower(config::byKey('market::username')) . ':' . config::byKey('market::password'))
-    ));
-    log::add('ajaxSystem', 'debug', '[request] ' . $url . ' => ' . json_encode($_data));
-    if ($_type == 'POST') {
-      $request_http->setPost(json_encode($_data));
-    }
-    if ($_type == 'PUT') {
-      $request_http->setPut(json_encode($_data));
-    }
-    $return = json_decode($request_http->exec(30, 1), true);
-    $return = is_json($return, $return);
-    if (isset($return['error'])) {
-      throw new \Exception(__('Erreur lors de la requete à Ajax System : ', __FILE__) . json_encode($return));
-    }
-    if (isset($return['errors'])) {
-      throw new \Exception(__('Erreur lors de la requete à Ajax System : ', __FILE__) . json_encode($return));
-    }
-    if (isset($return['body'])) {
-      return $return['body'];
-    }
-    return $return;
-    */
   }
 
+  public function checkToken() {
+    $token=config::byKey('accessToken', 'jee4lm');
+    $refresh=config::byKey('refreshToken', 'jee4lm');
+    $_username=config::byKey('userId', 'jee4lm');
+    $_password=config::byKey('userPwd', 'jee4lm');
+    $mc = cache::byKey('jee4lm::access_token');
+    $cachetoken = trim($mc->getValue());
+    log::add(__CLASS__, 'debug', 'cache token='.$cachetoken);
+    // try to detect the machines only if token succeeded
+    if ($cachetoken == '') {
+      log::add(__CLASS__, 'debug', 'refresh token');
+      $data = self::request(LMCLOUD_TOKEN, 
+      'username='.$_username. 
+      '&password='.$_password.
+      '&grant_type=password'. 
+      '&client_id='.LMCLIENT_ID.
+      '&client_secret='.LMCLIENT_SECRET, 
+      'POST');
+      log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
+      cache::set('jee4lm::access_token',""); 
+      if ($data['access_token']!='') {
+        config::save('refreshToken', $data['refresh_token'], 'jee4lm');
+        config::save('accessToken', $data['access_token'], 'jee4lm');
+        cache::set('jee4lm::access_token', $data['access_token'], 3600);    
+        $token=$data['access_token'];
+        $refresh=$data['refresh_token'];
+      } else {
+        $token='';
+        $refresh='';
+      } 
+    }  
+    config::save('refreshToken', $refresh, 'jee4lm');
+    config::save('accessToken', $token, 'jee4lm');
+  
+    return $token;
+  }
+  /*
+  la fonction CRON permet d'interroger les registres toutes les minutes. 
+  le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
+  depuis l'application cloud c'est plus long à être pris en compte
+  */
+  public static function cron()
+  {
+    log::add(__CLASS__, 'debug', 'cron start');
+    foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
+      if ($jee4lm->getIsEnable()) {
+        if (($modele = $jee4lm->getConfiguration('serialNumber')) != '') {
+          /* lire les infos de l'équipement ici */
+          $serial = $jee4lm->getConfiguration('serialNumber');
+          $slug= $jee4lm->getConfiguration('type');
+          $id = $jee4lm->getId();
+          log::add(__CLASS__, 'debug', "cron for ID=" . $id);
+          log::add(__CLASS__, 'debug', "cron     serial=" . $serial);
+          log::add(__CLASS__, 'debug', "cron     slug=" . $slug);
+          if ($slug!= '') {
+            $lm_return = $jee4lm->checkToken(); // send query fro token
+            if ($lm_return !="ERROR")
+              if ($jee4lm->readconfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
+                log::add(__CLASS__, 'debug', 'cron ok');
+              else
+                log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
+          }
+        } 
+      } else
+      log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
+    }
+    log::add(__CLASS__, 'debug', 'cron end');
+  }
   public function pull($_options = null)
   {
     log::add(__CLASS__, 'debug', 'pull start');
@@ -219,7 +249,7 @@ class jee4lm extends eqLogic
     return false;
   }
 
-public static function LMgetConfiguration($serial, $eq) {
+public static function readConfiguration($eq) {
   log::add(__CLASS__, 'debug', 'read configuration');
   $mc = cache::byKey('jee4lm::access_token');
   $token = trim($mc->getValue());
@@ -228,6 +258,7 @@ public static function LMgetConfiguration($serial, $eq) {
     log::add(__CLASS__, 'debug', '[get config] login not done or token empty, exit');
     return false;
   }
+  $serial=$eq->getConfiguration('serialNumber'); 
   $token=config::byKey('accessToken','jee4lm'); 
    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
@@ -408,37 +439,6 @@ public function toggleMain() {
 
 }
 
-public function applyModuleConfiguration() {
-  $this->setConfiguration('applyDevice', $this->getConfiguration('type'));
-  $this->save();
-  if ($this->getConfiguration('type') == '') {
-    return true;
-  }
-  $device = self::devicesParameters($this->getConfiguration('type'));
-  if (!is_array($device)) {
-    return true;
-  }
-  $this->import($device, true);
-}
-
-public static function devicesParameters($_device = '') {
-  $return = array();
-  $files = ls(__DIR__ . '/../config/devices', '*.json', false, array('files', 'quiet'));
-  foreach ($files as $file) {
-    try {
-      $return[str_replace('.json', '', $file)] = is_json(file_get_contents(__DIR__ . '/../config/devices/' . $file), false);
-    } catch (Exception $e) {
-    }
-  }
-  if (isset($_device) && $_device != '') {
-    if (isset($return[$_device])) {
-      return $return[$_device];
-    }
-    return array();
-  }
-  return $return;
-}
-
   public static function detect() 
   {
     log::add(__CLASS__, 'debug', '[detect] start');
@@ -559,28 +559,15 @@ public static function devicesParameters($_device = '') {
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-        // Add logic to retrieve the machine status
-        $auth_token = $this->getConfiguration('auth_token');
-        if ($auth_token=="") {
-          log::add(__CLASS__, 'debug', 'getinformation, no token, exiting');
-          return;
-        }
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.lamarzocco.com/status");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $auth_token"]);
-        $response = curl_exec($ch);
-        curl_close($ch);
+    $machines = eqLogic::byType(__CLASS__);
+    foreach ($machines as $machine) {
+      $serial = $machine->getConfiguration('serialNumber', 'jee4lm');
+      log::add(__CLASS__, 'debug', "fetched $serial");
 
-        if (!$response) {
-          log::add(__CLASS__, 'debug', 'getinformation cannot get status');
-        }
-        // debug phase
-        log::add(__CLASS__, 'debug', json_decode($response, true));
-        // debug phase
 
-        log::add(__CLASS__, 'debug', 'getinformation stop');
-        return json_decode($response, true);
+    }
+    log::add(__CLASS__, 'debug', 'getinformation stop');
+    return true;
   }
 
   public function getjee4lm()
