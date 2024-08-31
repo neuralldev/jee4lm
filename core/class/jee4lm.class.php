@@ -257,7 +257,7 @@ public static function LMgetConfiguration($serial, $eq) {
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
-          log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no)'));
+          log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
         }
