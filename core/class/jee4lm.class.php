@@ -281,7 +281,7 @@ public static function readConfiguration($eq) {
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
 
-      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','other', null, null,null,1);
+      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string', null, null,null,1);
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
@@ -296,11 +296,11 @@ public static function readConfiguration($eq) {
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       
-      $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','other', null, null,null,1);
+      $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','string', null, null,null,1);
       $cmd->event($reglage['doseIndex']); 
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
 
-      $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','other', null, null,null,1);
+      $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','string', null, null,null,1);
       $cmd->event($reglage['doseType']); 
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
  
