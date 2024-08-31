@@ -250,7 +250,9 @@ class jee4lm extends eqLogic
         $eqLogic->setName($machines['name']);
         $eqLogic->setCategory('other', 1);
         $eqLogic->setIsVisible(1);
-      }
+        log::add(__CLASS__, 'debug', 'uuid created');
+      } else
+        log::add(__CLASS__, 'debug', 'uuid update only');
       $eqLogic->setConfiguration('type', $slug);
       $eqLogic->setConfiguration('communicationKey', $machines['machine']['communicationKey']);
       $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
