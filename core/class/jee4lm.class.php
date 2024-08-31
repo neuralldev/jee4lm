@@ -218,7 +218,7 @@ class jee4lm extends eqLogic
     return false;
   }
 
-public static function LMgetConfiguration($serial) {
+public static function LMgetConfiguration($serial, $eq) {
   log::add(__CLASS__, 'debug', 'read configuration');
   $mc = cache::byKey('jee4lm::access_token');
   $token = trim($mc->getValue());
@@ -230,6 +230,162 @@ public static function LMgetConfiguration($serial) {
   $token=config::byKey('accessToken','jee4lm'); 
    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+  if ($data['status']== true) {
+    $machine = $data['data'];
+    if ($machine['machineCapabilities']['family']=='LINEA') { // linea mini
+      log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
+      log::add(__CLASS__, 'debug', 'plumbedin='.$machine['isPlumbedIn']);
+      log::add(__CLASS__, 'debug', 'backflush in process='.$machine['isBackFlushEnabled']);
+      log::add(__CLASS__, 'debug', 'tankStatus='.$machine['tankStatus']);
+      $bbw = $machine['recipes'][0];
+      $bbwset = $machine['recipeAssignment'][0];
+      log::add(__CLASS__, 'debug', 'bbwmode'.$bbwset['recipe_dose']);
+      log::add(__CLASS__, 'debug', 'bbwdoseA='.$machine['recipe_doses'][0]['target']);
+      log::add(__CLASS__, 'debug', 'bbwdoseB='.$machine['recipe_doses'][0]['target']);
+      $g = $machine['groupCapabilities'][0];
+      $reglage = $g['doses'][0];
+      log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
+      log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
+      log::add(__CLASS__, 'debug', 'groupDoseStop='.$reglage['stopTarget']);
+      log::add(__CLASS__, 'debug', 'actualmode='.$machine['machineMode']);
+      log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
+      log::add(__CLASS__, 'debug', 'isscaleconnected='.$machine['scale']['connected']);
+      log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
+      log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
+      log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
+      $boilers = $machine['boilers'];
+      foreach($boilers as $boiler) {
+        if ($boiler['id']=='SteamBoiler')
+        {
+          log::add(__CLASS__, 'debug', 'steamenabled='.$boiler['isEnabled']);
+          log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
+          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+        }
+        if ($boiler['id']=='CoffeeBoiler1')
+        {
+          log::add(__CLASS__, 'debug', 'steamenabled='.$boiler['isEnabled']);
+          log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
+          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+        }
+      }
+      $preinfusion = $machine['preinfusionSettings'];
+      log::add(__CLASS__, 'debug', 'preinfusion='.($preinfusion['mode']=='Enabled'));
+      log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
+      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
+      log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
+      $fw = $machine['firmwareVersions'];
+      log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
+      log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
+
+    }
+  }
+  /*
+  {"status":true,
+  "data":
+  {
+  "version":"v1",
+  "preinfusionModesAvailable":["ByDoseType"],
+  "machineCapabilities":
+    [{"family":"LINEA",
+    "groupsNumber":1,
+    "coffeeBoilersNumber":1,
+    "hasCupWarmer":false,
+    "steamBoilersNumber":1,
+    "teaDosesNumber":1,
+    "machineModes":[
+      "BrewingMode","StandBy"],
+    "schedulingType":"smartWakeUpSleep"}
+    ],
+  "machine_sn":"Sn2307902283",
+  "machine_hw":"0",
+  "isPlumbedIn":false,
+  "isBackFlushEnabled":false,
+  "standByTime":0,
+  "tankStatus":true,
+  "settings":[],
+  "recipes":[
+    {"id":"Recipe1",
+     "dose_mode":"Mass",
+     "recipe_doses":[
+      {"id":"A","target":30},
+      {"id":"B","target":45}]
+    }
+  ],
+  "recipeAssignment":[
+    {"dose_index":"DoseA",
+    "recipe_id":"Recipe1",
+    "recipe_dose":"A",
+    "group":"Group1"}
+  ],
+  "groupCapabilities":[
+    {"capabilities":
+      {"groupType":"AV_Group",
+      "groupNumber":"Group1",
+      "boilerId":"CoffeeBoiler1",
+      "hasScale":false,
+      "hasFlowmeter":false,
+      "numberOfDoses":1
+    },
+    "doses":[
+      {"groupNumber":"Group1",
+      "doseIndex":"DoseA",
+      "doseType":"MassType",
+      "stopTarget":30}
+    ],
+    "doseMode":{
+      "groupNumber":"Group1",
+      "brewingType":"ManualType"}
+    }
+  ],
+  "machineMode":"StandBy",
+  "teaDoses":
+    {"DoseA":{
+      "doseIndex":"DoseA",
+      "stopTarget":0}
+    },
+  "scale":
+    {"connected":false,
+    "address":"44:b7:d0:74:5f:90",
+    "name":"LMZ-745F90",
+    "battery":65},
+  "boilers":[
+    {"id":"SteamBoiler",
+    "isEnabled":false,
+    "target":0,
+    "current":0},
+    {"id":"CoffeeBoiler1",
+    "isEnabled":true,
+    "target":89,
+    "current":84}
+  ],
+  "boilerTargetTemperature":
+    {"SteamBoiler":0,"CoffeeBoiler1":89},
+  "preinfusionMode":
+    {"Group1":
+      {"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}
+    },
+  "preinfusionSettings":{
+    "mode":"Enabled",
+    "Group1":[
+      {"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}
+      ]
+  },
+  "wakeUpSleepEntries":[
+    {"id":"T6aLl42",
+    "days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
+    "steam":false,
+    "enabled":false,
+    "timeOn":"24:0","timeOff":"24:0"}
+  ],
+  "smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},
+  "clock":"2024-08-30T16:09:06",
+  "firmwareVersions":[
+    {"name":"machine_firmware","fw_version":"2.12"},
+    {"name":"gateway_firmware","fw_version":"v3.6-rc4"}
+  ]
+  }
+}
+  */
   return true;
 }
 
@@ -273,12 +429,11 @@ public static function LMgetConfiguration($serial) {
         $eqLogic->setConfiguration('communicationKey', $machines['communicationKey']);
         $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
         $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);     
-        $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
         $eqLogic->setLogicalId($uuid);
-        $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // now get configuration of machine
-        self::LMgetConfiguration($machines['machine']['serialNumber']);
+        self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
+        $eqLogic->save();
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
