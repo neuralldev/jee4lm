@@ -144,7 +144,7 @@ class jee4lm extends eqLogic
     }
     log::add(__CLASS__, 'debug', 'cron end');
   }
-  public function pull($_options = null)
+  public static function pull($_options = null)
   {
     log::add(__CLASS__, 'debug', 'pull start');
     $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
