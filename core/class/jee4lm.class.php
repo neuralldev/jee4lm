@@ -541,7 +541,7 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
       if ($v > 0) {
       }
     }
-  }
+  
 
   public function set_setpoint($_options, $_logicalID, $type)
   {
