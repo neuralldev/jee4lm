@@ -14,6 +14,10 @@ LMCLOUD_GW_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home",
 LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
 LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy";
 
+/* source api from HA
+https://github.com/zweckj/pylamarzocco/tree/main
+*/
+
 class jee4lm extends eqLogic
 {
 
@@ -799,9 +803,6 @@ public function startBackflush()
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-//  {"status":true,
-//  "data":{"received":"2024-09-01T13:57:58.698Z","MACHINE_STATUS":"StandBy","LEVEL_TANK":true,"TEMP_COFFEE":"66","TEMP_STEAM":"0","MACHINE_REMOTSETS":{"BOILER_ENABLE":false,"BACKFLUSH_ENABLE":false,"PLUMBIN_ENABLE":false}}}
-
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
       $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
