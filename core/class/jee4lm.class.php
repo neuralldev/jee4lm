@@ -55,6 +55,9 @@ class jee4lm extends eqLogic
         $answer = $arr['data']['status']; 
         log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
         if ($answer != 'PENDING')
+          if ($answer=="COMPLETED")
+            return true;
+          else if ($answer=='')
             return true;
       }
       sleep(5);
@@ -290,7 +293,8 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
       
       $cmd=$eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);  
-      $cmd->event($machine['isPlumbedIn']);    
+      $cmd->event($machine['isPlumbedIn']); 
+      $plumbed =    $machine['isPlumbedIn'];
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
       $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', null, null,null,1);
@@ -390,7 +394,7 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
 
       $cmd=$eq->AddCommand("Prétrempage",'prewet','info','binary', null, null,null,1);
-      $cmd->event($preinfusion['Group1'][0]['preWetTime']>0 && $preinfusion['Group1'][0]['preWetHoldTime'] >0); 
+      $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
 
       $cmd=$eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's','THERMOSTAT_SETPOINT',1);
       $cmd->event($preinfusion['Group1'][0]['preWetTime']); 
@@ -594,6 +598,14 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
 //    $this->getInformations();
   }
 
+  public function getStatistics() {
+    log::add(__CLASS__, 'debug', 'get basic counters');
+    $serial=$this->getConfiguration('serialNumber'); 
+    $token=self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/statistics/counters',"",'GET',["Authorization: Bearer $token"]);
+    self::checkrequest($data);
+    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+  }
 public function switchCoffeeBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
   $serial=$this->getConfiguration('serialNumber'); 
@@ -781,8 +793,12 @@ public function startBackflush()
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    $this->readConfiguration($this);
-    log::add(__CLASS__, 'debug', 'getinformation stop');
+//    $this->readConfiguration($this);
+      $serial=$this->getConfiguration('serialNumber'); 
+      $token=self::getToken();
+      $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
+      $arr = json_decode($data, true);
+    log::add(__CLASS__, 'debug', 'getinformation data='.$data);
     return true;
   }
 
