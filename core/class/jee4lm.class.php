@@ -293,7 +293,7 @@ public static function readConfiguration($eq) {
       $cmd->event($reglage['stopTarget']); 
       log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
-      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', null, null,null,1);
+      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', null, null,'THERMOSTAT_STATE',1);
       $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
@@ -319,29 +319,29 @@ public static function readConfiguration($eq) {
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
-          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', null, null,null,1);
+          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', null, null,'THERMOSTAT_STATE',1);
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
 
-          $cmd=$eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C',null,1);
+          $cmd=$eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',1);
           $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
 
-          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','binary', null, '°C',null,1);
+          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','binary', null, '°C','THERMOSTAT_TEMPERATURE',1);
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
-          $cmd=$eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,null,1);
+          $cmd=$eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,'THERMOSTAT_STATE',1);
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
 
-          $cmd=$eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C',null,1);
+          $cmd=$eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',1);
           $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
 
-          $cmd=$eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C',null,1);
+          $cmd=$eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',1);
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
         }
@@ -354,11 +354,11 @@ public static function readConfiguration($eq) {
       $cmd=$eq->AddCommand("Prétrempage",'prewet','info','binary', null, null,null,1);
       $cmd->event($preinfusion['Group1'][0]['preWetTime']>0 && $preinfusion['Group1'][0]['preWetHoldTime'] >0); 
 
-      $cmd=$eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's',null,1);
+      $cmd=$eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's','THERMOSTAT_SETPOINT',1);
       $cmd->event($preinfusion['Group1'][0]['preWetTime']); 
       log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
 
-      $cmd=$eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's',null,1);
+      $cmd=$eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's','THERMOSTAT_SETPOINT',1);
       $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
       
@@ -382,6 +382,11 @@ public static function readConfiguration($eq) {
       $eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
       $eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
       $eq->AddAction("start_backflush", "Démarrer backflush");
+      $eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
+      $eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
+      $eq->linksetpoint("jee4lm_prewet_slider", "prewettime"); 
+      $eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime"); 
+
     }
   }
   /*
@@ -512,6 +517,44 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     }
   }
 
+  public function linksetpoint($slider, $setpointlogicalID) {
+    $set_setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $slider);
+    $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $setpointlogicalID);
+    if ($set_setpoint == null || $setpoint == null) 
+        log::add(__CLASS__, 'debug', "setpoint : command not found");
+      else {
+        log::add(__CLASS__, 'debug', "setpoint : command found!");
+        $set_setpoint->setValue($setpoint->getId());
+        $set_setpoint->save();
+        log::add(__CLASS__, 'debug', "setpoint ID  stored");
+      }
+  }
+
+  public function updatesetpoint($value, $absolute = false, $setpointlogicalID)
+  {
+    $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $setpointlogicalID);
+      if ($absolute)
+        $v = (floatval($value));
+      else
+        $v = (floatval($setpoint->execCmd()) + $value);      
+      log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
+      if ($v > 0) {
+      }
+    }
+  }
+
+  public function set_setpoint($_options, $_logicalID, $type)
+  {
+    log::add(__CLASS__, 'debug', 'set setpoint start');
+    $v = $_options["slider"];
+    log::add(__CLASS__, 'debug', 'slider value='.$v);
+      //find setpoint value and store it on stove as it after slider move
+      if ($v > 0) 
+        $this->setBoilerTemperature($v,$type);
+    log::add(__CLASS__, 'debug', 'set setpoint end');   
+    // now refresh display  
+//    $this->getInformations();
+  }
 
 public function switchCoffeeBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
@@ -764,9 +807,11 @@ class jee4lmCmd extends cmd
         $eq->switchSteamBoilerONOFF(($action=='jee4lm_steam_on'));
         return $eq->getInformations();
       case 'jee4lm_coffee_slider':
+        $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
 //        $eq->setBoilerTemperature(, 'CoffeeBoiler1');
         break;
       case 'jee4lm_steam_slider':
+        $eq->set_setpoint($_options, 'steamtarget','SteamBoiler');        
 //        $eq->setBoilerTemperature(,'SteamBoiler');
 break;
     }
