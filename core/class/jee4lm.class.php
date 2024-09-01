@@ -167,7 +167,7 @@ class jee4lm extends eqLogic
   */
   public static function cron()
   {
-    log::add(__CLASS__, 'debug', 'cron start');
+    log::add(__CLASS__, 'debug', 'cron start'); 
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
