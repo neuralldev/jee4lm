@@ -591,6 +591,7 @@ public function switchCoffeeBoilerONOFF($toggle) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','status='.($toggle?"BrewingMode":"StandBy"),'POST',["Authorization: Bearer $token"]);
+  self::checkrequest($data);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -599,6 +600,7 @@ public function switchSteamBoilerONOFF($toggle) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-boiler','identifier=SteamBoiler&state='.($toggle?"enabled":"disabled"),'POST',["Authorization: Bearer $token"]);
+  self::checkrequest($data);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -608,6 +610,7 @@ public function switchPreinfusionOrPrebrew($type) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-preinfusion','mode='.$type,'POST',["Authorization: Bearer $token"]);
+  self::checkrequest($data);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -616,6 +619,7 @@ public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1') {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/target-boiler','identifier='.$type.'&value='.$celsius,'POST',["Authorization: Bearer $token"]);
+  self::checkrequest($data);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -624,6 +628,7 @@ public function switchPlumbedIn($toggle) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-plumbin','enable='.($toggle?'true':'false'),'POST',["Authorization: Bearer $token"]);
+  self::checkrequest($data);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -635,7 +640,8 @@ public function setDose($weight, $dose) {
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
     'dose_index=Dose'.$dose.'&dose_type=PulsesType&group=Group1&value='.$weight,
     'POST',["Authorization: Bearer $token"]);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+    self::checkrequest($data);
+    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
 public function startBackflush()
@@ -646,7 +652,8 @@ public function startBackflush()
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-backflush',
     'enable=true',
     'POST',["Authorization: Bearer $token"]);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+    self::checkrequest($data);
+    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
   public static function detect() 
