@@ -736,11 +736,7 @@ public function startBackflush()
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    $machines = eqLogic::byType(__CLASS__);
-    foreach ($machines as $machine) {
-      $serial = $machine->getConfiguration('serialNumber', 'jee4lm');
-      log::add(__CLASS__, 'debug', "fetched $serial");
-    }
+    $this->readConfiguration($this);
     log::add(__CLASS__, 'debug', 'getinformation stop');
     return true;
   }
@@ -808,12 +804,10 @@ class jee4lmCmd extends cmd
         return $eq->getInformations();
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
-//        $eq->setBoilerTemperature(, 'CoffeeBoiler1');
-        break;
+      return $eq->getInformations();
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget','SteamBoiler');        
-//        $eq->setBoilerTemperature(,'SteamBoiler');
-break;
+        return $eq->getInformations();
     }
   }
 
