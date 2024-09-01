@@ -27,14 +27,18 @@ class jee4lm extends eqLogic
 
   // check that request is executed when it it a GET with commandID command
   public static function checkrequest($response) {
+    log::add(__CLASS__, 'debug', 'check request');
+    if ($response=='') return true;
+    log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($response, true);
     $arr = $r['data'];
-    if (!array_key_exists("commandID", $arr))
+    $commandID = $arr["commandID"];
+    log::add(__CLASS__, 'debug', 'check request commandID='.$commandID);
+    if ($commandID!='')
       return true;
-    // if there is a commandID then wait for command to succeed 
-    log::add(__CLASS__, 'debug', 'checking commandID='.$arr['commandID']);
-  
+    // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
+      log::add(__CLASS__, 'debug', 'check request attempt '.$i+1);
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$arr['commandId']);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -47,7 +51,9 @@ class jee4lm extends eqLogic
 
       if ($response !='') {
         $arr = json_decode($response, true);
-          if ($arr['data']['status']!='PENDING')
+        $answer = $arr['data']['status']; 
+        log::add(__CLASS__, 'debug', 'check request answer='.$answer);
+        if ($answer != 'PENDING')
             return true;
       }
       sleep(5);
