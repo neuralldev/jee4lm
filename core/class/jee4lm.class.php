@@ -27,7 +27,8 @@ class jee4lm extends eqLogic
 
   // check that request is executed when it it a GET with commandID command
   public static function checkrequest($response) {
-    $arr = json_decode($response['data'], true);
+    $r = json_decode($response, true);
+    $arr = $r['data'];
     if (!array_key_exists("commandID", $arr))
       return true;
     // if there is a commandID then wait for command to succeed 
