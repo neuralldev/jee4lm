@@ -551,7 +551,7 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     }
     if ($createCmd) { // only if action is not yet defined
       if (!is_object($command)) {
-        $command = new jee4heatCmd();
+        $command = new jee4lmCmd();
         $command->setLogicalId($actionName);
         $command->setIsVisible($visible);
         $command->setName($actionTitle);
