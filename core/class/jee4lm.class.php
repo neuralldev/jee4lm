@@ -25,6 +25,7 @@ class jee4lm extends eqLogic
   $CONF_USE_BLUETOOTH = "use_bluetooth";
   */
 
+  // check that request is executed when it it a GET with commandID command
   public static function checkrequest($response) {
     $arr = json_decode($response, true);
     if (!array_key_exists("commandId", $arr))
