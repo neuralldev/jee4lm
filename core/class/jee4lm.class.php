@@ -804,9 +804,9 @@ public function startBackflush()
 
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
-      $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
-      $arr = json_decode($data, true);
-      log::add(__CLASS__, 'debug', 'getinformation status='.($arr['status']?'true':'false'));
+      $response = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
+      $arr = json_decode($response, true);
+      log::add(__CLASS__, 'debug', 'getinformation status='.($arr['status']==true?'true':'false'));
       if(array_key_exists('status', $arr)) {
         $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='ON'));
         $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
