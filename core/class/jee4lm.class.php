@@ -34,7 +34,7 @@ class jee4lm extends eqLogic
     $arr = $r['data'];
     $commandID = $arr["commandId"];
     log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
-    if ($commandID!='')
+    if ($commandID=='')
       return true;
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
