@@ -27,10 +27,11 @@ class jee4lm extends eqLogic
 
   // check that request is executed when it it a GET with commandID command
   public static function checkrequest($response) {
-    $arr = json_decode($response, true);
-    if (!array_key_exists("commandId", $arr))
+    $arr = json_decode($response['data'], true);
+    if (!array_key_exists("commandID", $arr))
       return true;
     // if there is a commandID then wait for command to succeed 
+    $arr = 
     for ($i=0;$i<5;$i++) {
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$response['commandId']);
@@ -43,7 +44,7 @@ class jee4lm extends eqLogic
       curl_close($ch);
 
       if ($response !='') {
-        $arr = json_decode($response, true);
+        $arr = json_decode($response['data'], true);
           if ($arr['status']!='PENDING')
             return true;
       }
