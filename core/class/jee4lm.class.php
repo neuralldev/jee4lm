@@ -79,7 +79,6 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', "request response=".$response);
     curl_close($ch);
     log::add(__CLASS__, 'debug', 'request stop');
-    if ($_type=='GET') 
     jee4lm::checkrequest($response);
     return json_decode($response,true);
   }
