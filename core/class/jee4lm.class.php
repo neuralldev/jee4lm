@@ -11,7 +11,8 @@ LMFILTER_MACHINE_TYPE='MACHINE_INSTANCE',
 LMCLOUD_TOKEN = 'https://cms.lamarzocco.io/oauth/v2/token',
 LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer',
 LMCLOUD_GW_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home",
-LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines";
+LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
+LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy";
 
 class jee4lm extends eqLogic
 {
@@ -24,6 +25,31 @@ class jee4lm extends eqLogic
   $CONF_USE_BLUETOOTH = "use_bluetooth";
   */
 
+  public static function checkrequest($response) {
+    $arr = json_decode($response, true);
+    if (!array_key_exists("commandId", $arr))
+      return true;
+    // if there is a commandID then wait for command to succeed 
+    for ($i=0;$i<5;$i++) {
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$response['commandId']);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+      if ($_header == null)
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
+      else
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $_header);
+      $response = curl_exec($ch);
+      curl_close($ch);
+
+      if ($response !='') {
+        $arr = json_decode($response, true);
+          if ($arr['status']!='PENDING')
+            return true;
+      }
+      sleep(5);
+    }
+    return false;
+  }
   public static function request($_path, $_data = null, $_type = 'GET', $_header= null) {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'request query url='.$_path);
@@ -50,6 +76,8 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', "request response=".$response);
     curl_close($ch);
     log::add(__CLASS__, 'debug', 'request stop');
+    if ($_type=='GET') 
+    jee4lm::checkrequest($response);
     return json_decode($response,true);
   }
 
