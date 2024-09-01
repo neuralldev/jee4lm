@@ -433,6 +433,18 @@ public static function readConfiguration($eq) {
       $cmd=$eq->AddCommand("Version Gateway",'gwversion','info','other', null, null,null,1);
       $cmd->event($fw[1]['fw_version']); 
       log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
+// now create standard commands
+      $eq->AddAction("jee4lm_on", "Machine ON");
+      $eq->AddAction("jee4lm_off", "Machine OFF");
+      $eq->AddAction("jee4lm_steam_on", "Vapeur ON");
+      $eq->AddAction("jee4lm_steam_off", "Vapeur OFF");
+      $eq->AddAction("refresh", __('Rafraichir', __FILE__));
+      $eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,95, 1);
+      $eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
+      $eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
+      $eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
+
+
     }
   }
   /*
@@ -527,6 +539,41 @@ public function AddCommand(
   return $Command;
 }
 
+public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible=1, $SubType = 'other', $min=null, $max=null, $step=null)
+  {
+    log::add(__CLASS__, 'debug', ' add action ' . $actionName);
+    $createCmd = true;
+    $command = $this->getCmd(null, $actionName);
+    if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
+      $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
+      if (is_object($command))
+        $createCmd = false;
+    }
+    if ($createCmd) { // only if action is not yet defined
+      if (!is_object($command)) {
+        $command = new jee4heatCmd();
+        $command->setLogicalId($actionName);
+        $command->setIsVisible($visible);
+        $command->setName($actionTitle);
+      }
+      if ($template != null) {
+        $command->setTemplate('dashboard', $template);
+        $command->setTemplate('mobile', $template);
+      }
+      $command->setType('action');
+      $command->setSubType($SubType);
+      $command->setEqLogic_id($this->getId());
+      if ($generic_type != null)
+        $command->setGeneric_type($generic_type);
+      if ($min != null)
+        $command->setConfiguration('minValue', $min);
+      if ($max != null)
+        $command->setConfiguration('maxValue', $max);
+        if ($step != null)
+        $command->setDisplay('step', $step);
+      $command->save();
+    }
+  }
 
 public function toggleMain() {
   log::add(__CLASS__, 'debug', 'toggle Main start');
@@ -676,64 +723,7 @@ public function toggleMain() {
     log::add(__CLASS__, 'debug', "getjee4lm");
     $this->checkAndUpdateCmd(__CLASS__, "");
   }
-  public function authenticate() {
-    log::add(__CLASS__, 'debug', 'authenticate start');
 
-    // Add logic to authenticate with La Marzocco API
-//    $username = $this->getConfiguration('username');
-//    $password = $this->getConfiguration('password');
-//    log::add(__CLASS__, 'debug', "try to log with u=$username p=$password");
-//    if ($username=="" || $password=="") {
-//      log::add(__CLASS__, 'debug', 'cannot authenticate as there is no user/password defined');
-//      $this->setConfiguration('auth_token', '');
-//     log::add(__CLASS__, 'debug', 'token storage cleared');
-//      return;
-//    }
-    $host = "https://cms.lamarzocco.io/oauth/v2/token";
-    $username = $this->getConfiguration('username', null);
-    $password = $this->getConfiguration('password', null);
-
-    if ($host=="") {
-      log::add(__CLASS__, 'debug', 'cannot authenticate as there is no host defined');
-      return;
-    }
-    $url = $host;
-    // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
-    log::add(__CLASS__, 'debug', 'authenticate query url='.$url);
-
-    $data = 
-      'username='.$username. 
-      '&password='.$password.
-      '&grant_type=password'. 
-      '&client_id='.LMCLIENT_ID.
-      '&client_secret='.LMCLIENT_SECRET;
-
-    log::add(__CLASS__, 'debug', 'authenticate data='.$data);
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-
-    $response = curl_exec($ch);
-    if (!$response) {
-      log::add(__CLASS__, 'debug', 'authenticate error, cannot fetch token');
-      $error_msg = curl_error($ch);
-      $err_no = curl_errno($ch);
-      log::add(__CLASS__, 'debug', "authenticate error no=$err_no message=$error_msg");
-    } else {
-      log::add(__CLASS__, 'debug', "authenticate response=".$response);
-      $items = json_decode($response, true);
-      if (isset($items['access_token']))
-        $this->setConfiguration('auth_token', $items['access_token']);
-      else
-        log::add(__CLASS__, 'debug', "no token found in response");
-      }
-    curl_close($ch);
-    log::add(__CLASS__, 'debug', 'authenticate stop');
-  }
 
   public static function getPluginVersion()
     {
