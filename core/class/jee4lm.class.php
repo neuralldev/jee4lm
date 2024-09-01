@@ -451,12 +451,12 @@ public function AddCommand(
     $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
     if (is_object($Command)) {
       $createCmd = false;
-      log::add(__CLASS__, 'debug', ' command already exists ');
+     // log::add(__CLASS__, 'debug', ' command already exists ');
     }
   }
 
   if ($createCmd) {
-    log::add(__CLASS__, 'debug', ' add record for ' . $Name);
+   // log::add(__CLASS__, 'debug', ' add record for ' . $Name);
     if (!is_object($Command)) {
       // basic settings
       $Command = new jee4lmCmd();
@@ -505,15 +505,15 @@ public function AddCommand(
     if ($_invert != null)
       $Command->setDisplay('invertBinary', $_invert);      
     $Command->save();
-    log::add(__CLASS__, 'debug', 'command saved');
+   // log::add(__CLASS__, 'debug', 'command saved');
   }
-  log::add(__CLASS__, 'debug', ' addcommand end');
+ // log::add(__CLASS__, 'debug', ' addcommand end');
   return $Command;
 }
 
 public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible=1, $SubType = 'other', $min=null, $max=null, $step=null)
   {
-    log::add(__CLASS__, 'debug', ' add action ' . $actionName);
+   // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
     $command = $this->getCmd(null, $actionName);
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
