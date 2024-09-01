@@ -32,15 +32,15 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($response, true);
     $arr = $r['data'];
-    $commandID = $arr["commandID"];
-    log::add(__CLASS__, 'debug', 'check request commandID='.$commandID);
+    $commandID = $arr["commandId"];
+    log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
     if ($commandID!='')
       return true;
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
       log::add(__CLASS__, 'debug', 'check request attempt '.$i+1);
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$arr['commandId']);
+      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       if ($_header == null)
         curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
@@ -52,7 +52,7 @@ class jee4lm extends eqLogic
       if ($response !='') {
         $arr = json_decode($response, true);
         $answer = $arr['data']['status']; 
-        log::add(__CLASS__, 'debug', 'check request answer='.$answer);
+        log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
         if ($answer != 'PENDING')
             return true;
       }
