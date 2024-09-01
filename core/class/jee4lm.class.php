@@ -31,10 +31,11 @@ class jee4lm extends eqLogic
     if (!array_key_exists("commandID", $arr))
       return true;
     // if there is a commandID then wait for command to succeed 
-    $arr = 
+    log::add(__CLASS__, 'debug', 'checking commandID='.$arr['commandID']);
+  
     for ($i=0;$i<5;$i++) {
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$response['commandId']);
+      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$arr['commandId']);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       if ($_header == null)
         curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
