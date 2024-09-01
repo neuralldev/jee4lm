@@ -31,7 +31,13 @@ class jee4lm extends eqLogic
     if ($response=='') return true;
     log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($response, true);
+    if (!array_key_exists('data',$r)) {
+      return true;
+    }
     $arr = $r['data'];
+    if (!array_key_exists('commandId',$arr)) {
+      return true;
+    }
     $commandID = $arr["commandId"];
     log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
     if ($commandID=='')
