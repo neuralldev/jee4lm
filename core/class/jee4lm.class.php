@@ -38,7 +38,7 @@ class jee4lm extends eqLogic
       return true;
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
-      log::add(__CLASS__, 'debug', 'check request attempt '.$i+1);
+      log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
