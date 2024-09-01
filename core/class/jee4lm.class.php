@@ -45,8 +45,8 @@ class jee4lm extends eqLogic
       curl_close($ch);
 
       if ($response !='') {
-        $arr = json_decode($response['data'], true);
-          if ($arr['status']!='PENDING')
+        $arr = json_decode($response, true);
+          if ($arr['data']['status']!='PENDING')
             return true;
       }
       sleep(5);
