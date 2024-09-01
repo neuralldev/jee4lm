@@ -799,11 +799,22 @@ public function startBackflush()
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-//    $this->readConfiguration($this);
+//  {"status":true,
+//  "data":{"received":"2024-09-01T13:57:58.698Z","MACHINE_STATUS":"StandBy","LEVEL_TANK":true,"TEMP_COFFEE":"66","TEMP_STEAM":"0","MACHINE_REMOTSETS":{"BOILER_ENABLE":false,"BACKFLUSH_ENABLE":false,"PLUMBIN_ENABLE":false}}}
+
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
       $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
       $arr = json_decode($data, true);
+      if($arr['status']) {
+        $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='ON'));
+        $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
+        $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
+        $this->getCmd(null, 'tankStatus')->event($arr['data']['LEVEL_TANK']);
+        $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
+        $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
+        $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+      }
     log::add(__CLASS__, 'debug', 'getinformation data='.$data);
     return true;
   }
