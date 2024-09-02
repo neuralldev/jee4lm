@@ -29,7 +29,13 @@ class jee4lm extends eqLogic
   $CONF_USE_BLUETOOTH = "use_bluetooth";
   */
 
-  // check that request is executed when it it a GET with commandID command
+  /**
+   * check that request is executed when it it a GET with commandID command
+   * check if request has a commandId, then check if there is a PENDING/COMPLETED answer or not
+   * if there is none, the request is done and was nt requiring a delay
+   * @param mixed $response
+   * @return bool
+   */
   public static function checkrequest($response) {
     log::add(__CLASS__, 'debug', 'check request');
     if ($response=='') return true;
@@ -74,6 +80,16 @@ class jee4lm extends eqLogic
     }
     return false;
   }
+  /**
+   * sends a request to the REST API formatting request for GET or POST as expected by La Marzocco
+   * data is used only for POST and must be URL encoded / formatted as a string parm1=val1&parm2=val2...
+   * an optional header can be sent as well, especially to set the OAuth2 token in the Bearer field
+   * @param mixed $_path
+   * @param mixed $_data
+   * @param mixed $_type
+   * @param mixed $_header
+   * @return mixed
+   */
   public static function request($_path, $_data = null, $_type = 'GET', $_header= null) {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'request query url='.$_path);
@@ -103,7 +119,14 @@ class jee4lm extends eqLogic
     jee4lm::checkrequest($response);
     return json_decode($response,true);
   }
-
+  /**
+   * Login is the login API to get the token based on the credential from the Web/App 
+   * if the login succeeds, it sets the fields with both the access_token and the refresh token for renewal
+   * in the appropriate plugin global variables
+   * @param mixed $_username
+   * @param mixed $_password
+   * @return mixed
+   */
   public static function login($_username, $_password)
   {
     // login to LM cloud attempt to get the token 
@@ -129,6 +152,11 @@ class jee4lm extends eqLogic
     }
     return '';
   }
+  /**
+   * Refresh the token by checking if it is expired, then asks for its renewal if necessary.
+   * the new token is stored in the cache with the expiricy set as well to 300
+   * @return mixed
+   */
   public static function refreshToken() {
     $refresh=config::byKey('refreshToken', 'jee4lm');
     $_username=config::byKey('userId', 'jee4lm');
@@ -154,6 +182,11 @@ class jee4lm extends eqLogic
     return '';
   }
 
+  /**
+   * getToken retrieve the current token stored in the cache. of the value has expired it calls
+   * the refresh routine to renew it 
+   * @return mixed
+   */
   public static function getToken() {
     $mc = cache::byKey('jee4lm::access_token');
     $access_token = $mc->getValue();
@@ -163,12 +196,42 @@ class jee4lm extends eqLogic
       $access_token = self::refreshToken();
     return $access_token;
   }
+ 
+  /**
+   * Rafraichit les données complètes toutes les heures
+   * @return void
+   */
+  public static function cronHourly() {
+    log::add(__CLASS__, 'debug', 'cron60 start'); 
+    foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
+      if ($jee4lm->getIsEnable()) {
+        if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
+          /* lire les infos de l'équipement ici */
+          $slug= $jee4lm->getConfiguration('type');
+          $id = $jee4lm->getId();
+          log::add(__CLASS__, 'debug', "cron for ID=" . $id);
+          log::add(__CLASS__, 'debug', "cron     serial=" . $serial);
+          log::add(__CLASS__, 'debug', "cron     slug=" . $slug);
+          if ($slug!= '') {
+            $token = self::getToken(); // send query for token and refresh it if necessary
+            if ($token !='')
+              if (jee4lm::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
+                log::add(__CLASS__, 'debug', 'cron60 ok');
+              else
+                log::add(__CLASS__, 'debug', 'cron60 error on readconfiguration');
+          }
+        } 
+      } else 
+      log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
+    }
+    log::add(__CLASS__, 'debug', 'cron end');
 
-  /*
-  la fonction CRON permet d'interroger les registres toutes les minutes. 
-  le temps de mise à jour du poele peut aller de 1 à 5 minutes selon la source qui a déclenché le réglage
-  depuis l'application cloud c'est plus long à être pris en compte
-  */
+  }
+
+  /**
+   * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
+   * @return void
+   */
   public static function cron()
   {
     log::add(__CLASS__, 'debug', 'cron start'); 
@@ -206,32 +269,42 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'pull end');
   }
    
+  /**
+   * fonction nécessaire à jeedom pour nettoyer les commandes dans la fonction de remplacement 
+   * @return array<mixed|string>[]
+   */
   public static function deadCmd()
   {
-     
+   
     log::add(__CLASS__, 'debug', 'deadcmd start');
     $return = array();
     foreach (eqLogic::byType(__CLASS__) as $eql) {
       foreach ($eql->getCmd() as $cmd) {
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('username', ''), $matches);
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('serialNumber', ''), $matches);
         foreach ($matches[1] as $cmd_id) {
           if (!cmd::byId(str_replace('#', '', $cmd_id))) {
             $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => "#" . $cmd_id . "#");
           }
         }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('password', ''), $matches);
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('refreshToken', ''), $matches);
         foreach ($matches[1] as $cmd_id) {
           if (!cmd::byId(str_replace('#', '', $cmd_id))) {
             $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
           }
         }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('host', ''), $matches);
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('accessToken', ''), $matches);
         foreach ($matches[1] as $cmd_id) {
           if (!cmd::byId(str_replace('#', '', $cmd_id))) {
             $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
           }
         }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('auth_token', ''), $matches);
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('userId', ''), $matches);
+        foreach ($matches[1] as $cmd_id) {
+          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
+            $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
+          }
+        }
+        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('userPwd', ''), $matches);
         foreach ($matches[1] as $cmd_id) {
           if (!cmd::byId(str_replace('#', '', $cmd_id))) {
             $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
@@ -243,7 +316,12 @@ class jee4lm extends eqLogic
     return $return;
   }
 
- 
+  /**
+   * used to set visible state (0=invisible/1=visible) of a jeedom equipment by logicalID
+   * @param mixed $_logicalId
+   * @param mixed $state
+   * @return bool
+   */
   private function toggleVisible($_logicalId, $state)
   {
     $Command = $this->getCmd(null, $_logicalId);
@@ -255,6 +333,10 @@ class jee4lm extends eqLogic
     }
     return false;
   }
+  /**
+   * Refresh function from Jeedom to refresh all values
+   * @return void
+   */
   public function refresh()
   {
     foreach ($this->getCmd() as $cmd) {
@@ -264,33 +346,58 @@ class jee4lm extends eqLogic
     }
   }
 
+  /**
+   * not used
+   * @return void
+   */
   public function postSave()
   {
-    log::add(__CLASS__, 'debug', 'postsave start');
+//    log::add(__CLASS__, 'debug', 'postsave start');
   }
 
+  /**
+   * not used
+   * @return void
+   */
   public function preUpdate()
   {
-    log::add(__CLASS__, 'debug', 'preupdate start');
-    log::add(__CLASS__, 'debug', 'preupdate stop');
+//    log::add(__CLASS__, 'debug', 'preupdate start');
+//    log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
+  /**
+   * not used
+   * @return void
+   */
   public function postUpdate()
   {
-    log::add(__CLASS__, 'debug', 'postupdate start');
-//    $this->applyModuleConfiguration();
-    log::add(__CLASS__, 'debug', 'postupdate stop');
+//    log::add(__CLASS__, 'debug', 'postupdate start');
+//    log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
+  /**
+   * not used
+   * @return void
+   */
   public function preRemove()
   {
   }
 
+  /**
+   * not used
+   * @return void
+   */
   public function postRemove()
   {
   }
 
 
+/**
+ * Reads and create/refresh all the values of an equipment previously created by detection routine
+ * the function takes only the target equipment to refresh as argument
+ * @param mixed $eq
+ * @return bool
+ */
 public static function readConfiguration($eq) {
   log::add(__CLASS__, 'debug', 'read configuration');
   $serial=$eq->getConfiguration('serialNumber'); 
@@ -461,6 +568,33 @@ public static function readConfiguration($eq) {
 }
 
 
+/**
+ * AddCommand function adds/update an information on an existing command inside an equipment
+ * it allows to initialize a lot of optional paramters to display the command properly
+ * @param mixed $Name
+ * @param mixed $_logicalId
+ * @param mixed $Type
+ * @param mixed $SubType
+ * @param mixed $Template
+ * @param mixed $unite
+ * @param mixed $generic_type
+ * @param mixed $IsVisible
+ * @param mixed $icon
+ * @param mixed $forceLineB
+ * @param mixed $valuemin
+ * @param mixed $valuemax
+ * @param mixed $_order
+ * @param mixed $IsHistorized
+ * @param mixed $repeatevent
+ * @param mixed $_iconname
+ * @param mixed $_calculValueOffset
+ * @param mixed $_historizeRound
+ * @param mixed $_noiconname
+ * @param mixed $_warning
+ * @param mixed $_danger
+ * @param mixed $_invert
+ * @return mixed
+ */
 public function AddCommand(
   $Name,$_logicalId,$Type = 'info',$SubType = 'binary',$Template = null, $unite = null,$generic_type = null,$IsVisible = 1,$icon = 'default',$forceLineB = 'default', $valuemin = 'default',
   $valuemax = 'default', $_order = null, $IsHistorized =0, $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
@@ -533,6 +667,19 @@ public function AddCommand(
   return $Command;
 }
 
+/**
+ * AddAction allows to add/update an action to an equipment using optional parameters
+ * @param mixed $actionName
+ * @param mixed $actionTitle
+ * @param mixed $template
+ * @param mixed $generic_type
+ * @param mixed $visible
+ * @param mixed $SubType
+ * @param mixed $min
+ * @param mixed $max
+ * @param mixed $step
+ * @return void
+ */
 public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible=1, $SubType = 'other', $min=null, $max=null, $step=null)
   {
    // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
@@ -569,6 +716,15 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     }
   }
 
+  /**
+   * this function is required for a slider to work.
+   * it sets the target information value field to a slider command
+   * $slider holds the logicalID of the slider
+   * $setpointlogicalID holds the target info command
+   * @param mixed $slider
+   * @param mixed $setpointlogicalID
+   * @return void
+   */
   public function linksetpoint($slider, $setpointlogicalID) {
     $set_setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $slider);
     $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $setpointlogicalID);
@@ -582,6 +738,14 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
       }
   }
 
+  /**
+   * this function allows to update the value of a slider according to a value sent. 
+   * the absolute parameters tells whether the $value is an offset to add or the value to replace the actual one
+   * @param mixed $value
+   * @param mixed $absolute
+   * @param mixed $setpointlogicalID
+   * @return void
+   */
   public function updatesetpoint($value, $absolute = false, $setpointlogicalID)
   {
     $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $setpointlogicalID);
@@ -595,6 +759,15 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     }
   
 
+  /**
+   * this function is used to set the Bouler value on the LM machine according to the slider
+   * it is called when the user change the value of the slider on the desktop with the chosen value
+   * note that type is used to set the coffee or steam boiler target
+   * @param mixed $_options
+   * @param mixed $_logicalID
+   * @param mixed $type
+   * @return void
+   */
   public function set_setpoint($_options, $_logicalID, $type)
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');
@@ -608,6 +781,11 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
 //    $this->getInformations();
   }
 
+  /**
+   * retrieve miscelleanous statistics from LM
+   * not used yet
+   * @return void
+   */
   public function getStatistics() {
     log::add(__CLASS__, 'debug', 'get basic counters');
     $serial=$this->getConfiguration('serialNumber'); 
@@ -616,6 +794,11 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     self::checkrequest($data);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
+/**
+ * Switch machine ON/OFF accoding to a boolean value
+ * @param mixed $toggle
+ * @return void
+ */
 public function switchCoffeeBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
   $serial=$this->getConfiguration('serialNumber'); 
@@ -625,6 +808,11 @@ public function switchCoffeeBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
+/**
+ * Switch Steam ON/OFF according to a boolean value
+ * @param mixed $toggle
+ * @return void
+ */
 public function switchSteamBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
   $serial=$this->getConfiguration('serialNumber'); 
@@ -634,6 +822,11 @@ public function switchSteamBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
+/**
+ * Select mode for Preinfusion/Prebew.
+ * @param mixed $type
+ * @return void
+ */
 public function switchPreinfusionOrPrebrew($type) {
   // preinfusion = TypeB, prebrew=Enabled/Disabled
   log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
@@ -644,6 +837,12 @@ public function switchPreinfusionOrPrebrew($type) {
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
+/**
+ * set the LM boiler target temperature for coffee or steam boiler according to $type value
+ * @param mixed $celsius
+ * @param mixed $type
+ * @return void
+ */
 public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1') {
   log::add(__CLASS__, 'debug', 'switch steam on or off');
   $serial=$this->getConfiguration('serialNumber'); 
@@ -653,6 +852,15 @@ public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1') {
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
+/**
+ * This API allow to select if the LM is plumbed In or not. If not, the by default if preinfusion
+ * is enabled it is Prebrew that is performed with the parameters set (time/hold). If enabled
+ * then a preinfusion using the water pressure line is used (in general 1 to 3 bars). 
+ * the samle (time/hold) parameters apply. 
+ * Do not activate this feature if no plumbed in line is installed!
+ * @param mixed $toggle
+ * @return void
+ */
 public function switchPlumbedIn($toggle) {
   log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
   $serial=$this->getConfiguration('serialNumber'); 
@@ -662,6 +870,14 @@ public function switchPlumbedIn($toggle) {
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
+/**
+ * Set the Dose to use with Group on GB3 or Brew By Weight on Linea Mini. On Mini, 
+ * Dose A and B hold the two possible values offered by BBW. 
+ * this API is not used on Micra.
+ * @param mixed $weight
+ * @param mixed $dose
+ * @return void
+ */
 public function setDose($weight, $dose) {
   // $dose = 'A' or 'B'
   log::add(__CLASS__, 'debug', 'set dose for BBW');
@@ -674,6 +890,11 @@ public function setDose($weight, $dose) {
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
+/**
+ * Start the Backflush. I recommend using the app for this purpose, it is much more convenient
+ * as it monitors the backflush and this is not.
+ * @return void
+ */
 public function startBackflush()
 {
   log::add(__CLASS__, 'debug', 'backflush start');
@@ -685,7 +906,11 @@ public function startBackflush()
     self::checkrequest($data);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
-
+  /**
+   * Detect is the function used by the plugin configuration button to detect and create the equipments.
+   * this function shall be used only when new equipments are available. it is not necessary to ru it at regular.
+   * @return bool
+   */
   public static function detect() 
   {
     log::add(__CLASS__, 'debug', '[detect] start');
@@ -800,6 +1025,10 @@ public function startBackflush()
       return true;
   }
 
+  /**
+   * Refreshes the main counters and not all the information
+   * @return bool
+   */
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
@@ -819,13 +1048,20 @@ public function startBackflush()
     return true;
   }
 
+  /**
+   * Required by jeedom plugin architecture, not used 
+   * @return void
+   */
   public function getjee4lm()
   {
     log::add(__CLASS__, 'debug', "getjee4lm");
     $this->checkAndUpdateCmd(__CLASS__, "");
   }
 
-
+  /**
+   * Returns plugin version
+   * @return mixed
+   */
   public static function getPluginVersion()
     {
         $pluginVersion = '0.0.0';
@@ -851,6 +1087,9 @@ public function startBackflush()
     }
 }
 
+/**
+ * Specific class for commands execution
+ */
 class jee4lmCmd extends cmd
 {
   public function dontRemoveCmd()
@@ -860,6 +1099,11 @@ class jee4lmCmd extends cmd
     }
     return false;
   }
+  /**
+   * Loop of command execution where it switches the command to the right function
+   * @param mixed $_options
+   * @return bool
+   */
   public function execute($_options = null)
   {
     $action = $this->getLogicalId();
@@ -869,7 +1113,8 @@ class jee4lmCmd extends cmd
       case 'refresh':
         return $eq->getInformations();
         case 'start_backflush':
-        return $eq->startBackflush();
+         $eq->startBackflush();
+         return true;
       case 'getStatus':
         return $eq->getInformations();
       case 'jee4lm_on':
@@ -882,10 +1127,12 @@ class jee4lmCmd extends cmd
         return $eq->getInformations();
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
-      return $eq->getInformations();
+        return $eq->getInformations();
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget','SteamBoiler');        
         return $eq->getInformations();
+      default:
+        return true;
     }
   }
 
