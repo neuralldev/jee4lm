@@ -470,7 +470,7 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       $eq->setConfiguration("scalename",$machine['scale']['name']);
 
-      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",null,1);
+      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'gauge',1,null,null,min:0,max:100);
       $cmd->event($machine['scale']['battery']); 
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
 
@@ -486,7 +486,7 @@ public static function readConfiguration($eq) {
           $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
 
-          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','binary', null, '°C','THERMOSTAT_TEMPERATURE',1);
+          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',1);
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
         }
