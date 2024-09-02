@@ -1083,7 +1083,7 @@ public function startBackflush()
       'display' => array('icon' => 'null'),
       'replace' => array(
         '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
         "#_time_widget_#" =>"0"
         )
     );
