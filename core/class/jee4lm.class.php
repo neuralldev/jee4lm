@@ -1067,17 +1067,25 @@ public function startBackflush()
    
   public static function templateWidget(){
     /*
-    "id":"",
-    "name":"Chauffe eau",
-    "type":"info",
-    "subtype":"binary",
-    "template":"tmplicon",
-    "display":{"icon":null},
-    "replace":{"#_time_widget_#":"0","#_icon_on_#":"<img class='img-responsive' src='data/img/chauffage/ch_eau2_on.png' width="64" height="64">","#_icon_off_#":"<img class='img-responsive' src='data/img/chauffage/ch_eau3_off.png' width="64" height="64">"},"test":[],"jeedomCoreVersion":"4.4.9"
-    */
+   {"id":"","name":"action power On Off","type":"action","subtype":"other","template":"tmplicon",
+   "display":{"icon":"<i class=\"fas fa-power-off \"></i>"},
+   "replace":{"#_time_widget_#":"0",
+   "#_icon_on_#":"<br>allum&eacute<br><br><i style='color:red' class='fas fa-power-off '></i>",
+   "#_icon_off_#":"<br>&eacuteteint<br><br><i style='color:green' class='fas fa-power-off '></i>"},
+   "test":[],"jeedomCoreVersion":"4.4.9"}    */
 
     $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
 
+    $r['action']['other']['jee4lm main on off'] = array(
+      'template' => 'tmplicon',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
+        "#_time_widget_#" =>"0"
+        )
+    );
+    
     $r['info']['binary']['jee4lm main'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
