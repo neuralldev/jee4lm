@@ -1059,6 +1059,38 @@ public function startBackflush()
   }
 
   /**
+   * Jeedom specific function to define inline widgets from the plugin
+   * @return array[]
+   */
+
+   
+  public static function templateWidget(){
+    /*
+    "id":"",
+    "name":"Chauffe eau",
+    "type":"info",
+    "subtype":"binary",
+    "template":"tmplicon",
+    "display":{"icon":null},
+    "replace":{"#_time_widget_#":"0","#_icon_on_#":"<img class='img-responsive' src='data/img/chauffage/ch_eau2_on.png' width="64" height="64">","#_icon_off_#":"<img class='img-responsive' src='data/img/chauffage/ch_eau3_off.png' width="64" height="64">"},"test":[],"jeedomCoreVersion":"4.4.9"
+    */
+
+    $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
+
+    $r['info']['binary']['jee4lm main'] = array(
+      'template' => 'tmplicon',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/ressources/main_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/ressources/main_on.png' width='64' height='64'>",
+        "#_time_widget_#" =>"0"
+        )
+    );
+
+    return $r;
+  }
+
+  /**
    * Returns plugin version
    * @return mixed
    */
