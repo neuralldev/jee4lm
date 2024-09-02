@@ -1087,6 +1087,24 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
+    $r['info']['binary']['jee4lm backflush'] = array(
+      'template' => 'tmplicon',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
+        "#_time_widget_#" =>"0"
+        )
+    );
+    $r['info']['binary']['jee4lm steam'] = array(
+      'template' => 'tmplicon',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
+        "#_time_widget_#" =>"0"
+        )
+    );
 
     return $r;
   }
