@@ -1095,6 +1095,15 @@ public function startBackflush()
         )
     );
 
+    $r['info']['binary']['jee4lm bbw'] = array(
+      'template' => 'tmplicon',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'>",
+        "#_time_widget_#" =>"0"
+        )
+    );
     $r['info']['binary']['jee4lm main'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
