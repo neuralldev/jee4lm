@@ -954,6 +954,7 @@ public function startBackflush()
         $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
        // self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
         $eqLogic->save();
+        jee4lm::readConfiguration($eqLogic);
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
