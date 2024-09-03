@@ -789,7 +789,7 @@ class jee4lm extends eqLogic
    * @param mixed $type
    * @return void
    */
-  public function set_setpoint($_options, $_logicalID, $type)
+  public function set_setpoint($_options, $type)
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');
     $v = $_options["slider"];
@@ -798,8 +798,6 @@ class jee4lm extends eqLogic
     if ($v > 0)
       $this->setBoilerTemperature($v, $type);
     log::add(__CLASS__, 'debug', 'set setpoint end');
-    // now refresh display  
-//    $this->getInformations();
   }
 
   /**
@@ -1238,26 +1236,32 @@ class jee4lmCmd extends cmd
     log::add(__CLASS__, 'debug', 'execute action ' . $action . ' with options=' . $_options);
     switch ($action) {
       case 'refresh':
-        return $eq->getInformations();
+        $eq->getInformations();
+        return true;
       case 'start_backflush':
         $eq->startBackflush();
         return true;
       case 'getStatus':
-        return $eq->getInformations();
+        $eq->getInformations();
+        return true;
       case 'jee4lm_on':
       case 'jee4lm_off':
         $eq->switchCoffeeBoilerONOFF(($action == 'jee4lm_on'));
-        return $eq->getInformations();
+        $eq->getInformations();
+        return true;
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $eq->switchSteamBoilerONOFF(($action == 'jee4lm_steam_on'));
-        return $eq->getInformations();
+        $eq->getInformations();
+        return true;
       case 'jee4lm_coffee_slider':
-        $eq->set_setpoint($_options, 'coffeetarget', 'CoffeeBoiler1');
-        return $eq->getInformations();
+        $eq->set_setpoint($_options, 'CoffeeBoiler1');
+        $eq->getInformations();
+        return true;
       case 'jee4lm_steam_slider':
-        $eq->set_setpoint($_options, 'steamtarget', 'SteamBoiler');
-        return $eq->getInformations();
+        $eq->set_setpoint($_options, 'SteamBoiler');
+        $eq->getInformations();
+        return true;
       default:
         return true;
     }
