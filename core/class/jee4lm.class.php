@@ -414,7 +414,7 @@ public static function readConfiguration($eq) {
       $plumbed =    $machine['isPlumbedIn'];
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
-      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm/backflush", null,null,1);
+      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null,null,1);
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
@@ -425,15 +425,15 @@ public static function readConfiguration($eq) {
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
 
-      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string', "jee4lm/bbw", null,null,1);
+      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string', "jee4lm::bbw", null,null,1);
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
-      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', "jee4lm/bbw dose", "g",null,1);
+      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', "jee4lm::bbw dose", "g",null,1);
       $cmd->event($bbw['recipe_doses'][0]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
 
-      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', "jee4lm/bbw dose", "g",null,1);
+      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', "jee4lm::bbw dose", "g",null,1);
       $cmd->event($bbw['recipe_doses'][1]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
@@ -452,7 +452,7 @@ public static function readConfiguration($eq) {
       $cmd->event($reglage['stopTarget']); 
       log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
-      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm/main", null,'THERMOSTAT_STATE',1);
+      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm::main", null,'THERMOSTAT_STATE',1);
       $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
@@ -478,7 +478,7 @@ public static function readConfiguration($eq) {
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
-          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm/steam", null,'THERMOSTAT_STATE',1);
+          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm::steam", null,'THERMOSTAT_STATE',1);
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
 
@@ -531,10 +531,10 @@ public static function readConfiguration($eq) {
       $cmd->event($fw[1]['fw_version']); 
       log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
 // now create standard commands
-      $eq->AddAction("jee4lm_on", "Machine ON", "jee4lm/main on off");
-      $eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm/main on off");
-      $eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm/steam on off");
-      $eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm/steam on off");
+      $eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off");
+      $eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off");
+      $eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off");
+      $eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off");
       $eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,95, 1);
       $eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
