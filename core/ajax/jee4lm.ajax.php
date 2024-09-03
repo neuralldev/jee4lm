@@ -11,10 +11,10 @@ try {
     ajax::init();
 
     if (init('action') == 'login') {
-        if (jee4lm::login(init('username'),init('password')))
+        if (jee4lm::login(init('username'), init('password')))
             ajax::success();
         else
-           throw new Exception(__('informations de connexion incorrectes', __FILE__));
+            throw new Exception(__('informations de connexion incorrectes', __FILE__));
     }
 
     if (init('action') == 'sync') {
@@ -22,9 +22,9 @@ try {
             ajax::success();
         else
             throw new Exception(__("la détection ne peut se faire qu'une fois la connexion réussie", __FILE__));
-     }
-      
-    
+    }
+
+
     if (init('action') == 'autoDEL_eq') {
         $eqLogic = jee4lm::byId(init('id'));
         if (!is_object($eqLogic)) {
