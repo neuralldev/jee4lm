@@ -163,13 +163,13 @@ class jee4lm extends eqLogic
     return $access_token;
   }
 
-    public static function cronHourly()
+   /* public static function cronHourly()
   {
     log::add(__CLASS__, 'debug', 'cron60 start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
-          /* lire les infos de l'équipement ici */
+          //lire les infos de l'équipement ici 
           $slug = $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
           log::add(__CLASS__, 'debug', "cron for ID=" . $id);
@@ -188,7 +188,7 @@ class jee4lm extends eqLogic
         log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
     log::add(__CLASS__, 'debug', 'cron end');
-  }
+  }*/
 
   
   public static function cron()
@@ -943,10 +943,7 @@ class jee4lmCmd extends cmd
 {
   public function dontRemoveCmd()
   {
-    if ($this->getLogicalId() == 'refresh') {
-      return true;
-    }
-    return false;
+    return ($this->getLogicalId() != 'refresh') ;
   }
     public function execute($_options = null)
   {
@@ -955,13 +952,11 @@ class jee4lmCmd extends cmd
     log::add(__CLASS__, 'debug', 'execute action ' . $action . ' with options=' . $_options);
     switch ($action) {
       case 'refresh':
-        $eq->getInformations();
+      case 'getStatus':
+          $eq->getInformations();
         return true;
       case 'start_backflush':
         $eq->startBackflush();
-        return true;
-      case 'getStatus':
-        $eq->getInformations();
         return true;
       case 'jee4lm_on':
       case 'jee4lm_off':
@@ -980,8 +975,6 @@ class jee4lmCmd extends cmd
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'SteamBoiler');
         $eq->getInformations();
-        return true;
-      default:
         return true;
     }
   }
