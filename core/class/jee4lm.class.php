@@ -1076,13 +1076,12 @@ public function startBackflush()
 
     $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
 
-
     $r['info']['numeric']['jee4lm bbw dose'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# == 0','state_light' => 'Arrêt','state_dark' => 'Arrêt'),
+        array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
         array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 20px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 20px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#</span></span>')
-      )
+      ));
     $r['action']['other']['jee4lm main on off'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
