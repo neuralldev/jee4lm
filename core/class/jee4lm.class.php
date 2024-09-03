@@ -20,15 +20,6 @@ https://github.com/zweckj/pylamarzocco/tree/main
 
 class jee4lm extends eqLogic
 {
-
-  
-  /*
-  $MACHINE_NAME = "machine_name";
-  $SERIAL_NUMBER = "serial_number";
-  $CONF_MACHINE = "machine";
-  $CONF_USE_BLUETOOTH = "use_bluetooth";
-  */
-
   /**
    * check that request is executed when it it a GET with commandID command
    * check if request has a commandId, then check if there is a PENDING/COMPLETED answer or not
@@ -225,7 +216,6 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
     log::add(__CLASS__, 'debug', 'cron end');
-
   }
 
   /**
