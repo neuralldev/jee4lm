@@ -16,52 +16,56 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
- require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
+require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
-function jee4lm_install() {
-  
-    $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
-    if (!is_object($cronLocal)) {
-      $cronLocal = new cron();
-      $cronLocal->setClass('jee4lm');
-      $cronLocal->setFunction('pull');
-      $cronLocal->setEnable(1);
-      $cronLocal->setDeamon(0);
-      $cronLocal->setSchedule('* * * * *');
-      $cronLocal->setTimeout(1);
-      $cronLocal->save();
-    }
+function jee4lm_install()
+{
 
-    if (config::byKey('configPull', 'jee4lm') == '') 
-      config::save('configPull', '1', 'jee4lm');
-    
-}
+  $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
+  if (!is_object($cronLocal)) {
+    $cronLocal = new cron();
+    $cronLocal->setClass('jee4lm');
+    $cronLocal->setFunction('pull');
+    $cronLocal->setEnable(1);
+    $cronLocal->setDeamon(0);
+    $cronLocal->setSchedule('* * * * *');
+    $cronLocal->setTimeout(1);
+    $cronLocal->save();
+  }
 
-function jee4lm_update() {
-
-    $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
-    if (!is_object($cronLocal)) {
-      $cronLocal = new cron();
-      $cronLocal->setClass('jee4lm');
-      $cronLocal->setFunction('pull');
-      $cronLocal->setEnable(1);
-      $cronLocal->setDeamon(0);
-      $cronLocal->setSchedule('* * * * *');
-      $cronLocal->setTimeout(1);
-      $cronLocal->save();
-    }
-
-    if (config::byKey('configPull', 'jee4lm') == '') 
-      config::save('configPull', '1', 'jee4lm');
-    
+  if (config::byKey('configPull', 'jee4lm') == '')
+    config::save('configPull', '1', 'jee4lm');
 
 }
 
-function jee4lm_remove() {
+function jee4lm_update()
+{
 
-    $cron = cron::byClassAndFunction('jee4lm', 'pull');
-    if (is_object($cron)) 
-        $cron->remove();
+  $cronLocal = cron::byClassAndFunction('jee4lm', 'pull');
+  if (!is_object($cronLocal)) {
+    $cronLocal = new cron();
+    $cronLocal->setClass('jee4lm');
+    $cronLocal->setFunction('pull');
+    $cronLocal->setEnable(1);
+    $cronLocal->setDeamon(0);
+    $cronLocal->setSchedule('* * * * *');
+    $cronLocal->setTimeout(1);
+    $cronLocal->save();
+  }
+
+  if (config::byKey('configPull', 'jee4lm') == '')
+    config::save('configPull', '1', 'jee4lm');
+
+
+}
+
+function jee4lm_remove()
+{
+
+  $cron = cron::byClassAndFunction('jee4lm', 'pull');
+  if (is_object($cron))
+    $cron->remove();
+  config::remove('configPull', 'jee4lm');
 
 }
 

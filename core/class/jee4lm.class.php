@@ -392,7 +392,7 @@ class jee4lm extends eqLogic
         log::add(__CLASS__, 'debug', 'scalename=' . $machine['scale']['name']);
         $eq->setConfiguration("scalename", $machine['scale']['name']);
 
-        $cmd = $eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'gauge', 1, null, null, min: 0, max: 100);
+        $cmd = $eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'gauge', 1);
         $cmd->event($machine['scale']['battery']);
         log::add(__CLASS__, 'debug', 'scalebattery=' . $machine['scale']['battery']);
 
