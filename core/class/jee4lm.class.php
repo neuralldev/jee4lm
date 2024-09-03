@@ -20,13 +20,7 @@ https://github.com/zweckj/pylamarzocco/tree/main
 
 class jee4lm extends eqLogic
 {
-  /**
-   * check that request is executed when it it a GET with commandID command
-   * check if request has a commandId, then check if there is a PENDING/COMPLETED answer or not
-   * if there is none, the request is done and was nt requiring a delay
-   * @param mixed $response
-   * @return bool
-   */
+  
   public static function checkrequest($response)
   {
     log::add(__CLASS__, 'debug', 'check request');
@@ -73,16 +67,7 @@ class jee4lm extends eqLogic
     }
     return false;
   }
-  /**
-   * sends a request to the REST API formatting request for GET or POST as expected by La Marzocco
-   * data is used only for POST and must be URL encoded / formatted as a string parm1=val1&parm2=val2...
-   * an optional header can be sent as well, especially to set the OAuth2 token in the Bearer field
-   * @param mixed $_path
-   * @param mixed $_data
-   * @param mixed $_type
-   * @param mixed $_header
-   * @return mixed
-   */
+  
   public static function request($_path, $_data = null, $_type = 'GET', $_header = null)
   {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
@@ -113,14 +98,7 @@ class jee4lm extends eqLogic
     jee4lm::checkrequest($response);
     return json_decode($response, true);
   }
-  /**
-   * Login is the login API to get the token based on the credential from the Web/App 
-   * if the login succeeds, it sets the fields with both the access_token and the refresh token for renewal
-   * in the appropriate plugin global variables
-   * @param mixed $_username
-   * @param mixed $_password
-   * @return mixed
-   */
+  
   public static function login($_username, $_password)
   {
     // login to LM cloud attempt to get the token 
@@ -148,11 +126,7 @@ class jee4lm extends eqLogic
     }
     return '';
   }
-  /**
-   * Refresh the token by checking if it is expired, then asks for its renewal if necessary.
-   * the new token is stored in the cache with the expiricy set as well to 300
-   * @return mixed
-   */
+ 
   public static function refreshToken()
   {
     $refresh = config::byKey('refreshToken', 'jee4lm');
@@ -181,11 +155,7 @@ class jee4lm extends eqLogic
     return '';
   }
 
-  /**
-   * getToken retrieve the current token stored in the cache. of the value has expired it calls
-   * the refresh routine to renew it 
-   * @return mixed
-   */
+  
   public static function getToken()
   {
     $mc = cache::byKey('jee4lm::access_token');
@@ -197,11 +167,7 @@ class jee4lm extends eqLogic
     return $access_token;
   }
 
-  /**
-   * Rafraichit les données complètes toutes les heures
-   * @return void
-   */
-  public static function cronHourly()
+    public static function cronHourly()
   {
     log::add(__CLASS__, 'debug', 'cron60 start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
@@ -228,10 +194,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'cron end');
   }
 
-  /**
-   * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
-   * @return void
-   */
+  
   public static function cron()
   {
     log::add(__CLASS__, 'debug', 'cron start');
@@ -269,10 +232,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'pull end');
   }
 
-  /**
-   * fonction nécessaire à jeedom pour nettoyer les commandes dans la fonction de remplacement 
-   * @return array<mixed|string>[]
-   */
+  
   public static function deadCmd()
   {
 
@@ -316,12 +276,7 @@ class jee4lm extends eqLogic
     return $return;
   }
 
-  /**
-   * used to set visible state (0=invisible/1=visible) of a jeedom equipment by logicalID
-   * @param mixed $_logicalId
-   * @param mixed $state
-   * @return bool
-   */
+  
   private function toggleVisible($_logicalId, $state)
   {
     $Command = $this->getCmd(null, $_logicalId);
@@ -333,10 +288,7 @@ class jee4lm extends eqLogic
     }
     return false;
   }
-  /**
-   * Refresh function from Jeedom to refresh all values
-   * @return void
-   */
+ 
   public function refresh()
   {
     foreach ($this->getCmd() as $cmd) {
@@ -346,58 +298,31 @@ class jee4lm extends eqLogic
     }
   }
 
-  /**
-   * not used
-   * @return void
-   */
+ 
   public function postSave()
   {
-    //    log::add(__CLASS__, 'debug', 'postsave start');
   }
 
-  /**
-   * not used
-   * @return void
-   */
+
   public function preUpdate()
   {
-    //    log::add(__CLASS__, 'debug', 'preupdate start');
-//    log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
-  /**
-   * not used
-   * @return void
-   */
+ 
   public function postUpdate()
   {
-    //    log::add(__CLASS__, 'debug', 'postupdate start');
-//    log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
-  /**
-   * not used
-   * @return void
-   */
+ 
   public function preRemove()
   {
   }
 
-  /**
-   * not used
-   * @return void
-   */
-  public function postRemove()
+   public function postRemove()
   {
   }
 
 
-  /**
-   * Reads and create/refresh all the values of an equipment previously created by detection routine
-   * the function takes only the target equipment to refresh as argument
-   * @param mixed $eq
-   * @return bool
-   */
   public static function readConfiguration($eq)
   {
     log::add(__CLASS__, 'debug', 'read configuration');
@@ -566,34 +491,6 @@ class jee4lm extends eqLogic
     return true;
   }
 
-
-  /**
-   * AddCommand function adds/update an information on an existing command inside an equipment
-   * it allows to initialize a lot of optional paramters to display the command properly
-   * @param mixed $Name
-   * @param mixed $_logicalId
-   * @param mixed $Type
-   * @param mixed $SubType
-   * @param mixed $Template
-   * @param mixed $unite
-   * @param mixed $generic_type
-   * @param mixed $IsVisible
-   * @param mixed $icon
-   * @param mixed $forceLineB
-   * @param mixed $valuemin
-   * @param mixed $valuemax
-   * @param mixed $_order
-   * @param mixed $IsHistorized
-   * @param mixed $repeatevent
-   * @param mixed $_iconname
-   * @param mixed $_calculValueOffset
-   * @param mixed $_historizeRound
-   * @param mixed $_noiconname
-   * @param mixed $_warning
-   * @param mixed $_danger
-   * @param mixed $_invert
-   * @return mixed
-   */
   public function AddCommand(
     $Name,
     $_logicalId,
@@ -618,8 +515,6 @@ class jee4lm extends eqLogic
     $_danger = null,
     $_invert = 0
   ) {
-
-
     $createCmd = true;
     $Command = $this->getCmd(null, $_logicalId);
     if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
@@ -687,19 +582,7 @@ class jee4lm extends eqLogic
     return $Command;
   }
 
-  /**
-   * AddAction allows to add/update an action to an equipment using optional parameters
-   * @param mixed $actionName
-   * @param mixed $actionTitle
-   * @param mixed $template
-   * @param mixed $generic_type
-   * @param mixed $visible
-   * @param mixed $SubType
-   * @param mixed $min
-   * @param mixed $max
-   * @param mixed $step
-   * @return void
-   */
+ 
   public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible = 1, $SubType = 'other', $min = null, $max = null, $step = null)
   {
     // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
@@ -736,15 +619,7 @@ class jee4lm extends eqLogic
     }
   }
 
-  /**
-   * this function is required for a slider to work.
-   * it sets the target information value field to a slider command
-   * $slider holds the logicalID of the slider
-   * $setpointlogicalID holds the target info command
-   * @param mixed $slider
-   * @param mixed $setpointlogicalID
-   * @return void
-   */
+
   public function linksetpoint($slider, $setpointlogicalID)
   {
     $set_setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $slider);
@@ -759,14 +634,7 @@ class jee4lm extends eqLogic
     }
   }
 
-  /**
-   * this function allows to update the value of a slider according to a value sent. 
-   * the absolute parameters tells whether the $value is an offset to add or the value to replace the actual one
-   * @param mixed $value
-   * @param mixed $absolute
-   * @param mixed $setpointlogicalID
-   * @return void
-   */
+ 
   public function updatesetpoint($value, $absolute = false, $setpointlogicalID)
   {
     $setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $setpointlogicalID);
@@ -780,15 +648,6 @@ class jee4lm extends eqLogic
   }
 
 
-  /**
-   * this function is used to set the Bouler value on the LM machine according to the slider
-   * it is called when the user change the value of the slider on the desktop with the chosen value
-   * note that type is used to set the coffee or steam boiler target
-   * @param mixed $_options
-   * @param mixed $_logicalID
-   * @param mixed $type
-   * @return void
-   */
   public function set_setpoint($_options, $type)
   {
     log::add(__CLASS__, 'debug', 'set setpoint start');
@@ -800,11 +659,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'set setpoint end');
   }
 
-  /**
-   * retrieve miscelleanous statistics from LM
-   * not used yet
-   * @return void
-   */
+  
   public function getStatistics()
   {
     log::add(__CLASS__, 'debug', 'get basic counters');
@@ -814,11 +669,7 @@ class jee4lm extends eqLogic
     self::checkrequest($data);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
-  /**
-   * Switch machine ON/OFF accoding to a boolean value
-   * @param mixed $toggle
-   * @return void
-   */
+  
   public function switchCoffeeBoilerONOFF($toggle)
   {
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
@@ -829,11 +680,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-  /**
-   * Switch Steam ON/OFF according to a boolean value
-   * @param mixed $toggle
-   * @return void
-   */
+  
   public function switchSteamBoilerONOFF($toggle)
   {
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
@@ -844,11 +691,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-  /**
-   * Select mode for Preinfusion/Prebew.
-   * @param mixed $type
-   * @return void
-   */
+  
   public function switchPreinfusionOrPrebrew($type)
   {
     // preinfusion = TypeB, prebrew=Enabled/Disabled
@@ -860,12 +703,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-  /**
-   * set the LM boiler target temperature for coffee or steam boiler according to $type value
-   * @param mixed $celsius
-   * @param mixed $type
-   * @return void
-   */
+  
   public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1')
   {
     log::add(__CLASS__, 'debug', 'switch steam on or off');
@@ -876,15 +714,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-  /**
-   * This API allow to select if the LM is plumbed In or not. If not, the by default if preinfusion
-   * is enabled it is Prebrew that is performed with the parameters set (time/hold). If enabled
-   * then a preinfusion using the water pressure line is used (in general 1 to 3 bars). 
-   * the samle (time/hold) parameters apply. 
-   * Do not activate this feature if no plumbed in line is installed!
-   * @param mixed $toggle
-   * @return void
-   */
+  
   public function switchPlumbedIn($toggle)
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
@@ -895,14 +725,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-  /**
-   * Set the Dose to use with Group on GB3 or Brew By Weight on Linea Mini. On Mini, 
-   * Dose A and B hold the two possible values offered by BBW. 
-   * this API is not used on Micra.
-   * @param mixed $weight
-   * @param mixed $dose
-   * @return void
-   */
+  
   public function setDose($weight, $dose)
   {
     // $dose = 'A' or 'B'
@@ -919,12 +742,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-  /**
-   * Start the Backflush. I recommend using the app for this purpose, it is much more convenient
-   * as it monitors the backflush and this is not.
-   * @return void
-   */
-  public function startBackflush()
+   public function startBackflush()
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
@@ -938,11 +756,7 @@ class jee4lm extends eqLogic
     self::checkrequest($data);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
-  /**
-   * Detect is the function used by the plugin configuration button to detect and create the equipments.
-   * this function shall be used only when new equipments are available. it is not necessary to ru it at regular.
-   * @return bool
-   */
+ 
   public static function detect()
   {
     log::add(__CLASS__, 'debug', '[detect] start');
@@ -991,77 +805,10 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', 'loop to next machine');
     }
     log::add(__CLASS__, 'debug', 'end parsing');
-    /*
-    detect=
-    {"status":true,
-    "status_code":200,
-    "data":
-      {"uuid":"78df57ee-3d7c-4081-9bea-c466e93d74c6",
-      "name":"gluzman thierry",
-      "active":true,
-      "country":{
-        "uuid":"d73b3872-985d-4b0b-8934-a41358495af8",
-        "name":"France",
-        "alpha2Code":"FR",
-        "country":"fr_FR"},
-      "email":"gluzmanandco@gmail.com",
-      "image":null,
-      "role":{
-        "uuid":"e1516a97-a7fe-4a16-8aa4-a7c54b64a7f6",
-        "name":"Customer",
-        "role":"ROLE_CUSTOMER",
-        "description":"Default role for user registered with mobile application"
-      },
-      "surname":null,"
-      username":"gluzmanandco@gmail.com",
-      "authenticationType":"INTERNAL",
-      "customerAuthenticationType":[],
-      "birthday":null,
-      "businessSector":null,
-      "disposalCommercial":true,
-      "disposalThirdParty":true,
-      "disposalProfile":true,
-      "emailConfirmed":true,
-      "fleet":[
-        {"uuid":"0c4354ae-44d6-44a2-bb0e-e875f67be18b",
-        "name":"LM049632",
-        "communicationKey":"4f902aeb455cc285f2f9c3e096951758dd13043c252741ecf67246cd2655ef75",
-        "customer":"gluzmanandco@gmail.com",
-        "machine":{
-          "uuid":"600b7183-a4fd-41b0-8a28-7fadf23bc021",
-          "name":null,
-          "model":{
-            "uuid":"9c8752bb-1272-472b-a853-0786d5c4acce",
-            "name":"Linea Mini",
-            "description":"Linea Mini",
-            "slug":"linea_mini"
-            },
-          "ownerNumber":1,
-          "serialNumber":"LM049632",
-          "type":"MACHINE_INSTANCE"
-        },
-        "paringDate":"2023-10-13T11:31:35+00:00",
-        "machineUse":{
-          "uuid":"000b6014-ace4-4bed-81d3-0c18d06cebd8",
-          "name":"1. Domicile",
-          "country":{
-            "uuid":"d73b3872-985d-4b0b-8934-a41358495af8",
-            "name":"France",
-            "alpha2Code":"FR",
-            "country":"fr_FR"},
-            "description":null
-          }
-          }
-        ],
-        "gender":null,"hobbies":[],"ownMachine":1,"privacy":null,"socialNetworkId":null,"business":null,"businessType":null,"coffeeRoaster":null,"countryOther":null,"areaOperation":null,"brandServiced":null,"personOfContact":null,"phoneModel":null,"id":133029}}
-    */
     return true;
   }
 
-  /**
-   * Refreshes the main counters and not all the information
-   * @return bool
-   */
+  
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
@@ -1081,34 +828,19 @@ class jee4lm extends eqLogic
     return true;
   }
 
-  /**
-   * Required by jeedom plugin architecture, not used 
-   * @return void
-   */
+  
   public function getjee4lm()
   {
     log::add(__CLASS__, 'debug', "getjee4lm");
     $this->checkAndUpdateCmd(__CLASS__, "");
   }
 
-  /**
-   * Jeedom specific function to define inline widgets from the plugin
-   * @return array[]
-   */
-
-
   public static function templateWidget()
   {
-    /*
-   {"id":"","name":"action power On Off","type":"action","subtype":"other","template":"tmplicon",
-   "display":{"icon":"<i class=\"fas fa-power-off \"></i>"},
-   "replace":{"#_time_widget_#":"0",
-   "#_icon_on_#":"<br>allum&eacute<br><br><i style='color:red' class='fas fa-power-off '></i>",
-   "#_icon_off_#":"<br>&eacuteteint<br><br><i style='color:green' class='fas fa-power-off '></i>"},
-   "test":[],"jeedomCoreVersion":"4.4.9"}    */
-
+ 
     $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
 
+    /*
     $r['info']['numeric']['jee4lm bbw dose'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
@@ -1116,6 +848,7 @@ class jee4lm extends eqLogic
         array('operation' => '#value# >= 0', 'state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 20px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 20px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#</span></span>')
       )
     );
+    */
     $r['action']['other']['jee4lm main on off'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
@@ -1184,10 +917,7 @@ class jee4lm extends eqLogic
     return $r;
   }
 
-  /**
-   * Returns plugin version
-   * @return mixed
-   */
+ 
   public static function getPluginVersion()
   {
     $pluginVersion = '0.0.0';
@@ -1212,9 +942,7 @@ class jee4lm extends eqLogic
   }
 }
 
-/**
- * Specific class for commands execution
- */
+
 class jee4lmCmd extends cmd
 {
   public function dontRemoveCmd()
@@ -1224,12 +952,7 @@ class jee4lmCmd extends cmd
     }
     return false;
   }
-  /**
-   * Loop of command execution where it switches the command to the right function
-   * @param mixed $_options
-   * @return bool
-   */
-  public function execute($_options = null)
+    public function execute($_options = null)
   {
     $action = $this->getLogicalId();
     $eq = $this->getEqLogic();
