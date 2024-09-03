@@ -711,7 +711,7 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
       if ($max != null)
         $command->setConfiguration('maxValue', $max);
         if ($step != null)
-        $command->setDisplay('step', $step);
+        $command->setDisplay('parameters', ['step' => $step]);
       $command->save();
     }
   }
