@@ -163,7 +163,7 @@ class jee4lm extends eqLogic
     return $access_token;
   }
 
-   /* public static function cronHourly()
+   public static function cronHourly()
   {
     log::add(__CLASS__, 'debug', 'cron60 start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
@@ -188,7 +188,7 @@ class jee4lm extends eqLogic
         log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
     log::add(__CLASS__, 'debug', 'cron end');
-  }*/
+  }
 
   
   public static function cron()
