@@ -470,7 +470,7 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       $eq->setConfiguration("scalename",$machine['scale']['name']);
 
-      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'gauge',1,null,null);
+      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'gauge',1,null,null,'default', 'default', '0','100');
       $cmd->event($machine['scale']['battery']); 
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
 
