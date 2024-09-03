@@ -414,7 +414,7 @@ public static function readConfiguration($eq) {
       $plumbed =    $machine['isPlumbedIn'];
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
-      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', null, null,null,1);
+      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm/backflush", null,null,1);
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
@@ -425,15 +425,15 @@ public static function readConfiguration($eq) {
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
 
-      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string', null, null,null,1);
+      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string', "jee4lm/bbw", null,null,1);
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
-      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', null, "g",null,1);
+      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', "jee4lm/bbw dose", "g",null,1);
       $cmd->event($bbw['recipe_doses'][0]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
 
-      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', null, "g",null,1);
+      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', "jee4lm/bbw dose", "g",null,1);
       $cmd->event($bbw['recipe_doses'][1]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
@@ -452,7 +452,7 @@ public static function readConfiguration($eq) {
       $cmd->event($reglage['stopTarget']); 
       log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
-      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', null, null,'THERMOSTAT_STATE',1);
+      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm/main", null,'THERMOSTAT_STATE',1);
       $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
@@ -478,7 +478,7 @@ public static function readConfiguration($eq) {
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
-          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', null, null,'THERMOSTAT_STATE',1);
+          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm/steam", null,'THERMOSTAT_STATE',1);
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
 
@@ -531,16 +531,16 @@ public static function readConfiguration($eq) {
       $cmd->event($fw[1]['fw_version']); 
       log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
 // now create standard commands
-      $eq->AddAction("jee4lm_on", "Machine ON");
-      $eq->AddAction("jee4lm_off", "Machine OFF");
-      $eq->AddAction("jee4lm_steam_on", "Vapeur ON");
-      $eq->AddAction("jee4lm_steam_off", "Vapeur OFF");
+      $eq->AddAction("jee4lm_on", "Machine ON", "jee4lm/main on off");
+      $eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm/main on off");
+      $eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm/steam on off");
+      $eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm/steam on off");
       $eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,95, 1);
       $eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
       $eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
       $eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
-      $eq->AddAction("start_backflush", "Démarrer backflush");
+      $eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm/backflush on off");
       $eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
       $eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
       $eq->linksetpoint("jee4lm_prewet_slider", "prewettime"); 
@@ -1076,13 +1076,13 @@ public function startBackflush()
 
     $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
 
-    $r['info']['numeric']['jee4lm bbw dose'] = array(
+    $r['info']['numeric']['bbw dose'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
         array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 20px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 20px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#</span></span>')
       ));
-    $r['action']['other']['jee4lm main on off'] = array(
+    $r['action']['other']['main on off'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
@@ -1091,7 +1091,7 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
-    $r['action']['other']['jee4lm steam on off'] = array(
+    $r['action']['other']['steam on off'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
@@ -1100,7 +1100,7 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
-    $r['action']['other']['jee4lm backflush on off'] = array(
+    $r['action']['other']['backflush on off'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
@@ -1110,7 +1110,7 @@ public function startBackflush()
         )
     );
 
-    $r['info']['binary']['jee4lm bbw'] = array(
+    $r['info']['binary']['bbw'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
@@ -1119,7 +1119,7 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
-    $r['info']['binary']['jee4lm main'] = array(
+    $r['info']['binary']['main'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
@@ -1128,7 +1128,7 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
-    $r['info']['binary']['jee4lm backflush'] = array(
+    $r['info']['binary']['backflush'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
@@ -1137,7 +1137,7 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
-    $r['info']['binary']['jee4lm steam'] = array(
+    $r['info']['binary']['steam'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
