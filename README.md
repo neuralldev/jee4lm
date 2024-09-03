@@ -29,6 +29,8 @@ pour utiliser le plugin c'est facile
 4) une fois que la connexion a réussie, lancer une détection. elle va créer les objets et ajouter les commandes de base.
 5) après ça toutes les minutes les éléments principaux sont rafraichis et le reste n'est rafraichi que de temps à autre pour ne pas saturer les API et entrer en collision avec l'application sur le smartphone.
 
+source api from HA
+https://github.com/zweckj/pylamarzocco/tree/main
 
 
 - 

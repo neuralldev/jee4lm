@@ -14,10 +14,6 @@ const
   LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
   LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy";
 
-/* source api from HA
-https://github.com/zweckj/pylamarzocco/tree/main
-*/
-
 class jee4lm extends eqLogic
 {
   
