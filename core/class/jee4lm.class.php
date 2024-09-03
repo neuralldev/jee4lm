@@ -414,7 +414,7 @@ public static function readConfiguration($eq) {
       $plumbed =    $machine['isPlumbedIn'];
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
-      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null,null,1);
+      $cmd=$eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null,null,0);
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
@@ -440,19 +440,19 @@ public static function readConfiguration($eq) {
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       
-      $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','string', null, null,null,1);
+      $cmd=$eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','string', null, null,null,0);
       $cmd->event($reglage['doseIndex']); 
       log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
 
-      $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','string', null, null,null,1);
+      $cmd=$eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','string', null, null,null,0);
       $cmd->event($reglage['doseType']); 
       log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
  
-      $cmd=$eq->AddCommand("Groupe Dose max",'groupDoseMax','info','numeric', null, "g",null,1);
+      $cmd=$eq->AddCommand("Groupe Dose max",'groupDoseMax','info','numeric', null, "g",null,0);
       $cmd->event($reglage['stopTarget']); 
       log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
-      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm::main", null,'THERMOSTAT_STATE',1);
+      $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm::main", null,'THERMOSTAT_STATE',0);
       $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
@@ -492,7 +492,7 @@ public static function readConfiguration($eq) {
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
-          $cmd=$eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,'THERMOSTAT_STATE',1);
+          $cmd=$eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,'THERMOSTAT_STATE',0);
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
 
@@ -540,7 +540,7 @@ public static function readConfiguration($eq) {
       $eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
       $eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
       $eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
-      $eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm/backflush on off");
+      $eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
       $eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
       $eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
       $eq->linksetpoint("jee4lm_prewet_slider", "prewettime"); 
