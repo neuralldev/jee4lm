@@ -1076,6 +1076,12 @@ public function startBackflush()
 
     $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
 
+    $r['info']['numeric']['temerature'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# == 0','state_light' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:black"> °C</span>','state_dark' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:white"> °C</span>'),
+        array('operation' => '#value# >= 0','state_light' => '<span style="font-size: 20px;color:gray">#value#</span>','state_dark' => '<span style="font-size: 20px;color:lightgray">#value#</span>')
+      ));
     $r['info']['numeric']['bbw dose'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
@@ -1114,8 +1120,8 @@ public function startBackflush()
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'><span>allum&eacute<br><br></span>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'><span>&eacuteteint<br><br></span>",
         "#_time_widget_#" =>"0"
         )
     );
@@ -1123,8 +1129,8 @@ public function startBackflush()
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'><span><br>allum&eacute<br><br><i style='color:red' class='fas fa-power-off '></i></<pan>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'<span><br>&eacuteteint<br><br><i style='color:green' class='fas fa-power-off '></i></span>>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
         "#_time_widget_#" =>"0"
         )
     );
