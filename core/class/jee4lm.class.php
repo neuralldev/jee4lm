@@ -1076,7 +1076,14 @@ public function startBackflush()
 
     $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
 
-    $r['info']['numeric']['temerature'] = array(
+    $r['info']['numeric']['batterie'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# <= 10','state_light' => '<span style="font-size: 24px;color:red">#value# %</span>','state_dark' => '<span style="font-size: 24px;color:red">#value# %</span>'),
+        array('operation' => '#value# > 10 && #value# <=70','state_light' => '<span style="font-size: 24px;color:orange">#value# %</span>','state_dark' => '<span style="font-size: 24px;color:orange">#value# %</span>'),
+        array('operation' => '#value# > 70','state_light' => '<span style="font-size: 20px;color:green">#value# %</span>','state_dark' => '<span style="font-size: 20px;color:green">#value# %</span>')
+      ));
+    $r['info']['numeric']['temperature'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:black"> °C</span>','state_dark' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:white"> °C</span>'),
