@@ -425,7 +425,7 @@ public static function readConfiguration($eq) {
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
 
-      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string', "jee4lm::bbw", null,null,1);
+      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string',null, null,null,1);
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
@@ -460,7 +460,7 @@ public static function readConfiguration($eq) {
       $cmd->event(($machine['scale']['address']==''?false:true)); 
       log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
 
-      $cmd=$eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', null, null,null,1);
+      $cmd=$eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', "jee4lm::bbw", null,null,1);
       $cmd->event($machine['scale']['connected']); 
       log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
 
@@ -478,7 +478,7 @@ public static function readConfiguration($eq) {
       foreach($boilers as $boiler) {
         if ($boiler['id']=='SteamBoiler')
         {
-          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm::steam", null,'THERMOSTAT_STATE',1);
+          $cmd=$eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm::steam", null,'THERMOSTAT_STATE',0);
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
 
@@ -1123,8 +1123,8 @@ public function startBackflush()
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'><span><br>allum&eacute<br><br><i style='color:red' class='fas fa-power-off '></i></<pan>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'<span><br>&eacuteteint<br><br><i style='color:green' class='fas fa-power-off '></i></span>>",
         "#_time_widget_#" =>"0"
         )
     );
