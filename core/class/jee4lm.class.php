@@ -1242,7 +1242,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_off':
         $b=($action=='jee4lm_on');
         $eq->switchCoffeeBoilerONOFF($b);
-        for ($i=1;$i<=5;$i++ && $this->getLMValue("coffeeenabled", ($action=='jee4lm_on')) != $b) {
+        for ($i=1;$i<=5;$i++ && $this->getLMValue("coffeeenabled", ($action=='jee4lm_on'))) {
           sleep(2);
           $eq->getinformations();
         }
@@ -1251,7 +1251,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_steam_off':
         $b=($action=='jee4lm_steam_on');
         $eq->switchSteamBoilerONOFF($b);
-        for ($i=1;$i<=5;$i++ && $this->getLMValue("steamenabled", ($action=='jee4lm_on')) != $b) {
+        for ($i=1;$i<=5;$i++ && $this->getLMValue("steamenabled", ($action=='jee4lm_on'))) {
           sleep(2);
           $eq->getinformations();
         }
