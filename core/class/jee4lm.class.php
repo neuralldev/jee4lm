@@ -1227,6 +1227,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_on':
       case 'jee4lm_off':
         $eq->switchCoffeeBoilerONOFF(($action=='jee4lm_on'));
+        sleep(2);
         return $eq->getInformations();
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
