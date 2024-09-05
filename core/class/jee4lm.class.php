@@ -52,7 +52,9 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
     if ($commandID=='')
       return true;
-    if (($serial = config::byKey('serialNumber','jee4lm')) == '') return true;
+    // add serial
+    if (($serial = config::byKey('serialNumber','jee4lm')) == '') 
+      return true;
       
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
