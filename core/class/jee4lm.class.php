@@ -1107,20 +1107,24 @@ public function startBackflush()
         )
     );
     $r['action']['other']['steam on off'] = array(
-      'template' => 'tmplicon',
+      'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
         "#_time_widget_#" =>"0"
         )
     );
     $r['action']['other']['backflush on off'] = array(
-      'template' => 'tmplicon',
+      'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
         "#_time_widget_#" =>"0"
         )
     );
@@ -1227,7 +1231,6 @@ class jee4lmCmd extends cmd
       case 'jee4lm_on':
       case 'jee4lm_off':
         $eq->switchCoffeeBoilerONOFF(($action=='jee4lm_on'));
-        sleep(2);
         return $eq->getInformations();
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
