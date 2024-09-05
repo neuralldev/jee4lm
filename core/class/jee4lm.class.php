@@ -1037,7 +1037,7 @@ public function startBackflush()
       $token=self::getToken();
       $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
       if(array_key_exists('status', $arr)) {
-        $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='ON'));
+        $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
         $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
         $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
         $this->getCmd(null, 'tankStatus')->event($arr['data']['LEVEL_TANK']);
