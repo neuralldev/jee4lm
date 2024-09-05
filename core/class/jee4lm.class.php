@@ -1210,6 +1210,12 @@ class jee4lmCmd extends cmd
     }
     return false;
   }
+
+  public function getLMValue($_logicalID, $expected_value) {
+        $r = cmd::byLogicalId($_logicalID)->execCmd();
+        return ($r != $expected_value);
+  }
+
   /**
    * Loop of command execution where it switches the command to the right function
    * @param mixed $_options
@@ -1230,11 +1236,21 @@ class jee4lmCmd extends cmd
         return $eq->getInformations();
       case 'jee4lm_on':
       case 'jee4lm_off':
-        $eq->switchCoffeeBoilerONOFF(($action=='jee4lm_on'));
+        $b=($action=='jee4lm_on');
+        $eq->switchCoffeeBoilerONOFF($b);
+        for ($i=1;$i<=5;$i++ && $this->getLMValue("coffeeenabled", ($action=='jee4lm_on')) != $b) {
+          sleep(2);
+          $eq->getinformations();
+        }
         return $eq->getInformations();
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
-        $eq->switchSteamBoilerONOFF(($action=='jee4lm_steam_on'));
+        $b=($action=='jee4lm_steam_on');
+        $eq->switchSteamBoilerONOFF($b);
+        for ($i=1;$i<=5;$i++ && $this->getLMValue("steamenabled", ($action=='jee4lm_on')) != $b) {
+          sleep(2);
+          $eq->getinformations();
+        }
         return $eq->getInformations();
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
