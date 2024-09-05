@@ -52,11 +52,13 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
     if ($commandID=='')
       return true;
+    if (($serial = config::byKey('serialNumber','jee4lm')) == '') return true;
+      
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
       log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/commands/".$commandID);
+      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/".$serial."/commands/".$commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       if ($_header == null)
         curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
