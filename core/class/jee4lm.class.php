@@ -36,7 +36,7 @@ class jee4lm extends eqLogic
    * @param mixed $response
    * @return bool
    */
-  public static function checkrequest($response, $serial = null) {
+  public static function checkrequest($response, $serial = null, $_header=null) {
     log::add(__CLASS__, 'debug', 'check request');
     if ($response=='') return true;
  //   log::add(__CLASS__, 'debug', 'check request not empty');
@@ -126,7 +126,7 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', "request response=".$response);
     curl_close($ch);
     log::add(__CLASS__, 'debug', 'request stop');
-    jee4lm::checkrequest($response, $serial);
+    jee4lm::checkrequest($response, $serial,$_header);
     return json_decode($response,true);
   }
   /**
