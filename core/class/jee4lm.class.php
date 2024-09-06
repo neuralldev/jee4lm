@@ -80,13 +80,8 @@ class jee4lm extends eqLogic
         if ($answer != 'PENDING')
           if ($answer=="COMPLETED")
             return true;
-          else if ($answer==false)
-            if ($arr['data']['code']=='user_not_logged')
-              jee4lm::login(config::byKey('userId','jee4lm'), config::byKey('userPwd','jee4lm'));
-            else
-              return true;
       }
-      sleep(5);
+      sleep(3);
     }
     return false;
   }
