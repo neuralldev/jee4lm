@@ -36,7 +36,7 @@ class jee4lm extends eqLogic
    * @param mixed $response
    * @return bool
    */
-  public static function checkrequest($response) {
+  public static function checkrequest($response, $serial = null) {
     log::add(__CLASS__, 'debug', 'check request');
     if ($response=='') return true;
  //   log::add(__CLASS__, 'debug', 'check request not empty');
@@ -54,7 +54,7 @@ class jee4lm extends eqLogic
       return true;
       log::add(__CLASS__, 'debug', 'check request serial');
       // add serial
-    if (($serial = config::byKey('serialNumber','jee4lm')) == '') 
+    if ($serial  == null) 
       return true;
       log::add(__CLASS__, 'debug', 'loop');
       
@@ -96,7 +96,7 @@ class jee4lm extends eqLogic
    * @param mixed $_header
    * @return mixed
    */
-  public static function request($_path, $_data = null, $_type = 'GET', $_header= null) {
+  public static function request($_path, $_data = null, $_type = 'GET', $_header= null, $serial = null) {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
     log::add(__CLASS__, 'debug', 'request query url='.$_path);
     log::add(__CLASS__, 'debug', 'request data='.$_data);
@@ -122,7 +122,7 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', "request response=".$response);
     curl_close($ch);
     log::add(__CLASS__, 'debug', 'request stop');
-    jee4lm::checkrequest($response);
+    jee4lm::checkrequest($response, $serial);
     return json_decode($response,true);
   }
   /**
@@ -796,8 +796,7 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     log::add(__CLASS__, 'debug', 'get basic counters');
     $serial=$this->getConfiguration('serialNumber'); 
     $token=self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/statistics/counters',"",'GET',["Authorization: Bearer $token"]);
-    self::checkrequest($data);
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/statistics/counters',"",'GET',["Authorization: Bearer $token"], $serial);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
 /**
@@ -809,8 +808,7 @@ public function switchCoffeeBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','status='.($toggle?"BrewingMode":"StandBy"),'POST',["Authorization: Bearer $token"]);
-  self::checkrequest($data);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','status='.($toggle?"BrewingMode":"StandBy"),'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -823,8 +821,7 @@ public function switchSteamBoilerONOFF($toggle) {
   log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-boiler','identifier=SteamBoiler&state='.($toggle?"enabled":"disabled"),'POST',["Authorization: Bearer $token"]);
-  self::checkrequest($data);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-boiler','identifier=SteamBoiler&state='.($toggle?"enabled":"disabled"),'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -838,8 +835,7 @@ public function switchPreinfusionOrPrebrew($type) {
   log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-preinfusion','mode='.$type,'POST',["Authorization: Bearer $token"]);
-  self::checkrequest($data);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-preinfusion','mode='.$type,'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -853,8 +849,7 @@ public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1') {
   log::add(__CLASS__, 'debug', 'switch steam on or off');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/target-boiler','identifier='.$type.'&value='.$celsius,'POST',["Authorization: Bearer $token"]);
-  self::checkrequest($data);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/target-boiler','identifier='.$type.'&value='.$celsius,'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -871,8 +866,7 @@ public function switchPlumbedIn($toggle) {
   log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-plumbin','enable='.($toggle?'true':'false'),'POST',["Authorization: Bearer $token"]);
-  self::checkrequest($data);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-plumbin','enable='.($toggle?'true':'false'),'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -891,8 +885,7 @@ public function setDose($weight, $dose) {
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
     'dose_index=Dose'.$dose.'&dose_type=PulsesType&group=Group1&value='.$weight,
-    'POST',["Authorization: Bearer $token"]);
-    self::checkrequest($data);
+    'POST',["Authorization: Bearer $token"],$serial);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
@@ -908,8 +901,7 @@ public function startBackflush()
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-backflush',
     'enable=true',
-    'POST',["Authorization: Bearer $token"]);
-    self::checkrequest($data);
+    'POST',["Authorization: Bearer $token"],$serial);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
   /**
