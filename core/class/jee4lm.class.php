@@ -1243,16 +1243,17 @@ class jee4lmCmd extends cmd
         $b=($action=='jee4lm_on');
         $eq->switchCoffeeBoilerONOFF($b);
         for ($i=1;$i<=5;$i++ && $this->getLMValue("coffeeenabled", ($action=='jee4lm_on'))) {
-          sleep(2);
+          log::add(__CLASS__, 'debug', 'execute action loop='.$i);
+          sleep(3);
           $eq->getinformations();
         }
-        return $eq->getInformations();
+        return true;
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b=($action=='jee4lm_steam_on');
         $eq->switchSteamBoilerONOFF($b);
         for ($i=1;$i<=5;$i++ && $this->getLMValue("steamenabled", ($action=='jee4lm_on'))) {
-          sleep(2);
+          sleep(3);
           $eq->getinformations();
         }
         return $eq->getInformations();
