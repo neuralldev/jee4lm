@@ -1098,7 +1098,14 @@ public function startBackflush()
           array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
           array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
         ));
-      $r['action']['other']['main on off'] = array(
+        $r['info']['numeric']['bbw nodose'] = array(
+          'template' => 'tmplmultistate',
+          'test' => array(
+            array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
+            array('operation' => '#value# < 0','state_light' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose.png' width='64' height='64'>",
+                                               'state_dark'  => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose.png' width='64' height='64'>"
+          ));
+        $r['action']['other']['main on off'] = array(
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
