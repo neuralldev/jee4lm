@@ -75,12 +75,16 @@ class jee4lm extends eqLogic
         $arr = json_decode($response, true);
         log::add(__CLASS__, 'debug', 'check request, response='.$response);
         $answer = $arr['data']['status']; 
+
         log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
         if ($answer != 'PENDING')
           if ($answer=="COMPLETED")
             return true;
-          else if ($answer=='')
-            return true;
+          else if ($answer==false)
+            if ($arr['data']['code']=='user_not_logged')
+              jee4lm::login(config::byKey('userId','jee4lm'), config::byKey('userPwd','jee4lm'));
+            else
+              return true;
       }
       sleep(5);
     }
