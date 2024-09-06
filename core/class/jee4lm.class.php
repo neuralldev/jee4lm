@@ -39,7 +39,7 @@ class jee4lm extends eqLogic
   public static function checkrequest($response) {
     log::add(__CLASS__, 'debug', 'check request');
     if ($response=='') return true;
-    log::add(__CLASS__, 'debug', 'check request not empty');
+ //   log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($response, true);
     if (!array_key_exists('data',$r)) {
       return true;
@@ -52,9 +52,11 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
     if ($commandID=='')
       return true;
-    // add serial
+      log::add(__CLASS__, 'debug', 'check request serial');
+      // add serial
     if (($serial = config::byKey('serialNumber','jee4lm')) == '') 
       return true;
+      log::add(__CLASS__, 'debug', 'loop');
       
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
