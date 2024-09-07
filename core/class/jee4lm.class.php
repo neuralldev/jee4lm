@@ -37,7 +37,7 @@ class jee4lm extends eqLogic
    * @return bool
    */
   public static function checkrequest($response, $serial = null, $_header=null) {
-    log::add(__CLASS__, 'debug', 'check request');
+ //   log::add(__CLASS__, 'debug', 'check request');
     if ($response=='') return true;
  //   log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($response, true);
@@ -52,11 +52,11 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
     if ($commandID=='')
       return true;
-      log::add(__CLASS__, 'debug', 'check request serial');
+//      log::add(__CLASS__, 'debug', 'check request serial');
       // add serial
     if ($serial  == null) 
       return true;
-      log::add(__CLASS__, 'debug', 'loop');
+//      log::add(__CLASS__, 'debug', 'loop');
       
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
@@ -1235,7 +1235,7 @@ class jee4lmCmd extends cmd
   {
     $action = $this->getLogicalId();
     $eq = $this->getEqLogic();
-    log::add(__CLASS__, 'debug', 'execute action ' . $action.' with options='.$_options);
+    log::add(__CLASS__, 'debug', 'execute action ' . $action.' with options='.json_encode($_options));
     switch ($action) {
       case 'refresh':
         return $eq->getInformations();
