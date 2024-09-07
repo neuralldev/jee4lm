@@ -545,7 +545,8 @@ public static function readConfiguration($eq) {
       $eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
       $eq->linksetpoint("jee4lm_prewet_slider", "prewettime"); 
       $eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime"); 
-      $eq->linksetpoint("jee4lm_on", "coffeeenabled"); 
+      $eq->linksetpoint("jee4lm_on", "machinemode"); 
+      $eq->linksetpoint("jee4lm_off", "machinemode"); 
       $eq->linksetpoint("jee4lm_steam_on", "steamenabled"); 
       $eq->linksetpoint("jee4lm_steam_off", "steamenabled"); 
     }
