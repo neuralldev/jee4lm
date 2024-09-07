@@ -540,6 +540,8 @@ public static function readConfiguration($eq) {
       $eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
       $eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
       $eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
+      $eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 1,25, 1);
+      $eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 1,25, 1);
       $eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
       $eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
       $eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
@@ -549,6 +551,8 @@ public static function readConfiguration($eq) {
       $eq->linksetpoint("jee4lm_off", "machinemode"); 
       $eq->linksetpoint("jee4lm_steam_on", "steamenabled"); 
       $eq->linksetpoint("jee4lm_steam_off", "steamenabled"); 
+      $eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA"); 
+      $eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB"); 
     }
   }
   /*
@@ -778,7 +782,9 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     // log::add(__CLASS__, 'debug', 'slider value='.$v);
       //find setpoint value and store it on stove as it after slider move
       if ($v > 0) 
-        $this->setBoilerTemperature($v,$type);
+        if ($type!='') $this->setBoilerTemperature($v,$type);
+      else
+        $this->setDose($v, $_logicalID);
    // log::add(__CLASS__, 'debug', 'set setpoint end');   
     // now refresh display  
 //    $this->getInformations();
@@ -1258,7 +1264,14 @@ class jee4lmCmd extends cmd
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget','SteamBoiler');        
         return $eq->getInformations();
-      default:
+      case 'jee4lm_doseA_slider':
+          $eq->set_setpoint($_options, 'A',"");              
+          return $eq->getInformations();
+      case 'jee4lm_doseB_slider':
+            $eq->set_setpoint($_options, 'B',"");              
+            return $eq->getInformations();
+    
+          default:
         return true;
     }
   }
