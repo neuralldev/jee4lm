@@ -202,6 +202,8 @@ class jee4lm extends eqLogic
     return $access_token;
   }
  
+
+  
   /**
    * Rafraichit les données complètes toutes les heures
    * @return void
@@ -399,7 +401,7 @@ public static function readConfiguration($eq) {
   $serial=$eq->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+  //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   if ($data['status']== true) {
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
@@ -729,10 +731,10 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
     if ($set_setpoint == null || $setpoint == null) 
         log::add(__CLASS__, 'debug', "setpoint : command not found");
       else {
-        log::add(__CLASS__, 'debug', "setpoint : command found!");
+       // log::add(__CLASS__, 'debug', "setpoint : command found!");
         $set_setpoint->setValue($setpoint->getId());
         $set_setpoint->save();
-        log::add(__CLASS__, 'debug', "setpoint ID  stored");
+       // log::add(__CLASS__, 'debug', "setpoint ID  stored");
       }
   }
 
@@ -768,13 +770,13 @@ public function AddAction($actionName, $actionTitle, $template = null, $generic_
    */
   public function set_setpoint($_options, $_logicalID, $type)
   {
-    log::add(__CLASS__, 'debug', 'set setpoint start');
+    // log::add(__CLASS__, 'debug', 'set setpoint start');
     $v = $_options["slider"];
-    log::add(__CLASS__, 'debug', 'slider value='.$v);
+    // log::add(__CLASS__, 'debug', 'slider value='.$v);
       //find setpoint value and store it on stove as it after slider move
       if ($v > 0) 
         $this->setBoilerTemperature($v,$type);
-    log::add(__CLASS__, 'debug', 'set setpoint end');   
+   // log::add(__CLASS__, 'debug', 'set setpoint end');   
     // now refresh display  
 //    $this->getInformations();
   }
