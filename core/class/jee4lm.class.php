@@ -1025,7 +1025,7 @@ public function startBackflush()
    */
   public function getInformations()
   {
-    log::add(__CLASS__, 'debug', 'getinformation start');
+//    log::add(__CLASS__, 'debug', 'getinformation start');
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
       $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
@@ -1037,8 +1037,8 @@ public function startBackflush()
         $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
         $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
         $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+        log::add(__CLASS__, 'debug', 'getinformation has refresh values');
       }
-    log::add(__CLASS__, 'debug', 'getinformation finished');
     return true;
   }
 
