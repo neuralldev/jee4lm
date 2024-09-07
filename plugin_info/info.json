@@ -1,29 +1,39 @@
 {
-	"id" : "jee4lm",
-	"name" : "jee4lm",
-    "pluginVersion": "4.5.1",
-	"description" : "Ce plugin permet de se connecter via le cloud LaMarzocco",
-    "utilization": "Connectez votre machine à café La Marzocco",
-	"licence" : "AGPL",
-	"author" : "neuralldev",
-	"require" : "4.4",
-    "hasDependency" : false,
+	"id": "jee4lm",
+	"name": "jee4lm",
+	"pluginVersion": "4.5",
+	"description": {
+		"fr_FR": "Ce plugin permet de se connecter via le cloud LaMarzocco"
+	},
+	"licence": "AGPL",
+	"author": "neuralldev",
+	"require": "4.4",
+	"os" : {
+		"min" : 11,
+		"max" : 12
+	},
 	"category": "automation",
-	"language" : ["fr_FR"],
-    "compatibility": [
-        "smart",
-        "atlas",
-        "rpi",
-        "docker",
-        "diy",
-        "mobile",
-        "v4",
-        "luna"
-    ],
-    "link": {
-        "forum": "https://github.com/neuralldev/jee4lm",
-        "video": ""
-    },
-    "changelog" : "tbd",
-    "documentation" : "tbd"
+	"hasDependency": false,
+	"hasOwnDeamon": false,
+	"maxDependancyInstallTime": 0,
+	"changelog_beta": "",
+	"changelog": "https:\/\/github.com\/neuralldev\/jee4lm\/template\/changelog",
+	"documentation_beta": "",
+	"documentation": "",
+	"link": {
+		"forum": "",
+		"video": ""
+	},
+	"language": [
+		"fr_FR"
+	],
+	"compatibility": [
+		"smart",
+		"luna",
+		"atlas",
+		"rpi",
+		"docker",
+		"diy",
+		"mobile"
+	]
 }
