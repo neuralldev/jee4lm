@@ -60,7 +60,7 @@ class jee4lm extends eqLogic
       
     // if there is a commandID then wait for command to succeed   
     for ($i=0;$i<5;$i++) {
-      log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
+ //     log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/".$serial."/commands/".$commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -73,7 +73,7 @@ class jee4lm extends eqLogic
 
       if ($response !='') {
         $arr = json_decode($response, true);
-        log::add(__CLASS__, 'debug', 'check request, response='.$response);
+//        log::add(__CLASS__, 'debug', 'check request, response='.$response);
         $answer = $arr['data']['status']; 
 
         log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
@@ -97,8 +97,8 @@ class jee4lm extends eqLogic
    */
   public static function request($_path, $_data = null, $_type = 'GET', $_header= null, $serial = null) {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
-    log::add(__CLASS__, 'debug', 'request query url='.$_path);
-    log::add(__CLASS__, 'debug', 'request data='.$_data);
+//    log::add(__CLASS__, 'debug', 'request query url='.$_path);
+//    log::add(__CLASS__, 'debug', 'request data='.$_data);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $_path);
@@ -118,9 +118,9 @@ class jee4lm extends eqLogic
       $err_no = curl_errno($ch);
       log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
     } else 
-      log::add(__CLASS__, 'debug', "request response=".$response);
+//      log::add(__CLASS__, 'debug', "request response=".$response);
     curl_close($ch);
-    log::add(__CLASS__, 'debug', 'request stop');
+//    log::add(__CLASS__, 'debug', 'request stop');
     jee4lm::checkrequest($response, $serial,$_header);
     return json_decode($response,true);
   }
@@ -1223,7 +1223,7 @@ class jee4lmCmd extends cmd
 
   public function getLMValue($_logicalID, $expected_value) {
         $r = cmd::byLogicalId($_logicalID)->execCmd();
-        return ($r != $expected_value);
+        return $r != $expected_value;
   }
 
   /**
