@@ -250,9 +250,7 @@ class jee4lm extends eqLogic
           if ($slug!= '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token !='')
-              if ($jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
-//                log::add(__CLASS__, 'debug', 'cron ok');
-              else
+              if (!$jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
                 log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
           }
         } 
