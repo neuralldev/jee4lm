@@ -246,14 +246,12 @@ class jee4lm extends eqLogic
           /* lire les infos de l'équipement ici */
           $slug= $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
-          log::add(__CLASS__, 'debug', "cron for ID=" . $id);
-          log::add(__CLASS__, 'debug', "cron     serial=" . $serial);
-          log::add(__CLASS__, 'debug', "cron     slug=" . $slug);
+          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug");
           if ($slug!= '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token !='')
               if ($jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron ok');
+//                log::add(__CLASS__, 'debug', 'cron ok');
               else
                 log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
           }
@@ -261,12 +259,12 @@ class jee4lm extends eqLogic
       } else 
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
-    log::add(__CLASS__, 'debug', 'cron end');
+//    log::add(__CLASS__, 'debug', 'cron end');
   }
 
   public static function pull($_options = null)
   {
-    log::add(__CLASS__, 'debug', 'pull start');
+//    log::add(__CLASS__, 'debug', 'pull start');
     $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
     if (is_object($cron)) {
       $cron->remove();
