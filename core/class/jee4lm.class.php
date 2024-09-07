@@ -540,8 +540,8 @@ public static function readConfiguration($eq) {
       $eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
       $eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
       $eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
-      $eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 1,25, 1);
-      $eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 1,25, 1);
+      $eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 1,60, 1);
+      $eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 1,60, 1);
       $eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
       $eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
       $eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
