@@ -207,30 +207,25 @@ class jee4lm extends eqLogic
    * @return void
    */
   public static function cronHourly() {
-    log::add(__CLASS__, 'debug', 'cron60 start'); 
+//    log::add(__CLASS__, 'debug', 'cron60 start'); 
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
           $slug= $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
-          log::add(__CLASS__, 'debug', "cron for ID=" . $id);
-          log::add(__CLASS__, 'debug', "cron     serial=" . $serial);
-          log::add(__CLASS__, 'debug', "cron     slug=" . $slug);
+          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug");
           if ($slug!= '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token !='')
-              if (jee4lm::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron60 ok');
-              else
+              if (!jee4lm::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
                 log::add(__CLASS__, 'debug', 'cron60 error on readconfiguration');
           }
         } 
       } else 
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
-    log::add(__CLASS__, 'debug', 'cron end');
-
+//    log::add(__CLASS__, 'debug', 'cron end');
   }
 
   /**
