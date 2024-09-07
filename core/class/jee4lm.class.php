@@ -207,14 +207,14 @@ class jee4lm extends eqLogic
    * @return void
    */
   public static function cronHourly() {
-//    log::add(__CLASS__, 'debug', 'cron60 start'); 
+ log::add(__CLASS__, 'debug', 'cron60 start'); 
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
           $slug= $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
-          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug");
+          log::add(__CLASS__, 'debug', "cron60 ID=$id serial=$serial slug=$slug");
           if ($slug!= '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token !='')
@@ -225,7 +225,7 @@ class jee4lm extends eqLogic
       } else 
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
-//    log::add(__CLASS__, 'debug', 'cron end');
+  log::add(__CLASS__, 'debug', 'cron60 end');
   }
 
   /**
@@ -257,11 +257,11 @@ class jee4lm extends eqLogic
 
   public static function pull($_options = null)
   {
-//    log::add(__CLASS__, 'debug', 'pull start');
-    $cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
-    if (is_object($cron)) {
-      $cron->remove();
-    }
+    log::add(__CLASS__, 'debug', 'pull start');
+    //$cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
+    //if (is_object($cron)) {
+    //  $cron->remove();
+    //}
     log::add(__CLASS__, 'debug', 'pull end');
   }
    
@@ -466,7 +466,9 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       $eq->setConfiguration("scalename",$machine['scale']['name']);
 
-      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'gauge',1,null,null,'default', 'default', '0','100');
+      log::add(__CLASS__, 'debug', 'scalebattery start');
+      $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'tile',1,null,null,'default', 'default', '0','100');
+      log::add(__CLASS__, 'debug', 'scalebattery addcommand done');
       $cmd->event($machine['scale']['battery']); 
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
 
