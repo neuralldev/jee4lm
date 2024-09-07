@@ -206,7 +206,7 @@ class jee4lm extends eqLogic
    * Rafraichit les données complètes toutes les heures
    * @return void
    */
-  public static function cronHourly() {
+  public static function cron5() {
  log::add(__CLASS__, 'debug', 'cron60 start'); 
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
