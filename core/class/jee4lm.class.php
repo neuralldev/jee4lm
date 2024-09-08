@@ -423,7 +423,7 @@ public static function readConfiguration($eq) {
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
 
-      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string',null, null,null,1);
+      $cmd=$eq->AddCommand("BBW Etat",'bbwmode','info','string',null, null,null,0);
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
@@ -451,7 +451,9 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
       $cmd=$eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm::main", null,'THERMOSTAT_STATE',0);
-      $cmd->event(($machine['machineMode']=="StandBy"?false:true)); 
+      $machinestate = ($machine['machineMode']=="StandBy"?false:true);
+      $cmd->event($machinestate); 
+
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
       $cmd=$eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,1);
@@ -482,13 +484,22 @@ public static function readConfiguration($eq) {
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
 
-          $cmd=$eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',1);
+          $cmd=$eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
           $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
 
-          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',1);
+          $cmd=$eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+
+          $cmd=$eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,0);
+          // calcule affichage
+          if (!$boiler['isEnabled'])
+            $display ='OFF';
+          else
+            $display = $boiler['target']."°C / ".$boiler['current'];
+          $cmd->event($display); 
+          log::add(__CLASS__, 'debug', 'steamdisplay='.$display);
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
@@ -503,6 +514,15 @@ public static function readConfiguration($eq) {
           $cmd=$eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',1);
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
+
+          $cmd=$eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,0);
+          // calcule affichage
+          if (!$machinestate)
+            $display ='---';
+          else
+            $display = $boiler['target']."°C / ".$boiler['current'];
+          $cmd->event($display); 
+          log::add(__CLASS__, 'debug', 'coffeedisplay='.$display);        
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
