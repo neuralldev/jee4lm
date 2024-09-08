@@ -553,6 +553,11 @@ public static function readConfiguration($eq) {
       $eq->linksetpoint("jee4lm_steam_off", "steamenabled"); 
       $eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA"); 
       $eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB"); 
+// add machine slug to display machine by type
+      $cmd=$eq->AddCommand("Machine",'machine','info','string',"jee4lm::machine", null,null,1);
+      $cmd->event(config::byKey('type','jee4lm'));    
+      log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+
     }
   }
   /*
@@ -1170,16 +1175,19 @@ public function startBackflush()
         "#_time_widget_#" =>"0"
         )
     );
-    $r['info']['binary']['steam'] = array(
-      'template' => 'tmplicon',
+    $r['info']['string']['machine'] = array(
+      'template' => 'tmplmultistate',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
+        "#_desktop_width_#" =>"",
+        "#_mobile_width_#" => "",
         "#_time_widget_#" =>"0"
-        )
-    );
-
+      ),
+      'test' => array(
+        array('operation' => "#value# !=''",
+          'state_light' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>",
+          'state_dark'  => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>")
+      ));
     return $r;
   }
 
