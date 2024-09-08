@@ -456,7 +456,7 @@ public static function readConfiguration($eq) {
 
       log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
-      $cmd=$eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,1);
+      $cmd=$eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,0);
       $cmd->event(($machine['scale']['address']==''?false:true)); 
       log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
 
