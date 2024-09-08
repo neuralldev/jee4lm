@@ -1076,17 +1076,17 @@ public function startBackflush()
         $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
         $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
 
-        $machinestate = $this->getCmd(null, 'machinemode')->execute();
-        $coffeecurrent = $this->getCmd(null, 'coffeecurrent')->execute();
-        $coffeetarget = $this->getCmd(null, 'coffeetarget')->execute();
+        $machinestate = ($arr['data']['MACHINE_STATUS']=='BrewingMode');
+        $coffeecurrent = $arr['data']['TEMP_COFFEE'];
+        $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
         if (!$machinestate)
           $display ='---';
         else
           $display = $coffeetarget."°C / ".$coffeecurrent;
         $this->getCmd(null, 'displaycoffee')->event($display);
-        $steamstate = $this->getCmd(null, 'steamenabled')->execute();
-        $steamcurrent = $this->getCmd(null, 'steamcurrent')->execute();
-        $steamtarget = $this->getCmd(null, 'steamtarget')->execute();
+        $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
+        $steamcurrent = $arr['data']['TEMP_STEAM'];
+        $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
         if (!$steamstate)
           $display ='OFF';
         else
