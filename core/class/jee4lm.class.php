@@ -1075,6 +1075,24 @@ public function startBackflush()
         $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
         $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
         $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+
+        $machinestate = $this->getCmd(null, 'machinemode')->execute();
+        $coffeecurrent = $this->getCmd(null, 'coffeecurrent')->execute();
+        $coffeetarget = $this->getCmd(null, 'coffeetarget')->execute();
+        if (!$machinestate)
+          $display ='---';
+        else
+          $display = $coffeetarget."°C / ".$coffeecurrent;
+        $this->getCmd(null, 'displaycoffee')->event($display);
+        $steamstate = $this->getCmd(null, 'steamenabled')->execute();
+        $steamcurrent = $this->getCmd(null, 'steamcurrent')->execute();
+        $steamtarget = $this->getCmd(null, 'steamtarget')->execute();
+        if (!$steamstate)
+          $display ='OFF';
+        else
+          $display = $steamtarget."°C / ".$steamcurrent;
+        $this->getCmd(null, 'displaysteam')->event($display);
+
         log::add(__CLASS__, 'debug', 'getinformation has refresh values');
       }
     return true;
