@@ -533,11 +533,11 @@ public static function readConfiguration($eq) {
       $cmd=$eq->AddCommand("Prétrempage",'prewet','info','binary', null, null,null,1);
       $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
 
-      $cmd=$eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's','THERMOSTAT_SETPOINT',1);
+      $cmd=$eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
       $cmd->event($preinfusion['Group1'][0]['preWetTime']); 
       log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
 
-      $cmd=$eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's','THERMOSTAT_SETPOINT',1);
+      $cmd=$eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
       $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
       
