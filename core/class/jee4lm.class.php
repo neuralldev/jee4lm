@@ -1082,7 +1082,7 @@ public function startBackflush()
         if (!$machinestate)
           $display ='---';
         else
-          $display = "<span style='text-color:".($coffeecurrent+2>=$coffeetarget?'green':'red')."'>".$coffeetarget."°C / ".$coffeecurrent."</span>";
+          $display = "<span style='color:".($coffeecurrent+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$coffeecurrent."°C</span>";
         $this->getCmd(null, 'displaycoffee')->event($display);
         $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
         $steamcurrent = $arr['data']['TEMP_STEAM'];
