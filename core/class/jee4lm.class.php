@@ -1071,7 +1071,7 @@ public function startBackflush()
         $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
         $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
         $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
-        $this->getCmd(null, 'tankStatus')->event($arr['data']['LEVEL_TANK']);
+        $this->getCmd(null, 'tankStatus')->event(!$arr['data']['LEVEL_TANK']);
         $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
         $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
         $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
