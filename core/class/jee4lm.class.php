@@ -436,8 +436,8 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
       $cmd=$eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1);
-      $cmd->event($bbw['recipe_doses'][1]['target']);    
-      log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
+      $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
+      log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
 
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
