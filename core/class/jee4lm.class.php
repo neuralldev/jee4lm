@@ -555,7 +555,7 @@ public static function readConfiguration($eq) {
       $eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB"); 
 // add machine slug to display machine by type
       $cmd=$eq->AddCommand("Machine",'machine','info','string',"jee4lm::machine", null,null,1);
-      $cmd->event(config::byKey('type','jee4lm'));    
+      $cmd->event($eq->getConfiguration('type'));    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
     }
