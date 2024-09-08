@@ -435,6 +435,10 @@ public static function readConfiguration($eq) {
       $cmd->event($bbw['recipe_doses'][1]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
+      $cmd=$eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1);
+      $cmd->event($bbw['recipe_doses'][1]['target']);    
+      log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
+
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       
@@ -470,9 +474,7 @@ public static function readConfiguration($eq) {
       log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       $eq->setConfiguration("scalename",$machine['scale']['name']);
 
-      log::add(__CLASS__, 'debug', 'scalebattery start');
       $cmd=$eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'tile',1,null,null,'default', 'default', '0','100');
-      log::add(__CLASS__, 'debug', 'scalebattery addcommand done');
       $cmd->event($machine['scale']['battery']); 
       log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
 
@@ -1148,15 +1150,19 @@ public function startBackflush()
         'template' => 'tmplmultistate',
         'test' => array(
           array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-          array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:rgb(var(--panel-bg-color));border-width:thick;border-color:white; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
+          array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:lightgray);border-width:thick;border-color:white; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
           ));
-        $r['info']['numeric']['bbw nodose'] = array(
+        $r['info']['binary']['bbw nodose'] = array(
           'template' => 'tmplmultistate',
           'test' => array(
-            array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-            array('operation' => '#value# < 0','state_light' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose.png' width='64' height='64'>",
-                                               'state_dark'  => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose.png' width='64' height='64'>")
-          ));
+            'template' => 'tmplicon',
+            'display' => array('icon' => 'null'),
+            'replace' => array(
+              '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' ><span>allum&eacute<br><br></span>",
+              '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png'><span>&eacuteteint<br><br></span>",
+              "#_time_widget_#" =>"0"
+              )
+            ));
         $r['action']['other']['main on off'] = array(
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
