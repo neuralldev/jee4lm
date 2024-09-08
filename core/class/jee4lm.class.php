@@ -418,7 +418,7 @@ public static function readConfiguration($eq) {
 
       $cmd=$eq->AddCommand("Réservoir plein",'tankStatus','info','binary', "flood", null,null,1);
       $cmd->event($machine['tankStatus']);    
-      log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']:'ok'?'empty'));
+      log::add(__CLASS__, 'debug', 'tankStatus='.(!$machine['tankStatus']?'ok':'empty'));
 
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
