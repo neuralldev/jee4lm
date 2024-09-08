@@ -1090,7 +1090,7 @@ public function startBackflush()
         if (!$steamstate)
           $display ='OFF';
         else
-          $display = $steamtarget."°C / ".$steamcurrent;
+        $display = "<span style='color:".($steamcurrent+2>=$steamtarget?'green':'red').";'>".$steamtarget."°C / ".$steamcurrent."°C</span>";
         $this->getCmd(null, 'displaysteam')->event($display);
 
         log::add(__CLASS__, 'debug', 'getinformation has refresh values');
