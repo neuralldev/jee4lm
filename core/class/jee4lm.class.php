@@ -1148,7 +1148,7 @@ public function startBackflush()
         'template' => 'tmplmultistate',
         'test' => array(
           array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-          array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;border-width:thick;border-color:white; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
+          array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:rgb(var(--panel-bg-color));border-width:thick;border-color:white; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
           ));
         $r['info']['numeric']['bbw nodose'] = array(
           'template' => 'tmplmultistate',
