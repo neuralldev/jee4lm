@@ -1158,8 +1158,8 @@ public function startBackflush()
             'template' => 'tmplicon',
             'display' => array('icon' => 'null'),
             'replace' => array(
-              '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' ><span>allum&eacute<br><br></span>",
-              '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png'><span>&eacuteteint<br><br></span>",
+              '#_icon_on_#' => "<span>ON <img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' ></span>",
+              '#_icon_off_#' => "<span>OFF <img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png'></span>",
               "#_time_widget_#" =>"0"
               )
             ));
