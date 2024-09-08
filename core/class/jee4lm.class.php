@@ -427,17 +427,17 @@ public static function readConfiguration($eq) {
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
-      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
-      $cmd->event($bbw['recipe_doses'][0]['target']);    
-      log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
-
-      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
-      $cmd->event($bbw['recipe_doses'][1]['target']);    
-      log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
-
       $cmd=$eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1);
       $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
       log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
+
+      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
+      $cmd->event($bbw['recipe_doses'][0]['target']);    
+      log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
+
+      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
+      $cmd->event($bbw['recipe_doses'][1]['target']);    
+      log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
