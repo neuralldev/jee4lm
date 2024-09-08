@@ -492,7 +492,7 @@ public static function readConfiguration($eq) {
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
 
-          $cmd=$eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,0);
+          $cmd=$eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,1);
           // calcule affichage
           if (!$boiler['isEnabled'])
             $display ='OFF';
@@ -507,15 +507,15 @@ public static function readConfiguration($eq) {
           $cmd->event($boiler['isEnabled']); 
           log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
 
-          $cmd=$eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',1);
+          $cmd=$eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
           $cmd->event($boiler['target']); 
           log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
 
-          $cmd=$eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',1);
+          $cmd=$eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
           $cmd->event($boiler['current']); 
           log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
 
-          $cmd=$eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,0);
+          $cmd=$eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,1);
           // calcule affichage
           if (!$machinestate)
             $display ='---';
