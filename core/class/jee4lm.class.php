@@ -1066,14 +1066,17 @@ public function startBackflush()
     $mac = $this->getConfiguration('scalemac');
 //    $bbw = eqLogic::byLogicalId($mac,'jmqtt');
     $bbw = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
-    log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
-    $bbwID = $bbw->getId();
-    $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
-    if ($cmd != null) {
-      $present = $cmd->execCmd();
-      log::add(__CLASS__, 'debug', 'search scale with BT address '.$present?'allumé':'éteint');
-      return $present; 
-    }
+    if ($bbw != null)  {
+      log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
+      $bbwID = $bbw->getId();
+      $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
+      if ($cmd != null) {
+        $present = $cmd->execCmd();
+        log::add(__CLASS__, 'debug', 'search scale with BT address '.$present?'allumé':'éteint');
+        return $present; 
+      }  
+    } else     
+     log::add(__CLASS__, 'debug', 'search scale with BT not founb');
   }
 
 
