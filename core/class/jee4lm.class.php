@@ -579,7 +579,7 @@ public static function readConfiguration($eq) {
       $cmd=$eq->AddCommand("Machine",'machine','info','string',"jee4lm::machine", null,null,1);
       $cmd->event($eq->getConfiguration('type'));    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
-
+      $eq->save();
     }
   }
   /*
@@ -1064,7 +1064,8 @@ public function startBackflush()
   // add logic to monitor BBW presence
   public function searchForBBW() {
     $mac = $this->getConfiguration('scalemac');
-    $bbw = eqLogic::byLogicalId($mac,'jmqtt');
+//    $bbw = eqLogic::byLogicalId($mac,'jmqtt');
+    $bbw = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
     log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
     $bbwID = $bbw->getId();
     $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
