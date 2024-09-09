@@ -1061,6 +1061,21 @@ public function startBackflush()
       return true;
   }
 
+  // add logic to monitor BBW presence
+  public function searchForBBW() {
+    $mac = $this->getConfiguration('scalemac');
+    $bbw = eqLogic::byLogicalId($mac,'jmqtt');
+    log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
+    $bbwID = $bbw->getId();
+    $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
+    if ($cmd != null) {
+      $present = $cmd->execCmd();
+      log::add(__CLASS__, 'debug', 'search scale with BT address '.$present?'allumé':'éteint');
+      return $present; 
+    }
+  }
+
+
   /**
    * Refreshes the main counters and not all the information
    * @return bool
@@ -1096,7 +1111,7 @@ public function startBackflush()
         else
         $display = "<span style='color:".($steamcurrent+2>=$steamtarget?'green':'red').";'>".$steamtarget."°C / ".$steamcurrent."°C</span>";
         $this->getCmd(null, 'displaysteam')->event($display);
-
+        $this->searchForBBW();
         log::add(__CLASS__, 'debug', 'getinformation has refresh values');
       }
     return true;
