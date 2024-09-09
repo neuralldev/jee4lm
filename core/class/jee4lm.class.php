@@ -1069,6 +1069,7 @@ public function startBackflush()
     if ($bbw != null)  {
       log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
       $bbwID = $bbw->getId();
+      log::add(__CLASS__, 'debug', 'search scale ID='.$bbwID);
       $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
       if ($cmd != null) {
         $present = $cmd->execCmd();
