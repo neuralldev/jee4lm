@@ -1065,17 +1065,19 @@ public function startBackflush()
   public function searchForBBW() {
     $mac = $this->getConfiguration('scalemac');
 //    $bbw = eqLogic::byLogicalId($mac,'jmqtt');
-    $bbw = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
-    if ($bbw != null)  {
-      log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
-      $bbwID = $bbw->getId();
-      log::add(__CLASS__, 'debug', 'search scale ID='.$bbwID);
-      $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
-      if ($cmd != null) {
-        $present = $cmd->execCmd();
-        log::add(__CLASS__, 'debug', 'search scale with BT address '.$present?'allumé':'éteint');
-        return $present; 
-      }  
+    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
+    if ($bbwcollection != null)  {
+      foreach ($bbwcollection as $bbw) {
+        log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
+        $bbwID = $bbw->getId();
+        log::add(__CLASS__, 'debug', 'search scale ID='.$bbwID);
+        $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
+        if ($cmd != null) {
+          $present = $cmd->execCmd();
+          log::add(__CLASS__, 'debug', 'search scale with BT address '.$present?'allumé':'éteint');
+          return $present; 
+        }    
+      }
     } else     
      log::add(__CLASS__, 'debug', 'search scale with BT not founb');
   }
