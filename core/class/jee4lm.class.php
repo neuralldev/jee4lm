@@ -1161,7 +1161,7 @@ public function startBackflush()
       foreach ($bbwcollection as $bbw) {
         $bbwID = $bbw->getId();
         if ($bbwID != null) {
-          $present = $cmd->execCmd();
+          $present = $bbw->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
           return $present;
         }
@@ -1169,7 +1169,7 @@ public function startBackflush()
       foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
         if ($bbwID != null) {
-          $present = $cmd->execCmd();
+          $present = $bbw->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
           return $present;
         }
