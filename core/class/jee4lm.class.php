@@ -1146,9 +1146,9 @@ public function startBackflush()
       if (strcasecmp($jobjName, $mac)==0) {
         $bbwID = $eqJ->getId();
         $cmdcollection = cmd::byEqLogicIdAndLogicalId($bbwID, '');
-        foreach($cmdcollection as $cmd)
-          if ($cmd->getName() == "present") {
-            $present = $cmd->execCmd();
+        foreach($cmdcollection as $jcmd)
+          if ($jcmd->getName() == "present") {
+            $present = $jcmd->execCmd();
             log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present?'allumé':'éteint');
             return $present;
           }
@@ -1159,6 +1159,7 @@ public function startBackflush()
     $bbwcollection1 = eqLogic::byObjectNameEqLogicName('MAISON',strtoupper($mac)); 
     if ($bbwcollection != null || $bbwcollection1 != null) {
       foreach ($bbwcollection as $bbw) {
+        log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
         $bbwID = $bbw->getId();
         if ($bbwID != null) { 
           $present = $bbw->execCmd();
@@ -1169,6 +1170,7 @@ public function startBackflush()
       foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
         if ($bbwID != null) {
+          log::add(__CLASS__, 'debug', 'bbw1='.json_encode($bbw));
           $present = $bbw->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
           return $present;
