@@ -1039,7 +1039,8 @@ public function startBackflush()
             foreach($keyIDs as $keyID) {
               $displayStuff["layout::dashboard::table::cmd::$keyID::line"] = $map[0];
               $displayStuff["layout::dashboard::table::cmd::$keyID::column"] = $map[1];
-            }
+              log::add(__CLASS__, 'debug', 'add '.$key."=".$keyID);
+}
         }   
 
         foreach ($displayStuff as $key => $value) {
