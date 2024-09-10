@@ -1133,7 +1133,7 @@ public function startBackflush()
       $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
       if ($cmd != null) {
         $present = $cmd->execCmd();
-        log::add(__CLASS__, 'debug', 'found scale in Blea with BT address '.$present?'allumé':'éteint');
+        log::add(__CLASS__, 'debug', 'found scale in Blea with BT address '.$present==1?'allumé':'éteint');
         return $present;
       }
     };
@@ -1148,7 +1148,7 @@ public function startBackflush()
         $jcmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
         if ($jcmd != null) {
           $present = $jcmd->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present?'allumé':'éteint');
+          log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present==1?'allumé':'éteint');
           return $present;
         }
       }
@@ -1162,7 +1162,7 @@ public function startBackflush()
         $bbwID = $bbw->getId();
         if ($bbwID != null) { 
           $present = $bbw->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
+          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present==1?'allumé':'éteint');
           return $present;
         }
       }
@@ -1171,7 +1171,7 @@ public function startBackflush()
         if ($bbwID != null) {
           log::add(__CLASS__, 'debug', 'bbw1='.json_encode($bbw));
           $present = $bbw->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
+          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present==1?'allumé':'éteint');
           return $present;
         }
       }
