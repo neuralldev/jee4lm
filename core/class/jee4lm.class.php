@@ -1008,7 +1008,7 @@ public function startBackflush()
         $eqLogic->setDisplay('parameters', json_decode($display,true));
         $eqLogic->setDisplay('layout', '{"dashboard" : {"table", "nbLine":"7",":nbColumn":"3"}}');
         $display = '{ "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""}}';
-        $eqLogic->setDisplay('layout::dashboard', json_decode($display,true));
+        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display,true));
         $display_map = [
           410 => [1,3],
           453 =>[1,2],
