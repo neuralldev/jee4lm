@@ -1049,7 +1049,7 @@ public function startBackflush()
           454 => [3,3]
         ];
         // create display based on tab
-        $eqLogic->setDisplay('layout', json_decode('{"dashboard":"table"}', true));
+        $eqLogic->setDisplay('layout::dashboard', "table");
         $display = '{
                      "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},
                      "nbLine":"7",":nbColumn":"3"
