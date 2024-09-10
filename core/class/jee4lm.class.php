@@ -1054,7 +1054,7 @@ public function startBackflush()
 
         foreach($display_map as $key => $map) {
           $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
-          $eqLogic->setDisplay('layout::dashboarder',json_decode($display, true));     
+          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
         }   
         $eqLogic->save();
         jee4lm::readConfiguration($eqLogic);
