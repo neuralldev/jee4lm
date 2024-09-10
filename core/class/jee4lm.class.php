@@ -1036,7 +1036,7 @@ public function startBackflush()
 
         foreach($display_map as $key => $map) {            
             $r = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
-            log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId(). ($r ==null?' pas de retour':$r));
+            log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId(). ($r ==null?' pas de retour':json_encode($r)));
 
             if ($r!=null) {
               $displayStuff["layout::dashboard::table::cmd::$r::line"] = $map[0];
