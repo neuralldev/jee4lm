@@ -1004,11 +1004,12 @@ public function startBackflush()
   }
 */
 // set default column stuff
-        $eqLogic->setDisplay('layout::dashboard', 'table');        
-        $display = '{"center":"1","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""}';
-        $eqLogic->setDisplay('layout::dashboard::table::parameters',  json_decode($display,true));
-        $display = '{ "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},"nbLine":"7",":nbColumn":"3"}';
-        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display,true));
+
+//        $eqLogic->setDisplay('layout::dashboard', ['table']);    
+//        $display = '{"center":"1","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""}';
+//        $eqLogic->setDisplay('layout::dashboard::table::parameters',  json_decode($display,true));
+//        $display = '{ "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},"nbLine":"7",":nbColumn":"3"}';
+//        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display,true));
         $display_map = [
           410 => [1,3],
           453 =>[1,2],
@@ -1052,10 +1053,26 @@ public function startBackflush()
           454 => [3,3]
         ];
 
+        $displayStuff = [
+          "layout::dashboard" => ["table"],
+          'layout::dashboard::table::nbLine' => '7',
+          'layout::dashboard::table::nbColumn' => '3'    
+        ];
+
         foreach($display_map as $key => $map) {
-          $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
-          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
+//          $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
+//          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
+//          log::add(__CLASS__, 'debug', 'add '.$display);
+            $displayStuff["layout::dashboard::table::cmd::$key::line"] = $map[0];
+            $displayStuff["layout::dashboard::table::cmd::$key::column"] = $map[1];
         }   
+
+        foreach ($displayStuff as $key => $value) {
+          if (is_array($value)) {
+              $eqLogic->setDisplay($key, $value);
+          }
+        }        
+  
         $eqLogic->save();
         jee4lm::readConfiguration($eqLogic);
       }
