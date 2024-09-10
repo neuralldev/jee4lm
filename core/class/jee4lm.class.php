@@ -1145,12 +1145,12 @@ public function startBackflush()
       log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$jobjName.') compared to ('.$mac.')');
       if (strcasecmp($jobjName, $mac)==0) {
         $bbwID = $eqJ->getId();
-        $jcmd = cmd::byEqLogicIdAndLogicalId($bbwID, '');
-          if ($jcmd->getName() == "present") {
-            $present = $jcmd->execCmd();
-            log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present?'allumé':'éteint');
-            return $present;
-          }
+        $jcmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
+        if ($jcmd != null) {
+          $present = $jcmd->execCmd();
+          log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present?'allumé':'éteint');
+          return $present;
+        }
       }
     }
     // search as an object name in root MAISON object
