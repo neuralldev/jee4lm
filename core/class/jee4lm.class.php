@@ -1124,7 +1124,7 @@ public function startBackflush()
   // add logic to monitor BBW presence
   public function searchForBBW() {
     $mac = strtoupper($this->getConfiguration('scalemac'));
-    log::add(__CLASS__, 'debug', 'search scale');
+    log::add(__CLASS__, 'debug', 'search scale '.$mac);
 
     // check if BLEA is installed and search for scale
     $blea = eqLogic::byLogicalId($mac, 'blea');
@@ -1137,7 +1137,6 @@ public function startBackflush()
         return $present;
       }
       log::add(__CLASS__, 'debug', 'not found from blea');
-      return false; 
     };
 
     // check if BLEA is installed and search for scale
@@ -1153,7 +1152,6 @@ public function startBackflush()
           return $present;
         }
         log::add(__CLASS__, 'debug', 'not found from jmqtt');
-        return false; 
       }
     }
     // search as an object name in root MAISON object
@@ -1168,10 +1166,7 @@ public function startBackflush()
         }
       }
       log::add(__CLASS__, 'debug', 'not found as a standard equipment');
-      return false;
     } 
-
-    log::add(__CLASS__, 'debug', 'search scale with BT not found');
     return false;
   }
 
