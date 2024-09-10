@@ -1029,12 +1029,15 @@ public function startBackflush()
           454 => [3,3]
         ];
         // create display based on tab
-        $display = '{layout::dashboard,"table" ,"layout::dashboard::table::nbLine":"7","layout::dashboard::table::nbColumn":"3",';
+        $display = '{"layout::dashboard":"table" ,
+                     "layout::dashboard::table::parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},
+                     "layout::dashboard::table::nbLine":"7","layout::dashboard::table::nbColumn":"3",
+                   ';
         foreach($display_map as $key => $map)
           $display = $display . 
-              '"layout::dashboard::table::cmd::'.$key.'::line":"'.$map[0].'",
-              "layout::dashboard::table::cmd::'.$key.'::column":"'.$map[1].'",';
-        $display .= '}';
+              '"layout::dashboard::table::cmd::'.$key.'::line":'.$map[0].',
+              "layout::dashboard::table::cmd::'.$key.'::column":'.$map[1].',';
+        $display = rtrim($display, ',').'}';
         log::add(__CLASS__, 'debug', $display);
         $eqLogic->setDisplay('layout::dashboard::table', json_decode($display, true));
         
