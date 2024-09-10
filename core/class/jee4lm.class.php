@@ -1144,7 +1144,7 @@ public function startBackflush()
     foreach ($jmqttCollection as $eqJ){
       $jobjName = $eqJ->getName();
       log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$jobjName.') compared to ('.$mac.')');
-      if ($jobjName == $mac) {
+      if (strcasecmp($jobjName, $mac)==0) {
         $bbwID = $eqJ->getId();
         $cmdcollection = cmd::byEqLogicIdAndLogicalId($bbwID, '');
         foreach($cmdcollection as $cmd)
@@ -1158,8 +1158,17 @@ public function startBackflush()
     }
     // search as an object name in root MAISON object
     $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
-    if ($bbwcollection != null)  {
+    $bbwcollection1 = eqLogic::byObjectNameEqLogicName('MAISON',strtoupper($mac)); 
+    if ($bbwcollection != null || $bbwcollection1 != null) {
       foreach ($bbwcollection as $bbw) {
+        $bbwID = $bbw->getId();
+        if ($cmd != null) {
+          $present = $cmd->execCmd();
+          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
+          return $present;
+        }
+      }
+      foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
         if ($cmd != null) {
           $present = $cmd->execCmd();
