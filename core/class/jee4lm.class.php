@@ -1160,7 +1160,7 @@ public function startBackflush()
     if ($bbwcollection != null || $bbwcollection1 != null) {
       foreach ($bbwcollection as $bbw) {
         $bbwID = $bbw->getId();
-        if ($bbwID != null) {
+        if ($bbwID != null) { 
           $present = $bbw->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
           return $present;
