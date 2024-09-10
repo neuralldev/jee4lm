@@ -1005,7 +1005,11 @@ public function startBackflush()
 */
 // set default column stuff
         $display = '{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""}';
-        $eqLogic->setDisplay('parameters', json_decode($display,true));
+        $eqLogic->setDisplay('parameters', $display);
+        $eqLogic->setDisplay('layout::dashboard', "table");
+        $display = '{ "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},"nbLine":"7",":nbColumn":"3"}';
+        $eqLogic->setDisplay('layout::dashboard',$display);
+
         $display_map = [
           410 => [1,3],
           453 =>[1,2],
@@ -1048,23 +1052,14 @@ public function startBackflush()
           455 => [3,1],
           454 => [3,3]
         ];
-        // create display based on tab
-        $eqLogic->setDisplay('layout::dashboard', "table");
-        $display = '{
-                     "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},
-                     "nbLine":"7",":nbColumn":"3"
-                    }';
-        log::add(__CLASS__, 'debug', $display);
-        $eqLogic->setDisplay('layout::dashboard',json_decode($display, true) );
+
         $display ='{';
         foreach($display_map as $key => $map)
           $display = $display . 
               '"cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].',
               ';
         $display = rtrim($display, ',').'}';
-        log::add(__CLASS__, 'debug', $display);
-        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display, true));
-        
+        $eqLogic->setDisplay('layout::dashboard::table',$display);        
         $eqLogic->save();
         jee4lm::readConfiguration($eqLogic);
       }
