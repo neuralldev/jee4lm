@@ -1053,7 +1053,7 @@ public function startBackflush()
         ];
 
         $displayStuff = [
-          "layout::dashboard" => ["table"],
+          "layout::dashboard" => "table",
           'layout::dashboard::table::nbLine' => '7',
           'layout::dashboard::table::nbColumn' => '3'    
         ];
@@ -1069,7 +1069,7 @@ public function startBackflush()
         foreach ($displayStuff as $key => $value) {
 //          if (is_array($value)) {
               $eqLogic->setDisplay($key, $value);
-              log::add(__CLASS__, 'debug', 'add '.json_encode($value));
+              log::add(__CLASS__, 'debug', 'add '.json_encode([$key =>$value]));
   //        }
         }        
   
