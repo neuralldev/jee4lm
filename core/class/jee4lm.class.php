@@ -1140,12 +1140,12 @@ public function startBackflush()
     };
 
     // check if BLEA is installed and search for scale
-    $jmqtt = eqLogic::byType('jmqtt', true);
-    foreach ($jmqtt as $e){
-      $objName = $e->getName();
-      log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$objName.') compared to ('.$mac.')');
-      if ($objName== $mac) {
-        $bbwID = $e->getId();
+    $jmqttCollection = eqLogic::byType('jmqtt', true);
+    foreach ($jmqttCollection as $eqJ){
+      $jobjName = $eqJ->getName();
+      log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$jobjName.') compared to ('.$mac.')');
+      if ($jobjName == $mac) {
+        $bbwID = $eqJ->getId();
         $cmdcollection = cmd::byEqLogicIdAndLogicalId($bbwID, '');
         foreach($cmdcollection as $cmd)
           if ($cmd->getName() == "present") {
