@@ -1036,9 +1036,10 @@ public function startBackflush()
 //          $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
 //          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
 //          log::add(__CLASS__, 'debug', 'add '.$display);
-            $keyIDs = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
-            log::add(__CLASS__, 'debug', 'search '.$key. "in eqlogic ".$eqLogic->getId());
-            foreach($keyIDs as $keyID) {
+            
+            $keyID = null;
+            log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId());
+            foreach(cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key) as $keyID) {
               $displayStuff["layout::dashboard::table::cmd::$keyID::line"] = $map[0];
               $displayStuff["layout::dashboard::table::cmd::$keyID::column"] = $map[1];
               log::add(__CLASS__, 'debug', 'add '.$key."=".$keyID);
