@@ -1031,17 +1031,20 @@ public function startBackflush()
           'layout::dashboard::table::nbColumn' => '3'    
         ];
 
+        log::add(__CLASS__, 'debug', 'start display map');
         foreach($display_map as $key => $map) {
 //          $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
 //          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
 //          log::add(__CLASS__, 'debug', 'add '.$display);
             $keyIDs = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
+            log::add(__CLASS__, 'debug', 'search '.$key. "in eqlogic ".$eqLogic->getId());
             foreach($keyIDs as $keyID) {
               $displayStuff["layout::dashboard::table::cmd::$keyID::line"] = $map[0];
               $displayStuff["layout::dashboard::table::cmd::$keyID::column"] = $map[1];
               log::add(__CLASS__, 'debug', 'add '.$key."=".$keyID);
-}
+            }
         }   
+        log::add(__CLASS__, 'debug', 'stop displaymap');
 
         foreach ($displayStuff as $key => $value) {
 //          if (is_array($value)) {
