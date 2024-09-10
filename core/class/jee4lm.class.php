@@ -1123,7 +1123,7 @@ public function startBackflush()
 
   // add logic to monitor BBW presence
   public function searchForBBW() {
-    $mac = strtoupper($this->getConfiguration('scalemac'));
+    $mac = $this->getConfiguration('scalemac');
     log::add(__CLASS__, 'debug', 'search scale '.$mac);
 
     // check if BLEA is installed and search for scale
@@ -1157,7 +1157,7 @@ public function startBackflush()
       }
     }
     // search as an object name in root MAISON object
-    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',strtolower($mac)); 
+    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
     if ($bbwcollection != null)  {
       foreach ($bbwcollection as $bbw) {
         $bbwID = $bbw->getId();
