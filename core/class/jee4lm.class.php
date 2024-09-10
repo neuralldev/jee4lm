@@ -1123,23 +1123,52 @@ public function startBackflush()
 
   // add logic to monitor BBW presence
   public function searchForBBW() {
-    $mac = $this->getConfiguration('scalemac');
-//    $bbw = eqLogic::byLogicalId($mac,'jmqtt');
-    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
-    if ($bbwcollection != null)  {
-      foreach ($bbwcollection as $bbw) {
-        log::add(__CLASS__, 'debug', 'search scale with BT address '.$mac);
-        $bbwID = $bbw->getId();
-        log::add(__CLASS__, 'debug', 'search scale ID='.$bbwID);
+    $mac = strtoupper($this->getConfiguration('scalemac'));
+    log::add(__CLASS__, 'debug', 'search scale');
+
+    // check if BLEA is installed and search for scale
+    $blea = eqLogic::byLogicalId($mac, 'blea');
+    if (is_object($blea)) {
+      $bbwID = $blea->getId();
+      $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
+      if ($cmd != null) {
+        $present = $cmd->execCmd();
+        log::add(__CLASS__, 'debug', 'found cale in Blea with BT address '.$present?'allumé':'éteint');
+        return $present;
+      }
+      return false; 
+    };
+
+    // check if BLEA is installed and search for scale
+    $jmqtt = eqLogic::byLogicalId('', 'jmqtt');
+    foreach ($jmqtt as $e)
+      if (is_object($e->getName()==$mac)) {
+        $bbwID = $e->getId();
         $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
         if ($cmd != null) {
           $present = $cmd->execCmd();
-          log::add(__CLASS__, 'debug', 'search scale with BT address '.$present?'allumé':'éteint');
-          return $present; 
-        }    
+          log::add(__CLASS__, 'debug', 'found cale in jmqtt with BT address '.$present?'allumé':'éteint');
+          return $present;
+        }
+        return false; 
+      };
+    
+    // search as an object name in root MAISON object
+    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
+    if ($bbwcollection != null)  {
+      foreach ($bbwcollection as $bbw) {
+        $bbwID = $bbw->getId();
+        if ($cmd != null) {
+          $present = $cmd->execCmd();
+          log::add(__CLASS__, 'debug', 'found cale in Blea with BT address '.$present?'allumé':'éteint');
+          return $present;
+        }
       }
-    } else     
-     log::add(__CLASS__, 'debug', 'search scale with BT not founb');
+      return false;
+    } 
+
+    log::add(__CLASS__, 'debug', 'search scale with BT not found');
+    return false;
   }
 
 
