@@ -985,7 +985,7 @@ public function startBackflush()
 //        $eqLogic->setDisplay('layout::dashboard', json_decode($display));
         // set default column stuff
         $display = '{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""}';
-        $eqLogic->setDisplay('parameters', json_decode($display));
+        $eqLogic->setDisplay('parameters', json_decode($display,true));
         $display_map = [
           410 => [1,3],
           453 =>[1,2],
@@ -1035,8 +1035,8 @@ public function startBackflush()
                    ';
         foreach($display_map as $key => $map)
           $display = $display . 
-              '"layout::dashboard::table::cmd::'.$key.'::line":'.$map[0].',
-              "layout::dashboard::table::cmd::'.$key.'::column":'.$map[1].',';
+              '"layout::dashboard::table::cmd::'.$key.'::line":'.$map[0].',"layout::dashboard::table::cmd::'.$key.'::column":'.$map[1].',
+              ';
         $display = rtrim($display, ',').'}';
         log::add(__CLASS__, 'debug', $display);
         $eqLogic->setDisplay('layout::dashboard::table', json_decode($display, true));
