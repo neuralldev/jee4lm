@@ -1058,7 +1058,7 @@ public function startBackflush()
               '"cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].',
               ';
         $display = rtrim($display, ',').'}';
-        $eqLogic->setDisplay('layout::dashboard::table',$display);        
+        $eqLogic->setDisplay('layout::dashboard::table',json_decode($display, true));        
         $eqLogic->save();
         jee4lm::readConfiguration($eqLogic);
       }
