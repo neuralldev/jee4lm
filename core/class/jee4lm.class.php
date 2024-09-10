@@ -984,8 +984,60 @@ public function startBackflush()
 
         // create display based on tab
         $eqLogic->setDisplay('layout::dashboard', "table" );
-        $display = '{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""},"layout::dashboard::table::nbLine":"7","layout::dashboard::table::nbColumn":"3","layout::dashboard::table::cmd::410::line":"1","layout::dashboard::table::cmd::410::column":"3","layout::dashboard::table::cmd::453::line":"1","layout::dashboard::table::cmd::453::column":"2","layout::dashboard::table::cmd::409::line":"1","layout::dashboard::table::cmd::409::column":"3","layout::dashboard::table::cmd::402::line":"4","layout::dashboard::table::cmd::402::column":"1","layout::dashboard::table::cmd::433::line":1,"layout::dashboard::table::cmd::433::column":1,"layout::dashboard::table::cmd::403::line":"4","layout::dashboard::table::cmd::403::column":"2","layout::dashboard::table::cmd::401::line":"4","layout::dashboard::table::cmd::401::column":"3","layout::dashboard::table::cmd::414::line":1,"layout::dashboard::table::cmd::414::column":1,"layout::dashboard::table::cmd::408::line":"1","layout::dashboard::table::cmd::408::column":"3","layout::dashboard::table::cmd::416::line":"3","layout::dashboard::table::cmd::416::column":"1","layout::dashboard::table::cmd::415::line":"3","layout::dashboard::table::cmd::415::column":"1","layout::dashboard::table::cmd::432::line":"2","layout::dashboard::table::cmd::432::column":"1","layout::dashboard::table::cmd::407::line":1,"layout::dashboard::table::cmd::407::column":1,"layout::dashboard::table::cmd::399::line":1,"layout::dashboard::table::cmd::399::column":1,"layout::dashboard::table::cmd::424::line":"2","layout::dashboard::table::cmd::424::column":"2","layout::dashboard::table::cmd::423::line":"2","layout::dashboard::table::cmd::423::column":"2","layout::dashboard::table::cmd::406::line":1,"layout::dashboard::table::cmd::406::column":1,"layout::dashboard::table::cmd::404::line":1,"layout::dashboard::table::cmd::404::column":1,"layout::dashboard::table::cmd::417::line":"5","layout::dashboard::table::cmd::417::column":"1","layout::dashboard::table::cmd::405::line":1,"layout::dashboard::table::cmd::405::column":1,"layout::dashboard::table::cmd::418::line":"5","layout::dashboard::table::cmd::418::column":"1","layout::dashboard::table::cmd::419::line":"5","layout::dashboard::table::cmd::419::column":"3","layout::dashboard::table::cmd::420::line":"5","layout::dashboard::table::cmd::420::column":"3","layout::dashboard::table::cmd::451::line":"6","layout::dashboard::table::cmd::451::column":"3","layout::dashboard::table::cmd::452::line":"6","layout::dashboard::table::cmd::452::column":"3","layout::dashboard::table::cmd::428::line":"6","layout::dashboard::table::cmd::428::column":"1","layout::dashboard::table::cmd::430::line":"6","layout::dashboard::table::cmd::430::column":"2","layout::dashboard::table::cmd::431::line":"6","layout::dashboard::table::cmd::431::column":"2","layout::dashboard::table::cmd::429::line":"6","layout::dashboard::table::cmd::429::column":"1","layout::dashboard::table::cmd::400::line":1,"layout::dashboard::table::cmd::400::column":1,"layout::dashboard::table::cmd::398::line":"5","layout::dashboard::table::cmd::398::column":"2","layout::dashboard::table::cmd::426::line":"2","layout::dashboard::table::cmd::426::column":"3","layout::dashboard::table::cmd::425::line":"2","layout::dashboard::table::cmd::425::column":"3","layout::dashboard::table::cmd::413::line":"3","layout::dashboard::table::cmd::413::column":"3","layout::dashboard::table::cmd::412::line":"3","layout::dashboard::table::cmd::412::column":"3","layout::dashboard::table::cmd::411::line":1,"layout::dashboard::table::cmd::411::column":1,"layout::dashboard::table::cmd::421::line":"7","layout::dashboard::table::cmd::421::column":"1","layout::dashboard::table::cmd::422::line":"7","layout::dashboard::table::cmd::422::column":"3","layout::dashboard::table::cmd::455::line":"3","layout::dashboard::table::cmd::455::column":"1","layout::dashboard::table::cmd::454::line":"3","layout::dashboard::table::cmd::454::column":"3"}'; 
-        $eqLogic->setDisplay('layout::dashboard::table::parameters', json_decode($display, true));
+        // set table to 7x3
+        $display ='{"layout::dashboard::table::nbLine":"7","layout::dashboard::table::nbColumn":"3"}';
+        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display,true) );
+        // set default column stuff
+        $display = '{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""}';
+        $eqLogic->setDisplay('layout::dashboard::table::parameters', json_decode($display);
+        $display_map = [
+          410 => [1,3],
+          453 =>[1,2],
+          409 =>[1,3],
+          402 =>[4,1],
+          433 =>[1,1],
+          403, [4,2],
+          401 => [4,3],
+          414 => [1,1],
+          408 => [1,3],
+          416 => [3,1],
+          415 => [3,1],
+          432 => [2,1],
+          407 => [1,1],
+          399 => [1,1],
+          424 => [2,2],
+          423 => [2,2],
+          406 => [1,1],
+          404 => [1,1],
+          417 => [5,1],
+          405 => [1,1],
+          418 => [5,1],
+          419 => [5,3],
+          420 => [5,3],
+          451 => [6,3],
+          452 => [6,3],
+          428 => [6,1],
+          430 => [6,2],
+          431 => [6,2],
+          429 => [6,1],
+          400 => [1,1],
+          398 => [5,2],
+          426 => [2,3],
+          425 => [2,3],
+          413 => [3,3],
+          412 => [3,3],
+          411 => [1,1],
+          421 => [7,1],
+          422 => [7,3],
+          455 => [3,1],
+          454 => [3,3]
+        ];
+        $display='';
+        foreach($display_map as $map)
+          $display = $display . 
+              '"layout::dashboard::table::cmd::'.$map[0].'::line":"'.$map[0][0].'",
+              "layout::dashboard::table::cmd::'.$map[0].'::column":"'.$map[0][1].'",';
+        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display, true));
         
         // self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
         $eqLogic->save();
