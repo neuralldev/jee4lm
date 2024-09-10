@@ -977,7 +977,6 @@ public function startBackflush()
         $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
         $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);     
         $eqLogic->setLogicalId($uuid);
-        log::add(__CLASS__, 'debug', 'eqlogic saved');
         // now get configuration of machine
         $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
 
@@ -1075,6 +1074,7 @@ public function startBackflush()
         }        
   
         $eqLogic->save();
+        log::add(__CLASS__, 'debug', 'eqlogic saved');
         jee4lm::readConfiguration($eqLogic);
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
