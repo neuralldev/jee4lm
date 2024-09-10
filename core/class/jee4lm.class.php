@@ -1144,7 +1144,7 @@ public function startBackflush()
     $jmqtt = eqLogic::byType('jmqtt', true);
     foreach ($jmqtt as $e){
       log::add(__CLASS__, 'debug', 'jmqtt installed, object = '.json_encode($e->getName()));
-      if ($e->getName() == $mac) {
+      if (strtoupper($e->getName()) == $mac) {
         $bbwID = $e->getId();
         $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
         if ($cmd != null) {
