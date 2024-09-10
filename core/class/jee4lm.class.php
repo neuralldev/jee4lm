@@ -979,77 +979,50 @@ public function startBackflush()
         $eqLogic->setLogicalId($uuid);
         // now get configuration of machine
         $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
+        $eqLogic->save();
+        jee4lm::readConfiguration($eqLogic);
 
-/*        
-  {
-    "backGraph::info":"",
-    "backGraph::color":"#4572a7",
-    "backGraph::format":"month",
-    "backGraph::height":"",
-    "backGraph::type":"areaspline",
-    "layout::dashboard":"table",
-    "layout::dashboard::table::parameters": 
-      {"center":"0",
-      "styletable":"",
-      "styletd":"",
-      "text::td::1::1":"",
-      "style::td::1::1":""
-      },
-    "layout::dashboard::table::nbLine":"7",
-    "layout::dashboard::table::nbColumn":"3",
-    "parameters":[],
-    "layout::dashboard::table::cmd::466::line":1,
-    "layout::dashboard::table::cmd::466::column":1
-  }
-*/
-// set default column stuff
-
-//        $eqLogic->setDisplay('layout::dashboard', ['table']);    
-//        $display = '{"center":"1","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":"","text::td::1::2":"","style::td::1::2":"","text::td::1::3":"","style::td::1::3":"","text::td::2::1":"","style::td::2::1":"","text::td::2::2":"","style::td::2::2":"","text::td::2::3":"","style::td::2::3":"","text::td::3::1":"","style::td::3::1":"font-size:larger;","text::td::3::2":"","style::td::3::2":"","text::td::3::3":"","style::td::3::3":"font-size:larger","text::td::4::1":"","style::td::4::1":"","text::td::4::2":"","style::td::4::2":"","text::td::4::3":"","style::td::4::3":"","text::td::5::1":"","style::td::5::1":"","text::td::5::2":"","style::td::5::2":"","text::td::5::3":"","style::td::5::3":"","text::td::6::1":"","style::td::6::1":"","text::td::6::2":"","style::td::6::2":"","text::td::6::3":"","style::td::6::3":"","text::td::7::1":"","style::td::7::1":"","text::td::7::2":"","style::td::7::2":"","text::td::7::3":"","style::td::7::3":""}';
-//        $eqLogic->setDisplay('layout::dashboard::table::parameters',  json_decode($display,true));
-//        $display = '{ "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},"nbLine":"7",":nbColumn":"3"}';
-//        $eqLogic->setDisplay('layout::dashboard::table', json_decode($display,true));
         $display_map = [
-          410 => [1,3],
-          453 =>[1,2],
-          409 =>[1,3],
-          402 =>[4,1],
-          433 =>[1,1],
-          403, [4,2],
-          401 => [4,3],
-          414 => [1,1],
-          408 => [1,3],
-          416 => [3,1],
-          415 => [3,1],
-          432 => [2,1],
-          407 => [1,1],
-          399 => [1,1],
-          424 => [2,2],
-          423 => [2,2],
-          406 => [1,1],
-          404 => [1,1],
-          417 => [5,1],
-          405 => [1,1],
-          418 => [5,1],
-          419 => [5,3],
-          420 => [5,3],
-          451 => [6,3],
-          452 => [6,3],
-          428 => [6,1],
-          430 => [6,2],
-          431 => [6,2],
-          429 => [6,1],
-          400 => [1,1],
-          398 => [5,2],
-          426 => [2,3],
-          425 => [2,3],
-          413 => [3,3],
-          412 => [3,3],
-          411 => [1,1],
-          421 => [7,1],
-          422 => [7,3],
-          455 => [3,1],
-          454 => [3,3]
+          'scalebattery' => [1,3],
+          'machine' =>[1,2],
+          'isscaleconnected' =>[1,3],
+          'bbwdoseA' =>[4,1],
+          'bbwdoseB', [4,2],
+          'bbwmode' => [4,3],
+          'coffeeenabled' => [1,1],
+          'isbbw' => [1,3],
+          'coffeecurrent' => [3,1],
+          'coffeetarget' => [3,1],
+          'start_backflush' => [2,1],
+          'machinemode' => [1,1],
+          'backflush' => [1,1],
+          'jee4lm_off' => [2,2],
+          'jee4lm_on' => [2,2],
+          'bbwfree' => [4,3],
+          'groupDoseMode' => [1,1],
+          'preinfusionmode' => [5,1],
+          'groupDoseType' => [1,1],
+          'prewet' => [5,1],
+          'prewettime' => [5,3],
+          'prewetholdtime' => [5,3],
+          'jee4lm_doseA_slider' => [6,3],
+          'jee4lm_doseB_slider' => [6,3],
+          'jee4lm_coffee_slider' => [6,1],
+          'jee4lm_prewet_slider' => [6,2],
+          'jee4lm_prewet_time_slider' => [6,2],
+          'jee4lm_steam_slider' => [6,1],
+          'tankStatus' => [1,1],
+          'plumbedin' => [5,2],
+          'jee4lm_steam_off' => [2,3],
+          'jee4lm_steam_on' => [2,3],
+          'steamcurrent' => [3,3],
+          'steamtarget' => [3,3],
+          'steamenabled' => [1,1],
+          'fwversion' => [7,1],
+          'gwversion' => [7,3],
+          'groupDoseMax' => [1,1],
+          'displaycoffee' => [3,1],
+          'displaysteam' => [3,3]
         ];
 
         $displayStuff = [
@@ -1062,8 +1035,11 @@ public function startBackflush()
 //          $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
 //          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
 //          log::add(__CLASS__, 'debug', 'add '.$display);
-            $displayStuff["layout::dashboard::table::cmd::$key::line"] = $map[0];
-            $displayStuff["layout::dashboard::table::cmd::$key::column"] = $map[1];
+            $keyIDs = cmd::byEqLogicIdAndLogicalId($eqLogic, $key);
+            foreach($keyIDs as $keyID) {
+              $displayStuff["layout::dashboard::table::cmd::$keyID::line"] = $map[0];
+              $displayStuff["layout::dashboard::table::cmd::$keyID::column"] = $map[1];
+            }
         }   
 
         foreach ($displayStuff as $key => $value) {
@@ -1075,7 +1051,6 @@ public function startBackflush()
   
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
-        jee4lm::readConfiguration($eqLogic);
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     } 
