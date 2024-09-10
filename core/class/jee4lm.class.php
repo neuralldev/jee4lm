@@ -1144,7 +1144,7 @@ public function startBackflush()
     foreach ($jmqtt as $e){
       $objName = trim(strtoupper($e->getName()));
       log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$objName.') compared to ('.$mac.')');
-      if ($objName === $mac) {
+      if ($objName == $mac) {
         $bbwID = $e->getId();
         $cmdcollection = cmd::byEqLogicIdAndLogicalId($bbwID, '');
         foreach($cmdcollection as $cmd)
@@ -1157,7 +1157,7 @@ public function startBackflush()
       }
     }
     // search as an object name in root MAISON object
-    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
+    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',strtolower($mac)); 
     if ($bbwcollection != null)  {
       foreach ($bbwcollection as $bbw) {
         $bbwID = $bbw->getId();
