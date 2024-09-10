@@ -1151,6 +1151,7 @@ public function startBackflush()
             log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present?'allumé':'éteint');
             return $present;
           }
+      }
     }
     // search as an object name in root MAISON object
     $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
