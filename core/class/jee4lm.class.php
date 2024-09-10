@@ -980,8 +980,9 @@ public function startBackflush()
         // now get configuration of machine
         $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
         $eqLogic->save();
+        // create commands before setting display
         jee4lm::readConfiguration($eqLogic);
-
+        // set display
         $display_map = [
           'scalebattery' => [1,3],
           'machine' =>[1,2],
@@ -1026,34 +1027,27 @@ public function startBackflush()
         ];
 
         $displayStuff = [
+          "parameters::style::td::3::1::font-size" => "larger",
+          "parameters::style::td::3::3::font-size" => "larger",
           "layout::dashboard" => "table",
           'layout::dashboard::table::nbLine' => '7',
           'layout::dashboard::table::nbColumn' => '3'    
         ];
 
-        log::add(__CLASS__, 'debug', 'start display map');
-        foreach($display_map as $key => $map) {
-//          $display = '{"table::cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].'}';
-//          $eqLogic->setDisplay('layout::dashboard',json_decode($display, true));     
-//          log::add(__CLASS__, 'debug', 'add '.$display);
-            
-            $keyID = null;
-            log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId());
-            foreach(cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key) as $keyID) {
-              $displayStuff["layout::dashboard::table::cmd::$keyID::line"] = $map[0];
-              $displayStuff["layout::dashboard::table::cmd::$keyID::column"] = $map[1];
-              log::add(__CLASS__, 'debug', 'add '.$key."=".$keyID);
+        foreach($display_map as $key => $map) {            
+            $r = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
+            log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId(). ($r ==null?' pas de retour':$r));
+
+            if ($r!=null) {
+              $displayStuff["layout::dashboard::table::cmd::$r::line"] = $map[0];
+              $displayStuff["layout::dashboard::table::cmd::$r::column"] = $map[1];
+              log::add(__CLASS__, 'debug', 'add '.$key."=".$r);
             }
         }   
-        log::add(__CLASS__, 'debug', 'stop displaymap');
 
-        foreach ($displayStuff as $key => $value) {
-//          if (is_array($value)) {
-              $eqLogic->setDisplay($key, $value);
-              log::add(__CLASS__, 'debug', 'add '.json_encode([$key =>$value]));
-  //        }
-        }        
-  
+        foreach ($displayStuff as $key => $value) 
+              $eqLogic->setDisplay($key, $value);   
+
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
       }
