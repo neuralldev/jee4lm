@@ -1136,7 +1136,6 @@ public function startBackflush()
         log::add(__CLASS__, 'debug', 'found scale in Blea with BT address '.$present?'allumé':'éteint');
         return $present;
       }
-      log::add(__CLASS__, 'debug', 'not found from blea');
     };
 
     // check if BLEA is installed and search for scale
@@ -1153,7 +1152,6 @@ public function startBackflush()
             log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.$present?'allumé':'éteint');
             return $present;
           }
-        log::add(__CLASS__, 'debug', 'not found from jmqtt');
       }
     }
     // search as an object name in root MAISON object
@@ -1162,7 +1160,7 @@ public function startBackflush()
     if ($bbwcollection != null || $bbwcollection1 != null) {
       foreach ($bbwcollection as $bbw) {
         $bbwID = $bbw->getId();
-        if ($cmd != null) {
+        if ($bbwID != null) {
           $present = $cmd->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
           return $present;
@@ -1170,13 +1168,12 @@ public function startBackflush()
       }
       foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
-        if ($cmd != null) {
+        if ($bbwID != null) {
           $present = $cmd->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present?'allumé':'éteint');
           return $present;
         }
       }
-      log::add(__CLASS__, 'debug', 'not found as a standard equipment');
     } 
     return false;
   }
