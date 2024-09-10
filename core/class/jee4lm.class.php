@@ -1049,13 +1049,14 @@ public function startBackflush()
           454 => [3,3]
         ];
         // create display based on tab
-        $eqLogic->setDisplay('layout::dashboard', 'table');
-       
+        $eqLogic->setDisplay('layout', '{"dashboard":"table"}');
         $display = '{
                      "parameters":{"center":"0","styletable":"","styletd":"","text::td::1::1":"","style::td::1::1":""},
-                     "nbLine":"7",":nbColumn":"3",
-                   ';
+                     "nbLine":"7",":nbColumn":"3"
+                    }';
+        log::add(__CLASS__, 'debug', $display);
         $eqLogic->setDisplay('layout::dashboard',json_decode($display, true) );
+        $display ='{';
         foreach($display_map as $key => $map)
           $display = $display . 
               '"cmd::'.$key.'::line":'.$map[0].',"cmd::'.$key.'::column":'.$map[1].',
@@ -1064,7 +1065,6 @@ public function startBackflush()
         log::add(__CLASS__, 'debug', $display);
         $eqLogic->setDisplay('layout::dashboard::table', json_decode($display, true));
         
-        // self::LMgetConfiguration($machines['machine']['serialNumber'], $eqLogic);
         $eqLogic->save();
         jee4lm::readConfiguration($eqLogic);
       }
