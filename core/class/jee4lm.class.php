@@ -1039,9 +1039,9 @@ public function startBackflush()
             log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId(). ($r ==null?' pas de retour':json_encode($r)));
 
             if ($r!=null) {
-              $displayStuff["layout::dashboard::table::cmd::$r::line"] = $map[0];
-              $displayStuff["layout::dashboard::table::cmd::$r::column"] = $map[1];
-              log::add(__CLASS__, 'debug', 'add '.$key."=".$r);
+              $displayStuff["layout::dashboard::table::cmd::".$r->getId()."::line"] = $map[0];
+              $displayStuff["layout::dashboard::table::cmd::".$r->getId()."::column"] = $map[1];
+              log::add(__CLASS__, 'debug', 'add '.$key."=".$r->getId());
             }
         }   
 
