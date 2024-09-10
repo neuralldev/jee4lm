@@ -1136,6 +1136,7 @@ public function startBackflush()
         log::add(__CLASS__, 'debug', 'found cale in Blea with BT address '.$present?'allumé':'éteint');
         return $present;
       }
+      log::add(__CLASS__, 'debug', 'not found from blea');
       return false; 
     };
 
@@ -1150,6 +1151,7 @@ public function startBackflush()
           log::add(__CLASS__, 'debug', 'found cale in jmqtt with BT address '.$present?'allumé':'éteint');
           return $present;
         }
+        log::add(__CLASS__, 'debug', 'not found from jmqtt');
         return false; 
       };
     
@@ -1164,6 +1166,7 @@ public function startBackflush()
           return $present;
         }
       }
+      log::add(__CLASS__, 'debug', 'not found as a standard equipment');
       return false;
     } 
 
