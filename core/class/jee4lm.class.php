@@ -1038,8 +1038,10 @@ public function startBackflush()
         ];
 
         $displayStuff = [
-          "layout::dashboard::table::parameters::style::td::3::1::font-size" => "larger",
-          "layout::dashboard::table::parameters::style::td::3::3::font-size" => "larger",
+          "layout::dashboard::table::parameters" => 
+            ["center"=>"0","styletable"=>"","styletd"=>"",
+            "style::td::3::1"=>"font-size:larger;",
+            "style::td::3::3"=>"font-size:larger;"],
           "layout::dashboard" => "table",
           'layout::dashboard::table::nbLine' => '7',
           'layout::dashboard::table::nbColumn' => '3'    
