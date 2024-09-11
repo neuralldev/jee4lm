@@ -925,7 +925,7 @@ public function setDose($_weight, $_dose) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
-    'dose_index=Dose'.$_dose.'&dose_type=PulsesType&group=Group1&value='.$_weight,
+    'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&value='.$_weight,
     'POST',["Authorization: Bearer $token"],$serial);
 //    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
@@ -1167,7 +1167,7 @@ public function startBackflush()
     $jmqttCollection = eqLogic::byType('jmqtt', true);
     foreach ($jmqttCollection as $eqJ){
       $jobjName = $eqJ->getName();
-      log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$jobjName.') compared to ('.$mac.')');
+//      log::add(__CLASS__, 'debug', 'jmqtt installed, object = ('.$jobjName.') compared to ('.$mac.')');
       if (strcasecmp($jobjName, $mac)==0) {
         $bbwID = $eqJ->getId();
         $jcmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
@@ -1183,7 +1183,7 @@ public function startBackflush()
     $bbwcollection1 = eqLogic::byObjectNameEqLogicName('MAISON',strtoupper($mac)); 
     if ($bbwcollection != null || $bbwcollection1 != null) {
       foreach ($bbwcollection as $bbw) {
-        log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
+ //       log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
         $bbwID = $bbw->getId();
         if ($bbwID != null) { 
           $present = $bbw->execCmd();
@@ -1194,7 +1194,7 @@ public function startBackflush()
       foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
         if ($bbwID != null) {
-          log::add(__CLASS__, 'debug', 'bbw1='.json_encode($bbw));
+   //       log::add(__CLASS__, 'debug', 'bbw1='.json_encode($bbw));
           $present = $bbw->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.$present==1?'allumé':'éteint');
           return $present;
