@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
@@ -421,7 +421,7 @@ public static function readConfiguration($_eq) {
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
-      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "flood", null,  null, 1);
+      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "flood", null,  null, 1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event(!$machine['tankStatus']);    
       log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
 
@@ -432,15 +432,15 @@ public static function readConfiguration($_eq) {
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
-      $cmd=$_eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1);
+      $cmd=$_eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
       log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
 
-      $cmd=$_eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
+      $cmd=$_eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event($bbw['recipe_doses'][0]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
 
-      $cmd=$_eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1) ;
+      $cmd=$_eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, 'default','default', 'default','default',null,0,false,null,null,null,0) ;
       $cmd->event($bbw['recipe_doses'][1]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
