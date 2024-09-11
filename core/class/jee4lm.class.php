@@ -548,7 +548,6 @@ public static function readConfiguration($_eq) {
       $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
        
-//      log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
       $fw = $machine['firmwareVersions'];
       $cmd=$_eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
       $cmd->event($fw[0]['fw_version']); 
