@@ -417,7 +417,7 @@ public static function readConfiguration($_eq) {
       $plumbed =    $machine['isPlumbedIn'];
       log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
-      $cmd=$_eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null,null,0);
+      $cmd=$_eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null, null, 0, _noiconname: 1);
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
