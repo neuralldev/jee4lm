@@ -1052,7 +1052,7 @@ public function startBackflush()
           "style::td::5::3"=>"border-top:solid;border-bottom:solid;",
           "style::td::6::1"=>"border-top:solid;border-bottom:solid;",
           "style::td::6::2"=>"border-top:solid;border-bottom:solid;",
-          "style::td::6w::3"=>"border-top:solid;border-bottom:solid;",
+          "style::td::6::3"=>"border-top:solid;border-bottom:solid;",
           'layout::dashboard::table::nbLine' => '7',
           'layout::dashboard::table::nbColumn' => '3'    
         ];
