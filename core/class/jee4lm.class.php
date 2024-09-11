@@ -547,7 +547,7 @@ public static function readConfiguration($_eq) {
       $cmd=$_eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
       $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
       log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
-      
+       
 //      log::add(__CLASS__, 'debug', 'prewetdose='.$preinfusion['Group1'][0]['doseType']);
       $fw = $machine['firmwareVersions'];
       $cmd=$_eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
