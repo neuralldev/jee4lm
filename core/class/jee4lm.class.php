@@ -639,7 +639,7 @@ public function AddCommand(
   $_icon = 'default', $_forceLineB = 'default', $_valuemin = 'default', $_valuemax = 'default', 
   $_order = null, $_IsHistorized =0, $_repeatevent = false, $_iconname = null, 
   $_calculValueOffset = null, $_historizeRound = null, 
-  $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
+  $_noiconname = 0, $_warning = null, $_danger = null, $_invert = 0 ) 
   { 
   $createCmd = true;
   $Command = $this->getCmd(null, $_logicalId);
@@ -678,8 +678,10 @@ public function AddCommand(
       $Command->setdisplay('forceReturnLineBefore', 1);
     if ($_iconname != 'default')
       $Command->setdisplay('showIconAndNamedashboard', 1);
-    if ($_noiconname != null)
+    if ($_noiconname == 0) {
+      $Command->setdisplay('showIconAndNamedashboard', 0);
       $Command->setdisplay('showNameOndashboard', 0);
+    }
     if ($_calculValueOffset != null)
       $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
     if ($_historizeRound != null)
