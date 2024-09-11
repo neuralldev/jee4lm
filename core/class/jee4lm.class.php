@@ -921,11 +921,12 @@ public function switchPlumbedIn($toggle) {
  */
 public function setDose($_weight, $_dose) {
   // $dose = 'A' or 'B'
+  //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32
   log::add(__CLASS__, 'debug', 'set dose for BBW Dose '.$_dose.' to '.$_weight.'g');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
-    'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&value='.$_weight,
+    'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&stop_target='.$_weight,
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
   $this->readConfiguration($this);
