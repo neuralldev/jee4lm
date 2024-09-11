@@ -18,22 +18,19 @@ LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy";
 https://github.com/zweckj/pylamarzocco/tree/main
 */
 
+/**
+ * jee4lm est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
+ */
 class jee4lm extends eqLogic
 {
-
-  
-  /*
-  $MACHINE_NAME = "machine_name";
-  $SERIAL_NUMBER = "serial_number";
-  $CONF_MACHINE = "machine";
-  $CONF_USE_BLUETOOTH = "use_bluetooth";
-  */
 
   /**
    * check that request is executed when it it a GET with commandID command
    * check if request has a commandId, then check if there is a PENDING/COMPLETED answer or not
    * if there is none, the request is done and was nt requiring a delay
-   * @param string $response
+   * @param mixed $_response
+   * @param mixed $_serial
+   * @param mixed $_header  
    * @return bool
    */
   public static function checkrequest($_response, $_serial = null, $_header = null) {
@@ -85,6 +82,7 @@ class jee4lm extends eqLogic
     }
     return false;
   }
+
   /**
    * sends a request to the REST API formatting request for GET or POST as expected by La Marzocco
    * data is used only for POST and must be URL encoded / formatted as a string parm1=val1&parm2=val2...
@@ -207,7 +205,7 @@ class jee4lm extends eqLogic
 
   
   /**
-   * Rafraichit les données complètes toutes les heures
+   * Rafraichit les données complètes toutes les 5mn
    * @return void
    */
   public static function cron5() {
@@ -218,18 +216,18 @@ class jee4lm extends eqLogic
           /* lire les infos de l'équipement ici */
           $slug= $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
-          log::add(__CLASS__, 'debug', "cron60 ID=$id serial=$serial slug=$slug");
+          log::add(__CLASS__, 'debug', "cron5 ID=$id serial=$serial slug=$slug");
           if ($slug!= '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token !='')
-              if (!jee4lm::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron60 error on readconfiguration');
+              if (!self::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
+                log::add(__CLASS__, 'debug', 'cron5 error on readconfiguration');
           }
         } 
       } else 
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
-  log::add(__CLASS__, 'debug', 'cron60 end');
+  log::add(__CLASS__, 'debug', 'cron5 end');
   }
 
   /**
@@ -266,12 +264,12 @@ class jee4lm extends eqLogic
    */
   public static function pull($_options = null)
   {
-    log::add(__CLASS__, 'debug', 'pull start');
+//    log::add(__CLASS__, 'debug', 'pull start');
     //$cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
     //if (is_object($cron)) {
     //  $cron->remove();
     //}
-    log::add(__CLASS__, 'debug', 'pull end');
+  //  log::add(__CLASS__, 'debug', 'pull end');
   }
    
   /**
@@ -345,8 +343,8 @@ class jee4lm extends eqLogic
   public function refresh()
   {
     foreach ($this->getCmd() as $cmd) {
-      $s = print_r($cmd, 1);
-      log::add(__CLASS__, 'debug', 'refresh  cmd: ' . $s);
+//      $s = print_r($cmd, 1);
+//      log::add(__CLASS__, 'debug', 'refresh  cmd: ' . $s);
       $cmd->execute();
     }
   }
@@ -400,7 +398,7 @@ class jee4lm extends eqLogic
 /**
  * Reads and create/refresh all the values of an equipment previously created by detection routine
  * the function takes only the target equipment to refresh as argument
- * @param mixed $_eq
+ * @param eqLogic $_eq
  * @return bool
  */
 public static function readConfiguration($_eq) {
@@ -423,7 +421,7 @@ public static function readConfiguration($_eq) {
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
-      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "flood", null, null, 1);
+      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , _Template: "flood", _unite: null, _generic_type: null, _IsVisible: 1, _noiconname: 1);
       $cmd->event(!$machine['tankStatus']);    
       log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
 
@@ -434,7 +432,7 @@ public static function readConfiguration($_eq) {
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
-      $cmd=$_eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1, _noicon: 1);
+      $cmd=$_eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1);
       $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
       log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
 
@@ -637,8 +635,9 @@ public static function readConfiguration($_eq) {
  * @return mixed
  */
 public function AddCommand(
-  $_Name,$_logicalId,$_Type = 'info',$_SubType = 'binary',$_Template = null, $_unite = null,$_generic_type = null,$_IsVisible = 1,
-  $_icon = 'default',$_forceLineB = 'default', $_valuemin = 'default', $_valuemax = 'default', 
+  $_Name, $_logicalId, $_Type = 'info', $_SubType = 'binary', $_Template = null, $_unite = null,
+  $_generic_type = null, $_IsVisible = 1,
+  $_icon = 'default', $_forceLineB = 'default', $_valuemin = 'default', $_valuemax = 'default', 
   $_order = null, $_IsHistorized =0, $_repeatevent = false, $_iconname = null, 
   $_calculValueOffset = null, $_historizeRound = null, 
   $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
