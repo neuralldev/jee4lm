@@ -639,7 +639,7 @@ public function AddCommand(
   $_icon = 'default', $_forceLineB = 'default', $_valuemin = 'default', $_valuemax = 'default', 
   $_order = null, $_IsHistorized =0, $_repeatevent = false, $_iconname = null, 
   $_calculValueOffset = null, $_historizeRound = null, 
-  $_noiconname = 0, $_warning = null, $_danger = null, $_invert = 0 ) 
+  $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
   { 
   $createCmd = true;
   $Command = $this->getCmd(null, $_logicalId);
@@ -678,7 +678,7 @@ public function AddCommand(
       $Command->setdisplay('forceReturnLineBefore', 1);
     if ($_iconname != 'default')
       $Command->setdisplay('showIconAndNamedashboard', 1);
-    if ($_noiconname == 0) {
+    if ($_noiconname !=null) {
       $Command->setdisplay('showIconAndNamedashboard', 0);
       $Command->setdisplay('showNameOndashboard', 0);
     }
@@ -1040,6 +1040,10 @@ public function startBackflush()
         $displayStuff = [
           "layout::dashboard::table::parameters" => 
             ["center"=>"0","styletable"=>"","styletd"=>"",
+            "style::td::1::1"=>"font-size:larger;",
+            "text::td::1::1"=>"<br>Réservoir à eau<br>",
+            "text::td::1::3"=>"<br>Balance connectée<br>",
+            "style::td::1::3"=>"font-size:larger;",
             "style::td::3::1"=>"font-size:larger;",
             "style::td::3::3"=>"font-size:larger;"],
           "layout::dashboard" => "table",
