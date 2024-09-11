@@ -1147,6 +1147,8 @@ public function startBackflush()
   // add logic to monitor BBW presence
   public function searchForBBW() {
     $mac = $this->getConfiguration('scalemac');
+    if ($mac=='') return false;
+
     log::add(__CLASS__, 'debug', 'search scale '.$mac);
 
     // check if BLEA is installed and search for scale
@@ -1238,7 +1240,26 @@ public function startBackflush()
         else
         $display = "<span style='color:".($steamcurrent+2>=$steamtarget?'green':'red').";'>".$steamtarget."°C / ".$steamcurrent."°C</span>";
         $this->getCmd(null, 'displaysteam')->event($display);
-        $this->searchForBBW();
+        if($this->getCmd(null, 'isbbw')->execCmd())
+          if($this->searchForBBW()) { //present
+              // change display of doses
+              $free = $this->getCmd(null, 'bbwfree')->execCmd();
+              $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
+              $this->getCmd(null, 'bbwfree')->setDisplay('template',($bbwmode =='A' || $bbwmode =='B' ?"jee4lm::bbw nodose inactive":"jee4lm::bbw nodose active"));
+              $this->getCmd(null, 'bbwdoseA')->setDisplay('template',($bbwmode == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"));
+              $this->getCmd(null, 'bbwdoseB')->setDisplay('template',($bbwmode == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"));
+              // - 
+          } else {
+            $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
+            $this->getCmd(null, 'bbwdoseA')->setDisplay('template',("jee4lm::bbw dose inactive"));
+            $this->getCmd(null, 'bbwdoseB')->setDisplay('template',("jee4lm::bbw dose inactive"));
+          }  
+        else
+        {
+          $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
+          $this->getCmd(null, 'bbwdoseA')->setDisplay('template',("jee4lm::bbw dose inactive"));
+          $this->getCmd(null, 'bbwdoseB')->setDisplay('template',("jee4lm::bbw dose inactive"));
+        }
         log::add(__CLASS__, 'debug', 'getinformation has refresh values');
       }
     return true;
@@ -1343,8 +1364,8 @@ public function startBackflush()
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'><span>allum&eacute<br><br></span>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'><span>&eacuteteint<br><br></span>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'>",
         "#_time_widget_#" =>"0"
         )
     );
