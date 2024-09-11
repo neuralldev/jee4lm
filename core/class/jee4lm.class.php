@@ -416,7 +416,7 @@ public static function readConfiguration($eq) {
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
-      $cmd=$eq->AddCommand("Réservoir plein",'tankStatus','info','binary', "flood", null,null,1);
+      $cmd=$eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "flood", null, null, 1, _noicon: 1);
       $cmd->event(!$machine['tankStatus']);    
       log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
 
@@ -427,15 +427,15 @@ public static function readConfiguration($eq) {
       $cmd->event($bbwset['recipe_dose']);    
       log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
-      $cmd=$eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1);
+      $cmd=$eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1, _noicon: 1);
       $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
       log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
 
-      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
+      $cmd=$eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, _noicon: 1);
       $cmd->event($bbw['recipe_doses'][0]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
 
-      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1);
+      $cmd=$eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, _noicon: 1);
       $cmd->event($bbw['recipe_doses'][1]['target']);    
       log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
@@ -630,11 +630,12 @@ public static function readConfiguration($eq) {
  * @return mixed
  */
 public function AddCommand(
-  $Name,$_logicalId,$Type = 'info',$SubType = 'binary',$Template = null, $unite = null,$generic_type = null,$IsVisible = 1,$icon = 'default',$forceLineB = 'default', $valuemin = 'default',
-  $valuemax = 'default', $_order = null, $IsHistorized =0, $repeatevent = false, $_iconname = null, $_calculValueOffset = null, $_historizeRound = null, $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
-  {
-
- 
+  $_Name,$_logicalId,$_Type = 'info',$_SubType = 'binary',$_Template = null, $_unite = null,$_generic_type = null,$_IsVisible = 1,
+  $_icon = 'default',$_forceLineB = 'default', $_valuemin = 'default', $_valuemax = 'default', 
+  $_order = null, $_IsHistorized =0, $_repeatevent = false, $_iconname = null, 
+  $_calculValueOffset = null, $_historizeRound = null, 
+  $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
+  { 
   $createCmd = true;
   $Command = $this->getCmd(null, $_logicalId);
   if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
@@ -653,22 +654,22 @@ public function AddCommand(
       // $Command->setId(null);
       $Command->setLogicalId($_logicalId);
       $Command->setEqLogic_id($this->getId());
-      $Command->setName($Name);
-      $Command->setType($Type);
-      $Command->setSubType($SubType);
+      $Command->setName($_Name);
+      $Command->setType($_Type);
+      $Command->setSubType($_SubType);
     }
     
-    $Command->setIsVisible($IsVisible);
-    if ($IsHistorized!=null) $Command->setIsHistorized(strval($IsHistorized));
-    if ($Template != null) {
-      $Command->setTemplate('dashboard', $Template);
-      $Command->setTemplate('mobile', $Template);
+    $Command->setIsVisible($_IsVisible);
+    if ($_IsHistorized!=null) $Command->setIsHistorized(strval($_IsHistorized));
+    if ($_Template != null) {
+      $Command->setTemplate('dashboard', $_Template);
+      $Command->setTemplate('mobile', $_Template);
     }
-    if ($unite != null && $SubType == 'numeric')
-      $Command->setUnite($unite);
-    if ($icon != 'default')
-      $Command->setdisplay('icon', '<i class="' . $icon . '"></i>');
-    if ($forceLineB != 'default')
+    if ($_unite != null && $_SubType == 'numeric')
+      $Command->setUnite($_unite);
+    if ($_icon != 'default')
+      $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
+    if ($_forceLineB != 'default')
       $Command->setdisplay('forceReturnLineBefore', 1);
     if ($_iconname != 'default')
       $Command->setdisplay('showIconAndNamedashboard', 1);
@@ -678,14 +679,14 @@ public function AddCommand(
       $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
     if ($_historizeRound != null)
       $Command->setConfiguration('historizeRound', $_historizeRound);
-    if ($generic_type != null)
-      $Command->setGeneric_type($generic_type);
-    if ($repeatevent == true && $Type == 'info')
+    if ($_generic_type != null)
+      $Command->setGeneric_type($_generic_type);
+    if ($_repeatevent == true && $_Type == 'info')
       $Command->setConfiguration('repeatEventManagement', 'never');
-    if ($valuemin != 'default')
-      $Command->setConfiguration('minValue', $valuemin);
-    if ($valuemax != 'default')
-      $Command->setConfiguration('maxValue', $valuemax);
+    if ($_valuemin != 'default')
+      $Command->setConfiguration('minValue', $_valuemin);
+    if ($_valuemax != 'default')
+      $Command->setConfiguration('maxValue', $_valuemax);
     if ($_warning != null)
       $Command->setDisplay("warningif", $_warning);
     if ($_order != null)
@@ -714,38 +715,38 @@ public function AddCommand(
  * @param mixed $step
  * @return void
  */
-public function AddAction($actionName, $actionTitle, $template = null, $generic_type = null, $visible=1, $SubType = 'other', $min=null, $max=null, $step=null)
+public function AddAction($_actionName, $_actionTitle, $_template = null, $_generic_type = null, $_visible=1, $_SubType = 'other', $_min=null, $_max=null, $_step=null)
   {
    // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
-    $command = $this->getCmd(null, $actionName);
+    $command = $this->getCmd(null, $_actionName);
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
-      $command = cmd::byEqLogicIdCmdName($this->getId(), $actionTitle);
+      $command = cmd::byEqLogicIdCmdName($this->getId(), $_actionTitle);
       if (is_object($command))
         $createCmd = false;
     }
     if ($createCmd) { // only if action is not yet defined
       if (!is_object($command)) {
         $command = new jee4lmCmd();
-        $command->setLogicalId($actionName);
-        $command->setIsVisible($visible);
-        $command->setName($actionTitle);
+        $command->setLogicalId($_actionName);
+        $command->setIsVisible($_visible);
+        $command->setName($_actionTitle);
       }
-      if ($template != null) {
-        $command->setTemplate('dashboard', $template);
-        $command->setTemplate('mobile', $template);
+      if ($_template != null) {
+        $command->setTemplate('dashboard', $_template);
+        $command->setTemplate('mobile', $_template);
       }
       $command->setType('action');
-      $command->setSubType($SubType);
+      $command->setSubType($_SubType);
       $command->setEqLogic_id($this->getId());
-      if ($generic_type != null)
-        $command->setGeneric_type($generic_type);
-      if ($min != null)
-        $command->setConfiguration('minValue', $min);
-      if ($max != null)
-        $command->setConfiguration('maxValue', $max);
-        if ($step != null)
-        $command->setDisplay('parameters', ['step' => $step]);
+      if ($_generic_type != null)
+        $command->setGeneric_type($_generic_type);
+      if ($_min != null)
+        $command->setConfiguration('minValue', $_min);
+      if ($_max != null)
+        $command->setConfiguration('maxValue', $_max);
+        if ($_step != null)
+        $command->setDisplay('parameters', ['step' => $_step]);
       $command->save();
     }
   }
@@ -1027,8 +1028,8 @@ public function startBackflush()
         ];
 
         $displayStuff = [
-          "parameters::style::td::3::1::font-size" => "larger",
-          "parameters::style::td::3::3::font-size" => "larger",
+          "layout::dashboard::table::parameters::style::td::3::1::font-size" => "larger",
+          "layout::dashboard::table::parameters::style::td::3::3::font-size" => "larger",
           "layout::dashboard" => "table",
           'layout::dashboard::table::nbLine' => '7',
           'layout::dashboard::table::nbColumn' => '3'    
