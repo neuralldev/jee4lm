@@ -1047,6 +1047,12 @@ public function startBackflush()
             "style::td::3::1"=>"font-size:larger;",
             "style::td::3::3"=>"font-size:larger;"],
           "layout::dashboard" => "table",
+          "style::td::5::1"=>"border-top:solid;border-bottom:solid;",
+          "style::td::5::2"=>"border-top:solid;border-bottom:solid;",
+          "style::td::5::3"=>"border-top:solid;border-bottom:solid;",
+          "style::td::6::1"=>"border-top:solid;border-bottom:solid;",
+          "style::td::6::2"=>"border-top:solid;border-bottom:solid;",
+          "style::td::6w::3"=>"border-top:solid;border-bottom:solid;",
           'layout::dashboard::table::nbLine' => '7',
           'layout::dashboard::table::nbColumn' => '3'    
         ];
