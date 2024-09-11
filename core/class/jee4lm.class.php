@@ -1402,9 +1402,12 @@ class jee4lmCmd extends cmd
     return false;
   }
 
-  public function getLMValue($_logicalID, $expected_value) {
-        $r = cmd::byLogicalId($_logicalID)->execCmd();
-        return $r != $expected_value;
+  public function getLMValue($_logicalID, $_expected_value) {
+        $r = cmd::byLogicalId($_logicalID);
+        $v = null;
+        if (is_object($r)) 
+          $v = $r->execCmd();
+        return $v != $_expected_value;
   }
 
   /**
