@@ -927,7 +927,8 @@ public function setDose($_weight, $_dose) {
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
     'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&value='.$_weight,
     'POST',["Authorization: Bearer $token"],$serial);
-//    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+//  now reread everthing
+  $this->readConfiguration($this);
 }
 
 /**
