@@ -1039,22 +1039,22 @@ public function startBackflush()
 
         $displayStuff = [
           "layout::dashboard::table::parameters" => 
-            ["center"=>"0","styletable"=>"","styletd"=>"",
-            "style::td::1::1"=>"font-size:larger;",
-            "text::td::1::1"=>"<br>Réservoir à eau<br>",
-            "text::td::1::3"=>"<br>Balance connectée<br>",
-            "style::td::1::3"=>"font-size:larger;",
-            "style::td::3::1"=>"font-size:larger;",
-            "style::td::3::3"=>"font-size:larger;"],
-          "layout::dashboard" => "table",
-          "style::td::5::1"=>"border-top:solid;border-bottom:solid;",
-          "style::td::5::2"=>"border-top:solid;border-bottom:solid;",
-          "style::td::5::3"=>"border-top:solid;border-bottom:solid;",
-          "style::td::6::1"=>"border-top:solid;border-bottom:solid;",
-          "style::td::6::2"=>"border-top:solid;border-bottom:solid;",
-          "style::td::6::3"=>"border-top:solid;border-bottom:solid;",
-          'layout::dashboard::table::nbLine' => '7',
-          'layout::dashboard::table::nbColumn' => '3'    
+              ["center"=>"0","styletable"=>"","styletd"=>"",
+              "style::td::1::1"=>"font-size:larger;",
+              "text::td::1::1"=>"<br>Réservoir à eau<br>",
+              "text::td::1::3"=>"<br>Balance connectée<br>",
+              "style::td::1::3"=>"font-size:larger;",
+              "style::td::3::1"=>"font-size:larger;",
+              "style::td::3::3"=>"font-size:larger;",
+              "style::td::5::1"=>"border-top:solid;border-bottom:solid;",
+              "style::td::5::2"=>"border-top:solid;border-bottom:solid;",
+              "style::td::5::3"=>"border-top:solid;border-bottom:solid;",
+              "style::td::6::1"=>"border-top:solid;border-bottom:solid;",
+              "style::td::6::2"=>"border-top:solid;border-bottom:solid;",
+              "style::td::6::3"=>"border-top:solid;border-bottom:solid;"],
+            "layout::dashboard" => "table",
+            'layout::dashboard::table::nbLine' => '7',
+            'layout::dashboard::table::nbColumn' => '3'    
         ];
 
         foreach($display_map as $key => $map) {            
