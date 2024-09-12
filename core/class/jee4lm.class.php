@@ -926,7 +926,7 @@ public function setDose($_weight, $_dose) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
-    'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&stop_target='.$_weight,
+    'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&value='.$_weight,
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
   $this->readConfiguration($this);
@@ -1250,11 +1250,13 @@ public function startBackflush()
               $this->getCmd(null, 'bbwfree')->setDisplay('template',($bbwmode =='A' || $bbwmode =='B' ?"jee4lm::bbw nodose inactive":"jee4lm::bbw nodose active"));
               $this->getCmd(null, 'bbwdoseA')->setDisplay('template',($bbwmode == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"));
               $this->getCmd(null, 'bbwdoseB')->setDisplay('template',($bbwmode == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"));
+              log::add(__CLASS__, 'debug', 'bbw scale on display');
               // - 
           } else {
             $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
             $this->getCmd(null, 'bbwdoseA')->setDisplay('template',("jee4lm::bbw dose inactive"));
             $this->getCmd(null, 'bbwdoseB')->setDisplay('template',("jee4lm::bbw dose inactive"));
+            log::add(__CLASS__, 'debug', 'bbw scale off display');
           }  
         else
         {
