@@ -248,9 +248,9 @@ class jee4lm extends eqLogic
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token !='')
               if (!$jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
+                log::add(__CLASS__, 'debug', 'cron error on getconfiguration');
           }
-        } 
+        }
       } else 
       log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
     }
@@ -1483,7 +1483,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_off':
         $b=($action=='jee4lm_on');
         $eq->switchCoffeeBoilerONOFF($b);
-        return $eq->getinformations();
+        return   jee4lm::readConfiguration($eq);
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b=($action=='jee4lm_steam_on');
@@ -1491,17 +1491,16 @@ class jee4lmCmd extends cmd
         return $eq->getInformations();
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
-        return $eq->getInformations();
+        return jee4lm::readConfiguration($eq);
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget','SteamBoiler');        
-        return $eq->getInformations();
+        return jee4lm::readConfiguration($eq);
       case 'jee4lm_doseA_slider':
           $eq->set_setpoint($_options, 'A',"");              
-          return $eq->getInformations();
+          return jee4lm::readConfiguration($eq);
       case 'jee4lm_doseB_slider':
-            $eq->set_setpoint($_options, 'B',"");              
-            return $eq->getInformations();
-    
+          $eq->set_setpoint($_options, 'B',"");              
+          return jee4lm::readConfiguration($eq);    
           default:
         return true;
     }
