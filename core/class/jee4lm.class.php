@@ -1489,7 +1489,7 @@ class jee4lmCmd extends cmd
         $b=($action=='jee4lm_steam_on');
         $eq->switchSteamBoilerONOFF($b);
         return $eq->getInformations();
-      case 'jee4lm_coffee_slider':
+      case 'jee4lm_coffee_slider': 
         $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
         return jee4lm::readConfiguration($eq);
       case 'jee4lm_steam_slider':
