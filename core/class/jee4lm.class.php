@@ -421,7 +421,7 @@ public static function readConfiguration($_eq) {
       $cmd->event($machine['isBackFlushEnabled']);    
       log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
-      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "flood", null,  null, 1, 'default','default', 'default','default',null,0,false,null,null,null,0);
+      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "jee4lm::tankStatus", null,  null, 1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event(!$machine['tankStatus']);    
       log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
 
