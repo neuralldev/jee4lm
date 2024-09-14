@@ -562,12 +562,12 @@ public static function readConfiguration($_eq) {
       $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off","button","ENERGY_ON");
       $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off","button","ENERGY_OFF");
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
-      $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,95, 1);
+      $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,105, 0.5);
       $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
-      $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 1);
-      $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 0, 9, 1);
-      $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 1,60, 1);
-      $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 1,60, 1);
+      $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 0.5);
+      $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 1, 9, 0.5);
+      $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5,100, 0.5);
+      $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5,100, 0.5);
       $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
       $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
       $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
