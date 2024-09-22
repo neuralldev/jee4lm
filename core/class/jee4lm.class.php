@@ -1210,6 +1210,13 @@ public function startBackflush()
     return false;
   }
 
+  public function getBBWSettings() {
+    log::add(__CLASS__, 'debug', 'getbbw settings start');
+    $serial=$this->getConfiguration('serialNumber'); 
+    $token=self::getToken();
+    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1;brewing_type=MassType','GET',["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
+  }
 
   /**
    * Refreshes the main counters and not all the information
@@ -1220,6 +1227,7 @@ public function startBackflush()
 //    log::add(__CLASS__, 'debug', 'getinformation start');
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
+      $this->getBBWSettings();
       $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
       if(array_key_exists('status', $arr)) {
         $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
