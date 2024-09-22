@@ -930,7 +930,11 @@ public function setScaleDose($_weight, $_dose) {
   $token=self::getToken();
   //group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e
   $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
+    $d,
+    'POST',["Authorization: Bearer $token"],$serial);
+//group:r.GROUP_1,dose_index:Object.values(T)[t],dose_type:n,value:e
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
