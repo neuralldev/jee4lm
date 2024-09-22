@@ -800,7 +800,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
       if ($v > 0) 
         if ($_type!='') $this->setBoilerTemperature($v,$_type);
       else
-        $this->setDose($v, $_setpointlogicalID);
+        $this->setScaleDose($v, $_setpointlogicalID);
     }
   
 
@@ -822,7 +822,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
       if ($v > 0) 
         if ($_type!='') $this->setBoilerTemperature($v,$_type);
       else
-        $this->setDose($v, $_logicalID);
+        $this->setScaleDose($v, $_logicalID);
    // log::add(__CLASS__, 'debug', 'set setpoint end');   
     // now refresh display  
 //    $this->getInformations();
@@ -919,13 +919,13 @@ public function switchPlumbedIn($toggle) {
  * @param mixed $dose
  * @return void
  */
-public function setDose($_weight, $_dose) {
+public function setScaleDose($_weight, $_dose) {
   // $dose = 'A' or 'B'
-  //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32
+  //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
   log::add(__CLASS__, 'debug', 'set dose for BBW Dose '.$_dose.' to '.$_weight.'g');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
     'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&value='.$_weight,
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
