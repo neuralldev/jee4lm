@@ -70,7 +70,7 @@ class jee4lm extends eqLogic
 
       if ($response !='') {
         $arr = json_decode($response, true);
-        log::add(__CLASS__, 'debug', 'check request, response='.$response);
+   //     log::add(__CLASS__, 'debug', 'check request, response='.$response);
         $answer = $arr['data']['status']; 
 
         log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
@@ -117,7 +117,7 @@ class jee4lm extends eqLogic
       $err_no = curl_errno($ch);
       log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
     } else 
-//      log::add(__CLASS__, 'debug', "request response=".$response);
+      log::add(__CLASS__, 'debug', "request response=".$response);
     curl_close($ch);
 //    log::add(__CLASS__, 'debug', 'request stop');
     jee4lm::checkrequest($response, $_serial,$_header);
