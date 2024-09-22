@@ -937,7 +937,7 @@ public function setScaleDose($_weight, $_dose) {
   $doseB= cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
   $token=self::getToken();
   $d = [["id"=>"A","target"=>$doseA],["id"=>"B","target"=>$doseB]];
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes',
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     json_encode($d),
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
