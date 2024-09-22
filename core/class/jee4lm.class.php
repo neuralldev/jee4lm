@@ -1223,7 +1223,7 @@ public function startBackflush()
     log::add(__CLASS__, 'debug', 'getbbw settings start');
     $serial=$this->getConfiguration('serialNumber'); 
     $token=self::getToken();
-    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','GET',["Authorization: Bearer $token"]);
+//    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','GET',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
   }
 
