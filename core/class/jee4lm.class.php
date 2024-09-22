@@ -593,7 +593,8 @@ public static function readConfiguration($_eq) {
  "machineCapabilities":[{"family":"LINEA","groupsNumber":1,"coffeeBoilersNumber":1,"hasCupWarmer":false,"steamBoilersNumber":1,"teaDosesNumber":1,"machineModes":["BrewingMode","StandBy"],"schedulingType":"smartWakeUpSleep"}],
  "machine_sn":"Sn2307902283","machine_hw":"0","isPlumbedIn":false,"isBackFlushEnabled":false,"standByTime":0,"tankStatus":true,"settings":[],
  "recipes":[{"id":"Recipe1","dose_mode":"Mass",
- "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],
+ "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],
+ "recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],
  "groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},
  "doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],
  "machineMode":"StandBy",
@@ -798,14 +799,15 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
         $v = floatval($setpoint->execCmd()) + $_value;      
       log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
       if ($v > 0) 
-        if ($_type!='') $this->setBoilerTemperature($v,$_type);
-      else
-        $this->setScaleDose($v, $_setpointlogicalID);
+        if ($_type!='') 
+          $this->setBoilerTemperature($v,$_type);
+        else
+          $this->setScaleDose($v, $_setpointlogicalID);
     }
   
 
   /**
-   * this function is used to set the Bouler value on the LM machine according to the slider
+   * this function is used to set the Boiler value on the LM machine according to the slider
    * it is called when the user change the value of the slider on the desktop with the chosen value
    * note that type is used to set the coffee or steam boiler target
    * @param mixed $_options
@@ -820,9 +822,10 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
     // log::add(__CLASS__, 'debug', 'slider value='.$v);
       //find setpoint value and store it on stove as it after slider move
       if ($v > 0) 
-        if ($_type!='') $this->setBoilerTemperature($v,$_type);
-      else
-        $this->setScaleDose($v, $_logicalID);
+        if ($_type!='') 
+          $this->setBoilerTemperature($v,$_type);
+        else
+          $this->setScaleDose($v, $_logicalID);
    // log::add(__CLASS__, 'debug', 'set setpoint end');   
     // now refresh display  
 //    $this->getInformations();
@@ -924,9 +927,18 @@ public function setScaleDose($_weight, $_dose) {
   //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
   log::add(__CLASS__, 'debug', 'set dose for BBW Dose '.$_dose.' to '.$_weight.'g');
   $serial=$this->getConfiguration('serialNumber'); 
+  if ($_dose =="A") 
+    $doseA = $_weight ;
+  else
+  $doseA= cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
+  if ($_dose =="B") 
+    $doseB = $_weight ;
+  else
+  $doseB= cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
-    'dose_index=Dose'.$_dose.'&dose_type=MassType&group=Group1&value='.$_weight,
+  $d = [["id"=>"A","target"=>$doseA],["id"=>"B","target"=>$doseB]];
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/receipes',
+    json_encode($d),
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
   $this->readConfiguration($this);
