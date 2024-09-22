@@ -70,7 +70,7 @@ class jee4lm extends eqLogic
 
       if ($response !='') {
         $arr = json_decode($response, true);
-//        log::add(__CLASS__, 'debug', 'check request, response='.$response);
+        log::add(__CLASS__, 'debug', 'check request, response='.$response);
         $answer = $arr['data']['status']; 
 
         log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
