@@ -1227,7 +1227,7 @@ public function startBackflush()
 //    log::add(__CLASS__, 'debug', 'getinformation start');
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
-      $this->getBBWSettings();
+      //$this->getBBWSettings();
       $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
       if(array_key_exists('status', $arr)) {
         $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
