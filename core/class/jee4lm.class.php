@@ -926,17 +926,17 @@ public function setScaleDose($_weight, $_dose) {
   // $dose = 'A' or 'B'
   //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
 
-  if ($_dose=='A')
+  if ($_dose=='A') {
     $doseA = $_weight;
+    foreach (cmd::byLogicalId('bbwDoseB','jee4lm') as $cmd)
+    $doseB = $cmd->execCmd();
+  }
   else 
-    foreach (cmd::byEqLogicId('bbwDoseA','jee4lm') as $cmd)
-      $doseA = $cmd->execCmd();
-  if ($_dose=='B')
-      $doseB = $_weight;
-    else 
-      foreach (cmd::byEqLogicId('bbwDoseB','jee4lm') as $cmd)
-        $doseB = $cmd->execCmd();
-
+  {
+    $doseB = $_weight;
+    foreach (cmd::byLogicalId('bbwDoseA','jee4lm') as $cmd)
+    $doseA = $cmd->execCmd();
+  }
   log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
