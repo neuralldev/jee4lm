@@ -563,14 +563,14 @@ public static function readConfiguration($_eq) {
       $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off","button","ENERGY_OFF");
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,105, 0.5);
-      $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 100,130, 1);
+//      $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 39,134, 1);
       $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 0.5);
       $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 1, 9, 0.5);
       $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5,100, 0.5);
       $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5,100, 0.5);
       $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
       $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
-      $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
+//    $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
       $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime"); 
       $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime"); 
       $_eq->linksetpoint("jee4lm_on", "machinemode"); 
@@ -929,12 +929,8 @@ public function setScaleDose($_weight, $_dose) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   //group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e
-  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
+  $d = 'group=Group1&dose_index='.$_dose.'&dose_type=MassType&value='.$_weight; 
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
-    $d,
-    'POST',["Authorization: Bearer $token"],$serial);
-//group:r.GROUP_1,dose_index:Object.values(T)[t],dose_type:n,value:e
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
@@ -1220,11 +1216,11 @@ public function startBackflush()
   }
 
   public function getBBWSettings() {
-    log::add(__CLASS__, 'debug', 'getbbw settings start');
-    $serial=$this->getConfiguration('serialNumber'); 
-    $token=self::getToken();
+//    log::add(__CLASS__, 'debug', 'getbbw settings');
+//    $serial=$this->getConfiguration('serialNumber'); 
+//    $token=self::getToken();
 //    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enabled-led','led=0','POST',["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
+//    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
   }
 
   /**
