@@ -925,17 +925,35 @@ public function switchPlumbedIn($toggle) {
 public function setScaleDose($_weight, $_dose) {
   // $dose = 'A' or 'B'
   //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
-  log::add(__CLASS__, 'debug', 'set dose for BBW Dose '.$_dose.' to '.$_weight.'g');
+
+  if ($_dose=='A')
+    $doseA = $_weight;
+  else 
+    foreach (cmd::byEqLogicId('bbwDoseA','jee4lm') as $cmd)
+      $doseA = $cmd->execCmd();
+  if ($_dose=='B')
+      $doseB = $_weight;
+    else 
+      foreach (cmd::byEqLogicId('bbwDoseB','jee4lm') as $cmd)
+        $doseB = $cmd->execCmd();
+
+  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
 
   //"recipes":[{"id":"Recipe1","dose_mode":"Mass","recipe_doses":[{"id":"A","target":32},{"id":"B","target":35}]}],
+  $d = 'id=Recipe1&dose_mode=Mass&recipe_doses=[{"id":"A","target":'.$doseA.'},{"id":"B","target":'.$doseB.'}]}]'; 
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
+    $d,
+    'POST',["Authorization: Bearer $token"],$serial);
+
   //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}]
+/*
   $d = 'dose_index=Dose'.$_dose.'&recipe_id=Recipe1&recipe_dose='.$_dose.'group=Group1'; 
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
-
+*/
 //  $d = 'group=Group1&dose_index='.$_dose.'&dose_type=MassType&value='.$_weight; 
 //  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
 //    $d,
