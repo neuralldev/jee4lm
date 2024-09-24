@@ -1071,7 +1071,7 @@ public function startBackflush()
 
         $displayStuff = [
           "layout::dashboard::table::parameters" => 
-              ["center"=>"0","styletable"=>"","styletd"=>"",
+              ["center"=>"0","styletable"=>"background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100%;","styletd"=>"",
               "style::td::1::1"=>"font-size:larger;",
               "text::td::1::1"=>"<br>Réservoir à eau<br>",
               "text::td::1::3"=>"<br>Balance connectée<br>",
