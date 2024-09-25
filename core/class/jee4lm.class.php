@@ -928,13 +928,13 @@ public function setScaleDose($_weight, $_dose) {
 
   if ($_dose=='A') {
     $doseA = $_weight;
-    foreach (cmd::byLogicalId('bbwDoseB','jee4lm') as $cmd)
+    foreach (cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseB') as $cmd)
     $doseB = $cmd->execCmd();
   }
   else 
   {
     $doseB = $_weight;
-    foreach (cmd::byLogicalId('bbwDoseA','jee4lm') as $cmd)
+    foreach (cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA') as $cmd)
     $doseA = $cmd->execCmd();
   }
   log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
@@ -946,6 +946,7 @@ public function setScaleDose($_weight, $_dose) {
 // (b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}]},
   $d = 'id='.$scale.'&dose_mode=MassType&recipe_doses='.$recipedoses;
+  log::add(__CLASS__, 'debug', 'd='.$recipedoses);
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
