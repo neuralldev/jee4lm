@@ -1374,8 +1374,8 @@ public function startBackflush()
         'template' => 'tmplicon',
         'display' => array('icon' => 'null'),
         'replace' => array(
-            '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;float:left;width:30px;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>", 
-            '#_icon_off_#' =>  "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;float:left;width:30px;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
+            '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>", 
+            '#_icon_off_#' =>  "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
             "#_time_widget_#" =>"0"
             )
       );
