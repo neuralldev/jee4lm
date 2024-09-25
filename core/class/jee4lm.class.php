@@ -1248,11 +1248,11 @@ public function startBackflush()
   }
 
   public function getBBWSettings() {
-//    log::add(__CLASS__, 'debug', 'getbbw settings');
-//    $serial=$this->getConfiguration('serialNumber'); 
-//    $token=self::getToken();
-//    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enabled-led','led=0','POST',["Authorization: Bearer $token"]);
-//    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
+    log::add(__CLASS__, 'debug', 'getbbw settings');
+    $serial=$this->getConfiguration('serialNumber'); 
+    $token=self::getToken();
+    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
   }
 
   /**
