@@ -1075,9 +1075,12 @@ public function startBackflush()
               "style::td::1::1"=>"font-size:larger;",
               "text::td::1::1"=>"<br>Réservoir à eau<br>",
               "text::td::1::3"=>"<br>Balance connectée<br>",
-              "style::td::1::3"=>"font-size:larger;",
-              "style::td::3::1"=>"font-size:larger;",
-              "style::td::3::3"=>"font-size:larger;",
+              "style::td::3::1"=>"font-size:larger;height:4em;vertical-align:middle;;",
+              "style::td::3::2"=>"font-size:larger;height:4em;vertical-align:middle;",
+              "style::td::3::3"=>"font-size:larger;height:4em;vertical-align:middle;",
+              "style::td::4::1"=>"height:4em;vertical-align:middle;;",
+              "style::td::4::2"=>"height:4em;vertical-align:middle;",
+              "style::td::4::3"=>"height:4em;vertical-align:middle;",
               "style::td::5::1"=>"border-top:solid;border-bottom:solid;",
               "style::td::5::2"=>"border-top:solid;border-bottom:solid;",
               "style::td::5::3"=>"border-top:solid;border-bottom:solid;",
@@ -1276,14 +1279,16 @@ public function startBackflush()
         else
           $display = "<span style='color:".($coffeecurrent+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$coffeecurrent."°C</span>";
         $this->getCmd(null, 'displaycoffee')->event($display);
+  
         $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
-        $steamcurrent = $arr['data']['TEMP_STEAM'];
-        $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
+  //      $steamcurrent = $arr['data']['TEMP_STEAM'];
+  //      $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
         if (!$steamstate)
           $display ='OFF';
         else
-        $display = "<span style='color:".($steamcurrent+2>=$steamtarget?'green':'red').";'>".$steamtarget."°C / ".$steamcurrent."°C</span>";
+          $display = "<span style='color:green'>ON</span>";
         $this->getCmd(null, 'displaysteam')->event($display);
+  
         if($this->getCmd(null, 'isbbw')->execCmd())
           if($this->searchForBBW()) { //present
               // change display of doses
@@ -1355,31 +1360,31 @@ public function startBackflush()
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-        array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
+        array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
       ));
-      $r['info']['numeric']['bbw dose inactive'] = array(
-        'template' => 'tmplmultistate',
-        'test' => array(
-          array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-          array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:lightgray);border-width:thick;border-color:white; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 16px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
-          ));
-        $r['info']['binary']['bbw nodose'] = array(
-          'template' => 'tmplicon',
-          'display' => array('icon' => 'null'),
-          'replace' => array(
-              '#_icon_on_#' => "<span style='display: inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>", 
-              '#_icon_off_#' =>  "<span style='display: inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
-              "#_time_widget_#" =>"0"
-              )
-        );
-        $r['action']['other']['main on off'] = array(
-      'template' => 'tmplimg',
+    $r['info']['numeric']['bbw dose inactive'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
+        array('operation' => '#value# >= 0','state_light' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:lightgray);border-width:thick;border-color:lightgray; border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 'state_dark' => '<span style="display: inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
+        ));
+    $r['info']['binary']['bbw nodose'] = array(
+        'template' => 'tmplicon',
+        'display' => array('icon' => 'null'),
+        'replace' => array(
+            '#_icon_on_#' => "<span style='display: inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>", 
+            '#_icon_off_#' =>  "<span style='display: inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
+            "#_time_widget_#" =>"0"
+            )
+      );
+    $r['action']['other']['main on off'] = array(
+    'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='128' height='128'>",
-        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='128' height='128'>",
-        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='128' height='128'>",
-        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='128' height='128'>",
+        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
+        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
         "#_time_widget_#" =>"0"
         )
     );
