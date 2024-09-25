@@ -943,7 +943,7 @@ public function setScaleDose($_weight, $_dose) {
 
 // (b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}]},
-  $d = 'id='.$scale.'&dose_mode=Mass&recipe_doses='.$recipedoses;
+  $d = 'id=Recipe1&dose_mode=Mass&recipe_doses='.$recipedoses;
   log::add(__CLASS__, 'debug', 'd='.$d);
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     $d,
