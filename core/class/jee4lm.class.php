@@ -928,12 +928,12 @@ public function setScaleDose($_weight, $_dose) {
 
   if ($_dose=='A') {
     $doseA = $_weight;
-     $doseB = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseB')->execCmd();
+     $doseB = ""&cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseB')->execCmd();
   }
   else 
   {
     $doseB = $_weight;
-    $doseA = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA')->execCmd();
+    $doseA = ""&cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA')->execCmd();
   }
   log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
   $serial=$this->getConfiguration('serialNumber'); 
