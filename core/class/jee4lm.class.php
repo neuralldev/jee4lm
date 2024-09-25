@@ -942,16 +942,16 @@ public function setScaleDose($_weight, $_dose) {
   $token=self::getToken();
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
-
-  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
-    $d,
-    'POST',["Authorization: Bearer $token"],$serial);
-
-//  $d = 'group=Group1&dose_index='.$_dose.'&dose_type=MassType&value='.$_weight; 
+//  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
 //  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
 //    $d,
 //    'POST',["Authorization: Bearer $token"],$serial);
+
+// c={group:r.GROUP_1,dose_index:Object.values(T)[t],dose_type:n,value:e},
+ $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
+    $d,
+    'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
   $this->readConfiguration($this);
 }
