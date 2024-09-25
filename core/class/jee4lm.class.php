@@ -940,6 +940,15 @@ public function setScaleDose($_weight, $_dose) {
   log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
+  $scale=$this->getConfiguration('scaleName'); 
+  $recipedoses= json_encode([['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]]);
+
+// (b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
+//  [{id:d.b.A,target:32},{id:d.b.B,target:42}]},
+  $d = 'id='.$scale.'&dose_mode=MassType&recipe_doses='.$recipedoses;
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/recipes',
+    $d,
+    'POST',["Authorization: Bearer $token"],$serial);
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
 //  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
@@ -948,10 +957,10 @@ public function setScaleDose($_weight, $_dose) {
 //    'POST',["Authorization: Bearer $token"],$serial);
 
 // c={group:r.GROUP_1,dose_index:Object.values(T)[t],dose_type:n,value:e},
- $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
-    $d,
-    'POST',["Authorization: Bearer $token"],$serial);
+// $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
+//  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
+//    $d,
+//    'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
   $this->readConfiguration($this);
 }
