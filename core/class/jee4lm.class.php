@@ -1071,14 +1071,18 @@ public function startBackflush()
 
         $displayStuff = [
           "layout::dashboard::table::parameters" => 
-              ["center"=>"0","styletable"=>"background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 42%;","styletd"=>"",
+              ["center"=>"0",
+              "styletable"=>"background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletd"=>"",
               "style::td::1::1"=>"font-size:larger;",
               "text::td::1::1"=>"<br>Réservoir à eau<br>",
               "text::td::1::3"=>"<br>Balance connectée<br>",
-              "style::td::3::1"=>"font-size:larger;height:4em;vertical-align:middle;;",
-              "style::td::3::2"=>"font-size:larger;height:4em;vertical-align:middle;",
-              "style::td::3::3"=>"font-size:larger;height:4em;vertical-align:middle;",
-              "style::td::4::1"=>"height:4em;vertical-align:middle;;",
+              "text::td::3::1"=>"Chaudière à café",
+              "text::td::3::3"=>"Chaudière à vapeur",
+              "style::td::3::1"=>"font-size:1.5em;height:3em;vertical-align:top;",
+              "style::td::3::2"=>"font-size:1.5em;height:3em;vertical-align:top;",
+              "style::td::3::3"=>"font-size:1.5em;height:3em;vertical-align:top;",
+              "style::td::4::1"=>"height:4em;vertical-align:middle;",
               "style::td::4::2"=>"height:4em;vertical-align:middle;",
               "style::td::4::3"=>"height:4em;vertical-align:middle;",
               "style::td::5::1"=>"border-top:solid;border-bottom:solid;",
