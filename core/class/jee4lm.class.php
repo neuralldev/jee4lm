@@ -941,19 +941,13 @@ public function setScaleDose($_weight, $_dose) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
 
-  //"recipes":[{"id":"Recipe1","dose_mode":"Mass","recipe_doses":[{"id":"A","target":32},{"id":"B","target":35}]}],
-  $d = 'id=Recipe1&dose_mode=Mass&recipe_doses=[{"id":"A","target":'.$doseA.'},{"id":"B","target":'.$doseB.'}]}]'; 
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
+//                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
+
+  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
 
-  //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}]
-/*
-  $d = 'dose_index=Dose'.$_dose.'&recipe_id=Recipe1&recipe_dose='.$_dose.'group=Group1'; 
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
-    $d,
-    'POST',["Authorization: Bearer $token"],$serial);
-*/
 //  $d = 'group=Group1&dose_index='.$_dose.'&dose_type=MassType&value='.$_weight; 
 //  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
 //    $d,
@@ -1249,9 +1243,9 @@ public function startBackflush()
 
   public function getBBWSettings() {
     log::add(__CLASS__, 'debug', 'getbbw settings');
-    $serial=$this->getConfiguration('serialNumber'); 
-    $token=self::getToken();
-    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','GET',["Authorization: Bearer $token"]);
+ //   $serial=$this->getConfiguration('serialNumber'); 
+ //   $token=self::getToken();
+ //   $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
   }
 
