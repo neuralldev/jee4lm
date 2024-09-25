@@ -946,7 +946,7 @@ public function setScaleDose($_weight, $_dose) {
 // (b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}]},
   $d = 'id='.$scale.'&dose_mode=MassType&recipe_doses='.$recipedoses;
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/recipes',
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
 
