@@ -1071,7 +1071,7 @@ public function startBackflush()
 
         $displayStuff = [
           "layout::dashboard::table::parameters" => 
-              ["center"=>"0","styletable"=>"background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100%;","styletd"=>"",
+              ["center"=>"0","styletable"=>"background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 42%;","styletd"=>"",
               "style::td::1::1"=>"font-size:larger;",
               "text::td::1::1"=>"<br>Réservoir à eau<br>",
               "text::td::1::3"=>"<br>Balance connectée<br>",
@@ -1376,10 +1376,10 @@ public function startBackflush()
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
-        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
-        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
-        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='128' height='128'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='128' height='128'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='128' height='128'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='128' height='128'>",
         "#_time_widget_#" =>"0"
         )
     );
