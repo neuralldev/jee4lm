@@ -1278,7 +1278,7 @@ public function startBackflush()
           $display ='---';
         else
           $display = "<span style='color:".($coffeecurrent+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$coffeecurrent."°C</span>";
-        $this->getCmd(null, 'displaycoffee')->event($display);
+        $this->getCmd(null, 'displaycoffee')->event('Chaudière café<br>'.$display);
   
         $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
   //      $steamcurrent = $arr['data']['TEMP_STEAM'];
@@ -1287,7 +1287,7 @@ public function startBackflush()
           $display ='OFF';
         else
           $display = "<span style='color:green'>ON</span>";
-        $this->getCmd(null, 'displaysteam')->event($display);
+        $this->getCmd(null, 'displaysteam')->event('Chaudière vapeur<br>'.$display);
   
         if($this->getCmd(null, 'isbbw')->execCmd())
           if($this->searchForBBW()) { //present
