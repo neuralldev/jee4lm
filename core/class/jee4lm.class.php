@@ -493,6 +493,7 @@ public static function readConfiguration($_eq) {
 
           $cmd=$_eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
           $cmd->event($boiler['target']); 
+    
           log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
 
           $cmd=$_eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
@@ -500,11 +501,13 @@ public static function readConfiguration($_eq) {
           log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
 
           $cmd=$_eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,1);
+          $cmd->setdisplay('showIconAndNamedashboard', 0);
+          $cmd->setdisplay('showNameOndashboard', 0);
           // calcule affichage
           if (!$boiler['isEnabled'])
             $display ='OFF';
           else
-            $display = $boiler['target']."°C / ".$boiler['current'];
+            $display = "ON";
           $cmd->event($display); 
           log::add(__CLASS__, 'debug', 'steamdisplay='.$display);
         }
@@ -523,6 +526,8 @@ public static function readConfiguration($_eq) {
           log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
 
           $cmd=$_eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,1);
+          $cmd->setdisplay('showIconAndNamedashboard', 0);
+          $cmd->setdisplay('showNameOndashboard', 0);
           // calcule affichage
           if (!$machinestate)
             $display ='---';
@@ -1056,13 +1061,13 @@ public function startBackflush()
           'jee4lm_coffee_slider' => [6,1],
           'jee4lm_prewet_slider' => [6,2],
           'jee4lm_prewet_time_slider' => [6,2],
-          'jee4lm_steam_slider' => [6,1],
+        //  'jee4lm_steam_slider' => [6,1],
           'tankStatus' => [1,1],
           'plumbedin' => [5,2],
           'jee4lm_steam_off' => [2,3],
           'jee4lm_steam_on' => [2,3],
-          'steamcurrent' => [3,3],
-          'steamtarget' => [3,3],
+        //  'steamcurrent' => [3,3],
+        //  'steamtarget' => [3,3],
           'steamenabled' => [1,1],
           'fwversion' => [7,1],
           'gwversion' => [7,3],
@@ -1271,7 +1276,7 @@ public function startBackflush()
       if(array_key_exists('status', $arr)) {
         $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
         $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
-        $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
+  //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
         $this->getCmd(null, 'tankStatus')->event(!$arr['data']['LEVEL_TANK']);
         $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
         $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
