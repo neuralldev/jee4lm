@@ -114,7 +114,7 @@ class jee4lm extends eqLogic
     } else     
     if ($_type=="PUT") {
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-      curl_setopt($ch, CURLOPT_POSTFIELDS,http_build_query($_data));
+      curl_setopt($ch, CURLOPT_POSTFIELDS,$_data);
     }
 
     $response = curl_exec($ch);
