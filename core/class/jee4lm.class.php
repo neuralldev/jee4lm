@@ -114,7 +114,7 @@ class jee4lm extends eqLogic
     } else     
     if ($_type=="PUT") {
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-      curl_setopt($ch, CURLOPT_POSTFIELDS,$_data);
+      curl_setopt($ch, CURLOPT_POSTFIELDS,http_build_query($_data));
     }
 
     $response = curl_exec($ch);
@@ -968,7 +968,7 @@ public function setRecipeDose($_weight, $_dose) {
   log::add(__CLASS__, 'debug', "send PUT with d=$d");
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     '$d',
-    'PUT',["Authorization: Bearer $token"],$serial);
+    'PUT',["cache-control: no-cache","content-type: application/json","Authorization: Bearer $token"],$serial);
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
 //  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
