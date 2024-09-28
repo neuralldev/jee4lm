@@ -963,7 +963,7 @@ public function setRecipeDose($_weight, $_dose) {
   log::add(__CLASS__, 'debug', "send POST with d=$d");
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/?'.$d,
     '',
-    '',["Authorization: Bearer $token"],$serial);
+    'POST',["Authorization: Bearer $token"],$serial);
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
 //  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
