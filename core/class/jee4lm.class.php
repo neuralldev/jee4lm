@@ -12,7 +12,9 @@ LMCLOUD_TOKEN = 'https://cms.lamarzocco.io/oauth/v2/token',
 LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer',
 LMCLOUD_GW_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home",
 LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
-LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy";
+LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
+COFFEE_BOILER_1 = "CoffeeBoiler1",
+STEAM_BOILER = "SteamBoiler";
 
 /* source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
@@ -805,7 +807,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
       log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
       if ($v > 0) 
         if ($_type!='') 
-          $this->setBoilerTemperature($v,$_type);
+          $this->setBoilerTarget($v,$_type);
         else
           $this->setScaleDose($v, $_setpointlogicalID);
     }
@@ -828,7 +830,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
       //find setpoint value and store it on stove as it after slider move
       if ($v > 0) 
         if ($_type!='') 
-          $this->setBoilerTemperature($v,$_type);
+          $this->setBoilerTarget($v,$_type);
         else
           $this->setScaleDose($v, $_logicalID);
    // log::add(__CLASS__, 'debug', 'set setpoint end');   
@@ -876,30 +878,31 @@ public function switchSteamBoilerONOFF($_toggle) {
 
 /**
  * Select mode for Preinfusion/Prebew.
- * @param mixed $type
+ * set to Disabled if prebrew, set to enabled if prebrew
+ * @param mixed $_mode values accepted : Enabled,Disabled,TypeB
  * @return void
  */
-public function switchPreinfusionOrPrebrew($type) {
+public function setPreinfusionStatus($_mode) {
   // preinfusion = TypeB, prebrew=Enabled/Disabled
   log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-preinfusion','mode='.$type,'POST',["Authorization: Bearer $token"],$serial);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-preinfusion','mode='.$_mode,'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
 /**
  * set the LM boiler target temperature for coffee or steam boiler according to $type value
- * @param mixed $celsius
- * @param mixed $type
+ * @param mixed $_value value in celsius
+ * @param mixed $_identifier by default this is coffee boiler temperature for group 1
  * @return void
  */
-public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1') {
+public function setBoilerTarget($_value, $_identifier = COFFEE_BOILER_1) {
   log::add(__CLASS__, 'debug', 'switch steam on or off');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/target-boiler','identifier='.$type.'&value='.$celsius,'POST',["Authorization: Bearer $token"],$serial);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/target-boiler','identifier='.$_identifier.'&value='.$_value,'POST',["Authorization: Bearer $token"],$serial);
+  //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
 }
 
 /**
@@ -908,15 +911,23 @@ public function setBoilerTemperature($celsius, $type = 'CoffeeBoiler1') {
  * then a preinfusion using the water pressure line is used (in general 1 to 3 bars). 
  * the samle (time/hold) parameters apply. 
  * Do not activate this feature if no plumbed in line is installed!
- * @param mixed $toggle
+ * @param mixed $_toggle true or false
  * @return void
  */
-public function switchPlumbedIn($toggle) {
+public function setPlumbinStatus($_toggle) {
   log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-plumbin','enable='.($toggle?'true':'false'),'POST',["Authorization: Bearer $token"],$serial);
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-plumbin','enable='.($_toggle?'true':'false'),'POST',["Authorization: Bearer $token"],$serial);
   log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+}
+
+public function getMachineUses() {
+  log::add(__CLASS__, 'debug', 'get number of uses');
+  $serial=$this->getConfiguration('serialNumber'); 
+  $token=self::getToken();
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'api/machine_uses','','POST',["Authorization: Bearer $token"],$serial);
+  log::add(__CLASS__, 'debug', 'uses='.json_encode($data, true));
 }
 
 /**
@@ -1084,8 +1095,8 @@ public function startBackflush()
               "style::td::1::1"=>"font-size:larger;",
               "text::td::1::1"=>"<br>Réservoir à eau<br>",
               "text::td::1::3"=>"<br>Balance connectée<br>",
-              "text::td::3::1"=>"Chaudière à café",
-              "text::td::3::3"=>"Chaudière à vapeur",
+//              "text::td::3::1"=>"Chaudière à café",
+//              "text::td::3::3"=>"Chaudière à vapeur",
               "style::td::3::1"=>"font-size:1.5em;height:3em;vertical-align:top;",
               "style::td::3::2"=>"font-size:1.5em;height:3em;vertical-align:top;",
               "style::td::3::3"=>"font-size:1.5em;height:3em;vertical-align:top;",
@@ -1259,7 +1270,7 @@ public function startBackflush()
  //   $serial=$this->getConfiguration('serialNumber'); 
  //   $token=self::getToken();
  //   $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
+//    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
   }
 
   /**
@@ -1371,15 +1382,15 @@ public function startBackflush()
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-        array('operation' => '#value# >= 0','state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block;float:left;width:30px; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 
-                                             'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; float:left;width:30px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
+        array('operation' => '#value# >= 0','state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block;float:left;width:32px; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 
+                                             'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
       ));
     $r['info']['numeric']['bbw dose inactive'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-        array('operation' => '#value# >= 0','state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:lightgray);border-width:thick;border-color:lightgray; border-style: solid;"><span style="display: inline-block; float:left;width:30px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 
-                                            'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; float:left;width:30px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
+        array('operation' => '#value# >= 0','state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 
+                                            'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:lightgray;border-width:thick;border-color:lightgray; border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
         ));
     $r['info']['binary']['bbw nodose'] = array(
         'template' => 'tmplicon',
@@ -1395,9 +1406,9 @@ public function startBackflush()
       'display' => array('icon' => 'null'),
       'replace' => array(
         '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
-        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
         '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
-        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
         "#_time_widget_#" =>"0"
         )
     );
