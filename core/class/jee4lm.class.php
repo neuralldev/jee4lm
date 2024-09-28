@@ -809,7 +809,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
         if ($_type!='') 
           $this->setBoilerTarget($v,$_type);
         else
-          $this->setScaleDose($v, $_setpointlogicalID);
+          $this->setRecipeDose($v, $_setpointlogicalID);
     }
   
 
@@ -832,7 +832,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
         if ($_type!='') 
           $this->setBoilerTarget($v,$_type);
         else
-          $this->setScaleDose($v, $_logicalID);
+          $this->setRecipeDose($v, $_logicalID);
    // log::add(__CLASS__, 'debug', 'set setpoint end');   
     // now refresh display  
 //    $this->getInformations();
@@ -938,7 +938,7 @@ public function getMachineUses() {
  * @param mixed $dose
  * @return void
  */
-public function setScaleDose($_weight, $_dose) {
+public function setRecipeDose($_weight, $_dose) {
   // $dose = 'A' or 'B'
   //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
 
@@ -951,7 +951,7 @@ public function setScaleDose($_weight, $_dose) {
     $doseB = 0+$_weight;
     $doseA = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA')->execCmd();
   }
-  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
+//  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $scale=$this->getConfiguration('scalename'); 
@@ -960,7 +960,7 @@ public function setScaleDose($_weight, $_dose) {
 // (b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}]},
   $d = 'id=Recipe1&dose_mode=Mass&recipe_doses='.$recipedoses;
-  log::add(__CLASS__, 'debug', 'd='.$d);
+  log::add(__CLASS__, 'debug', "send POST with d=$d");
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     $d,
     'POST',["Authorization: Bearer $token"],$serial);
