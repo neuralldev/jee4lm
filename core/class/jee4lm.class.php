@@ -957,13 +957,13 @@ public function setRecipeDose($_weight, $_dose) {
   $scale=$this->getConfiguration('scalename'); 
   $recipedoses= json_encode([['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]]);
 
-// (b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
-//  [{id:d.b.A,target:32},{id:d.b.B,target:42}]},
+// b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
+//  [{id:d.b.A,target:32},{id:d.b.B,target:42}],
   $d = 'id=Recipe1&dose_mode=Mass&recipe_doses='.$recipedoses;
   log::add(__CLASS__, 'debug', "send POST with d=$d");
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
-    $d,
-    'POST',["Authorization: Bearer $token"],$serial);
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/?'.$d,
+    '',
+    '',["Authorization: Bearer $token"],$serial);
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
 //  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
@@ -1196,7 +1196,10 @@ public function startBackflush()
           }
           }
         ],
-        "gender":null,"hobbies":[],"ownMachine":1,"privacy":null,"socialNetworkId":null,"business":null,"businessType":null,"coffeeRoaster":null,"countryOther":null,"areaOperation":null,"brandServiced":null,"personOfContact":null,"phoneModel":null,"id":133029}}
+        "gender":null,"hobbies":[],"ownMachine":1,"privacy":null,
+        "socialNetworkId":null,"business":null,"businessType":null,"coffeeRoaster":null,
+        "countryOther":null,"areaOperation":null,"brandServiced":null,
+        "personOfContact":null,"phoneModel":null,"id":133029}}
     */
       return true;
   }
