@@ -964,7 +964,7 @@ public function setRecipeDose($_weight, $_dose) {
 
 // b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}],
-  $d = 'id=Recipe1&dose_mode=Mass&recipe_doses='.$recipedoses;
+  $d = 'recipeId=Recipe1&doseMode=Mass&recipeDoses='.$recipedoses;
   log::add(__CLASS__, 'debug', "send PUT with d=$d");
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     '$d',
