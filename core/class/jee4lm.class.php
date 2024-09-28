@@ -111,7 +111,12 @@ class jee4lm extends eqLogic
     if ($_type=="POST") {
       curl_setopt($ch, CURLOPT_POST, 1);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
+    } else     
+    if ($_type=="PUT") {
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+      curl_setopt($ch, CURLOPT_POSTFIELDS,http_build_query($_data));
     }
+
     $response = curl_exec($ch);
     if (!$response) {
       log::add(__CLASS__, 'debug', 'request error, cannot fetch info');
@@ -960,10 +965,10 @@ public function setRecipeDose($_weight, $_dose) {
 // b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}],
   $d = 'id=Recipe1&dose_mode=Mass&recipe_doses='.$recipedoses;
-  log::add(__CLASS__, 'debug', "send POST with d=$d");
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes',
+  log::add(__CLASS__, 'debug', "send PUT with d=$d");
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     '$d',
-    'POST',["Authorization: Bearer $token"],$serial);
+    'PUT',["Authorization: Bearer $token"],$serial);
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
 //  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
