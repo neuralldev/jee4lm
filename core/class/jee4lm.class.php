@@ -244,25 +244,29 @@ class jee4lm extends eqLogic
    */
   public static function cron()
   {
-    log::add(__CLASS__, 'debug', 'cron start'); 
+    log::add(__CLASS__, 'debug', 'cron start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       if ($jee4lm->getIsEnable()) {
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
-          $slug= $jee4lm->getConfiguration('type');
+          $slug = $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
+          $state = 0 + cmd::byEqLogicIdAndLogicalId($jee4lm, 'machinemode')->execCmd();
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug");
-          if ($slug!= '') {
+          if ($slug != '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
-            if ($token !='')
-              if (!$jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron error on getconfiguration');
+            if ($token != '')
+              if ($state == 0) // just scan status, all information will be refreshed only if up
+                if (!$jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
+                  log::add(__CLASS__, 'debug', 'cron error on getconfiguration');
+                else
+                  if (!self::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
+                    log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
           }
-        }
-      } else 
-      log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
+        } else
+          log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
+      }
     }
-//    log::add(__CLASS__, 'debug', 'cron end');
   }
 
   /**
@@ -611,7 +615,9 @@ public static function readConfiguration($_eq) {
  "groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},
  "doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],
  "machineMode":"StandBy",
- "teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},"scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},"boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},
+ "teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},
+ "scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},
+ "boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},
  {"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},
  "preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
 2223|[2024-08-31 14:49:02] DEBUG  
@@ -1279,8 +1285,8 @@ public function startBackflush()
  //   $token=self::getToken();
  //   $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
 //    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
-$arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$_serial.'/machine-remotsets','','GET',["Authorization: Bearer $_token"]);
-log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
+//$arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$_serial.'/machine-remotsets','','GET',["Authorization: Bearer $_token"]);
+//log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
 
 }
 
