@@ -944,6 +944,8 @@ public function getMachineUses() {
  * @param mixed $dose
  * @return void
  */
+
+
 public function setRecipeDose($_weight, $_dose) {
   // $dose = 'A' or 'B'
   //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
@@ -965,21 +967,20 @@ public function setRecipeDose($_weight, $_dose) {
   // update recipe
     //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"B","group":"Group1"}]
   //                    t={group:e.group,doseIndex:e.dose_index,recipeId:e.recipe_id,recipeDose:e.recipe_dose},
-  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => $_dose];
-  log::add(__CLASS__, 'debug', "active recipe POST with d=".json_encode($d));
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
-    $d,
-    'POST',["Authorization: Bearer $token"],$serial);
+//  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => $_dose];
+ // log::add(__CLASS__, 'debug', "active recipe POST with d=".json_encode($d));
+ // self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
+ //   $d,
+ //   'POST',["Authorization: Bearer $token"],$serial);
 
   // update list of doses
   $recipedoses= [['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]];
   $d = ["recipeId"=>"Recipe1", "doseMode"=>"Mass", "recipeDoses" => $recipedoses];
-  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
+//  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     $d,
     'PUT',["cache-control: no-cache","content-type: application/json","Authorization: Bearer $token"],$serial);
-
-
+  sleep(5);
 //  now reread everthing
   $this->readConfiguration($this);
 }
@@ -1272,13 +1273,16 @@ public function startBackflush()
     return false;
   }
 
-  public function getBBWSettings() {
+  public function getBBWSettings($_serial, $_token) {
     log::add(__CLASS__, 'debug', 'getbbw settings');
  //   $serial=$this->getConfiguration('serialNumber'); 
  //   $token=self::getToken();
  //   $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
 //    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
-  }
+$arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$_serial.'/machine-remotsets','','GET',["Authorization: Bearer $_token"]);
+log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
+
+}
 
   /**
    * Refreshes the main counters and not all the information
@@ -1289,7 +1293,7 @@ public function startBackflush()
 //    log::add(__CLASS__, 'debug', 'getinformation start');
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
-      $this->getBBWSettings();
+      $this->getBBWSettings($serial, $token);
       $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
       if(array_key_exists('status', $arr)) {
         $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
@@ -1342,6 +1346,7 @@ public function startBackflush()
         }
         log::add(__CLASS__, 'debug', 'getinformation has refresh values');
       }
+
     return true;
   }
 
