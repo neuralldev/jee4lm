@@ -125,7 +125,7 @@ class jee4lm extends eqLogic
       $err_no = curl_errno($ch);
       log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
     } else 
-      log::add(__CLASS__, 'debug', "request response=".$response);
+      log::add(__CLASS__, 'debug', "request response ok "); //.$response);
     curl_close($ch);
 //    log::add(__CLASS__, 'debug', 'request stop');
     jee4lm::checkrequest($response, $_serial,$_header);
@@ -184,7 +184,7 @@ class jee4lm extends eqLogic
       '&client_id='.LMCLIENT_ID.
       '&client_secret='.LMCLIENT_SECRET, 
       'POST');
-    log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
+//    log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
     cache::delete('jee4lm::access_token'); 
     if ($data['access_token']!='') {
       cache::set('jee4lm::access_token', $data['access_token'], 300);    
