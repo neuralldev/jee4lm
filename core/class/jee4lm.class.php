@@ -961,27 +961,21 @@ public function setRecipeDose($_weight, $_dose) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $scale=$this->getConfiguration('scalename'); 
-  $recipedoses= [['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]];
 
-// b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
-//  [{id:d.b.A,target:32},{id:d.b.B,target:42}],
+  // update recipe
+    //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"B","group":"Group1"}]
+  //                    t={group:e.group,doseIndex:e.dose_index,recipeId:e.recipe_id,recipeDose:e.recipe_dose},
+  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => "$_dose"];
+
+  // update list of doses
+  $recipedoses= [['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]];
   $d = ["recipeId"=>"Recipe1", "doseMode"=>"Mass", "recipeDoses" => $recipedoses];
   log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
     $d,
     'PUT',["cache-control: no-cache","content-type: application/json","Authorization: Bearer $token"],$serial);
 
-//                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
-//  $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
-//  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/target-dose',
-//    $d,
-//    'POST',["Authorization: Bearer $token"],$serial);
 
-// c={group:r.GROUP_1,dose_index:Object.values(T)[t],dose_type:n,value:e},
-// $d = 'group=Group1&dose_index=Dose'.$_dose.'&dose_type=MassType&value='.$_weight; 
-//  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/dose',
-//    $d,
-//    'POST',["Authorization: Bearer $token"],$serial);
 //  now reread everthing
   $this->readConfiguration($this);
 }
