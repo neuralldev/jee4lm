@@ -210,34 +210,6 @@ class jee4lm extends eqLogic
     return $access_token;
   }
  
-
-  
-  /**
-   * Rafraichit les données complètes toutes les 5mn
-   * @return void
-   */
-  public static function cron5() {
- log::add(__CLASS__, 'debug', 'cron60 start'); 
-    foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      if ($jee4lm->getIsEnable()) {
-        if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
-          /* lire les infos de l'équipement ici */
-          $slug= $jee4lm->getConfiguration('type');
-          $id = $jee4lm->getId();
-          log::add(__CLASS__, 'debug', "cron5 ID=$id serial=$serial slug=$slug");
-          if ($slug!= '') {
-            $token = self::getToken(); // send query for token and refresh it if necessary
-            if ($token !='')
-              if (!self::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
-                log::add(__CLASS__, 'debug', 'cron5 error on readconfiguration');
-          }
-        } 
-      } else 
-      log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
-    }
-  log::add(__CLASS__, 'debug', 'cron5 end');
-  }
-
   /**
    * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
    * @return void
