@@ -965,7 +965,11 @@ public function setRecipeDose($_weight, $_dose) {
   // update recipe
     //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"B","group":"Group1"}]
   //                    t={group:e.group,doseIndex:e.dose_index,recipeId:e.recipe_id,recipeDose:e.recipe_dose},
-  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => "$_dose"];
+  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => $_dose];
+  log::add(__CLASS__, 'debug', "active recipe POST with d=".json_encode($d));
+  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
+    $d,
+    'POST',["Authorization: Bearer $token"],$serial);
 
   // update list of doses
   $recipedoses= [['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]];
