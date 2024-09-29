@@ -961,7 +961,7 @@ public function setRecipeDose($_weight, $_dose) {
   $serial=$this->getConfiguration('serialNumber'); 
   $token=self::getToken();
   $scale=$this->getConfiguration('scalename'); 
-  $recipedoses= json_encode([['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]]);
+  $recipedoses= [['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]];
 
 // b={id:d.c.SCALE,dose_mode:d.a.MASS,recipe_doses:
 //  [{id:d.b.A,target:32},{id:d.b.B,target:42}],
