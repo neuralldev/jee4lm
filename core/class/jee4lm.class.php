@@ -115,7 +115,7 @@ class jee4lm extends eqLogic
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
       curl_setopt($ch, CURLOPT_ENCODING, "");  
       curl_setopt($ch, CURLOPT_POSTFIELDS,http_build_query($_data));
-      log::add(__CLASS__, 'debug', 'request data='.http_build_query($_data));
+      log::add(__CLASS__, 'debug', 'request data='.json_encode($_data));
     }
 
     $response = curl_exec($ch);
