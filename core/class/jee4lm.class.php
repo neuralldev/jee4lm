@@ -968,7 +968,7 @@ public function setRecipeDose($_weight, $_dose) {
   $d = ["recipeID"=>"Recipe1", "doseMode"=>"Mass", "recipeDoses" => $recipedoses];
   log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
   self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
-    '$d',
+    $d,
     'PUT',["cache-control: no-cache","content-type: application/json","Authorization: Bearer $token"],$serial);
 
 //                i={group:"Group1",dose_index:T.DOSE_A,dose_type:A.MASS_TYPE,value:e},
