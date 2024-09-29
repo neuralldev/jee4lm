@@ -482,7 +482,7 @@ public static function readConfiguration($_eq) {
 
           $cmd=$_eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
           $cmd->event($boiler['current']); 
-          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+//          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
 
           $cmd=$_eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,1);
           $cmd->setdisplay('showIconAndNamedashboard', 0);
@@ -1252,14 +1252,13 @@ public function startBackflush()
   }
 
   public function getBBWSettings($_serial, $_token) {
-    log::add(__CLASS__, 'debug', 'getbbw settings');
+  //  log::add(__CLASS__, 'debug', 'getbbw settings');
  //   $serial=$this->getConfiguration('serialNumber'); 
  //   $token=self::getToken();
  //   $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
 //    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
 //$arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$_serial.'/machine-remotsets','','GET',["Authorization: Bearer $_token"]);
 //log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
-
 }
 
   /**
@@ -1268,7 +1267,7 @@ public function startBackflush()
    */
   public function getInformations()
   {
-//    log::add(__CLASS__, 'debug', 'getinformation start');
+    log::add(__CLASS__, 'debug', 'getinformation start');
       $serial=$this->getConfiguration('serialNumber'); 
       $token=self::getToken();
       $this->getBBWSettings($serial, $token);
