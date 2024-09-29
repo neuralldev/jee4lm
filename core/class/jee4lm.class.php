@@ -251,7 +251,7 @@ class jee4lm extends eqLogic
           /* lire les infos de l'équipement ici */
           $slug = $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
-          $state = 0 + cmd::byEqLogicIdAndLogicalId($jee4lm, 'machinemode')->execCmd();
+          $state = 0 + cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->execCmd();
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug");
           if ($slug != '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
