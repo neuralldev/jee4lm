@@ -229,12 +229,11 @@ class jee4lm extends eqLogic
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token != '')
               if ($state == 0) // just scan status, all information will be refreshed only if up
-                if (!$jee4lm->getInformations()) // translate registers to jeedom values, return true if successful
-                  log::add(__CLASS__, 'debug', 'cron error on getconfiguration');
-                else
-                  if (!self::readConfiguration($jee4lm)) // translate registers to jeedom values, return true if successful
-                    log::add(__CLASS__, 'debug', 'cron error on readconfiguration');
-          }
+                $error =  !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+             else
+                $error = !self::readConfiguration($jee4lm); // translate registers to jeedom values, return true if successful             
+             if ($error)  log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
+         }
         } else
           log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
       }
