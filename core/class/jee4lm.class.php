@@ -422,78 +422,78 @@ public static function readConfiguration($_eq) {
   if ($data['status']== true) {
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
-      log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
+      //log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
       
       $cmd=$_eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);  
       $cmd->event($machine['isPlumbedIn']); 
       $plumbed =    $machine['isPlumbedIn'];
-      log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
+      //log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
       $cmd=$_eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null, null, 0);
       $cmd->event($machine['isBackFlushEnabled']);    
-      log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
+      //log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
 
       $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "jee4lm::tankStatus", null,  null, 1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event(!$machine['tankStatus']);    
-      log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
+      //log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
 
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
 
       $cmd=$_eq->AddCommand("BBW Etat",'bbwmode','info','string',null, null,null,0);
       $cmd->event($bbwset['recipe_dose']);    
-      log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+     // log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
 
       $cmd=$_eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
-      log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
+      //log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
 
       $cmd=$_eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, 'default','default', 'default','default',null,0,false,null,null,null,0);
       $cmd->event($bbw['recipe_doses'][0]['target']);    
-      log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
+     // log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
 
       $cmd=$_eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, 'default','default', 'default','default',null,0,false,null,null,null,0) ;
       $cmd->event($bbw['recipe_doses'][1]['target']);    
-      log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
+    //  log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
 
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       
       $cmd=$_eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','string', null, null,null,0);
       $cmd->event($reglage['doseIndex']); 
-      log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
+     // log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
 
       $cmd=$_eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','string', null, null,null,0);
       $cmd->event($reglage['doseType']); 
-      log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
+    //  log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
  
       $cmd=$_eq->AddCommand("Groupe Dose max",'groupDoseMax','info','numeric', null, "g",null,0);
       $cmd->event($reglage['stopTarget']); 
-      log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
+    //  log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
       
       $cmd=$_eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm::main", null,'THERMOSTAT_STATE',0);
       $machinestate = ($machine['machineMode']=="StandBy"?false:true);
       $cmd->event($machinestate); 
 
-      log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
+   //   log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
 
       $cmd=$_eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,0);
       $cmd->event(($machine['scale']['address']==''?false:true)); 
-      log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
+    //  log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
 
       $cmd=$_eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', "jee4lm::bbw", null,null,1);
       $cmd->event($machine['scale']['connected']); 
-      log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
+    //  log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
 
-      log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
+  //    log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
       $_eq->setConfiguration("scalemac",$machine['scale']['address']);
 
-      log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
+  //    log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
       $_eq->setConfiguration("scalename",$machine['scale']['name']);
 
       $cmd=$_eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'tile',1,null,null,'default', 'default', '0','100');
       $cmd->event($machine['scale']['battery']); 
-      log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
+ //     log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
 
       $boilers = $machine['boilers'];
       foreach($boilers as $boiler) {
@@ -501,12 +501,12 @@ public static function readConfiguration($_eq) {
         {
           $cmd=$_eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm::steam", null,'THERMOSTAT_STATE',0);
           $cmd->event($boiler['isEnabled']); 
-          log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
+ //         log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
 
           $cmd=$_eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
           $cmd->event($boiler['target']); 
     
-          log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
+ //         log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
 
           $cmd=$_eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
           $cmd->event($boiler['current']); 
@@ -521,21 +521,21 @@ public static function readConfiguration($_eq) {
           else
             $display = "ON";
           $cmd->event($display); 
-          log::add(__CLASS__, 'debug', 'steamdisplay='.$display);
+   //       log::add(__CLASS__, 'debug', 'steamdisplay='.$display);
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
           $cmd=$_eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,'THERMOSTAT_STATE',0);
           $cmd->event($boiler['isEnabled']); 
-          log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
+ //         log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
 
           $cmd=$_eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
           $cmd->event($boiler['target']); 
-          log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
+ //         log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
 
           $cmd=$_eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
           $cmd->event($boiler['current']); 
-          log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
+  //        log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
 
           $cmd=$_eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,1);
           $cmd->setdisplay('showIconAndNamedashboard', 0);
@@ -546,33 +546,33 @@ public static function readConfiguration($_eq) {
           else
             $display = $boiler['target']."°C / ".$boiler['current'];
           $cmd->event($display); 
-          log::add(__CLASS__, 'debug', 'coffeedisplay='.$display);        
+  //        log::add(__CLASS__, 'debug', 'coffeedisplay='.$display);        
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
       $cmd=$_eq->AddCommand("Préinfusion",'preinfusionmode','info','binary', null, null,null,1);
       $cmd->event($preinfusion['mode']=='Enabled'); 
-      log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
+//      log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
 
       $cmd=$_eq->AddCommand("Prétrempage",'prewet','info','binary', null, null,null,1);
-      $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
+ //     $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
 
       $cmd=$_eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
       $cmd->event($preinfusion['Group1'][0]['preWetTime']); 
-      log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
+//      log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
 
       $cmd=$_eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
       $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
-      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
+//      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
        
       $fw = $machine['firmwareVersions'];
       $cmd=$_eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
       $cmd->event($fw[0]['fw_version']); 
-      log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
+ //     log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
 
       $cmd=$_eq->AddCommand("Version Gateway",'gwversion','info','other', null, null,null,1);
       $cmd->event($fw[1]['fw_version']); 
-      log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
+ //     log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
 // now create standard commands
       $_eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off","button","ENERGY_ON");
       $_eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off","button","ENERGY_OFF");
@@ -599,7 +599,7 @@ public static function readConfiguration($_eq) {
 // add machine slug to display machine by type
       $cmd=$_eq->AddCommand("Machine",'machine','info','string',"jee4lm::machine", null,null,1);
       $cmd->event($_eq->getConfiguration('type'));    
-      log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+   //   log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
       $_eq->save();
     }
   }
