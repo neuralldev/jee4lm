@@ -515,8 +515,9 @@ public static function readConfiguration($_eq) {
           if (!$machinestate)
             $display ='---';
           else
-            $display = $boiler['target']."°C / ".$boiler['current'];
-          $cmd->event($display); 
+            $display = "<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>";
+          $cmd->event('Chaudière café<br>'.$display);
+
   //        log::add(__CLASS__, 'debug', 'coffeedisplay='.$display);        
         }
       }
