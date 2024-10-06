@@ -516,7 +516,7 @@ public static function readConfiguration($_eq) {
             $display ='---';
           else
             $display = "<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>";
-          $cmd->event('Chaudière café<br>'.$display);
+          $cmd->event($display);
 
   //        log::add(__CLASS__, 'debug', 'coffeedisplay='.$display);        
         }
@@ -1282,13 +1282,13 @@ public function startBackflush()
         $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
 
         $machinestate = ($arr['data']['MACHINE_STATUS']=='BrewingMode');
-        $coffeecurrent = $arr['data']['TEMP_COFFEE'];
         $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
         if (!$machinestate)
           $display ='---';
         else
-          $display = "<span style='color:".($coffeecurrent+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$coffeecurrent."°C</span>";
-        $this->getCmd(null, 'displaycoffee')->event('Chaudière café<br>'.$display);
+          $display = "<span style='color:".($arr['data']['TEMP_COFFEE']+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$arr['data']['TEMP_COFFEE']."°C</span>";
+        $this->getCmd(null, 'displaycoffee')->event($display);
+        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp='. $arr['data']['TEMP_COFFEE']);
   
         $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
   //      $steamcurrent = $arr['data']['TEMP_STEAM'];
@@ -1297,7 +1297,7 @@ public function startBackflush()
           $display ='OFF';
         else
           $display = "<span style='color:green'>ON</span>";
-        $this->getCmd(null, 'displaysteam')->event('Chaudière vapeur<br>'.$display);
+        $this->getCmd(null, 'displaysteam')->event($display);
   
         if($this->getCmd(null, 'isbbw')->execCmd())
           if($this->searchForBBW()) { //present
