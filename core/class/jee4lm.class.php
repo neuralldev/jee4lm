@@ -1288,7 +1288,7 @@ public function startBackflush()
         else
           $display = "<span style='color:".($arr['data']['TEMP_COFFEE']+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$arr['data']['TEMP_COFFEE']."°C</span>";
         $this->getCmd(null, 'displaycoffee')->event($display);
-        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp='. $arr['data']['TEMP_COFFEE']);
+        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp='. $arr['data']['TEMP_COFFEE'].' tank='.$arr['data']['LEVEL_TANK']);
   
         $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
   //      $steamcurrent = $arr['data']['TEMP_STEAM'];
