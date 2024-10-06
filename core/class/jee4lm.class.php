@@ -486,6 +486,7 @@ public static function readConfiguration($_eq) {
           $cmd=$_eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,1);
           $cmd->setdisplay('showIconAndNamedashboard', 0);
           $cmd->setdisplay('showNameOndashboard', 0);
+          $cmd->save();
           // calcule affichage
           if (!$boiler['isEnabled'])
             $display ='OFF';
@@ -511,6 +512,7 @@ public static function readConfiguration($_eq) {
           $cmd=$_eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,1);
           $cmd->setdisplay('showIconAndNamedashboard', 0);
           $cmd->setdisplay('showNameOndashboard', 0);
+          $cmd->save();
           // calcule affichage
           if (!$machinestate)
             $display ='---';
