@@ -231,7 +231,7 @@ class jee4lm extends eqLogic
               if ($state == 0) // just scan status, all information will be refreshed only if up
                 $error =  !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
              else
-                $error = !self::readConfiguration($jee4lm); // translate registers to jeedom values, return true if successful             
+                $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
              if ($error)  log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
          }
         } else
@@ -377,6 +377,74 @@ class jee4lm extends eqLogic
   {
   }
 
+/**
+ * Reads and refresh all the values of an equipment previously created by detection routine
+ * the function takes only the target equipment to refresh as argument
+ * @param eqLogic $_eq
+ * @return bool
+ */
+public static function RefreshAllInformation($_eq) {
+  log::add(__CLASS__, 'debug', 'refresh all information');
+  $serial=$_eq->getConfiguration('serialNumber'); 
+  $token=self::getToken();
+  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
+  if ($data['status']== true) {
+    $machine = $data['data'];
+    if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
+      $_eq->getCmd('', 'isPlumbedIn')->event($machine['isPlumbedIn']); 
+      $_eq->getCmd('', 'backflush')->event($machine['isBackFlushEnabled']); 
+      $_eq->getCmd('', 'tankStatus')->event($machine['tankStatus']); 
+      
+      $bbw = $machine['recipes'][0];
+      $bbwset = $machine['recipeAssignment'][0];
+      $_eq->getCmd('', 'bbwmode')->event($bbwset['recipe_dose']); 
+      $_eq->getCmd('', 'bbwfree')->event(!$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'); 
+      $_eq->getCmd('', 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
+      $_eq->getCmd('', 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
+
+      $g = $machine['groupCapabilities'][0];
+      $reglage = $g['doses'][0];
+      $_eq->getCmd('', 'groupDoseMode')->event($reglage['doseIndex']); 
+      $_eq->getCmd('', 'groupDoseType')->event($reglage['doseType']); 
+      $_eq->getCmd('', 'groupDoseMax')->event($reglage['stopTarget']); 
+
+      $_eq->getCmd('', 'machinemode')->event($machine['machineMode']=="StandBy"?false:true); 
+      $_eq->getCmd('', 'isbbw')->event($machine['scale']['address']==''?false:true); 
+      $_eq->getCmd('', 'isscaleconnected')->event($machine['scale']['connected']); 
+      $_eq->getCmd('', 'scalebattery')->event($machine['scale']['battery']); 
+
+      $boilers = $machine['boilers'];
+      foreach($boilers as $boiler) {
+        if ($boiler['id']=='SteamBoiler')
+        {
+          $_eq->getCmd('', 'steamenabled')->event($boiler['isEnabled']); 
+          $_eq->getCmd('', 'steamtarget')->event($boiler['target']); 
+          $_eq->getCmd('', 'steamcurrent')->event($boiler['current']); 
+          $_eq->getCmd('', 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
+        }
+        if ($boiler['id']=='CoffeeBoiler1')
+        {
+          $_eq->getCmd('', 'coffeeenabled')->event($boiler['isEnabled']); 
+          $_eq->getCmd('', 'coffeetarget')->event($boiler['target']); 
+          $_eq->getCmd('', 'coffeecurrent')->event($boiler['current']); 
+          $_eq->getCmd('', 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
+        }
+      }
+      $preinfusion = $machine['preinfusionSettings'];
+      $_eq->getCmd('', 'preinfusionmode')->event($preinfusion['mode']=='Enabled'); 
+      $_eq->getCmd('', 'prewet')->event($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$machine['isPlumbedIn']); 
+      $_eq->getCmd('', 'prewettime')->event($preinfusion['Group1'][0]['preWetTime']); 
+      $_eq->getCmd('', 'prewetholdtime')->event($preinfusion['Group1'][0]['preWetHoldTime']); 
+
+      $fw = $machine['firmwareVersions'];
+      $_eq->getCmd('', 'fwversion')->event($fw[0]['fw_version']); 
+      $_eq->getCmd('', 'gwversion')->event($fw[1]['fw_version']); 
+      $_eq->save();
+    }
+    return true;
+  } 
+  return false;
+}
 
 /**
  * Reads and create/refresh all the values of an equipment previously created by detection routine
@@ -397,7 +465,6 @@ public static function readConfiguration($_eq) {
       
       $cmd=$_eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);  
       $cmd->event($machine['isPlumbedIn']); 
-      $plumbed =    $machine['isPlumbedIn'];
       //log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
 
       $cmd=$_eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null, null, 0);
@@ -488,12 +555,7 @@ public static function readConfiguration($_eq) {
           $cmd->setdisplay('showNameOndashboard', 0);
           $cmd->save();
           // calcule affichage
-          if (!$boiler['isEnabled'])
-            $display ='OFF';
-          else
-            $display = "ON";
-          $cmd->event($display); 
-   //       log::add(__CLASS__, 'debug', 'steamdisplay='.$display);
+          $cmd->event($boiler['isEnabled'] ?"ON":"OFF"); 
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
@@ -514,13 +576,7 @@ public static function readConfiguration($_eq) {
           $cmd->setdisplay('showNameOndashboard', 0);
           $cmd->save();
           // calcule affichage
-          if (!$machinestate)
-            $display ='---';
-          else
-            $display = "<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>";
-          $cmd->event($display);
-
-  //        log::add(__CLASS__, 'debug', 'coffeedisplay='.$display);        
+          $cmd->event(!$machinestate ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>");
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
