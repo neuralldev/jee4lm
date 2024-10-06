@@ -538,11 +538,11 @@ public static function readConfiguration($_eq) {
 //      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
        
       $fw = $machine['firmwareVersions'];
-      $cmd=$_eq->AddCommand("Version Firmware",'fwversion','info','other', null, null,null,1);
+      $cmd=$_eq->AddCommand("Version Firmware",'fwversion','info','string', null, null,null,1);
       $cmd->event($fw[0]['fw_version']); 
  //     log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
 
-      $cmd=$_eq->AddCommand("Version Gateway",'gwversion','info','other', null, null,null,1);
+      $cmd=$_eq->AddCommand("Version Gateway",'gwversion','info','string', null, null,null,1);
       $cmd->event($fw[1]['fw_version']); 
  //     log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
 // now create standard commands
