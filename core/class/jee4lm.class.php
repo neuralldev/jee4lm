@@ -426,7 +426,7 @@ public static function RefreshAllInformation($_eq) {
         cmd::byEqLogicIdAndLogicalId($id, 'coffeeenabled')->event($boiler['isEnabled']); 
         cmd::byEqLogicIdAndLogicalId($id, 'coffeetarget')->event($boiler['target']); 
         cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
-        log::add(__CLASS__, 'debug', 'current='.$$boiler['current']);
+        log::add(__CLASS__, 'debug', 'current='.$boiler['current']);
         cmd::byEqLogicIdAndLogicalId($id, 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
         }
       }
