@@ -386,6 +386,7 @@ class jee4lm extends eqLogic
 public static function RefreshAllInformation($_eq) {
   log::add(__CLASS__, 'debug', 'refresh all information');
   $serial=$_eq->getConfiguration('serialNumber'); 
+  $id = $_eq->getId();
   log::add(__CLASS__, 'debug', 'serial='.$serial);
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
@@ -393,9 +394,9 @@ public static function RefreshAllInformation($_eq) {
     log::add(__CLASS__, 'debug', 'parse info');
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
-      $_eq->getCmd('jee4lm', 'isPlumbedIn')->event($machine['isPlumbedIn']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'isPlumbedIn')->event($machine['isPlumbedIn']); 
       log::add(__CLASS__, 'debug', 'isPlumbedIn');
-      $_eq->getCmd('jee4lm', 'backflush')->event($machine['isBackFlushEnabled']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']); 
       log::add(__CLASS__, 'debug', 'isBackFlushEnabled');
       $_eq->getCmd('jee4lm', 'tankStatus')->event($machine['tankStatus']); 
       log::add(__CLASS__, 'debug', 'tankStatus');
