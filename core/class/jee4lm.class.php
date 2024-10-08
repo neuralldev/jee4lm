@@ -230,8 +230,10 @@ class jee4lm extends eqLogic
             if ($token != '')
               if ($state == 0) // just scan status, all information will be refreshed only if up
                 $error =  !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
-             else
-                $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
+             else {
+              $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
+              $error |=  !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+             }
              if ($error)  log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
          }
         } else
@@ -419,15 +421,14 @@ public static function RefreshAllInformation($_eq) {
       if ($boiler['id']=='SteamBoiler') {
         cmd::byEqLogicIdAndLogicalId($id, 'steamenabled')->event($boiler['isEnabled']); 
         cmd::byEqLogicIdAndLogicalId($id, 'steamtarget')->event($boiler['target']); 
-        cmd::byEqLogicIdAndLogicalId($id, 'steamcurrent')->event($boiler['current']); 
-        cmd::byEqLogicIdAndLogicalId($id, 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
+//        cmd::byEqLogicIdAndLogicalId($id, 'steamcurrent')->event($boiler['current']); 
+//        cmd::byEqLogicIdAndLogicalId($id, 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
       }
       if ($boiler['id']=='CoffeeBoiler1')  {
         cmd::byEqLogicIdAndLogicalId($id, 'coffeeenabled')->event($boiler['isEnabled']); 
         cmd::byEqLogicIdAndLogicalId($id, 'coffeetarget')->event($boiler['target']); 
-        cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
-        log::add(__CLASS__, 'debug', 'current='.$boiler['current']);
-        cmd::byEqLogicIdAndLogicalId($id, 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
+//        cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
+//        cmd::byEqLogicIdAndLogicalId($id, 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
         }
       }
       cmd::byEqLogicIdAndLogicalId($id, 'preinfusionmode')->event($preinfusion['mode']=='Enabled'); 
