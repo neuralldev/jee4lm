@@ -387,14 +387,18 @@ public static function RefreshAllInformation($_eq) {
   log::add(__CLASS__, 'debug', 'refresh all information');
   $serial=$_eq->getConfiguration('serialNumber'); 
   $id = $_eq->getId();
-  log::add(__CLASS__, 'debug', 'serial='.$serial);
+  log::add(__CLASS__, 'debug', 'serial='.$serial. 'id='.$id);
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
-  if ($data['status']== true) {
+  if ($data['status']== true) { // check that we have information returned
     log::add(__CLASS__, 'debug', 'parse info');
     $machine = $data['data'];
-    if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
-      cmd::byEqLogicIdAndLogicalId($id, 'isPlumbedIn')->event($machine['isPlumbedIn']); 
+      log::add(__CLASS__, 'debug', 'linea identified');
+
+      $cmd = cmd::byEqLogicIdAndLogicalId($id, 'isPlumbedIn'); 
+      if ($cmd ==null) log::add(__CLASS__, 'debug', 'cmd null');
+      if ($cmd !=null) log::add(__CLASS__, 'debug', 'cmd'.$cmd->getId());
+      $cmd->event($machine['isPlumbedIn']); 
       log::add(__CLASS__, 'debug', 'isPlumbedIn');
       cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']); 
       log::add(__CLASS__, 'debug', 'isBackFlushEnabled');
@@ -465,7 +469,7 @@ public static function RefreshAllInformation($_eq) {
       $_eq->getCmd('', 'fwversion')->event($fw[0]['fw_version']); 
       $_eq->getCmd('', 'gwversion')->event($fw[1]['fw_version']); 
       $_eq->save();
-    }
+    
     return true;
   } 
   return false;
