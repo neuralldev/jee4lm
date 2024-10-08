@@ -386,9 +386,11 @@ class jee4lm extends eqLogic
 public static function RefreshAllInformation($_eq) {
   log::add(__CLASS__, 'debug', 'refresh all information');
   $serial=$_eq->getConfiguration('serialNumber'); 
+  log::add(__CLASS__, 'debug', 'serial='.$serial);
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   if ($data['status']== true) {
+    log::add(__CLASS__, 'debug', 'parse info');
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
       $_eq->getCmd('', 'isPlumbedIn')->event($machine['isPlumbedIn']); 
@@ -432,16 +434,24 @@ public static function RefreshAllInformation($_eq) {
         if ($boiler['id']=='SteamBoiler')
         {
           $_eq->getCmd('', 'steamenabled')->event($boiler['isEnabled']); 
+          log::add(__CLASS__, 'debug', 'isEnabled');
           $_eq->getCmd('', 'steamtarget')->event($boiler['target']); 
+          log::add(__CLASS__, 'debug', 'target');
           $_eq->getCmd('', 'steamcurrent')->event($boiler['current']); 
+          log::add(__CLASS__, 'debug', 'current');
           $_eq->getCmd('', 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
+          log::add(__CLASS__, 'debug', 'isEnabled');
         }
         if ($boiler['id']=='CoffeeBoiler1')
         {
           $_eq->getCmd('', 'coffeeenabled')->event($boiler['isEnabled']); 
+          log::add(__CLASS__, 'debug', 'isEnabled');
           $_eq->getCmd('', 'coffeetarget')->event($boiler['target']); 
+          log::add(__CLASS__, 'debug', 'target');
           $_eq->getCmd('', 'coffeecurrent')->event($boiler['current']); 
+          log::add(__CLASS__, 'debug', 'current');
           $_eq->getCmd('', 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
+          log::add(__CLASS__, 'debug', 'machineMode');
         }
       }
       $preinfusion = $machine['preinfusionSettings'];
