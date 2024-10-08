@@ -393,22 +393,22 @@ public static function RefreshAllInformation($_eq) {
     log::add(__CLASS__, 'debug', 'parse info');
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
-      $_eq->getCmd('', 'isPlumbedIn')->event($machine['isPlumbedIn']); 
+      $_eq->getCmd('jee4lm', 'isPlumbedIn')->event($machine['isPlumbedIn']); 
       log::add(__CLASS__, 'debug', 'isPlumbedIn');
-      $_eq->getCmd('', 'backflush')->event($machine['isBackFlushEnabled']); 
+      $_eq->getCmd('jee4lm', 'backflush')->event($machine['isBackFlushEnabled']); 
       log::add(__CLASS__, 'debug', 'isBackFlushEnabled');
-      $_eq->getCmd('', 'tankStatus')->event($machine['tankStatus']); 
+      $_eq->getCmd('jee4lm', 'tankStatus')->event($machine['tankStatus']); 
       log::add(__CLASS__, 'debug', 'tankStatus');
       
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
-      $_eq->getCmd('', 'bbwmode')->event($bbwset['recipe_dose']); 
+      $_eq->getCmd('jee4lm', 'bbwmode')->event($bbwset['recipe_dose']); 
       log::add(__CLASS__, 'debug', 'recipe_dose');
-      $_eq->getCmd('', 'bbwfree')->event(!$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'); 
+      $_eq->getCmd('jee4lm', 'bbwfree')->event(!$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'); 
       log::add(__CLASS__, 'debug', 'connected');
-      $_eq->getCmd('', 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
+      $_eq->getCmd('jee4lm', 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
       log::add(__CLASS__, 'debug', 'doseA');
-      $_eq->getCmd('', 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
+      $_eq->getCmd('jee4lm', 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
       log::add(__CLASS__, 'debug', 'doseB');
 
       $g = $machine['groupCapabilities'][0];
