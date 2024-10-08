@@ -393,78 +393,48 @@ public static function RefreshAllInformation($_eq) {
   if ($data['status']== true) { // check that we have information returned
     log::add(__CLASS__, 'debug', 'parse info');
     $machine = $data['data'];
-      cmd::byEqLogicIdAndLogicalId($id, 'plumbedin')->event($machine['isPlumbedIn']); 
-      log::add(__CLASS__, 'debug', 'isPlumbedIn');
-      cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']); 
-      log::add(__CLASS__, 'debug', 'isBackFlushEnabled');
-      $_eq->getCmd('', 'tankStatus')->event($machine['tankStatus']); 
-      log::add(__CLASS__, 'debug', 'tankStatus');
-      
-      $bbw = $machine['recipes'][0];
-      $bbwset = $machine['recipeAssignment'][0];
-      $_eq->getCmd('', 'bbwmode')->event($bbwset['recipe_dose']); 
-      log::add(__CLASS__, 'debug', 'recipe_dose');
-      $_eq->getCmd('', 'bbwfree')->event(!$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'); 
-      log::add(__CLASS__, 'debug', 'connected');
-      $_eq->getCmd('', 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
-      log::add(__CLASS__, 'debug', 'doseA');
-      $_eq->getCmd('', 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
-      log::add(__CLASS__, 'debug', 'doseB');
+    $bbw = $machine['recipes'][0];
+    $bbwset = $machine['recipeAssignment'][0];
+    $g = $machine['groupCapabilities'][0];
+    $reglage = $g['doses'][0];
+    $boilers = $machine['boilers'];
+    $preinfusion = $machine['preinfusionSettings'];
+    $fw = $machine['firmwareVersions'];
 
-      $g = $machine['groupCapabilities'][0];
-      $reglage = $g['doses'][0];
-      $_eq->getCmd('', 'groupDoseMode')->event($reglage['doseIndex']); 
-      log::add(__CLASS__, 'debug', 'doseIndex');
-      $_eq->getCmd('', 'groupDoseType')->event($reglage['doseType']); 
-      log::add(__CLASS__, 'debug', 'doseType');
-      $_eq->getCmd('', 'groupDoseMax')->event($reglage['stopTarget']); 
-      log::add(__CLASS__, 'debug', 'stopTarget');
-
-      $_eq->getCmd('', 'machinemode')->event($machine['machineMode']=="StandBy"?false:true); 
-      log::add(__CLASS__, 'debug', 'machineMode');
-      $_eq->getCmd('', 'isbbw')->event($machine['scale']['address']==''?false:true); 
-      log::add(__CLASS__, 'debug', 'address');
-      $_eq->getCmd('', 'isscaleconnected')->event($machine['scale']['connected']); 
-      log::add(__CLASS__, 'debug', 'connected');
-      $_eq->getCmd('', 'scalebattery')->event($machine['scale']['battery']); 
-      log::add(__CLASS__, 'debug', 'battery');
-
-      $boilers = $machine['boilers'];
-      foreach($boilers as $boiler) {
-        if ($boiler['id']=='SteamBoiler')
-        {
-          $_eq->getCmd('', 'steamenabled')->event($boiler['isEnabled']); 
-          log::add(__CLASS__, 'debug', 'isEnabled');
-          $_eq->getCmd('', 'steamtarget')->event($boiler['target']); 
-          log::add(__CLASS__, 'debug', 'target');
-          $_eq->getCmd('', 'steamcurrent')->event($boiler['current']); 
-          log::add(__CLASS__, 'debug', 'current');
-          $_eq->getCmd('', 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
-          log::add(__CLASS__, 'debug', 'isEnabled');
-        }
-        if ($boiler['id']=='CoffeeBoiler1')
-        {
-          $_eq->getCmd('', 'coffeeenabled')->event($boiler['isEnabled']); 
-          log::add(__CLASS__, 'debug', 'isEnabled');
-          $_eq->getCmd('', 'coffeetarget')->event($boiler['target']); 
-          log::add(__CLASS__, 'debug', 'target');
-          $_eq->getCmd('', 'coffeecurrent')->event($boiler['current']); 
-          log::add(__CLASS__, 'debug', 'current');
-          $_eq->getCmd('', 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
-          log::add(__CLASS__, 'debug', 'machineMode');
+    cmd::byEqLogicIdAndLogicalId($id, 'plumbedin')->event($machine['isPlumbedIn']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'tankStatus')->event($machine['tankStatus']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'bbwmode')->event($bbwset['recipe_dose']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'bbwfree')->event(!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B')); 
+    cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMode')->event($reglage['doseIndex']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'groupDoseType')->event($reglage['doseType']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMax')->event($reglage['stopTarget']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->event($machine['machineMode']=="StandBy"?false:true); 
+    cmd::byEqLogicIdAndLogicalId($id, 'isbbw')->event($machine['scale']['address']==''?false:true); 
+    cmd::byEqLogicIdAndLogicalId($id, 'isscaleconnected')->event($machine['scale']['connected']); 
+    cmd::byEqLogicIdAndLogicalId($id, 'scalebattery')->event($machine['scale']['battery']); 
+    foreach($boilers as $boiler) {
+      if ($boiler['id']=='SteamBoiler') {
+        cmd::byEqLogicIdAndLogicalId($id, 'steamenabled')->event($boiler['isEnabled']); 
+        cmd::byEqLogicIdAndLogicalId($id, 'steamtarget')->event($boiler['target']); 
+        cmd::byEqLogicIdAndLogicalId($id, 'steamcurrent')->event($boiler['current']); 
+        cmd::byEqLogicIdAndLogicalId($id, 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
+      }
+      if ($boiler['id']=='CoffeeBoiler1')  {
+        cmd::byEqLogicIdAndLogicalId($id, 'coffeeenabled')->event($boiler['isEnabled']); 
+        cmd::byEqLogicIdAndLogicalId($id, 'coffeetarget')->event($boiler['target']); 
+        cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
+        cmd::byEqLogicIdAndLogicalId($id, 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
         }
       }
-      $preinfusion = $machine['preinfusionSettings'];
-      $_eq->getCmd('', 'preinfusionmode')->event($preinfusion['mode']=='Enabled'); 
-      $_eq->getCmd('', 'prewet')->event($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$machine['isPlumbedIn']); 
-      $_eq->getCmd('', 'prewettime')->event($preinfusion['Group1'][0]['preWetTime']); 
-      $_eq->getCmd('', 'prewetholdtime')->event($preinfusion['Group1'][0]['preWetHoldTime']); 
-
-      $fw = $machine['firmwareVersions'];
-      $_eq->getCmd('', 'fwversion')->event($fw[0]['fw_version']); 
-      $_eq->getCmd('', 'gwversion')->event($fw[1]['fw_version']); 
-      $_eq->save();
-    
+      cmd::byEqLogicIdAndLogicalId($id, 'preinfusionmode')->event($preinfusion['mode']=='Enabled'); 
+      cmd::byEqLogicIdAndLogicalId($id, 'prewet')->event($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$machine['isPlumbedIn']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'prewettime')->event($preinfusion['Group1'][0]['preWetTime']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'prewetholdtime')->event($preinfusion['Group1'][0]['preWetHoldTime']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'fwversion')->event($fw[0]['fw_version']);
+      cmd::byEqLogicIdAndLogicalId($id, 'gwversion')->event($fw[1]['fw_version']);
     return true;
   } 
   return false;
