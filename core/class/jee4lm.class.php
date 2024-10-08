@@ -392,26 +392,40 @@ public static function RefreshAllInformation($_eq) {
     $machine = $data['data'];
     if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
       $_eq->getCmd('', 'isPlumbedIn')->event($machine['isPlumbedIn']); 
+      log::add(__CLASS__, 'debug', 'isPlumbedIn');
       $_eq->getCmd('', 'backflush')->event($machine['isBackFlushEnabled']); 
+      log::add(__CLASS__, 'debug', 'isBackFlushEnabled');
       $_eq->getCmd('', 'tankStatus')->event($machine['tankStatus']); 
+      log::add(__CLASS__, 'debug', 'tankStatus');
       
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
       $_eq->getCmd('', 'bbwmode')->event($bbwset['recipe_dose']); 
+      log::add(__CLASS__, 'debug', 'recipe_dose');
       $_eq->getCmd('', 'bbwfree')->event(!$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'); 
+      log::add(__CLASS__, 'debug', 'connected');
       $_eq->getCmd('', 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
+      log::add(__CLASS__, 'debug', 'doseA');
       $_eq->getCmd('', 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
+      log::add(__CLASS__, 'debug', 'doseB');
 
       $g = $machine['groupCapabilities'][0];
       $reglage = $g['doses'][0];
       $_eq->getCmd('', 'groupDoseMode')->event($reglage['doseIndex']); 
+      log::add(__CLASS__, 'debug', 'doseIndex');
       $_eq->getCmd('', 'groupDoseType')->event($reglage['doseType']); 
+      log::add(__CLASS__, 'debug', 'doseType');
       $_eq->getCmd('', 'groupDoseMax')->event($reglage['stopTarget']); 
+      log::add(__CLASS__, 'debug', 'stopTarget');
 
       $_eq->getCmd('', 'machinemode')->event($machine['machineMode']=="StandBy"?false:true); 
+      log::add(__CLASS__, 'debug', 'machineMode');
       $_eq->getCmd('', 'isbbw')->event($machine['scale']['address']==''?false:true); 
+      log::add(__CLASS__, 'debug', 'address');
       $_eq->getCmd('', 'isscaleconnected')->event($machine['scale']['connected']); 
+      log::add(__CLASS__, 'debug', 'connected');
       $_eq->getCmd('', 'scalebattery')->event($machine['scale']['battery']); 
+      log::add(__CLASS__, 'debug', 'battery');
 
       $boilers = $machine['boilers'];
       foreach($boilers as $boiler) {
@@ -842,10 +856,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
   public function updatesetpoint($_value, $_absolute = false, $_setpointlogicalID, $_type)
   {
     $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
-      if ($_absolute)
-        $v = floatval($_value);
-      else
-        $v = floatval($setpoint->execCmd()) + $_value;      
+      $v = $_absolute ? floatval($_value) : floatval($setpoint->execCmd()) + $_value;      
       log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
       if ($v > 0) 
         if ($_type!='') 
@@ -1290,17 +1301,18 @@ public function startBackflush()
       foreach ($bbwcollection as $bbw) {
  //       log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
         $bbwID = $bbw->getId();
-        if ($bbwID != null) { 
-          $present = $bbw->execCmd();
+        $scmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
+        if ($scmd != null) { 
+          $present = $scmd->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.($present==1?'allumé':'éteint'));
           return $present;
         }
       }
       foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
-        if ($bbwID != null) {
-   //       log::add(__CLASS__, 'debug', 'bbw1='.json_encode($bbw));
-          $present = $bbw->execCmd();
+        $scmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
+        if ($scmd != null) { 
+          $present = $scmd->execCmd();
           log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.($present==1?'allumé':'éteint'));
           return $present;
         }
