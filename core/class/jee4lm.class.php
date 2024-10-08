@@ -387,15 +387,13 @@ public static function RefreshAllInformation($_eq) {
   log::add(__CLASS__, 'debug', 'refresh all information');
   $serial=$_eq->getConfiguration('serialNumber'); 
   $id = $_eq->getId();
-  log::add(__CLASS__, 'debug', 'serial='.$serial. 'id='.$id);
+  log::add(__CLASS__, 'debug', 'serial='.$serial. ' id='.$id);
   $token=self::getToken();
   $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
   if ($data['status']== true) { // check that we have information returned
     log::add(__CLASS__, 'debug', 'parse info');
     $machine = $data['data'];
-      log::add(__CLASS__, 'debug', 'linea identified');
-
-      $cmd = cmd::byEqLogicIdAndLogicalId($id, 'isPlumbedIn'); 
+      $cmd =  $_eq->getCmd('', 'plumbedin'); 
       if ($cmd ==null) log::add(__CLASS__, 'debug', 'cmd null');
       if ($cmd !=null) log::add(__CLASS__, 'debug', 'cmd'.$cmd->getId());
       $cmd->event($machine['isPlumbedIn']); 
