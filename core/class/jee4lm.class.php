@@ -1,20 +1,20 @@
-<?php 
+<?php
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 
-const 
-LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg", 
-LMCLIENT_SECRET ="2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s",
-LMDEFAULT_PORT_LOCAL = 8081, 
-LMMACHINE_TYPE = ['linea-mini','micra','gs3'],
-LMFILTER_MACHINE_TYPE='MACHINE_INSTANCE',
-LMCLOUD_TOKEN = 'https://cms.lamarzocco.io/oauth/v2/token',
-LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer',
-LMCLOUD_GW_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home",
-LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
-LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
-COFFEE_BOILER_1 = "CoffeeBoiler1",
-STEAM_BOILER = "SteamBoiler";
+const
+  LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg",
+  LMCLIENT_SECRET = "2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s",
+  LMDEFAULT_PORT_LOCAL = 8081,
+  LMMACHINE_TYPE = ['linea-mini', 'micra', 'gs3'],
+  LMFILTER_MACHINE_TYPE = 'MACHINE_INSTANCE',
+  LMCLOUD_TOKEN = 'https://cms.lamarzocco.io/oauth/v2/token',
+  LMCLOUD_CUSTOMER = 'https://cms.lamarzocco.io/api/customer',
+  LMCLOUD_GW_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home",
+  LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
+  LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
+  COFFEE_BOILER_1 = "CoffeeBoiler1",
+  STEAM_BOILER = "SteamBoiler";
 
 /* source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
@@ -35,50 +35,43 @@ class jee4lm extends eqLogic
    * @param mixed $_header  
    * @return bool
    */
-  public static function checkrequest($_response, $_serial = null, $_header = null) {
- //   log::add(__CLASS__, 'debug', 'check request');
-    if ($_response=='') return true;
- //   log::add(__CLASS__, 'debug', 'check request not empty');
+  public static function checkrequest($_response, $_serial = null, $_header = null)
+  {
+    //   log::add(__CLASS__, 'debug', 'check request');
+    if ($_response == '') return true;
+    //   log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($_response, true);
-    if (!array_key_exists('data',$r)) {
-      return true;
-    }
+    if (!array_key_exists('data', $r)) return true;    
     $arr = $r['data'];
-    if (!array_key_exists('commandId',$arr)) {
-      return true;
-    }
+    if (!array_key_exists('commandId', $arr)) return true;
     $commandID = $arr["commandId"];
-    log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
-    if ($commandID=='')
-      return true;
-//      log::add(__CLASS__, 'debug', 'check request serial');
-      // add serial
-    if ($_serial  == null) 
-      return true;
-//      log::add(__CLASS__, 'debug', 'loop');
-      
+    //    log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
+    if ($commandID == '') return true;
+    //      log::add(__CLASS__, 'debug', 'check request serial');
+    // add serial
+    if ($_serial == null) return true;
+    //      log::add(__CLASS__, 'debug', 'loop');
+
     // if there is a commandID then wait for command to succeed   
-    for ($i=0;$i<5;$i++) {
- //     log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
+    for ($i = 0; $i < 5; $i++) {
+      //     log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY."/".$_serial."/commands/".$commandID);
+      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY . "/" . $_serial . "/commands/" . $commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-      if ($_header == null)
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
-      else
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $_header);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $_header == null ? ["Content-Type: application/x-www-form-urlencoded"] : $_header);
       $response = curl_exec($ch);
       curl_close($ch);
 
-      if ($response !='') {
+      if ($response != '') {
         $arr = json_decode($response, true);
-   //     log::add(__CLASS__, 'debug', 'check request, response='.$response);
-        $answer = $arr['data']['status']; 
-
-        log::add(__CLASS__, 'debug', 'check request, loop '.($i+1).' answer='.$answer);
-        if ($answer != 'PENDING')
-          if ($answer=="COMPLETED")
+        switch ($arr['data']['status']) {
+          case "COMPLETED":
             return true;
+          case "PENDING":
+            break;
+          default:
+            break;
+        }
       }
       sleep(3);
     }
@@ -96,40 +89,40 @@ class jee4lm extends eqLogic
    * @param mixed $_serial
    * @return mixed
    */
-  public static function request($_path, $_data = null, $_type = 'GET', $_header= null, $_serial = null) {
+  public static function request($_path, $_data = null, $_type = 'GET', $_header = null, $_serial = null)
+  {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
 //    log::add(__CLASS__, 'debug', 'request query url='.$_path);
- 
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $_path);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    if ($_header == null)
-      curl_setopt($ch, CURLOPT_HTTPHEADER, ["Content-Type: application/x-www-form-urlencoded"]);
-    else
-      curl_setopt($ch, CURLOPT_HTTPHEADER, $_header);
-    if ($_type=="POST") {
-      curl_setopt($ch, CURLOPT_POST, 1);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
-    } else     
-    if ($_type=="PUT") {
-      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-      curl_setopt($ch, CURLOPT_ENCODING, "");  
-      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($_data));
-      log::add(__CLASS__, 'debug', 'request data='.json_encode($_data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $_header == null ? ["Content-Type: application/x-www-form-urlencoded"] : $_header);
+    switch ($_type) {
+      case "POST":
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
+        break;
+      case "PUT":
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_ENCODING, "");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($_data));
+        break;
+      default:
+        break;
     }
-
     $response = curl_exec($ch);
     if (!$response) {
       log::add(__CLASS__, 'debug', 'request error, cannot fetch info');
       $error_msg = curl_error($ch);
       $err_no = curl_errno($ch);
       log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
-    } else 
+    } else
       log::add(__CLASS__, 'debug', "request response ok "); //.$response);
     curl_close($ch);
-//    log::add(__CLASS__, 'debug', 'request stop');
-    jee4lm::checkrequest($response, $_serial,$_header);
-    return json_decode($response,true);
+    //    log::add(__CLASS__, 'debug', 'request stop');
+    jee4lm::checkrequest($response, $_serial, $_header);
+    return json_decode($response, true);
   }
 
   /**
@@ -143,18 +136,20 @@ class jee4lm extends eqLogic
   public static function login($_username, $_password)
   {
     // login to LM cloud attempt to get the token 
-    $data = self::request(LMCLOUD_TOKEN, 
-    'username='.$_username. 
-    '&password='.$_password.
-    '&grant_type=password'. 
-    '&client_id='.LMCLIENT_ID.
-    '&client_secret='.LMCLIENT_SECRET, 
-    'POST');
+    $data = self::request(
+      LMCLOUD_TOKEN,
+      'username=' . $_username .
+      '&password=' . $_password .
+      '&grant_type=password' .
+      '&client_id=' . LMCLIENT_ID .
+      '&client_secret=' . LMCLIENT_SECRET,
+      'POST'
+    );
     log::add(__CLASS__, 'debug', 'login ' . json_encode($data, true));
-    cache::delete('jee4lm::access_token'); 
+    cache::delete('jee4lm::access_token');
     config::save('refreshToken', '', 'jee4lm');
     config::save('accessToken', '', 'jee4lm');
-  if ($data['access_token']!='') {
+    if ($data['access_token'] != '') {
       config::save('refreshToken', $data['refresh_token'], 'jee4lm');
       config::save('accessToken', $data['access_token'], 'jee4lm');
       config::save('userId', $_username, 'jee4lm');
@@ -170,28 +165,31 @@ class jee4lm extends eqLogic
    * the new token is stored in the cache with the expiricy set as well to 300
    * @return mixed
    */
-  public static function refreshToken() {
-    $refresh=config::byKey('refreshToken', 'jee4lm');
-    $_username=config::byKey('userId', 'jee4lm');
-    $_password=config::byKey('userPwd', 'jee4lm');
+  public static function refreshToken()
+  {
+    $refresh = config::byKey('refreshToken', 'jee4lm');
+    $_username = config::byKey('userId', 'jee4lm');
+    $_password = config::byKey('userPwd', 'jee4lm');
     config::save('refreshToken', '', 'jee4lm');
     config::save('accessToken', '', 'jee4lm');
-  // try to detect the machines only if token succeeded
+    // try to detect the machines only if token succeeded
     log::add(__CLASS__, 'debug', 'refresh token');
-    $data = self::request(LMCLOUD_TOKEN, 
-      'grant_type=refresh_token'.
-      '&refresh_token='.$refresh. 
-      '&client_id='.LMCLIENT_ID.
-      '&client_secret='.LMCLIENT_SECRET, 
-      'POST');
-//    log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
-    cache::delete('jee4lm::access_token'); 
-    if ($data['access_token']!='') {
-      cache::set('jee4lm::access_token', $data['access_token'], 300);    
-      config::save('refreshToken',  $data['refresh_token'], 'jee4lm');
+    $data = self::request(
+      LMCLOUD_TOKEN,
+      'grant_type=refresh_token' .
+      '&refresh_token=' . $refresh .
+      '&client_id=' . LMCLIENT_ID .
+      '&client_secret=' . LMCLIENT_SECRET,
+      'POST'
+    );
+    //    log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
+    cache::delete('jee4lm::access_token');
+    if ($data['access_token'] != '') {
+      cache::set('jee4lm::access_token', $data['access_token'], 300);
+      config::save('refreshToken', $data['refresh_token'], 'jee4lm');
       config::save('accessToken', $data['access_token'], 'jee4lm');
       return $data['access_token'];
-    }    
+    }
     return '';
   }
 
@@ -200,16 +198,17 @@ class jee4lm extends eqLogic
    * the refresh routine to renew it 
    * @return mixed
    */
-  public static function getToken() {
+  public static function getToken()
+  {
     $mc = cache::byKey('jee4lm::access_token');
     $access_token = $mc->getValue();
-    if (config::byKey('accessToken', 'jee4lm')=='') // no login performed yet
+    if (config::byKey('accessToken', 'jee4lm') == '') // no login performed yet
       return '';
-    if ($access_token =='') 
+    if ($access_token == '')
       $access_token = self::refreshToken();
     return $access_token;
   }
- 
+
   /**
    * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
    * @return void
@@ -224,18 +223,19 @@ class jee4lm extends eqLogic
           $slug = $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
           $state = 0 + cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->execCmd();
-          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=".$state);
+          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=" . $state);
           if ($slug != '') {
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token != '')
               if ($state == 0) // just scan status, all information will be refreshed only if up
-                $error =  !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
-             else {
-              $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
-              $error |=  !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
-             }
-             if ($error)  log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
-         }
+                $error = !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+              else {
+                $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
+                $error |= !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+              }
+            if ($error)
+              log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
+          }
         } else
           log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
       }
@@ -249,21 +249,21 @@ class jee4lm extends eqLogic
    */
   public static function pull($_options = null)
   {
-//    log::add(__CLASS__, 'debug', 'pull start');
+    //    log::add(__CLASS__, 'debug', 'pull start');
     //$cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
     //if (is_object($cron)) {
     //  $cron->remove();
     //}
-  //  log::add(__CLASS__, 'debug', 'pull end');
+    //  log::add(__CLASS__, 'debug', 'pull end');
   }
-   
+
   /**
    * fonction nécessaire à jeedom pour nettoyer les commandes dans la fonction de remplacement 
    * @return array<mixed|string>[]
    */
   public static function deadCmd()
   {
-   
+
     log::add(__CLASS__, 'debug', 'deadcmd start');
     $return = array();
     foreach (eqLogic::byType(__CLASS__) as $eql) {
@@ -328,7 +328,7 @@ class jee4lm extends eqLogic
   public function refresh()
   {
     foreach ($this->getCmd() as $cmd) {
-//      $s = print_r($cmd, 1);
+      //      $s = print_r($cmd, 1);
 //      log::add(__CLASS__, 'debug', 'refresh  cmd: ' . $s);
       $cmd->execute();
     }
@@ -340,7 +340,7 @@ class jee4lm extends eqLogic
    */
   public function postSave()
   {
-//    log::add(__CLASS__, 'debug', 'postsave start');
+    //    log::add(__CLASS__, 'debug', 'postsave start');
   }
 
   /**
@@ -349,7 +349,7 @@ class jee4lm extends eqLogic
    */
   public function preUpdate()
   {
-//    log::add(__CLASS__, 'debug', 'preupdate start');
+    //    log::add(__CLASS__, 'debug', 'preupdate start');
 //    log::add(__CLASS__, 'debug', 'preupdate stop');
   }
 
@@ -359,7 +359,7 @@ class jee4lm extends eqLogic
    */
   public function postUpdate()
   {
-//    log::add(__CLASS__, 'debug', 'postupdate start');
+    //    log::add(__CLASS__, 'debug', 'postupdate start');
 //    log::add(__CLASS__, 'debug', 'postupdate stop');
   }
 
@@ -379,398 +379,415 @@ class jee4lm extends eqLogic
   {
   }
 
-/**
- * Reads and refresh all the values of an equipment previously created by detection routine
- * the function takes only the target equipment to refresh as argument
- * @param eqLogic $_eq
- * @return bool
- */
-public static function RefreshAllInformation($_eq) {
-  log::add(__CLASS__, 'debug', 'refresh all information');
-  $serial=$_eq->getConfiguration('serialNumber'); 
-  $id = $_eq->getId();
-  log::add(__CLASS__, 'debug', 'serial='.$serial. ' id='.$id);
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
-  if ($data['status']== true) { // check that we have information returned
-    log::add(__CLASS__, 'debug', 'parse info');
-    $machine = $data['data'];
-    $bbw = $machine['recipes'][0];
-    $bbwset = $machine['recipeAssignment'][0];
-    $g = $machine['groupCapabilities'][0];
-    $reglage = $g['doses'][0];
-    $boilers = $machine['boilers'];
-    $preinfusion = $machine['preinfusionSettings'];
-    $fw = $machine['firmwareVersions'];
+  /**
+   * Reads and refresh all the values of an equipment previously created by detection routine
+   * the function takes only the target equipment to refresh as argument
+   * @param eqLogic $_eq
+   * @return bool
+   */
+  public static function RefreshAllInformation($_eq)
+  {
+    log::add(__CLASS__, 'debug', 'refresh all information');
+    $serial = $_eq->getConfiguration('serialNumber');
+    $id = $_eq->getId();
+    log::add(__CLASS__, 'debug', 'serial=' . $serial . ' id=' . $id);
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/configuration', null, 'GET', ["Authorization: Bearer $token"]);
+    if ($data['status'] == true) { // check that we have information returned
+      log::add(__CLASS__, 'debug', 'parse info');
+      $machine = $data['data'];
+      $bbw = $machine['recipes'][0];
+      $bbwset = $machine['recipeAssignment'][0];
+      $g = $machine['groupCapabilities'][0];
+      $reglage = $g['doses'][0];
+      $boilers = $machine['boilers'];
+      $preinfusion = $machine['preinfusionSettings'];
+      $fw = $machine['firmwareVersions'];
 
-    cmd::byEqLogicIdAndLogicalId($id, 'plumbedin')->event($machine['isPlumbedIn']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'tankStatus')->event($machine['tankStatus']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'bbwmode')->event($bbwset['recipe_dose']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'bbwfree')->event(!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B')); 
-    cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMode')->event($reglage['doseIndex']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'groupDoseType')->event($reglage['doseType']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMax')->event($reglage['stopTarget']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->event($machine['machineMode']=="StandBy"?false:true); 
-    cmd::byEqLogicIdAndLogicalId($id, 'isbbw')->event($machine['scale']['address']==''?false:true); 
-    cmd::byEqLogicIdAndLogicalId($id, 'isscaleconnected')->event($machine['scale']['connected']); 
-    cmd::byEqLogicIdAndLogicalId($id, 'scalebattery')->event($machine['scale']['battery']); 
-    foreach($boilers as $boiler) {
-      if ($boiler['id']=='SteamBoiler') {
-        cmd::byEqLogicIdAndLogicalId($id, 'steamenabled')->event($boiler['isEnabled']); 
-        cmd::byEqLogicIdAndLogicalId($id, 'steamtarget')->event($boiler['target']); 
-//        cmd::byEqLogicIdAndLogicalId($id, 'steamcurrent')->event($boiler['current']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'plumbedin')->event($machine['isPlumbedIn']);
+      cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']);
+      cmd::byEqLogicIdAndLogicalId($id, 'tankStatus')->event($machine['tankStatus']);
+      cmd::byEqLogicIdAndLogicalId($id, 'bbwmode')->event($bbwset['recipe_dose']);
+      cmd::byEqLogicIdAndLogicalId($id, 'bbwfree')->event(!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'));
+      cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']);
+      cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']);
+      cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMode')->event($reglage['doseIndex']);
+      cmd::byEqLogicIdAndLogicalId($id, 'groupDoseType')->event($reglage['doseType']);
+      cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMax')->event($reglage['stopTarget']);
+      cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->event($machine['machineMode'] == "StandBy" ? false : true);
+      cmd::byEqLogicIdAndLogicalId($id, 'isbbw')->event($machine['scale']['address'] == '' ? false : true);
+      cmd::byEqLogicIdAndLogicalId($id, 'isscaleconnected')->event($machine['scale']['connected']);
+      cmd::byEqLogicIdAndLogicalId($id, 'scalebattery')->event($machine['scale']['battery']);
+      foreach ($boilers as $boiler) {
+        if ($boiler['id'] == 'SteamBoiler') {
+          cmd::byEqLogicIdAndLogicalId($id, 'steamenabled')->event($boiler['isEnabled']);
+          cmd::byEqLogicIdAndLogicalId($id, 'steamtarget')->event($boiler['target']);
+          //        cmd::byEqLogicIdAndLogicalId($id, 'steamcurrent')->event($boiler['current']); 
 //        cmd::byEqLogicIdAndLogicalId($id, 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
-      }
-      if ($boiler['id']=='CoffeeBoiler1')  {
-        cmd::byEqLogicIdAndLogicalId($id, 'coffeeenabled')->event($boiler['isEnabled']); 
-        cmd::byEqLogicIdAndLogicalId($id, 'coffeetarget')->event($boiler['target']); 
-//        cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
+        }
+        if ($boiler['id'] == 'CoffeeBoiler1') {
+          cmd::byEqLogicIdAndLogicalId($id, 'coffeeenabled')->event($boiler['isEnabled']);
+          cmd::byEqLogicIdAndLogicalId($id, 'coffeetarget')->event($boiler['target']);
+          //        cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
 //        cmd::byEqLogicIdAndLogicalId($id, 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
         }
       }
-      cmd::byEqLogicIdAndLogicalId($id, 'preinfusionmode')->event($preinfusion['mode']=='Enabled'); 
-      cmd::byEqLogicIdAndLogicalId($id, 'prewet')->event($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$machine['isPlumbedIn']); 
-      cmd::byEqLogicIdAndLogicalId($id, 'prewettime')->event($preinfusion['Group1'][0]['preWetTime']); 
-      cmd::byEqLogicIdAndLogicalId($id, 'prewetholdtime')->event($preinfusion['Group1'][0]['preWetHoldTime']); 
+      cmd::byEqLogicIdAndLogicalId($id, 'preinfusionmode')->event($preinfusion['mode'] == 'Enabled');
+      cmd::byEqLogicIdAndLogicalId($id, 'prewet')->event($preinfusion['Group1'][0]['preWetTime'] > 0) && ($preinfusion['Group1'][0]['preWetHoldTime'] > 0) && (!$machine['isPlumbedIn']);
+      cmd::byEqLogicIdAndLogicalId($id, 'prewettime')->event($preinfusion['Group1'][0]['preWetTime']);
+      cmd::byEqLogicIdAndLogicalId($id, 'prewetholdtime')->event($preinfusion['Group1'][0]['preWetHoldTime']);
       cmd::byEqLogicIdAndLogicalId($id, 'fwversion')->event($fw[0]['fw_version']);
       cmd::byEqLogicIdAndLogicalId($id, 'gwversion')->event($fw[1]['fw_version']);
-    return true;
-  } 
-  return false;
-}
-
-/**
- * Reads and create/refresh all the values of an equipment previously created by detection routine
- * the function takes only the target equipment to refresh as argument
- * @param eqLogic $_eq
- * @return bool
- */
-public static function readConfiguration($_eq) {
-  log::add(__CLASS__, 'debug', 'read configuration');
-  $serial=$_eq->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/configuration',null,'GET',["Authorization: Bearer $token"]);
-  //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-  if ($data['status']== true) {
-    $machine = $data['data'];
-    if ($machine['machineCapabilities'][0]['family']=='LINEA') { // linea mini
-      //log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
-      
-      $cmd=$_eq->AddCommand("Sur réseau d'eau",'plumbedin','info','binary', null, null,null,1);  
-      $cmd->event($machine['isPlumbedIn']); 
-      //log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
-
-      $cmd=$_eq->AddCommand("Etat Backflush",'backflush','info','binary', "jee4lm::backflush", null, null, 0);
-      $cmd->event($machine['isBackFlushEnabled']);    
-      //log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
-
-      $cmd=$_eq->AddCommand("Réservoir plein", 'tankStatus', 'info' ,'binary' , "jee4lm::tankStatus", null,  null, 1, 'default','default', 'default','default',null,0,false,null,null,null,0);
-      $cmd->event(!$machine['tankStatus']);    
-      //log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
-
-      $bbw = $machine['recipes'][0];
-      $bbwset = $machine['recipeAssignment'][0];
-
-      $cmd=$_eq->AddCommand("BBW Etat",'bbwmode','info','string',null, null,null,0);
-      $cmd->event($bbwset['recipe_dose']);    
-     // log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
-
-      $cmd=$_eq->AddCommand("BBW Libre",'bbwfree','info','binary', "jee4lm::bbw nodose", null,null,1, 'default','default', 'default','default',null,0,false,null,null,null,0);
-      $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');    
-      //log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
-
-      $cmd=$_eq->AddCommand("BBW Dose A",'bbwdoseA','info','numeric', ($bbwset['recipe_dose'] == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, 'default','default', 'default','default',null,0,false,null,null,null,0);
-      $cmd->event($bbw['recipe_doses'][0]['target']);    
-     // log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
-
-      $cmd=$_eq->AddCommand("BBW Dose B",'bbwdoseB','info','numeric', ($bbwset['recipe_dose'] == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"), "g",null,1, 'default','default', 'default','default',null,0,false,null,null,null,0) ;
-      $cmd->event($bbw['recipe_doses'][1]['target']);    
-    //  log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
-
-      $g = $machine['groupCapabilities'][0];
-      $reglage = $g['doses'][0];
-      
-      $cmd=$_eq->AddCommand("Groupe Réglage sur Dose",'groupDoseMode','info','string', null, null,null,0);
-      $cmd->event($reglage['doseIndex']); 
-     // log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
-
-      $cmd=$_eq->AddCommand("Groupe Type de Dose",'groupDoseType','info','string', null, null,null,0);
-      $cmd->event($reglage['doseType']); 
-    //  log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
- 
-      $cmd=$_eq->AddCommand("Groupe Dose max",'groupDoseMax','info','numeric', null, "g",null,0);
-      $cmd->event($reglage['stopTarget']); 
-    //  log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
-      
-      $cmd=$_eq->AddCommand("Etat",'machinemode','info','binary', "jee4lm::main", null,'THERMOSTAT_STATE',0);
-      $machinestate = ($machine['machineMode']=="StandBy"?false:true);
-      $cmd->event($machinestate); 
-
-   //   log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
-
-      $cmd=$_eq->AddCommand("BBW Présent",'isbbw','info','binary', null, null,null,0);
-      $cmd->event(($machine['scale']['address']==''?false:true)); 
-    //  log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
-
-      $cmd=$_eq->AddCommand("BBW balance connectée",'isscaleconnected','info','binary', "jee4lm::bbw", null,null,1);
-      $cmd->event($machine['scale']['connected']); 
-    //  log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
-
-  //    log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
-      $_eq->setConfiguration("scalemac",$machine['scale']['address']);
-
-  //    log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
-      $_eq->setConfiguration("scalename",$machine['scale']['name']);
-
-      $cmd=$_eq->AddCommand("BBW batterie",'scalebattery','info','numeric', null, "%",'tile',1,null,null,'default', 'default', '0','100');
-      $cmd->event($machine['scale']['battery']); 
- //     log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
-
-      $boilers = $machine['boilers'];
-      foreach($boilers as $boiler) {
-        if ($boiler['id']=='SteamBoiler')
-        {
-          $cmd=$_eq->AddCommand("Vapeur activée",'steamenabled','info','binary', "jee4lm::steam", null,'THERMOSTAT_STATE',0);
-          $cmd->event($boiler['isEnabled']); 
- //         log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
-
-          $cmd=$_eq->AddCommand("Vapeur temperature cible",'steamtarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
-          $cmd->event($boiler['target']); 
-    
- //         log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
-
-          $cmd=$_eq->AddCommand("Vapeur température actuelle",'steamcurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
-          $cmd->event($boiler['current']); 
-//          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
-
-          $cmd=$_eq->AddCommand("Chaudière Vapeur",'displaysteam','info','string', null, null,null,1);
-          $cmd->setdisplay('showIconAndNamedashboard', 0);
-          $cmd->setdisplay('showNameOndashboard', 0);
-          $cmd->save();
-          // calcule affichage
-          $cmd->event($boiler['isEnabled'] ?"ON":"OFF"); 
-        }
-        if ($boiler['id']=='CoffeeBoiler1')
-        {
-          $cmd=$_eq->AddCommand("Cafetière activée",'coffeeenabled','info','binary', null, null,'THERMOSTAT_STATE',0);
-          $cmd->event($boiler['isEnabled']); 
- //         log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
-
-          $cmd=$_eq->AddCommand("Cafetière temperature cible",'coffeetarget','info','numeric', null, '°C','THERMOSTAT_SETPOINT',0);
-          $cmd->event($boiler['target']); 
- //         log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
-
-          $cmd=$_eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric', null, '°C','THERMOSTAT_TEMPERATURE',0);
-          $cmd->event($boiler['current']); 
-  //        log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
-
-          $cmd=$_eq->AddCommand("Chaudière café",'displaycoffee','info','string', null, null,null,1);
-          $cmd->setdisplay('showIconAndNamedashboard', 0);
-          $cmd->setdisplay('showNameOndashboard', 0);
-          $cmd->save();
-          // calcule affichage
-          $cmd->event(!$machinestate ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>");
-        }
-      }
-      $preinfusion = $machine['preinfusionSettings'];
-      $cmd=$_eq->AddCommand("Préinfusion",'preinfusionmode','info','binary', null, null,null,1);
-      $cmd->event($preinfusion['mode']=='Enabled'); 
-//      log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
-
-      $cmd=$_eq->AddCommand("Prétrempage",'prewet','info','binary', null, null,null,1);
- //     $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
-
-      $cmd=$_eq->AddCommand("Prétrempage durée",'prewettime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
-      $cmd->event($preinfusion['Group1'][0]['preWetTime']); 
-//      log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
-
-      $cmd=$_eq->AddCommand("Prétrempage pause",'prewetholdtime','info','numeric', null, 's','THERMOSTAT_SETPOINT',0);
-      $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']); 
-//      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
-       
-      $fw = $machine['firmwareVersions'];
-      $cmd=$_eq->AddCommand("Version Firmware",'fwversion','info','string', null, null,null,1);
-      $cmd->event($fw[0]['fw_version']); 
- //     log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
-
-      $cmd=$_eq->AddCommand("Version Gateway",'gwversion','info','string', null, null,null,1);
-      $cmd->event($fw[1]['fw_version']); 
- //     log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
-// now create standard commands
-      $_eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off","button",1);
-      $_eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off","button",1);
-      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off","button",1);
-      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off","button",1);
-      $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
-      $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85,105, 0.5);
-//      $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 39,134, 1);
-      $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 0.5);
-      $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 1, 9, 0.5);
-      $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5,100, 0.5);
-      $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5,100, 0.5);
-      $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
-      $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget"); 
-//    $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
-      $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime"); 
-      $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime"); 
-      $_eq->linksetpoint("jee4lm_on", "machinemode"); 
-      $_eq->linksetpoint("jee4lm_off", "machinemode"); 
-      $_eq->linksetpoint("jee4lm_steam_on", "steamenabled"); 
-      $_eq->linksetpoint("jee4lm_steam_off", "steamenabled"); 
-      $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA"); 
-      $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB"); 
-// add machine slug to display machine by type
-      $cmd=$_eq->AddCommand("Machine",'machine','info','string',"jee4lm::machine", null,null,1);
-      $cmd->event($_eq->getConfiguration('type'));    
-   //   log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
-      $_eq->save();
+      return true;
     }
-  }
-  /*
- config={"status":true,"data":
- {"version":"v1",
- "preinfusionModesAvailable":["ByDoseType"],
- "machineCapabilities":[{"family":"LINEA","groupsNumber":1,"coffeeBoilersNumber":1,"hasCupWarmer":false,"steamBoilersNumber":1,"teaDosesNumber":1,"machineModes":["BrewingMode","StandBy"],"schedulingType":"smartWakeUpSleep"}],
- "machine_sn":"Sn2307902283","machine_hw":"0","isPlumbedIn":false,"isBackFlushEnabled":false,"standByTime":0,"tankStatus":true,"settings":[],
- "recipes":[{"id":"Recipe1","dose_mode":"Mass",
- "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],
- "recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],
- "groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},
- "doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],
- "machineMode":"StandBy",
- "teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},
- "scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},
- "boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},
- {"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},
- "preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
-2223|[2024-08-31 14:49:02] DEBUG  
-  */
-  return true;
-}
-
-
-/**
- * AddCommand function adds/update an information on an existing command inside an equipment
- * it allows to initialize a lot of optional paramters to display the command properly
- * @param mixed $_Name
- * @param mixed $_logicalId
- * @param mixed $_Type
- * @param mixed $_SubType
- * @param mixed $_Template
- * @param mixed $_unite
- * @param mixed $_generic_type
- * @param mixed $_IsVisible
- * @param mixed $_icon
- * @param mixed $_forceLineB
- * @param mixed $_valuemin
- * @param mixed $_valuemax
- * @param mixed $_order
- * @param mixed $_IsHistorized
- * @param mixed $_repeatevent
- * @param mixed $_iconname
- * @param mixed $_calculValueOffset
- * @param mixed $_historizeRound
- * @param mixed $_noiconname
- * @param mixed $_warning
- * @param mixed $_danger
- * @param mixed $_invert
- * @return mixed
- */
-public function AddCommand(
-  $_Name, $_logicalId, $_Type = 'info', $_SubType = 'binary', $_Template = null, $_unite = null,
-  $_generic_type = null, $_IsVisible = 1,
-  $_icon = 'default', $_forceLineB = 'default', $_valuemin = 'default', $_valuemax = 'default', 
-  $_order = null, $_IsHistorized =0, $_repeatevent = false, $_iconname = null, 
-  $_calculValueOffset = null, $_historizeRound = null, 
-  $_noiconname = null, $_warning = null, $_danger = null, $_invert = 0 ) 
-  { 
-  $createCmd = true;
-  $Command = $this->getCmd(null, $_logicalId);
-  if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
-    $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
-    if (is_object($Command)) {
-      $createCmd = false;
-     // log::add(__CLASS__, 'debug', ' command already exists ');
-    }
+    return false;
   }
 
-  if ($createCmd) {
-   // log::add(__CLASS__, 'debug', ' add record for ' . $Name);
-    if (!is_object($Command)) {
-      // basic settings
-      $Command = new jee4lmCmd();
-      // $Command->setId(null);
-      $Command->setLogicalId($_logicalId);
-      $Command->setEqLogic_id($this->getId());
-      $Command->setName($_Name);
-      $Command->setType($_Type);
-      $Command->setSubType($_SubType);
-    }
-    
-    $Command->setIsVisible($_IsVisible);
-    if ($_IsHistorized!=null) $Command->setIsHistorized(strval($_IsHistorized));
-    if ($_Template != null) {
-      $Command->setTemplate('dashboard', $_Template);
-      $Command->setTemplate('mobile', $_Template);
-    }
-    if ($_unite != null && $_SubType == 'numeric')
-      $Command->setUnite($_unite);
-    if ($_icon != 'default')
-      $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
-    if ($_forceLineB != 'default')
-      $Command->setdisplay('forceReturnLineBefore', 1);
-    if ($_iconname != 'default')
-      $Command->setdisplay('showIconAndNamedashboard', 1);
-    if ($_noiconname !=null) {
-      $Command->setdisplay('showIconAndNamedashboard', 0);
-      $Command->setdisplay('showNameOndashboard', 0);
-    }
-    if ($_calculValueOffset != null)
-      $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
-    if ($_historizeRound != null)
-      $Command->setConfiguration('historizeRound', $_historizeRound);
-    if ($_generic_type != null)
-      $Command->setGeneric_type($_generic_type);
-    if ($_repeatevent == true && $_Type == 'info')
-      $Command->setConfiguration('repeatEventManagement', 'never');
-    if ($_valuemin != 'default')
-      $Command->setConfiguration('minValue', $_valuemin);
-    if ($_valuemax != 'default')
-      $Command->setConfiguration('maxValue', $_valuemax);
-    if ($_warning != null)
-      $Command->setDisplay("warningif", $_warning);
-    if ($_order != null)
-      $Command->setOrder($_order);
-    if ($_danger != null)
-      $Command->setDisplay("dangerif", $_danger);
-    if ($_invert != null)
-      $Command->setDisplay('invertBinary', $_invert);      
-    $Command->save();
-   // log::add(__CLASS__, 'debug', 'command saved');
-  }
- // log::add(__CLASS__, 'debug', ' addcommand end');
-  return $Command;
-}
-
-/**
- * AddAction allows to add/update an action to an equipment using optional parameters
- * @param mixed $_actionName
- * @param mixed $_actionTitle
- * @param mixed $_template
- * @param mixed $_generic_type
- * @param mixed $_visible
- * @param mixed $_SubType
- * @param mixed $_min
- * @param mixed $_max
- * @param mixed $_step
- * @return void
- */
-public function AddAction($_actionName, $_actionTitle, $_template = null, $_generic_type = null, $_visible=1, $_SubType = 'other', $_min=null, $_max=null, $_step=null)
+  /**
+   * Reads and create/refresh all the values of an equipment previously created by detection routine
+   * the function takes only the target equipment to refresh as argument
+   * @param eqLogic $_eq
+   * @return bool
+   */
+  public static function readConfiguration($_eq)
   {
-   // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
+    log::add(__CLASS__, 'debug', 'read configuration');
+    $serial = $_eq->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/configuration', null, 'GET', ["Authorization: Bearer $token"]);
+    //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+    if ($data['status'] == true) {
+      $machine = $data['data'];
+      if ($machine['machineCapabilities'][0]['family'] == 'LINEA') { // linea mini
+        //log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
+
+        $cmd = $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
+        $cmd->event($machine['isPlumbedIn']);
+        //log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
+
+        $cmd = $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm::backflush", null, null, 0);
+        $cmd->event($machine['isBackFlushEnabled']);
+        //log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
+
+        $cmd = $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $cmd->event(!$machine['tankStatus']);
+        //log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
+
+        $bbw = $machine['recipes'][0];
+        $bbwset = $machine['recipeAssignment'][0];
+
+        $cmd = $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
+        $cmd->event($bbwset['recipe_dose']);
+        // log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+
+        $cmd = $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');
+        //log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
+
+        $cmd = $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($bbwset['recipe_dose'] == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $cmd->event($bbw['recipe_doses'][0]['target']);
+        // log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
+
+        $cmd = $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($bbwset['recipe_dose'] == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $cmd->event($bbw['recipe_doses'][1]['target']);
+        //  log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
+
+        $g = $machine['groupCapabilities'][0];
+        $reglage = $g['doses'][0];
+
+        $cmd = $_eq->AddCommand("Groupe Réglage sur Dose", 'groupDoseMode', 'info', 'string', null, null, null, 0);
+        $cmd->event($reglage['doseIndex']);
+        // log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
+
+        $cmd = $_eq->AddCommand("Groupe Type de Dose", 'groupDoseType', 'info', 'string', null, null, null, 0);
+        $cmd->event($reglage['doseType']);
+        //  log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
+
+        $cmd = $_eq->AddCommand("Groupe Dose max", 'groupDoseMax', 'info', 'numeric', null, "g", null, 0);
+        $cmd->event($reglage['stopTarget']);
+        //  log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
+
+        $cmd = $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm::main", null, 'THERMOSTAT_STATE', 0);
+        $machinestate = ($machine['machineMode'] == "StandBy" ? false : true);
+        $cmd->event($machinestate);
+
+        //   log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
+
+        $cmd = $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
+        $cmd->event(($machine['scale']['address'] == '' ? false : true));
+        //  log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
+
+        $cmd = $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm::bbw", null, null, 1);
+        $cmd->event($machine['scale']['connected']);
+        //  log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
+
+        //    log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
+        $_eq->setConfiguration("scalemac", $machine['scale']['address']);
+
+        //    log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
+        $_eq->setConfiguration("scalename", $machine['scale']['name']);
+
+        $cmd = $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
+        $cmd->event($machine['scale']['battery']);
+        //     log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
+
+        $boilers = $machine['boilers'];
+        foreach ($boilers as $boiler) {
+          if ($boiler['id'] == 'SteamBoiler') {
+            $cmd = $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
+            $cmd->event($boiler['isEnabled']);
+            //         log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
+
+            $cmd = $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+            $cmd->event($boiler['target']);
+
+            //         log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
+
+            $cmd = $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+            $cmd->event($boiler['current']);
+            //          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
+
+            $cmd = $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
+            $cmd->setdisplay('showIconAndNamedashboard', 0);
+            $cmd->setdisplay('showNameOndashboard', 0);
+            $cmd->save();
+            // calcule affichage
+            $cmd->event($boiler['isEnabled'] ? "ON" : "OFF");
+          }
+          if ($boiler['id'] == 'CoffeeBoiler1') {
+            $cmd = $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
+            $cmd->event($boiler['isEnabled']);
+            //         log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
+
+            $cmd = $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+            $cmd->event($boiler['target']);
+            //         log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
+
+            $cmd = $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+            $cmd->event($boiler['current']);
+            //        log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
+
+            $cmd = $_eq->AddCommand("Chaudière café", 'displaycoffee', 'info', 'string', null, null, null, 1);
+            $cmd->setdisplay('showIconAndNamedashboard', 0);
+            $cmd->setdisplay('showNameOndashboard', 0);
+            $cmd->save();
+            // calcule affichage
+            $cmd->event(!$machinestate ? '---' : "<span style='color:" . ($boiler['current'] + 2 >= $boiler['target'] ? 'green' : 'red') . ";'>" . $boiler['target'] . "°C / " . $boiler['current'] . "°C</span>");
+          }
+        }
+        $preinfusion = $machine['preinfusionSettings'];
+        $cmd = $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+        $cmd->event($preinfusion['mode'] == 'Enabled');
+        //      log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
+
+        $cmd = $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
+        //     $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
+
+        $cmd = $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+        $cmd->event($preinfusion['Group1'][0]['preWetTime']);
+        //      log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
+
+        $cmd = $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+        $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']);
+        //      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
+
+        $fw = $machine['firmwareVersions'];
+        $cmd = $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
+        $cmd->event($fw[0]['fw_version']);
+        //     log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
+
+        $cmd = $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
+        $cmd->event($fw[1]['fw_version']);
+        //     log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
+// now create standard commands
+        $_eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off", "button", 1);
+        $_eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off", "button", 1);
+        $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "button", 1);
+        $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off", "button", 1);
+        $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
+        $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85, 105, 0.5);
+        //      $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 39,134, 1);
+        $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 2, 9, 0.5);
+        $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 1, 9, 0.5);
+        $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
+        $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5, 100, 0.5);
+        $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm::backflush on off");
+        $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget");
+        //    $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
+        $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime");
+        $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime");
+        $_eq->linksetpoint("jee4lm_on", "machinemode");
+        $_eq->linksetpoint("jee4lm_off", "machinemode");
+        $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
+        $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
+        $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
+        $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
+        // add machine slug to display machine by type
+        $cmd = $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm::machine", null, null, 1);
+        $cmd->event($_eq->getConfiguration('type'));
+        //   log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
+        $_eq->save();
+      }
+    }
+    /*
+   config={"status":true,"data":
+   {"version":"v1",
+   "preinfusionModesAvailable":["ByDoseType"],
+   "machineCapabilities":[{"family":"LINEA","groupsNumber":1,"coffeeBoilersNumber":1,"hasCupWarmer":false,"steamBoilersNumber":1,"teaDosesNumber":1,"machineModes":["BrewingMode","StandBy"],"schedulingType":"smartWakeUpSleep"}],
+   "machine_sn":"Sn2307902283","machine_hw":"0","isPlumbedIn":false,"isBackFlushEnabled":false,"standByTime":0,"tankStatus":true,"settings":[],
+   "recipes":[{"id":"Recipe1","dose_mode":"Mass",
+   "recipe_doses":[{"id":"A","target":32},{"id":"B","target":45}]}],
+   "recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"A","group":"Group1"}],
+   "groupCapabilities":[{"capabilities":{"groupType":"AV_Group","groupNumber":"Group1","boilerId":"CoffeeBoiler1","hasScale":false,"hasFlowmeter":false,"numberOfDoses":1},
+   "doses":[{"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","stopTarget":32}],"doseMode":{"groupNumber":"Group1","brewingType":"ManualType"}}],
+   "machineMode":"StandBy",
+   "teaDoses":{"DoseA":{"doseIndex":"DoseA","stopTarget":0}},
+   "scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},
+   "boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},
+   {"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},
+   "preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
+  2223|[2024-08-31 14:49:02] DEBUG  
+    */
+    return true;
+  }
+
+
+  /**
+   * AddCommand function adds/update an information on an existing command inside an equipment
+   * it allows to initialize a lot of optional paramters to display the command properly
+   * @param mixed $_Name
+   * @param mixed $_logicalId
+   * @param mixed $_Type
+   * @param mixed $_SubType
+   * @param mixed $_Template
+   * @param mixed $_unite
+   * @param mixed $_generic_type
+   * @param mixed $_IsVisible
+   * @param mixed $_icon
+   * @param mixed $_forceLineB
+   * @param mixed $_valuemin
+   * @param mixed $_valuemax
+   * @param mixed $_order
+   * @param mixed $_IsHistorized
+   * @param mixed $_repeatevent
+   * @param mixed $_iconname
+   * @param mixed $_calculValueOffset
+   * @param mixed $_historizeRound
+   * @param mixed $_noiconname
+   * @param mixed $_warning
+   * @param mixed $_danger
+   * @param mixed $_invert
+   * @return mixed
+   */
+  public function AddCommand(
+    $_Name,
+    $_logicalId,
+    $_Type = 'info',
+    $_SubType = 'binary',
+    $_Template = null,
+    $_unite = null,
+    $_generic_type = null,
+    $_IsVisible = 1,
+    $_icon = 'default',
+    $_forceLineB = 'default',
+    $_valuemin = 'default',
+    $_valuemax = 'default',
+    $_order = null,
+    $_IsHistorized = 0,
+    $_repeatevent = false,
+    $_iconname = null,
+    $_calculValueOffset = null,
+    $_historizeRound = null,
+    $_noiconname = null,
+    $_warning = null,
+    $_danger = null,
+    $_invert = 0
+  ) {
+    $createCmd = true;
+    $Command = $this->getCmd(null, $_logicalId);
+    if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
+      $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
+      if (is_object($Command)) {
+        $createCmd = false;
+        // log::add(__CLASS__, 'debug', ' command already exists ');
+      }
+    }
+
+    if ($createCmd) {
+      // log::add(__CLASS__, 'debug', ' add record for ' . $Name);
+      if (!is_object($Command)) {
+        // basic settings
+        $Command = new jee4lmCmd();
+        // $Command->setId(null);
+        $Command->setLogicalId($_logicalId);
+        $Command->setEqLogic_id($this->getId());
+        $Command->setName($_Name);
+        $Command->setType($_Type);
+        $Command->setSubType($_SubType);
+      }
+
+      $Command->setIsVisible($_IsVisible);
+      if ($_IsHistorized != null)
+        $Command->setIsHistorized(strval($_IsHistorized));
+      if ($_Template != null) {
+        $Command->setTemplate('dashboard', $_Template);
+        $Command->setTemplate('mobile', $_Template);
+      }
+      if ($_unite != null && $_SubType == 'numeric')
+        $Command->setUnite($_unite);
+      if ($_icon != 'default')
+        $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
+      if ($_forceLineB != 'default')
+        $Command->setdisplay('forceReturnLineBefore', 1);
+      if ($_iconname != 'default')
+        $Command->setdisplay('showIconAndNamedashboard', 1);
+      if ($_noiconname != null) {
+        $Command->setdisplay('showIconAndNamedashboard', 0);
+        $Command->setdisplay('showNameOndashboard', 0);
+      }
+      if ($_calculValueOffset != null)
+        $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+      if ($_historizeRound != null)
+        $Command->setConfiguration('historizeRound', $_historizeRound);
+      if ($_generic_type != null)
+        $Command->setGeneric_type($_generic_type);
+      if ($_repeatevent == true && $_Type == 'info')
+        $Command->setConfiguration('repeatEventManagement', 'never');
+      if ($_valuemin != 'default')
+        $Command->setConfiguration('minValue', $_valuemin);
+      if ($_valuemax != 'default')
+        $Command->setConfiguration('maxValue', $_valuemax);
+      if ($_warning != null)
+        $Command->setDisplay("warningif", $_warning);
+      if ($_order != null)
+        $Command->setOrder($_order);
+      if ($_danger != null)
+        $Command->setDisplay("dangerif", $_danger);
+      if ($_invert != null)
+        $Command->setDisplay('invertBinary', $_invert);
+      $Command->save();
+      // log::add(__CLASS__, 'debug', 'command saved');
+    }
+    // log::add(__CLASS__, 'debug', ' addcommand end');
+    return $Command;
+  }
+
+  /**
+   * AddAction allows to add/update an action to an equipment using optional parameters
+   * @param mixed $_actionName
+   * @param mixed $_actionTitle
+   * @param mixed $_template
+   * @param mixed $_generic_type
+   * @param mixed $_visible
+   * @param mixed $_SubType
+   * @param mixed $_min
+   * @param mixed $_max
+   * @param mixed $_step
+   * @return void
+   */
+  public function AddAction($_actionName, $_actionTitle, $_template = null, $_generic_type = null, $_visible = 1, $_SubType = 'other', $_min = null, $_max = null, $_step = null)
+  {
+    // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
     $command = $this->getCmd(null, $_actionName);
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
@@ -798,7 +815,7 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
         $command->setConfiguration('minValue', $_min);
       if ($_max != null)
         $command->setConfiguration('maxValue', $_max);
-        if ($_step != null)
+      if ($_step != null)
         $command->setDisplay('parameters', ['step' => $_step]);
       $command->save();
     }
@@ -813,17 +830,18 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
    * @param mixed $_setpointlogicalID
    * @return void
    */
-  public function linksetpoint($_slider, $_setpointlogicalID) {
+  public function linksetpoint($_slider, $_setpointlogicalID)
+  {
     $set_setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $_slider);
-    $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
-    if ($set_setpoint == null || $setpoint == null) 
-        log::add(__CLASS__, 'debug', "setpoint : command not found");
-      else {
-       // log::add(__CLASS__, 'debug', "setpoint : command found!");
-        $set_setpoint->setValue($setpoint->getId());
-        $set_setpoint->save();
-       // log::add(__CLASS__, 'debug', "setpoint ID  stored");
-      }
+    $setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
+    if ($set_setpoint == null || $setpoint == null)
+      log::add(__CLASS__, 'debug', "setpoint : command not found");
+    else {
+      // log::add(__CLASS__, 'debug', "setpoint : command found!");
+      $set_setpoint->setValue($setpoint->getId());
+      $set_setpoint->save();
+      // log::add(__CLASS__, 'debug', "setpoint ID  stored");
+    }
   }
 
   /**
@@ -837,16 +855,16 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
    */
   public function updatesetpoint($_value, $_absolute = false, $_setpointlogicalID, $_type)
   {
-    $setpoint= cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
-      $v = $_absolute ? floatval($_value) : floatval($setpoint->execCmd()) + $_value;      
-      log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
-      if ($v > 0) 
-        if ($_type!='') 
-          $this->setBoilerTarget($v,$_type);
-        else
-          $this->setRecipeDose($v, $_setpointlogicalID);
-    }
-  
+    $setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
+    $v = $_absolute ? floatval($_value) : floatval($setpoint->execCmd()) + $_value;
+    log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
+    if ($v > 0)
+      if ($_type != '')
+        $this->setBoilerTarget($v, $_type);
+      else
+        $this->setRecipeDose($v, $_setpointlogicalID);
+  }
+
 
   /**
    * this function is used to set the Boiler value on the LM machine according to the slider
@@ -862,13 +880,13 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
     // log::add(__CLASS__, 'debug', 'set setpoint start');
     $v = $_options["slider"];
     // log::add(__CLASS__, 'debug', 'slider value='.$v);
-      //find setpoint value and store it on stove as it after slider move
-      if ($v > 0) 
-        if ($_type!='') 
-          $this->setBoilerTarget($v,$_type);
-        else
-          $this->setRecipeDose($v, $_logicalID);
-   // log::add(__CLASS__, 'debug', 'set setpoint end');   
+    //find setpoint value and store it on stove as it after slider move
+    if ($v > 0)
+      if ($_type != '')
+        $this->setBoilerTarget($v, $_type);
+      else
+        $this->setRecipeDose($v, $_logicalID);
+    // log::add(__CLASS__, 'debug', 'set setpoint end');   
     // now refresh display  
 //    $this->getInformations();
   }
@@ -878,183 +896,197 @@ public function AddAction($_actionName, $_actionTitle, $_template = null, $_gene
    * not used yet
    * @return void
    */
-  public function getStatistics() {
-    log::add(__CLASS__, 'debug', 'get basic counters');
-    $serial=$this->getConfiguration('serialNumber'); 
-    $token=self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/statistics/counters',"",'GET',["Authorization: Bearer $token"], $serial);
-    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-  }
-/**
- * Switch machine ON/OFF accoding to a boolean value
- * @param mixed $toggle
- * @return void
- */
-public function switchCoffeeBoilerONOFF($toggle) {
-  log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','status='.($toggle?"BrewingMode":"StandBy"),'POST',["Authorization: Bearer $token"],$serial);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-}
-
-/**
- * Switch Steam ON/OFF according to a boolean value
- * @param mixed $_toggle
- * @return void
- */
-public function switchSteamBoilerONOFF($_toggle) {
-  log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-boiler','identifier=SteamBoiler&state='.($_toggle?"enabled":"disabled"),'POST',["Authorization: Bearer $token"],$serial);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-}
-
-/**
- * Select mode for Preinfusion/Prebew.
- * set to Disabled if prebrew, set to enabled if prebrew
- * @param mixed $_mode values accepted : Enabled,Disabled,TypeB
- * @return void
- */
-public function setPreinfusionStatus($_mode) {
-  // preinfusion = TypeB, prebrew=Enabled/Disabled
-  log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-preinfusion','mode='.$_mode,'POST',["Authorization: Bearer $token"],$serial);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-}
-
-/**
- * set the LM boiler target temperature for coffee or steam boiler according to $type value
- * @param mixed $_value value in celsius
- * @param mixed $_identifier by default this is coffee boiler temperature for group 1
- * @return void
- */
-public function setBoilerTarget($_value, $_identifier = COFFEE_BOILER_1) {
-  log::add(__CLASS__, 'debug', 'switch steam on or off');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/target-boiler','identifier='.$_identifier.'&value='.$_value,'POST',["Authorization: Bearer $token"],$serial);
-  //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-}
-
-/**
- * This API allow to select if the LM is plumbed In or not. If not, the by default if preinfusion
- * is enabled it is Prebrew that is performed with the parameters set (time/hold). If enabled
- * then a preinfusion using the water pressure line is used (in general 1 to 3 bars). 
- * the samle (time/hold) parameters apply. 
- * Do not activate this feature if no plumbed in line is installed!
- * @param mixed $_toggle true or false
- * @return void
- */
-public function setPlumbinStatus($_toggle) {
-  log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-plumbin','enable='.($_toggle?'true':'false'),'POST',["Authorization: Bearer $token"],$serial);
-  log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-}
-
-public function getMachineUses() {
-  log::add(__CLASS__, 'debug', 'get number of uses');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'api/machine_uses','','POST',["Authorization: Bearer $token"],$serial);
-  log::add(__CLASS__, 'debug', 'uses='.json_encode($data, true));
-}
-
-/**
- * Set the Dose to use with Group on GB3 or Brew By Weight on Linea Mini. On Mini, 
- * Dose A and B hold the two possible values offered by BBW. 
- * this API is not used on Micra.
- * @param mixed $weight
- * @param mixed $dose
- * @return void
- */
-
-
-public function setRecipeDose($_weight, $_dose) {
-  // $dose = 'A' or 'B'
-  //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
-
-  if ($_dose=='A') {
-    $doseA = 0+$_weight;
-     $doseB = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseB')->execCmd();
-  }
-  else 
+  public function getStatistics()
   {
-    $doseB = 0+$_weight;
-    $doseA = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA')->execCmd();
+    log::add(__CLASS__, 'debug', 'get basic counters');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $serial);
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
-//  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $scale=$this->getConfiguration('scalename'); 
+  /**
+   * Switch machine ON/OFF accoding to a boolean value
+   * @param mixed $toggle
+   * @return void
+   */
+  public function switchCoffeeBoilerONOFF($toggle)
+  {
+    log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/status', 'status=' . ($toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"], $serial);
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+  }
 
-  // update recipe
+  /**
+   * Switch Steam ON/OFF according to a boolean value
+   * @param mixed $_toggle
+   * @return void
+   */
+  public function switchSteamBoilerONOFF($_toggle)
+  {
+    log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"], $serial);
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+  }
+
+  /**
+   * Select mode for Preinfusion/Prebew.
+   * set to Disabled if prebrew, set to enabled if prebrew
+   * @param mixed $_mode values accepted : Enabled,Disabled,TypeB
+   * @return void
+   */
+  public function setPreinfusionStatus($_mode)
+  {
+    // preinfusion = TypeB, prebrew=Enabled/Disabled
+    log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $serial);
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+  }
+
+  /**
+   * set the LM boiler target temperature for coffee or steam boiler according to $type value
+   * @param mixed $_value value in celsius
+   * @param mixed $_identifier by default this is coffee boiler temperature for group 1
+   * @return void
+   */
+  public function setBoilerTarget($_value, $_identifier = COFFEE_BOILER_1)
+  {
+    log::add(__CLASS__, 'debug', 'switch steam on or off');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $serial);
+    //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+  }
+
+  /**
+   * This API allow to select if the LM is plumbed In or not. If not, the by default if preinfusion
+   * is enabled it is Prebrew that is performed with the parameters set (time/hold). If enabled
+   * then a preinfusion using the water pressure line is used (in general 1 to 3 bars). 
+   * the samle (time/hold) parameters apply. 
+   * Do not activate this feature if no plumbed in line is installed!
+   * @param mixed $_toggle true or false
+   * @return void
+   */
+  public function setPlumbinStatus($_toggle)
+  {
+    log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"], $serial);
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+  }
+
+  public function getMachineUses()
+  {
+    log::add(__CLASS__, 'debug', 'get number of uses');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . 'api/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $serial);
+    log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
+  }
+
+  /**
+   * Set the Dose to use with Group on GB3 or Brew By Weight on Linea Mini. On Mini, 
+   * Dose A and B hold the two possible values offered by BBW. 
+   * this API is not used on Micra.
+   * @param mixed $weight
+   * @param mixed $dose
+   * @return void
+   */
+
+
+  public function setRecipeDose($_weight, $_dose)
+  {
+    // $dose = 'A' or 'B'
+    //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
+
+    if ($_dose == 'A') {
+      $doseA = 0 + $_weight;
+      $doseB = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseB')->execCmd();
+    } else {
+      $doseB = 0 + $_weight;
+      $doseA = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA')->execCmd();
+    }
+    //  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $scale = $this->getConfiguration('scalename');
+
+    // update recipe
     //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"B","group":"Group1"}]
-  //                    t={group:e.group,doseIndex:e.dose_index,recipeId:e.recipe_id,recipeDose:e.recipe_dose},
+    //                    t={group:e.group,doseIndex:e.dose_index,recipeId:e.recipe_id,recipeDose:e.recipe_dose},
 //  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => $_dose];
- // log::add(__CLASS__, 'debug', "active recipe POST with d=".json_encode($d));
- // self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
- //   $d,
- //   'POST',["Authorization: Bearer $token"],$serial);
+    // log::add(__CLASS__, 'debug', "active recipe POST with d=".json_encode($d));
+    // self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
+    //   $d,
+    //   'POST',["Authorization: Bearer $token"],$serial);
 
-  // update list of doses
-  $recipedoses= [['id'=>'A','target'=>$doseA],['id'=>'B','target'=>$doseB]];
-  $d = ["recipeId"=>"Recipe1", "doseMode"=>"Mass", "recipeDoses" => $recipedoses];
-//  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
-  self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/',
-    $d,
-    'PUT',["cache-control: no-cache","content-type: application/json","Authorization: Bearer $token"],$serial);
-  sleep(5);
-//  now reread everthing
-  $this->readConfiguration($this);
-}
+    // update list of doses
+    $recipedoses = [['id' => 'A', 'target' => $doseA], ['id' => 'B', 'target' => $doseB]];
+    $d = ["recipeId" => "Recipe1", "doseMode" => "Mass", "recipeDoses" => $recipedoses];
+    //  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
+    self::request(
+      LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/recipes/',
+      $d,
+      'PUT',
+      ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
+      $serial
+    );
+    sleep(5);
+    //  now reread everthing
+    $this->readConfiguration($this);
+  }
 
-/**
- * Start the Backflush. I recommend using the app for this purpose, it is much more convenient
- * as it monitors the backflush and this is not.
- * @return void
- */
-public function startBackflush()
-{
-  log::add(__CLASS__, 'debug', 'backflush start');
-  $serial=$this->getConfiguration('serialNumber'); 
-  $token=self::getToken();
-  $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/enable-backflush',
-    'enable=true',
-    'POST',["Authorization: Bearer $token"],$serial);
-    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
-}
+  /**
+   * Start the Backflush. I recommend using the app for this purpose, it is much more convenient
+   * as it monitors the backflush and this is not.
+   * @return void
+   */
+  public function startBackflush()
+  {
+    log::add(__CLASS__, 'debug', 'backflush start');
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $data = self::request(
+      LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-backflush',
+      'enable=true',
+      'POST',
+      ["Authorization: Bearer $token"],
+      $serial
+    );
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+  }
   /**
    * Detect is the function used by the plugin configuration button to detect and create the equipments.
    * this function shall be used only when new equipments are available. it is not necessary to ru it at regular.
    * @return bool
    */
-  public static function detect() 
+  public static function detect()
   {
     log::add(__CLASS__, 'debug', '[detect] start');
     $token = self::getToken();
     // try to detect the machines only if token succeeded
-    if ($token=='') {
+    if ($token == '') {
       log::add(__CLASS__, 'debug', '[detect] login not done or token empty, exit');
       return false;
     }
-    $data = self::request(LMCLOUD_CUSTOMER,null,'GET',["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'detect='.json_encode($data, true));
+    $data = self::request(LMCLOUD_CUSTOMER, null, 'GET', ["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', 'detect=' . json_encode($data, true));
     if ($data["status"] != true)
       return false;
     foreach ($data['data']['fleet'] as $machines) {
-      log::add(__CLASS__, 'debug', 'detect found '.($uuid=$machines['uuid'])." ".$machines['name'].'('.$machines['machine']['model']['name'].') SN='.$machines['machine']['serialNumber']);
-      log::add(__CLASS__, 'debug', 'type='.$machines['machine']['type']);
+      log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['uuid']) . " " . $machines['name'] . '(' . $machines['machine']['model']['name'] . ') SN=' . $machines['machine']['serialNumber']);
+      log::add(__CLASS__, 'debug', 'type=' . $machines['machine']['type']);
       if ($machines['machine']['type'] == LMFILTER_MACHINE_TYPE) {
         $d = DateTime::createFromFormat(DateTime::ATOM, $machines['paringDate']);
-        log::add(__CLASS__, 'debug', 'slug='.($slug=$machines['machine']['model']['slug']));
-        log::add(__CLASS__, 'debug', 'key='.$machines['communicationKey']);
-        log::add(__CLASS__, 'debug', 'detect paired on '.$d->format("d/m/y"));  
+        log::add(__CLASS__, 'debug', 'slug=' . ($slug = $machines['machine']['model']['slug']));
+        log::add(__CLASS__, 'debug', 'key=' . $machines['communicationKey']);
+        log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
         // now check if machine is already created as an eqlogic
         $eqLogic = eqLogic::byLogicalId($uuid, 'jee4lm');
         if (!is_object($eqLogic)) {
@@ -1070,103 +1102,105 @@ public function startBackflush()
         $eqLogic->setConfiguration('type', $slug);
         $eqLogic->setConfiguration('communicationKey', $machines['communicationKey']);
         $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
-        $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);     
+        $eqLogic->setConfiguration('model', $machines['machine']['model']['name']);
         $eqLogic->setLogicalId($uuid);
         // now get configuration of machine
-        $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);     
+        $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);
         $eqLogic->save();
         // create commands before setting display
         jee4lm::readConfiguration($eqLogic);
         // set display
         $display_map = [
-          'scalebattery' => [1,3],
-          'machine' =>[1,2],
-          'isscaleconnected' =>[1,3],
-          'bbwdoseA' =>[4,1],
-          'bbwdoseB'=> [4,2],
-          'bbwfree' => [4,3],
-          'bbwmode' => [4,3],
-          'coffeeenabled' => [1,1],
-          'isbbw' => [1,3],
-          'coffeecurrent' => [3,1],
-          'coffeetarget' => [3,1],
-          'start_backflush' => [2,1],
-          'machinemode' => [1,1],
-          'backflush' => [1,1],
-          'jee4lm_off' => [2,2],
-          'jee4lm_on' => [2,2],
-          'groupDoseMode' => [1,1],
-          'preinfusionmode' => [5,1],
-          'groupDoseType' => [1,1],
-          'prewet' => [5,1],
-          'prewettime' => [5,3],
-          'prewetholdtime' => [5,3],
-          'jee4lm_doseA_slider' => [6,3],
-          'jee4lm_doseB_slider' => [6,3],
-          'jee4lm_coffee_slider' => [6,1],
-          'jee4lm_prewet_slider' => [6,2],
-          'jee4lm_prewet_time_slider' => [6,2],
-        //  'jee4lm_steam_slider' => [6,1],
-          'tankStatus' => [1,1],
-          'plumbedin' => [5,2],
-          'jee4lm_steam_off' => [2,3],
-          'jee4lm_steam_on' => [2,3],
-        //  'steamcurrent' => [3,3],
-        //  'steamtarget' => [3,3],
-          'steamenabled' => [1,1],
-          'fwversion' => [7,1],
-          'gwversion' => [7,3],
-          'groupDoseMax' => [1,1],
-          'displaycoffee' => [3,1],
-          'displaysteam' => [3,3]
+          'scalebattery' => [1, 3],
+          'machine' => [1, 2],
+          'isscaleconnected' => [1, 3],
+          'bbwdoseA' => [4, 1],
+          'bbwdoseB' => [4, 2],
+          'bbwfree' => [4, 3],
+          'bbwmode' => [4, 3],
+          'coffeeenabled' => [1, 1],
+          'isbbw' => [1, 3],
+          'coffeecurrent' => [3, 1],
+          'coffeetarget' => [3, 1],
+          'start_backflush' => [2, 1],
+          'machinemode' => [1, 1],
+          'backflush' => [1, 1],
+          'jee4lm_off' => [2, 2],
+          'jee4lm_on' => [2, 2],
+          'groupDoseMode' => [1, 1],
+          'preinfusionmode' => [5, 1],
+          'groupDoseType' => [1, 1],
+          'prewet' => [5, 1],
+          'prewettime' => [5, 3],
+          'prewetholdtime' => [5, 3],
+          'jee4lm_doseA_slider' => [6, 3],
+          'jee4lm_doseB_slider' => [6, 3],
+          'jee4lm_coffee_slider' => [6, 1],
+          'jee4lm_prewet_slider' => [6, 2],
+          'jee4lm_prewet_time_slider' => [6, 2],
+          //  'jee4lm_steam_slider' => [6,1],
+          'tankStatus' => [1, 1],
+          'plumbedin' => [5, 2],
+          'jee4lm_steam_off' => [2, 3],
+          'jee4lm_steam_on' => [2, 3],
+          //  'steamcurrent' => [3,3],
+          //  'steamtarget' => [3,3],
+          'steamenabled' => [1, 1],
+          'fwversion' => [7, 1],
+          'gwversion' => [7, 3],
+          'groupDoseMax' => [1, 1],
+          'displaycoffee' => [3, 1],
+          'displaysteam' => [3, 3]
         ];
 
         $displayStuff = [
-          "layout::dashboard::table::parameters" => 
-              ["center"=>"0",
-              "styletable"=>"background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
-              "styletd"=>"",
-              "style::td::1::1"=>"font-size:larger;",
-              "text::td::1::1"=>"<br>Réservoir à eau<br>",
-              "text::td::1::3"=>"<br>Balance connectée<br>",
-//              "text::td::3::1"=>"Chaudière à café",
+          "layout::dashboard::table::parameters" =>
+            [
+              "center" => "0",
+              "styletable" => "background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletd" => "",
+              "style::td::1::1" => "font-size:larger;",
+              "text::td::1::1" => "<br>Réservoir à eau<br>",
+              "text::td::1::3" => "<br>Balance connectée<br>",
+              //              "text::td::3::1"=>"Chaudière à café",
 //              "text::td::3::3"=>"Chaudière à vapeur",
-              "style::td::3::1"=>"font-size:1.5em;height:3em;vertical-align:top;",
-              "style::td::3::2"=>"font-size:1.5em;height:3em;vertical-align:top;",
-              "style::td::3::3"=>"font-size:1.5em;height:3em;vertical-align:top;",
-              "style::td::4::1"=>"height:4em;vertical-align:middle;",
-              "style::td::4::2"=>"height:4em;vertical-align:middle;",
-              "style::td::4::3"=>"height:4em;vertical-align:middle;",
-              "style::td::5::1"=>"border-top:solid;border-bottom:solid;",
-              "style::td::5::2"=>"border-top:solid;border-bottom:solid;",
-              "style::td::5::3"=>"border-top:solid;border-bottom:solid;",
-              "style::td::6::1"=>"border-top:solid;border-bottom:solid;",
-              "style::td::6::2"=>"border-top:solid;border-bottom:solid;",
-              "style::td::6::3"=>"border-top:solid;border-bottom:solid;"],
-            "layout::dashboard" => "table",
-            'layout::dashboard::table::nbLine' => '7',
-            'layout::dashboard::table::nbColumn' => '3'    
+              "style::td::3::1" => "font-size:1.5em;height:3em;vertical-align:top;",
+              "style::td::3::2" => "font-size:1.5em;height:3em;vertical-align:top;",
+              "style::td::3::3" => "font-size:1.5em;height:3em;vertical-align:top;",
+              "style::td::4::1" => "height:4em;vertical-align:middle;",
+              "style::td::4::2" => "height:4em;vertical-align:middle;",
+              "style::td::4::3" => "height:4em;vertical-align:middle;",
+              "style::td::5::1" => "border-top:solid;border-bottom:solid;",
+              "style::td::5::2" => "border-top:solid;border-bottom:solid;",
+              "style::td::5::3" => "border-top:solid;border-bottom:solid;",
+              "style::td::6::1" => "border-top:solid;border-bottom:solid;",
+              "style::td::6::2" => "border-top:solid;border-bottom:solid;",
+              "style::td::6::3" => "border-top:solid;border-bottom:solid;"
+            ],
+          "layout::dashboard" => "table",
+          'layout::dashboard::table::nbLine' => '7',
+          'layout::dashboard::table::nbColumn' => '3'
         ];
 
-        foreach($display_map as $key => $map) {            
-            $r = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
-            //log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId(). ($r ==null?' pas de retour':json_encode($r)));
+        foreach ($display_map as $key => $map) {
+          $r = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
+          //log::add(__CLASS__, 'debug', 'search '.$key. " in eqlogic ".$eqLogic->getId(). ($r ==null?' pas de retour':json_encode($r)));
 
-            if ($r!=null) {
-              $displayStuff["layout::dashboard::table::cmd::".$r->getId()."::line"] = $map[0];
-              $displayStuff["layout::dashboard::table::cmd::".$r->getId()."::column"] = $map[1];
-              //log::add(__CLASS__, 'debug', 'add '.$key."=".$r->getId());
-            }
-        }   
+          if ($r != null) {
+            $displayStuff["layout::dashboard::table::cmd::" . $r->getId() . "::line"] = $map[0];
+            $displayStuff["layout::dashboard::table::cmd::" . $r->getId() . "::column"] = $map[1];
+            //log::add(__CLASS__, 'debug', 'add '.$key."=".$r->getId());
+          }
+        }
 
-        foreach ($displayStuff as $key => $value) 
-              $eqLogic->setDisplay($key, $value);   
+        foreach ($displayStuff as $key => $value)
+          $eqLogic->setDisplay($key, $value);
 
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
-    } 
+    }
     log::add(__CLASS__, 'debug', 'end parsing');
     /*
     detect=
@@ -1235,15 +1269,17 @@ public function startBackflush()
         "countryOther":null,"areaOperation":null,"brandServiced":null,
         "personOfContact":null,"phoneModel":null,"id":133029}}
     */
-      return true;
+    return true;
   }
 
   // add logic to monitor BBW presence
-  public function searchForBBW() {
+  public function searchForBBW()
+  {
     $mac = $this->getConfiguration('scalemac');
-    if ($mac=='') return false;
+    if ($mac == '')
+      return false;
 
-    log::add(__CLASS__, 'debug', 'search scale '.$mac);
+    log::add(__CLASS__, 'debug', 'search scale ' . $mac);
 
     // check if BLEA is installed and search for scale
     $blea = eqLogic::byLogicalId($mac, 'blea');
@@ -1252,24 +1288,25 @@ public function startBackflush()
       $cmd = cmd::byEqLogicIdAndLogicalId($bbwID, 'present');
       if ($cmd != null) {
         $present = $cmd->execCmd();
-        log::add(__CLASS__, 'debug', 'found scale in Blea with BT address '.($present==1?'allumé':'éteint'));
+        log::add(__CLASS__, 'debug', 'found scale in Blea with BT address ' . ($present == 1 ? 'allumé' : 'éteint'));
         return $present;
       }
       return false;
-    };
+    }
+    ;
 
     // check if BLEA is installed and search for scale
     $jmqttCollection = eqLogic::byType('jmqtt', true);
-    foreach ($jmqttCollection as $eqJ){
+    foreach ($jmqttCollection as $eqJ) {
       $jobjName = $eqJ->getName();
-      log::add(__CLASS__, 'debug', 'jmqtt check equipment'.$jobjName);
-      if (strcasecmp($jobjName, $mac)==0) {
+      log::add(__CLASS__, 'debug', 'jmqtt check equipment' . $jobjName);
+      if (strcasecmp($jobjName, $mac) == 0) {
         $bbwID = $eqJ->getId();
         $jcmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
-        log::add(__CLASS__, 'debug', 'jmqtt search present info on eq='.$bbwID);
+        log::add(__CLASS__, 'debug', 'jmqtt search present info on eq=' . $bbwID);
         if ($jcmd != null) {
           $present = $jcmd->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address '.($present==1?'allumé':'éteint'));
+          log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address ' . ($present == 1 ? 'allumé' : 'éteint'));
           return $present;
         }
         return false;
@@ -1277,41 +1314,36 @@ public function startBackflush()
       log::add(__CLASS__, 'debug', 'jmqtt loop');
     }
     // search as an object name in root MAISON object
-    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON',$mac); 
-    $bbwcollection1 = eqLogic::byObjectNameEqLogicName('MAISON',strtoupper($mac)); 
+    $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON', $mac);
+    $bbwcollection1 = eqLogic::byObjectNameEqLogicName('MAISON', strtoupper($mac));
     if ($bbwcollection != null || $bbwcollection1 != null) {
       foreach ($bbwcollection as $bbw) {
- //       log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
+        //       log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
         $bbwID = $bbw->getId();
         $scmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
-        if ($scmd != null) { 
+        if ($scmd != null) {
           $present = $scmd->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.($present==1?'allumé':'éteint'));
+          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address ' . ($present == 1 ? 'allumé' : 'éteint'));
           return $present;
         }
       }
       foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
         $scmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
-        if ($scmd != null) { 
+        if ($scmd != null) {
           $present = $scmd->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address '.($present==1?'allumé':'éteint'));
+          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address ' . ($present == 1 ? 'allumé' : 'éteint'));
           return $present;
         }
       }
-    } 
+    }
     return false;
   }
 
-  public function getBBWSettings($_serial, $_token) {
-  //  log::add(__CLASS__, 'debug', 'getbbw settings');
- //   $serial=$this->getConfiguration('serialNumber'); 
- //   $token=self::getToken();
- //   $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/scale/mode','group=Group1&brewing_type=MassType','POST',["Authorization: Bearer $token"]);
-//    log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
-//$arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$_serial.'/machine-remotsets','','GET',["Authorization: Bearer $_token"]);
-//log::add(__CLASS__, 'debug', 'arr='.json_encode($arr));
-}
+  public function getBBWSettings($_serial, $_token)
+  {
+
+  }
 
   /**
    * Refreshes the main counters and not all the information
@@ -1320,61 +1352,57 @@ public function startBackflush()
   public function getInformations()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-      $serial=$this->getConfiguration('serialNumber'); 
-      $token=self::getToken();
-      $this->getBBWSettings($serial, $token);
-      $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/status','','GET',["Authorization: Bearer $token"]);
-      if(array_key_exists('status', $arr)) {
-        $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS']=='BrewingMode'));
-        $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
-  //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
-        $this->getCmd(null, 'tankStatus')->event(!$arr['data']['LEVEL_TANK']);
-        $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
-        $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
-        $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $this->getBBWSettings($serial, $token);
+    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/status', '', 'GET', ["Authorization: Bearer $token"]);
+    if (array_key_exists('status', $arr)) {
+      $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS'] == 'BrewingMode'));
+      $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
+      //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
+      $this->getCmd(null, 'tankStatus')->event(!$arr['data']['LEVEL_TANK']);
+      $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
+      $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
+      $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
 
-        $machinestate = ($arr['data']['MACHINE_STATUS']=='BrewingMode');
-        $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
-        if (!$machinestate)
-          $display ='---';
-        else
-          $display = "<span style='color:".($arr['data']['TEMP_COFFEE']+2>=$coffeetarget?'green':'red').";'>".$coffeetarget."°C / ".$arr['data']['TEMP_COFFEE']."°C</span>";
-        $this->getCmd(null, 'displaycoffee')->event($display);
-        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp='. $arr['data']['TEMP_COFFEE'].' tank='.$arr['data']['LEVEL_TANK']);
-  
-        $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
-  //      $steamcurrent = $arr['data']['TEMP_STEAM'];
-  //      $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
-        if (!$steamstate)
-          $display ='OFF';
-        else
-          $display = "<span style='color:green'>ON</span>";
-        $this->getCmd(null, 'displaysteam')->event($display);
-  
-        if($this->getCmd(null, 'isbbw')->execCmd())
-          if($this->searchForBBW()) { //present
-              // change display of doses
-              $free = $this->getCmd(null, 'bbwfree')->execCmd();
-              $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
-              $this->getCmd(null, 'bbwfree')->setDisplay('template',($bbwmode =='A' || $bbwmode =='B' ?"jee4lm::bbw nodose inactive":"jee4lm::bbw nodose active"));
-              $this->getCmd(null, 'bbwdoseA')->setDisplay('template',($bbwmode == 'A' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"));
-              $this->getCmd(null, 'bbwdoseB')->setDisplay('template',($bbwmode == 'B' && !$free ?"jee4lm::bbw dose":"jee4lm::bbw dose inactive"));
-              log::add(__CLASS__, 'debug', 'bbw scale on display');
-              // - 
-          } else {
-            $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
-            $this->getCmd(null, 'bbwdoseA')->setDisplay('template',("jee4lm::bbw dose inactive"));
-            $this->getCmd(null, 'bbwdoseB')->setDisplay('template',("jee4lm::bbw dose inactive"));
-            log::add(__CLASS__, 'debug', 'bbw scale off display');
-          }  
-        else
-        {
+      $machinestate = ($arr['data']['MACHINE_STATUS'] == 'BrewingMode');
+      $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
+      $display = !$machinestate ? '---' :
+        "<span style='color:" . ($arr['data']['TEMP_COFFEE'] + 2 >= $coffeetarget ? 'green' : 'red') . ";'>" . $coffeetarget . "°C / " . $arr['data']['TEMP_COFFEE'] . "°C</span>";
+      $this->getCmd(null, 'displaycoffee')->event($display);
+      log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $arr['data']['TEMP_COFFEE'] . ' tank=' . $arr['data']['LEVEL_TANK']);
+
+      $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
+      //      $steamcurrent = $arr['data']['TEMP_STEAM'];
+      //      $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
+      if (!$steamstate)
+        $display = 'OFF';
+      else
+        $display = "<span style='color:green'>ON</span>";
+      $this->getCmd(null, 'displaysteam')->event($display);
+
+      if ($this->getCmd(null, 'isbbw')->execCmd())
+        if ($this->searchForBBW()) { //present
+          // change display of doses
+          $free = $this->getCmd(null, 'bbwfree')->execCmd();
+          $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
+          $this->getCmd(null, 'bbwfree')->setDisplay('template', $bbwmode == 'A' || $bbwmode == 'B' ? "jee4lm::bbw nodose inactive" : "jee4lm::bbw nodose active");
+          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', $bbwmode == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
+          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', $bbwmode == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
+          log::add(__CLASS__, 'debug', 'bbw scale on display');
+          // - 
+        } else {
           $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
-          $this->getCmd(null, 'bbwdoseA')->setDisplay('template',("jee4lm::bbw dose inactive"));
-          $this->getCmd(null, 'bbwdoseB')->setDisplay('template',("jee4lm::bbw dose inactive"));
-        }
-        log::add(__CLASS__, 'debug', 'getinformation has refresh values');
+          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', "jee4lm::bbw dose inactive");
+          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', "jee4lm::bbw dose inactive");
+          log::add(__CLASS__, 'debug', 'bbw scale off display');
+        } else {
+        $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
+        $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm::bbw dose inactive"));
+        $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm::bbw dose inactive"));
       }
+      log::add(__CLASS__, 'debug', 'getinformation has refresh values');
+    }
 
     return true;
   }
@@ -1385,7 +1413,7 @@ public function startBackflush()
    */
   public function getjee4lm()
   {
-    log::add(__CLASS__, 'debug', "getjee4lm");
+    //    log::add(__CLASS__, 'debug', "getjee4lm");
     $this->checkAndUpdateCmd(__CLASS__, "");
   }
 
@@ -1394,64 +1422,67 @@ public function startBackflush()
    * @return array[]
    */
 
-   
-  public static function templateWidget(){
-    /*
-   {"id":"","name":"action power On Off","type":"action","subtype":"other","template":"tmplicon",
-   "display":{"icon":"<i class=\"fas fa-power-off \"></i>"},
-   "replace":{"#_time_widget_#":"0",
-   "#_icon_on_#":"<br>allum&eacute<br><br><i style='color:red' class='fas fa-power-off '></i>",
-   "#_icon_off_#":"<br>&eacuteteint<br><br><i style='color:green' class='fas fa-power-off '></i>"},
-   "test":[],"jeedomCoreVersion":"4.4.9"}    */
 
-    $r = array('action' => array('string' => array()), 'info' => array('string' => array()));
+  public static function templateWidget()
+  {
+    $r = ['action' => array('string' => array()), 'info' => array('string' => array())];
 
     $r['info']['numeric']['batterie'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# <= 10','state_light' => '<span style="font-size: 24px;color:red">#value# %</span>','state_dark' => '<span style="font-size: 24px;color:red">#value# %</span>'),
-        array('operation' => '#value# > 10 && #value# <=70','state_light' => '<span style="font-size: 24px;color:orange">#value# %</span>','state_dark' => '<span style="font-size: 24px;color:orange">#value# %</span>'),
-        array('operation' => '#value# > 70','state_light' => '<span style="font-size: 20px;color:green">#value# %</span>','state_dark' => '<span style="font-size: 20px;color:green">#value# %</span>')
-      ));
+        array('operation' => '#value# <= 10', 'state_light' => '<span style="font-size: 24px;color:red">#value# %</span>', 'state_dark' => '<span style="font-size: 24px;color:red">#value# %</span>'),
+        array('operation' => '#value# > 10 && #value# <=70', 'state_light' => '<span style="font-size: 24px;color:orange">#value# %</span>', 'state_dark' => '<span style="font-size: 24px;color:orange">#value# %</span>'),
+        array('operation' => '#value# > 70', 'state_light' => '<span style="font-size: 20px;color:green">#value# %</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value# %</span>')
+      )
+    );
     $r['info']['numeric']['temperature'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# == 0','state_light' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:black"> °C</span>','state_dark' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:white"> °C</span>'),
-        array('operation' => '#value# >= 0','state_light' => '<span style="font-size: 20px;color:gray">#value#</span>','state_dark' => '<span style="font-size: 20px;color:lightgray">#value#</span>')
-      ));
+        array('operation' => '#value# == 0', 'state_light' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:black"> °C</span>', 'state_dark' => '<span style="font-size: 24px;color:gray">#value#</span><span style="font-size: 20px;color:white"> °C</span>'),
+        array('operation' => '#value# >= 0', 'state_light' => '<span style="font-size: 20px;color:gray">#value#</span>', 'state_dark' => '<span style="font-size: 20px;color:lightgray">#value#</span>')
+      )
+    );
     $r['info']['numeric']['bbw dose'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-        array('operation' => '#value# >= 0','state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block;float:left;width:32px; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 
-                                             'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
-      ));
+        array('operation' => '#value# == 0', 'state_light' => 'N/A', 'state_dark' => 'N/A'),
+        array(
+          'operation' => '#value# >= 0',
+          'state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block;float:left;width:32px; padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>',
+          'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>'
+        )
+      )
+    );
     $r['info']['numeric']['bbw dose inactive'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# == 0','state_light' => 'N/A','state_dark' => 'N/A'),
-        array('operation' => '#value# >= 0','state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>', 
-                                            'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:lightgray;border-width:thick;border-color:lightgray; border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>')
-        ));
+        array('operation' => '#value# == 0', 'state_light' => 'N/A', 'state_dark' => 'N/A'),
+        array(
+          'operation' => '#value# >= 0',
+          'state_light' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 10px;background-color: gray;color:lightgray;border-width:thick;border-color:rgb(var(--panel-bg-color); border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>',
+          'state_dark' => '<span style="display:inline-block;line-height:0px;border-radius:50%;font-size: 12px;background-color: gray;color:lightgray;border-width:thick;border-color:lightgray; border-style: solid;"><span style="display: inline-block; float:left;width:32px;padding-top: 50%;padding-bottom: 50%;margin-left: 8px; margin-right: 8px;">#value#g</span></span>'
+        )
+      )
+    );
     $r['info']['binary']['bbw nodose'] = array(
-        'template' => 'tmplicon',
-        'display' => array('icon' => 'null'),
-        'replace' => array(
-            '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>", 
-            '#_icon_off_#' =>  "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
-            "#_time_widget_#" =>"0"
-            )
-      );
+      'template' => 'tmplicon',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>",
+        '#_icon_off_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
+        "#_time_widget_#" => "0"
+      )
+    );
     $r['action']['other']['main on off'] = array(
-    'template' => 'tmplimg',
+      'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
         '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
         '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
         '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
         '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
     $r['action']['other']['steam on off'] = array(
       'template' => 'tmplimg',
@@ -1461,8 +1492,8 @@ public function startBackflush()
         '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
         '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
         '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
     $r['action']['other']['backflush on off'] = array(
       'template' => 'tmplimg',
@@ -1472,8 +1503,8 @@ public function startBackflush()
         '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
         '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
         '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
 
     $r['info']['binary']['tankStatus'] = array(
@@ -1482,8 +1513,8 @@ public function startBackflush()
       'replace' => array(
         '#_icon_on_#' => "<span style='color:red';font-size:1,5em;font-style:bold;'><br>Remplir<br><br></span><img class='img-responsive' src='/plugins/jee4lm/core/config/img/reservoir.png' width='64' height='64'>",
         '#_icon_off_#' => "<span style='font-size:1,5em;font-style:bold;'><br>OK</span>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
     $r['info']['binary']['bbw'] = array(
       'template' => 'tmplicon',
@@ -1491,8 +1522,8 @@ public function startBackflush()
       'replace' => array(
         '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'>",
         '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
     $r['info']['binary']['main'] = array(
       'template' => 'tmplicon',
@@ -1500,8 +1531,8 @@ public function startBackflush()
       'replace' => array(
         '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
         '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
     $r['info']['binary']['backflush'] = array(
       'template' => 'tmplicon',
@@ -1509,22 +1540,25 @@ public function startBackflush()
       'replace' => array(
         '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
         '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
-        "#_time_widget_#" =>"0"
-        )
+        "#_time_widget_#" => "0"
+      )
     );
     $r['info']['string']['machine'] = array(
       'template' => 'tmplmultistate',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        "#_desktop_width_#" =>"",
+        "#_desktop_width_#" => "",
         "#_mobile_width_#" => "",
-        "#_time_widget_#" =>"0"
+        "#_time_widget_#" => "0"
       ),
       'test' => array(
-        array('operation' => "#value# !=''",
+        array(
+          'operation' => "#value# !=''",
           'state_light' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>",
-          'state_dark'  => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>")
-      ));
+          'state_dark' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>"
+        )
+      )
+    );
     return $r;
   }
 
@@ -1533,28 +1567,27 @@ public function startBackflush()
    * @return mixed
    */
   public static function getPluginVersion()
-    {
-        $pluginVersion = '0.0.0';
-		try {
-			if (!file_exists(dirname(__FILE__) . '/../../plugin_info/info.json')) {
-				log::add(__CLASS__, 'warning', '[VERSION] fichier info.json manquant');
-			}
-			$data = json_decode(file_get_contents(dirname(__FILE__) . '/../../plugin_info/info.json'), true);
-			if (!is_array($data)) {
-				log::add(__CLASS__, 'warning', '[VERSION] Impossible de décoder le fichier info.json');
-			}
-			try {
-				$pluginVersion = $data['pluginVersion'];
-			} catch (\Exception $e) {
-				log::add(__CLASS__, 'warning', '[VERSION] Impossible de récupérer la version du plugin');
-			}
-		}
-		catch (\Exception $e) {
-			log::add(__CLASS__, 'warning', '[VERSION] Get ERROR :: ' . $e->getMessage());
-		}
-		log::add(__CLASS__, 'info', '[VERSION] PluginVersion :: ' . $pluginVersion);
-        return $pluginVersion;
+  {
+    $pluginVersion = '0.0.0';
+    try {
+      if (!file_exists(dirname(__FILE__) . '/../../plugin_info/info.json')) {
+        log::add(__CLASS__, 'warning', '[VERSION] fichier info.json manquant');
+      }
+      $data = json_decode(file_get_contents(dirname(__FILE__) . '/../../plugin_info/info.json'), true);
+      if (!is_array($data)) {
+        log::add(__CLASS__, 'warning', '[VERSION] Impossible de décoder le fichier info.json');
+      }
+      try {
+        $pluginVersion = $data['pluginVersion'];
+      } catch (\Exception $e) {
+        log::add(__CLASS__, 'warning', '[VERSION] Impossible de récupérer la version du plugin');
+      }
+    } catch (\Exception $e) {
+      log::add(__CLASS__, 'warning', '[VERSION] Get ERROR :: ' . $e->getMessage());
     }
+    log::add(__CLASS__, 'info', '[VERSION] PluginVersion :: ' . $pluginVersion);
+    return $pluginVersion;
+  }
 }
 
 /**
@@ -1570,12 +1603,11 @@ class jee4lmCmd extends cmd
     return false;
   }
 
-  public function getLMValue($_logicalID, $_expected_value) {
-        $r = cmd::byLogicalId($_logicalID);
-        $v = null;
-        if (is_object($r)) 
-          $v = $r->execCmd();
-        return $v != $_expected_value;
+  public function getLMValue($_logicalID, $_expected_value)
+  {
+    $r = cmd::byLogicalId($_logicalID);
+    $v = is_object($r) ? $r->execCmd() : null;
+    return $v != $_expected_value;
   }
 
   /**
@@ -1587,38 +1619,38 @@ class jee4lmCmd extends cmd
   {
     $action = $this->getLogicalId();
     $eq = $this->getEqLogic();
-    log::add(__CLASS__, 'debug', 'execute action ' . $action.' with options='.json_encode($_options));
+    log::add(__CLASS__, 'debug', 'execute action ' . $action . ' with options=' . json_encode($_options));
     switch ($action) {
       case 'refresh':
-        return $eq->getInformations();
-        case 'start_backflush':
-         $eq->startBackflush();
-         return true;
+        return jee4lm::RefreshAllInformation($eq);
+      case 'start_backflush':
+        $eq->startBackflush();
+        return true;
       case 'getStatus':
         return $eq->getInformations();
       case 'jee4lm_on':
       case 'jee4lm_off':
-        $b=($action=='jee4lm_on');
+        $b = ($action == 'jee4lm_on');
         $eq->switchCoffeeBoilerONOFF($b);
-        return   jee4lm::readConfiguration($eq);
+        return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
-        $b=($action=='jee4lm_steam_on');
+        $b = ($action == 'jee4lm_steam_on');
         $eq->switchSteamBoilerONOFF($b);
-        return $eq->getInformations();
-      case 'jee4lm_coffee_slider': 
-        $eq->set_setpoint($_options, 'coffeetarget','CoffeeBoiler1');              
-        return jee4lm::readConfiguration($eq);
+        return jee4lm::RefreshAllInformation($eq);
+      case 'jee4lm_coffee_slider':
+        $eq->set_setpoint($_options, 'coffeetarget', 'CoffeeBoiler1');
+        return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_steam_slider':
-        $eq->set_setpoint($_options, 'steamtarget','SteamBoiler');        
-        return jee4lm::readConfiguration($eq);
+        $eq->set_setpoint($_options, 'steamtarget', 'SteamBoiler');
+        return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_doseA_slider':
-          $eq->set_setpoint($_options, 'A',"");              
-          return jee4lm::readConfiguration($eq);
+        $eq->set_setpoint($_options, 'A', "");
+        return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_doseB_slider':
-          $eq->set_setpoint($_options, 'B',"");              
-          return jee4lm::readConfiguration($eq);    
-          default:
+        $eq->set_setpoint($_options, 'B', "");
+        return jee4lm::RefreshAllInformation($eq);
+      default:
         return true;
     }
   }
