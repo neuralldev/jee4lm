@@ -196,13 +196,14 @@ class jee4lm extends eqLogic
   /**
    * getToken retrieve the current token stored in the cache. of the value has expired it calls
    * the refresh routine to renew it 
+   * @param $_local jee4lm
    * @return mixed
    */
-  public static function getToken($_local=false)
+  public static function getToken($_local = null)
   {
-    if ($_local)
-      if ($ip=config::byKey('host', 'jee4lm') =!'') // if set to local communication do not use the web token mechanism and just take communicationkey
-        return config::byKey('communicationKey', 'jee4lm');
+    if ($_local != null)
+      if ($_local->getConfiguration('host', '') =!'') // if set to local communication do not use the web token mechanism and just take communicationkey
+        return $_local->getConfiguration('communicationKey', '');
     $mc = cache::byKey('jee4lm::access_token');
     $access_token = $mc->getValue();
     if (config::byKey('accessToken', 'jee4lm') == '') // no login performed yet
@@ -228,14 +229,14 @@ class jee4lm extends eqLogic
           $state = 0 + cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->execCmd();
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
-          if ($slug != '' && $ip='') { // if there is no ip set, get the information from the web site
-            $token = self::getToken(true); // send query for token and refresh it if necessary
+          if ($slug != '') { // if there is no ip set, get the information from the web site
+            $token = self::getToken($jee4lm); // send query for token and refresh it if necessary
             if ($token != '')
               if ($state == 0) // just scan status, all information will be refreshed only if up
                 $error = !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
               else {
                 $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
-                $error |= !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+                if ($ip=='') $error |= !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
               }
             if ($error)
               log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
@@ -412,7 +413,7 @@ class jee4lm extends eqLogic
     $ip = $_eq->getConfiguration('host');
     $id = $_eq->getId();
     log::add(__CLASS__, 'debug', 'serial=' . $serial . ' id=' . $id);
-    $token = self::getToken(true);
+    $token = self::getToken($_eq);
     $data = self::request(($ip==''?LMCLOUD_GW_MACHINE_BASE_URL. '/' . $serial . '/configuration':"http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config") , null, 'GET', ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
     $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
