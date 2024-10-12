@@ -403,7 +403,7 @@ class jee4lm extends eqLogic
 
       cmd::byEqLogicIdAndLogicalId($id, 'plumbedin')->event($machine['isPlumbedIn']);
       cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']);
-      cmd::byEqLogicIdAndLogicalId($id, 'tankStatus')->event($machine['tankStatus']);
+      cmd::byEqLogicIdAndLogicalId($id, 'tankStatus')->event(!$machine['tankStatus']);
       cmd::byEqLogicIdAndLogicalId($id, 'bbwmode')->event($bbwset['recipe_dose']);
       cmd::byEqLogicIdAndLogicalId($id, 'bbwfree')->event(!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'));
       cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']);
