@@ -343,7 +343,7 @@ class jee4lm extends eqLogic
    * not used
    * @return bool
    */
-  public function postSave()
+  public function preSave()
   {
       log::add(__CLASS__, 'debug', 'postsave start');
       $ip = $this->getConfiguration('host','');
@@ -368,42 +368,6 @@ class jee4lm extends eqLogic
         }
       }
       return true;
-  }
-
-  /**
-   * not used
-   * @return void
-   */
-  public function preUpdate()
-  {
-    //    log::add(__CLASS__, 'debug', 'preupdate start');
-//    log::add(__CLASS__, 'debug', 'preupdate stop');
-  }
-
-  /**
-   * not used
-   * @return void
-   */
-  public function postUpdate()
-  {
-    //    log::add(__CLASS__, 'debug', 'postupdate start');
-//    log::add(__CLASS__, 'debug', 'postupdate stop');
-  }
-
-  /**
-   * not used
-   * @return void
-   */
-  public function preRemove()
-  {
-  }
-
-  /**
-   * not used
-   * @return void
-   */
-  public function postRemove()
-  {
   }
 
   /**
