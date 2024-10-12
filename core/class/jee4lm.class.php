@@ -358,6 +358,7 @@ class jee4lm extends eqLogic
    */
   public function preSave()
   {
+    /*
       log::add(__CLASS__, 'debug', 'presave start');
       $ip = $this->getConfiguration('host','');
       $token=$this->getConfiguration('communicationKey','');
@@ -380,7 +381,9 @@ class jee4lm extends eqLogic
           return false;
         }
       }
+        */
       return true;
+      
   }
 
   /**
