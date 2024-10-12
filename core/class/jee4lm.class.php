@@ -209,6 +209,10 @@ class jee4lm extends eqLogic
     return $access_token;
   }
 
+public static function validateip($_host) {
+
+}
+
   /**
    * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
    * @return void
@@ -223,8 +227,9 @@ class jee4lm extends eqLogic
           $slug = $jee4lm->getConfiguration('type');
           $id = $jee4lm->getId();
           $state = 0 + cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->execCmd();
-          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=" . $state);
-          if ($slug != '') {
+          $ip = $jee4lm->getConfiguration('host');
+          log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
+          if ($slug != '' && $ip='') { // if there is no ip set, get the information from the web site
             $token = self::getToken(); // send query for token and refresh it if necessary
             if ($token != '')
               if ($state == 0) // just scan status, all information will be refreshed only if up
@@ -336,11 +341,26 @@ class jee4lm extends eqLogic
 
   /**
    * not used
-   * @return void
+   * @return bool
    */
   public function postSave()
   {
-    //    log::add(__CLASS__, 'debug', 'postsave start');
+      log::add(__CLASS__, 'debug', 'postsave start');
+      $ip = $this->getConfiguration('host','');
+      $token=$this->getConfiguration('communicationKey','');
+      if ($ip !='' && $token!='') {
+        log::add(__CLASS__, 'debug', 'check machine at ip '.$ip);
+        $data = self::request(
+         "http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config","", '', ["Authorization: Bearer $token"]);
+         if ($data['status'] == true) { // check that we have information returned
+          log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
+          return true;
+         } else {
+          log::add(__CLASS__, 'debug', "error with request");
+          return false;
+         }
+      }
+      return true;
   }
 
   /**
