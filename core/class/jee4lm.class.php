@@ -908,7 +908,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'get basic counters');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip) . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -922,7 +922,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip) . '/status', 'status=' . ($toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -937,7 +937,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -954,7 +954,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -970,7 +970,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
@@ -989,7 +989,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"],$ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -999,7 +999,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'get number of uses');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request($this->getPath($serial, $ip). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
   }
@@ -1029,7 +1029,7 @@ class jee4lm extends eqLogic
     //  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $scale = $this->getConfiguration('scalename');
 
     // update recipe
@@ -1065,7 +1065,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $data = self::request(
       $this->getPath($serial, $ip) . '/enable-backflush',
       'enable=true',
@@ -1368,7 +1368,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'getinformation start');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken();
+    $token = self::getToken($this);
     $this->getBBWSettings($serial, $token);
     $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
     if (array_key_exists('status', $arr)) {
