@@ -1054,7 +1054,7 @@ class jee4lm extends eqLogic
     );
     sleep(5);
     //  now reread everthing
-    $this->readConfiguration($this);
+    $this->RefreshAllInformation($this);
   }
 
   /**
