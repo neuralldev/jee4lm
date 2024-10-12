@@ -358,7 +358,7 @@ class jee4lm extends eqLogic
    */
   public function preSave()
   {
-      log::add(__CLASS__, 'debug', 'postsave start');
+      log::add(__CLASS__, 'debug', 'presave start');
       $ip = $this->getConfiguration('host','');
       $token=$this->getConfiguration('communicationKey','');
       if ($ip !='' && $token!='') {
@@ -972,7 +972,7 @@ class jee4lm extends eqLogic
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $data = self::request($this->getPath($serial, $ip). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
-    //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
 
   /**
@@ -1045,16 +1045,14 @@ class jee4lm extends eqLogic
     $recipedoses = [['id' => 'A', 'target' => $doseA], ['id' => 'B', 'target' => $doseB]];
     $d = ["recipeId" => "Recipe1", "doseMode" => "Mass", "recipeDoses" => $recipedoses];
     //  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
-    self::request(
+    $req = self::request(
       $this->getPath($serial, $ip). '/recipes/',
       $d,
       'PUT',
       ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
       $ip==''?$serial:null
     );
-    sleep(5);
-    //  now reread everthing
-    $this->RefreshAllInformation($this);
+      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
   }
 
   /**
