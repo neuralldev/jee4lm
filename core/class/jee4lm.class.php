@@ -352,7 +352,8 @@ public static function validateip($_host) {
         log::add(__CLASS__, 'debug', 'check machine at ip '.$ip);
         $data = self::request(
          "http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config","", '', ["Authorization: Bearer $token"]);
-         if ($data['status'] == true) { // check that we have information returned
+         log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
+         if ($data['status_code'] != 403) { // check that we have information returned
           log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
           return true;
          } else {
