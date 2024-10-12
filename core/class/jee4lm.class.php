@@ -352,14 +352,17 @@ class jee4lm extends eqLogic
         log::add(__CLASS__, 'debug', 'check machine at ip '.$ip);
         $data = self::request(
          "http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config","", '', ["Authorization: Bearer $token"]);
-        if ($data['status_code'] != 403) { // check that we have information returned
-          log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
-          return true;
-        } else { // clear ip field as there is no anwser
-          $ip = $this->setConfiguration('host','');
-          log::add(__CLASS__, 'debug', "error with request");
+        if ($data != null) 
+          if ($data['status_code'] != 403) { // check that we have information returned
+            log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
+            return true;
+          } else { // clear ip field as there is no anwser
+            $ip = $this->setConfiguration('host','');
+            log::add(__CLASS__, 'debug', "error with request");
+            return false;
+          }
+        else
           return false;
-        }
       }
       return true;
   }
