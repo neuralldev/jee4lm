@@ -887,7 +887,7 @@ class jee4lm extends eqLogic
    */
   public function set_setpoint($_options, $_logicalID, $_type)
   {
-    // log::add(__CLASS__, 'debug', 'set setpoint start');
+     log::add(__CLASS__, 'debug', 'set setpoint start');
     $v = $_options["slider"];
     // log::add(__CLASS__, 'debug', 'slider value='.$v);
     //find setpoint value and store it on stove as it after slider move
@@ -1032,8 +1032,7 @@ class jee4lm extends eqLogic
     //  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $scale = $this->getConfiguration('scalename');
+    $token = self::getToken();
 
     // update recipe
     //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"B","group":"Group1"}]
@@ -1047,15 +1046,16 @@ class jee4lm extends eqLogic
     // update list of doses
     $recipedoses = [['id' => 'A', 'target' => $doseA], ['id' => 'B', 'target' => $doseB]];
     $d = ["recipeId" => "Recipe1", "doseMode" => "Mass", "recipeDoses" => $recipedoses];
-      log::add(__CLASS__, 'debug', "send PUT ".$this->getPath($serial, $ip). '/recipes/ with d='.json_encode($d));
+//      log::add(__CLASS__, 'debug', "send PUT ".$this->getPath($serial, $ip). '/recipes/ with d='.json_encode($d));
+// force by web site
     $req = self::request(
-      $this->getPath($serial, $ip). '/recipes/',
+      $this->getPath($serial,''). '/recipes/',
       $d,
       'PUT',
       ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
-      $ip==''?$serial:null
+      $serial
     );
-      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
+//      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
   }
 
   /**
