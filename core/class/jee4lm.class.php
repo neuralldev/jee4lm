@@ -232,12 +232,15 @@ class jee4lm extends eqLogic
           if ($slug != '') { // if there is no ip set, get the information from the web site
             $token = self::getToken($jee4lm); // send query for token and refresh it if necessary
             if ($token != '')
-              if ($state == 0) // just scan status, all information will be refreshed only if up
-                $error = !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
-              else {
+              if ($ip!='')
                 $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
-                if ($ip=='') $error |= !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
-              }
+              else
+                if ($state == 0) // just scan status, all information will be refreshed only if up
+                  $error = !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+                else {
+                  $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
+                  if ($ip=='') $error |= !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
+                }
             if ($error)
               log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           }
