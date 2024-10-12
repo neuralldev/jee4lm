@@ -79,6 +79,16 @@ class jee4lm extends eqLogic
   }
 
   /**
+   * build path to rest api to local machine or remote web site depending on prensence of ip address
+   * @param mixed $_serial
+   * @param mixed $_ip
+   * @return mixed
+   */
+  public function getPath($_serial, $_ip) {
+    return $_ip == '' ? LMCLOUD_GW_MACHINE_BASE_URL. '/' . $_serial : "http://".$_ip.":".LMDEFAULT_PORT_LOCAL."/api/v1";
+  }
+
+  /**
    * sends a request to the REST API formatting request for GET or POST as expected by La Marzocco
    * data is used only for POST and must be URL encoded / formatted as a string parm1=val1&parm2=val2...
    * an optional header can be sent as well, especially to set the OAuth2 token in the Bearer field
@@ -121,7 +131,7 @@ class jee4lm extends eqLogic
       log::add(__CLASS__, 'debug', "request response ok "); //.$response);
     curl_close($ch);
     //    log::add(__CLASS__, 'debug', 'request stop');
-    jee4lm::checkrequest($response, $_serial, $_header);
+    if ($_serial !='') jee4lm::checkrequest($response, $_serial, $_header);
     return json_decode($response, true);
   }
 
@@ -387,7 +397,7 @@ class jee4lm extends eqLogic
     $id = $_eq->getId();
     log::add(__CLASS__, 'debug', 'serial=' . $serial . ' id=' . $id);
     $token = self::getToken($_eq);
-    $data = self::request(($ip==''?LMCLOUD_GW_MACHINE_BASE_URL. '/' . $serial . '/configuration':"http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config") , null, 'GET', ["Authorization: Bearer $token"]);
+    $data = self::request($ip == '' ? $_eq->getPath($serial, $ip). '/configuration' : $_eq->getPath($serial, $ip)."/config" , null, 'GET', ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
     $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
     if ($isdata) { // check that we have information returned
@@ -897,8 +907,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'get basic counters');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip) . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
   /**
@@ -910,8 +921,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/status', 'status=' . ($toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip) . '/status', 'status=' . ($toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -924,8 +936,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -940,8 +953,9 @@ class jee4lm extends eqLogic
     // preinfusion = TypeB, prebrew=Enabled/Disabled
     log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -955,8 +969,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
 
@@ -973,8 +988,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"],$ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -982,8 +998,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'get number of uses');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . 'api/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $serial);
+    $data = self::request($this->getPath($serial, $ip). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $ip!==''?$serial:null);
     log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
   }
 
@@ -1011,6 +1028,7 @@ class jee4lm extends eqLogic
     }
     //  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $scale = $this->getConfiguration('scalename');
 
@@ -1028,11 +1046,11 @@ class jee4lm extends eqLogic
     $d = ["recipeId" => "Recipe1", "doseMode" => "Mass", "recipeDoses" => $recipedoses];
     //  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
     self::request(
-      LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/recipes/',
+      $this->getPath($serial, $ip). '/recipes/',
       $d,
       'PUT',
       ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
-      $serial
+      $ip==''?$serial:null
     );
     sleep(5);
     //  now reread everthing
@@ -1048,13 +1066,14 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $data = self::request(
-      LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/enable-backflush',
+      $this->getPath($serial, $ip) . '/enable-backflush',
       'enable=true',
       'POST',
       ["Authorization: Bearer $token"],
-      $serial
+      $ip==''?$serial:null
     );
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -1350,9 +1369,10 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
     $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $this->getBBWSettings($serial, $token);
-    $arr = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/status', '', 'GET', ["Authorization: Bearer $token"]);
+    $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
     if (array_key_exists('status', $arr)) {
       $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS'] == 'BrewingMode'));
       $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
