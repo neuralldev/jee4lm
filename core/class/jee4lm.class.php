@@ -200,6 +200,8 @@ class jee4lm extends eqLogic
    */
   public static function getToken()
   {
+    if ($ip=config::byKey('host', 'jee4lm') =!'') // if set to local communication do not use the web token mechanism and just take communicationkey
+      return config::byKey('communicationKey', 'jee4lm')
     $mc = cache::byKey('jee4lm::access_token');
     $access_token = $mc->getValue();
     if (config::byKey('accessToken', 'jee4lm') == '') // no login performed yet
@@ -208,10 +210,6 @@ class jee4lm extends eqLogic
       $access_token = self::refreshToken();
     return $access_token;
   }
-
-public static function validateip($_host) {
-
-}
 
   /**
    * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
@@ -352,14 +350,14 @@ public static function validateip($_host) {
         log::add(__CLASS__, 'debug', 'check machine at ip '.$ip);
         $data = self::request(
          "http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config","", '', ["Authorization: Bearer $token"]);
-         log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
-         if ($data['status_code'] != 403) { // check that we have information returned
+        if ($data['status_code'] != 403) { // check that we have information returned
           log::add(__CLASS__, 'debug', "machine answer=".json_encode($data));
           return true;
-         } else {
+        } else { // clear ip field as there is no anwser
+          $ip = $this->setConfiguration('host','');
           log::add(__CLASS__, 'debug', "error with request");
           return false;
-         }
+        }
       }
       return true;
   }
