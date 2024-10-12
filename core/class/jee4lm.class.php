@@ -1044,7 +1044,7 @@ class jee4lm extends eqLogic
     // update list of doses
     $recipedoses = [['id' => 'A', 'target' => $doseA], ['id' => 'B', 'target' => $doseB]];
     $d = ["recipeId" => "Recipe1", "doseMode" => "Mass", "recipeDoses" => $recipedoses];
-    //  log::add(__CLASS__, 'debug', "send PUT with d=".json_encode($d));
+      log::add(__CLASS__, 'debug', "send PUT ".$this->getPath($serial, $ip). '/recipes/ with d='.json_encode($d));
     $req = self::request(
       $this->getPath($serial, $ip). '/recipes/',
       $d,
