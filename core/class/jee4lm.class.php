@@ -198,10 +198,11 @@ class jee4lm extends eqLogic
    * the refresh routine to renew it 
    * @return mixed
    */
-  public static function getToken()
+  public static function getToken($_local=false)
   {
-    if ($ip=config::byKey('host', 'jee4lm') =!'') // if set to local communication do not use the web token mechanism and just take communicationkey
-      return config::byKey('communicationKey', 'jee4lm');
+    if ($_local)
+      if ($ip=config::byKey('host', 'jee4lm') =!'') // if set to local communication do not use the web token mechanism and just take communicationkey
+        return config::byKey('communicationKey', 'jee4lm');
     $mc = cache::byKey('jee4lm::access_token');
     $access_token = $mc->getValue();
     if (config::byKey('accessToken', 'jee4lm') == '') // no login performed yet
@@ -228,7 +229,7 @@ class jee4lm extends eqLogic
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
           if ($slug != '' && $ip='') { // if there is no ip set, get the information from the web site
-            $token = self::getToken(); // send query for token and refresh it if necessary
+            $token = self::getToken(true); // send query for token and refresh it if necessary
             if ($token != '')
               if ($state == 0) // just scan status, all information will be refreshed only if up
                 $error = !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
@@ -408,13 +409,16 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'refresh all information');
     $serial = $_eq->getConfiguration('serialNumber');
+    $ip = $_eq->getConfiguration('host');
     $id = $_eq->getId();
     log::add(__CLASS__, 'debug', 'serial=' . $serial . ' id=' . $id);
-    $token = self::getToken();
-    $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/configuration', null, 'GET', ["Authorization: Bearer $token"]);
-    if ($data['status'] == true) { // check that we have information returned
+    $token = self::getToken(true);
+    $data = self::request(($ip==''?LMCLOUD_GW_MACHINE_BASE_URL. '/' . $serial . '/configuration':"http://".$ip.":".LMDEFAULT_PORT_LOCAL."/api/v1/config") , null, 'GET', ["Authorization: Bearer $token"]);
+    // check if local or remote config info is fetched
+    $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
+    if ($isdata) { // check that we have information returned
       log::add(__CLASS__, 'debug', 'parse info');
-      $machine = $data['data'];
+      $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
       $g = $machine['groupCapabilities'][0];
