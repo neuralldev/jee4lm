@@ -202,7 +202,7 @@ class jee4lm extends eqLogic
   public static function getToken($_local = null)
   {
     if ($_local != null)
-      if ($_local->getConfiguration('host', '') =!'') // if set to local communication do not use the web token mechanism and just take communicationkey
+      if ($_local->getConfiguration('host', '') !='') // if set to local communication do not use the web token mechanism and just take communicationkey
         return $_local->getConfiguration('communicationKey', '');
     $mc = cache::byKey('jee4lm::access_token');
     $access_token = $mc->getValue();
