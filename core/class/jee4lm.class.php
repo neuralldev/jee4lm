@@ -361,8 +361,11 @@ class jee4lm extends eqLogic
             log::add(__CLASS__, 'debug', "error with request");
             return false;
           }
-        else
+        else {
+          $ip = $this->setConfiguration('host','');
+          log::add(__CLASS__, 'debug', "error with request");
           return false;
+        }
       }
       return true;
   }
