@@ -438,6 +438,7 @@ class jee4lm extends eqLogic
           $_eq->checkAndUpdateCmd('coffeetarget',$boiler['target']);
           $_eq->checkAndUpdateCmd('coffeecurrent',$boiler['current']); 
           $_eq->checkAndUpdateCmd('displaycoffee',$machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
+          log::add(__CLASS__, 'debug', $boiler['current']." ".$boiler['target']);
         }
       }
       $_eq->checkAndUpdateCmd('preinfusionmode',$preinfusion['mode'] == 'Enabled');
