@@ -1,18 +1,37 @@
  
  {
-    "name": "Linea Mini",
-    "configuration" : {
-        "model" : "linea mini",
-        "type" : "coffee machine",
-        "clientid" : "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg",
-        "clientsecret": "2mgjqpikbfuok8g4s44oo4gsw0ks44okk4kc4kkkko0c8soc8s"
-    },
+    "slug": "linea_mini",
+    "configuration": [
+      {
+        "scalename":"",
+        "scalemac":""
+      }
+
+    ],
     "commands": [ 
-      {"name": "Nb de shots", "type": "info", "subtype": "numeric",  "logicalId": "lmshots", "unit": "", "warningif": "", "dangerif": "", "template": "tile"},
-      {"name": "Température café", "type": "info", "subtype": "numeric",  "logicalId": "cofeetemperature", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "", "template": "tile", "history": "1"},
-      {"name": "Consigne vapeur", "type": "info", "subtype": "numeric",  "logicalId": "steamtarget", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "", "template": "tile", "history": "1","min": "85", "max": "105"},
-      {"name": "Température vapeur", "type": "info", "subtype": "numeric",  "logicalId": "steamtemperature", "unit" : "°C", "generictype": "THERMOSTAT_TEMPERATURE", "offset": "", "template": "tile", "history": "1"},
-      {"name": "Consigne café", "type": "info", "subtype": "numeric",  "logicalId": "coffeetarget", "unit" : "°C", "generictype": "THERMOSTAT_SETPOINT", "offset": "", "template": "tile", "history": "1","min": "50", "max": "120"}
+
+    {"name": "defaultcommand", "type": "info", "subtype": "numeric",  "logicalId": "lmshots", "unit": "", "warningif": "", "dangerif": "", "template": "tile", "generictype":"","visible":1,"icon":"default","linebreak":"default","min":0,"max":0,"order":0,"historised":0,"repeat":0,"iconanme":"","offset":0,"round":0,"noiconname":1,"warning":"","danger":"","invert":0},
+
+    {"name": "BBW balance connectée", "type": "info", "subtype": "binary",  "logicalId": "isscaleconnected",  "generictype":"", "template":"jee4lm::bbw",  "visible":0, "noiconname":1},
+    {"name": "BBW batterie", "type": "info", "subtype": "numeric",  "logicalId": "scalebattery",  "generictype":"", "unit":"%", "template":"tile", "min":0, "max":100, "visible":1, "noiconname":1},
+
+
+    {"name": "Vapeur activée", "type": "info", "subtype": "binary",  "logicalId": "steamenabled",  "generictype":"THERMOSTAT_STATE",  "visible":0, "noiconname":1},
+    {"name": "Vapeur temperature cible", "type": "info", "subtype": "numeric",  "logicalId": "steamtarget",  "generictype":"THERMOSTAT_SETPOINT", "unit":"°C", "visible":0, "noiconname":1},
+    {"name": "Vapeur température actuelle", "type": "info", "subtype": "numeric",  "logicalId": "steamcurrent",  "generictype":"THERMOSTAT_TEMPERATURE", "unit":"°C", "visible":0, "noiconname":1},
+    {"name": "Chaudière Vapeur", "type": "info", "subtype": "string",  "logicalId": "displaysteam",  "generictype":"",  "visible":1, "noiconname":1},
+
+    {"name": "Cafetière activée", "type": "info", "subtype": "binary",  "logicalId": "coffeeenabled",  "generictype":"THERMOSTAT_STATE",  "visible":0, "noiconname":1},
+    {"name": "Cafetière temperature cible", "type": "info", "subtype": "numeric",  "logicalId": "coffeetarget",  "generictype":"THERMOSTAT_SETPOINT", "unit":"°C", "visible":0, "noiconname":1},
+    {"name": "Cafetière temperature actuelle", "type": "info", "subtype": "numeric",  "logicalId": "coffeecurrent",  "generictype":"THERMOSTAT_TEMPERATURE", "unit":"°C", "visible":0, "noiconname":1},
+    {"name": "Chaudière café", "type": "info", "subtype": "string",  "logicalId": "displaycoffee",  "generictype":"",  "visible":1, "noiconname":1},
+    {"name": "Préinfusion", "type": "info", "subtype": "binary",  "logicalId": "preinfusionmode",  "generictype":"",  "visible":1, "noiconname":1},
+    {"name": "Prétrempage", "type": "info", "subtype": "binary",  "logicalId": "prewet",  "generictype":"",  "visible":1, "noiconname":1},
+    {"name": "Prétrempage durée", "type": "info", "subtype": "numeric",  "logicalId": "prewettime",  "generictype":"THERMOSTAT_SETPOINT", "unit":"s", "visible":1,"noiconname":0},
+    {"name": "Prétrempage pause", "type": "info", "subtype": "numeric",  "logicalId": "prewetholdtime",  "generictype":"THERMOSTAT_SETPOINT", "unit":"s", "visible":1,"noiconname":0},
+    {"name": "Version Firmware", "type": "info", "subtype": "string",  "logicalId": "fwversion",  "generictype":"", "visible":1,"noiconname":1},
+    {"name": "Version Gateway", "type": "info", "subtype": "string",  "logicalId": "gwversion",  "generictype":"", "visible":1,"noiconname":1},
+    {"name": "Machine", "type": "info", "subtype": "string",  "logicalId": "machine", "template": "jee4lm::machine", "generictype":"","noiconname":1}
     ]
   }
   

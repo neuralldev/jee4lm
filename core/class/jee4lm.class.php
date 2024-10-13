@@ -354,9 +354,9 @@ class jee4lm extends eqLogic
 
   /**
    * not used
-   * @return bool
+   * @return void
    */
-  public function preSave()
+  public function preSave(): void
   {
     /*
       log::add(__CLASS__, 'debug', 'presave start');
@@ -381,9 +381,7 @@ class jee4lm extends eqLogic
           return false;
         }
       }
-        */
-      return true;
-      
+        */      
   }
 
   /**
@@ -394,11 +392,11 @@ class jee4lm extends eqLogic
    */
   public static function RefreshAllInformation($_eq)
   {
-    log::add(__CLASS__, 'debug', 'refresh all information');
+//    log::add(__CLASS__, 'debug', 'refresh all information');
     $serial = $_eq->getConfiguration('serialNumber');
     $ip = $_eq->getConfiguration('host');
     $id = $_eq->getId();
-    log::add(__CLASS__, 'debug', 'serial=' . $serial . ' id=' . $id);
+    log::add(__CLASS__, 'debug', "refresh serial=$serial id=$id ip=$ip");
     $token = self::getToken($_eq);
     $data = self::request($ip == '' ? $_eq->getPath($serial, $ip). '/configuration' : $_eq->getPath($serial, $ip)."/config" , null, 'GET', ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
@@ -414,40 +412,40 @@ class jee4lm extends eqLogic
       $preinfusion = $machine['preinfusionSettings'];
       $fw = $machine['firmwareVersions'];
 
-      cmd::byEqLogicIdAndLogicalId($id, 'plumbedin')->event($machine['isPlumbedIn']);
-      cmd::byEqLogicIdAndLogicalId($id, 'backflush')->event($machine['isBackFlushEnabled']);
-      cmd::byEqLogicIdAndLogicalId($id, 'tankStatus')->event(!$machine['tankStatus']);
-      cmd::byEqLogicIdAndLogicalId($id, 'bbwmode')->event($bbwset['recipe_dose']);
-      cmd::byEqLogicIdAndLogicalId($id, 'bbwfree')->event(!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'));
-      cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseA')->event($bbw['recipe_doses'][0]['target']);
-      cmd::byEqLogicIdAndLogicalId($id, 'bbwdoseB')->event($bbw['recipe_doses'][1]['target']);
-      cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMode')->event($reglage['doseIndex']);
-      cmd::byEqLogicIdAndLogicalId($id, 'groupDoseType')->event($reglage['doseType']);
-      cmd::byEqLogicIdAndLogicalId($id, 'groupDoseMax')->event($reglage['stopTarget']);
-      cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->event($machine['machineMode'] == "StandBy" ? false : true);
-      cmd::byEqLogicIdAndLogicalId($id, 'isbbw')->event($machine['scale']['address'] == '' ? false : true);
-      cmd::byEqLogicIdAndLogicalId($id, 'isscaleconnected')->event($machine['scale']['connected']);
-      cmd::byEqLogicIdAndLogicalId($id, 'scalebattery')->event($machine['scale']['battery']);
+      $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
+      $_eq->checkAndUpdateCmd('backflush',$machine['isBackFlushEnabled']);
+      $_eq->checkAndUpdateCmd('tankStatus',!$machine['tankStatus']);
+      $_eq->checkAndUpdateCmd('bbwmode',$bbwset['recipe_dose']);
+      $_eq->checkAndUpdateCmd('bbwfree',!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B'));
+      $_eq->checkAndUpdateCmd('bbwdoseA',$bbw['recipe_doses'][0]['target']);
+      $_eq->checkAndUpdateCmd('bbwdoseB',$bbw['recipe_doses'][1]['target']);
+      $_eq->checkAndUpdateCmd('groupDoseMode',$reglage['doseIndex']);
+      $_eq->checkAndUpdateCmd('groupDoseType',$reglage['doseType']);
+      $_eq->checkAndUpdateCmd('groupDoseMax',$reglage['stopTarget']);
+      $_eq->checkAndUpdateCmd('machinemode',$machine['machineMode'] == "StandBy" ? false : true);
+      $_eq->checkAndUpdateCmd('isbbw',$machine['scale']['address'] == '' ? false : true);
+      $_eq->checkAndUpdateCmd('isscaleconnected',$machine['scale']['connected']);
+      $_eq->checkAndUpdateCmd( 'scalebattery',$machine['scale']['battery']);
       foreach ($boilers as $boiler) {
         if ($boiler['id'] == 'SteamBoiler') {
-          cmd::byEqLogicIdAndLogicalId($id, 'steamenabled')->event($boiler['isEnabled']);
-          cmd::byEqLogicIdAndLogicalId($id, 'steamtarget')->event($boiler['target']);
-          //        cmd::byEqLogicIdAndLogicalId($id, 'steamcurrent')->event($boiler['current']); 
-//        cmd::byEqLogicIdAndLogicalId($id, 'displaysteam')->event($boiler['isEnabled'] ?"ON":"OFF"); 
+          $_eq->checkAndUpdateCmd('steamenabled',$boiler['isEnabled']);
+          $_eq->checkAndUpdateCmd('steamtarget',$boiler['target']);
+          $_eq->checkAndUpdateCmd('steamcurrent',$boiler['current']); 
+          $_eq->checkAndUpdateCmd( 'displaysteam',$boiler['isEnabled'] ?"ON":"OFF"); 
         }
         if ($boiler['id'] == 'CoffeeBoiler1') {
-          cmd::byEqLogicIdAndLogicalId($id, 'coffeeenabled')->event($boiler['isEnabled']);
-          cmd::byEqLogicIdAndLogicalId($id, 'coffeetarget')->event($boiler['target']);
-          //        cmd::byEqLogicIdAndLogicalId($id, 'coffeecurrent')->event($boiler['current']); 
-//        cmd::byEqLogicIdAndLogicalId($id, 'displaycoffee')->event($machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
+          $_eq->checkAndUpdateCmd('coffeeenabled',$boiler['isEnabled']);
+          $_eq->checkAndUpdateCmd('coffeetarget',$boiler['target']);
+          $_eq->checkAndUpdateCmd('coffeecurrent',$boiler['current']); 
+          $_eq->checkAndUpdateCmd('displaycoffee',$machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
         }
       }
-      cmd::byEqLogicIdAndLogicalId($id, 'preinfusionmode')->event($preinfusion['mode'] == 'Enabled');
-      cmd::byEqLogicIdAndLogicalId($id, 'prewet')->event($preinfusion['Group1'][0]['preWetTime'] > 0) && ($preinfusion['Group1'][0]['preWetHoldTime'] > 0) && (!$machine['isPlumbedIn']);
-      cmd::byEqLogicIdAndLogicalId($id, 'prewettime')->event($preinfusion['Group1'][0]['preWetTime']);
-      cmd::byEqLogicIdAndLogicalId($id, 'prewetholdtime')->event($preinfusion['Group1'][0]['preWetHoldTime']);
-      cmd::byEqLogicIdAndLogicalId($id, 'fwversion')->event($fw[0]['fw_version']);
-      cmd::byEqLogicIdAndLogicalId($id, 'gwversion')->event($fw[1]['fw_version']);
+      $_eq->checkAndUpdateCmd('preinfusionmode',$preinfusion['mode'] == 'Enabled');
+      $_eq->checkAndUpdateCmd('prewet',$preinfusion['Group1'][0]['preWetTime'] > 0) && ($preinfusion['Group1'][0]['preWetHoldTime'] > 0) && (!$machine['isPlumbedIn']);
+      $_eq->checkAndUpdateCmd('prewettime',$preinfusion['Group1'][0]['preWetTime']);
+      $_eq->checkAndUpdateCmd('prewetholdtime',$preinfusion['Group1'][0]['preWetHoldTime']);
+      $_eq->checkAndUpdateCmd('fwversion',$fw[0]['fw_version']);
+      $_eq->checkAndUpdateCmd('gwversion',$fw[1]['fw_version']);
       return true;
     }
     return false;
@@ -459,7 +457,7 @@ class jee4lm extends eqLogic
    * @param eqLogic $_eq
    * @return bool
    */
-  public static function readConfiguration($_eq)
+  public static function CreateConfiguration($_eq)
   {
     log::add(__CLASS__, 'debug', 'read configuration');
     $serial = $_eq->getConfiguration('serialNumber');
@@ -635,7 +633,6 @@ class jee4lm extends eqLogic
         // add machine slug to display machine by type
         $cmd = $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm::machine", null, null, 1);
         $cmd->event($_eq->getConfiguration('type'));
-        //   log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
         $_eq->save();
       }
     }
@@ -714,17 +711,13 @@ class jee4lm extends eqLogic
     $_invert = 0
   ) {
     $createCmd = true;
-    $Command = $this->getCmd(null, $_logicalId);
-    if (!is_object($Command)) { // check if action is already defined, if yes avoid duplicating
+    $Command = $this->getCmd('info', $_logicalId);
+    if (!is_object($Command)) { // check if info is already defined, if yes avoid duplicating
       $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
-      if (is_object($Command)) {
-        $createCmd = false;
-        // log::add(__CLASS__, 'debug', ' command already exists ');
-      }
+      if (is_object($Command)) $createCmd = false;
     }
 
-    if ($createCmd) {
-      // log::add(__CLASS__, 'debug', ' add record for ' . $Name);
+    if ($createCmd) 
       if (!is_object($Command)) {
         // basic settings
         $Command = new jee4lmCmd();
@@ -736,48 +729,48 @@ class jee4lm extends eqLogic
         $Command->setSubType($_SubType);
       }
 
-      $Command->setIsVisible($_IsVisible);
-      if ($_IsHistorized != null)
-        $Command->setIsHistorized(strval($_IsHistorized));
-      if ($_Template != null) {
-        $Command->setTemplate('dashboard', $_Template);
-        $Command->setTemplate('mobile', $_Template);
-      }
-      if ($_unite != null && $_SubType == 'numeric')
-        $Command->setUnite($_unite);
-      if ($_icon != 'default')
-        $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
-      if ($_forceLineB != 'default')
-        $Command->setdisplay('forceReturnLineBefore', 1);
-      if ($_iconname != 'default')
-        $Command->setdisplay('showIconAndNamedashboard', 1);
-      if ($_noiconname != null) {
-        $Command->setdisplay('showIconAndNamedashboard', 0);
-        $Command->setdisplay('showNameOndashboard', 0);
-      }
-      if ($_calculValueOffset != null)
-        $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
-      if ($_historizeRound != null)
-        $Command->setConfiguration('historizeRound', $_historizeRound);
-      if ($_generic_type != null)
-        $Command->setGeneric_type($_generic_type);
-      if ($_repeatevent == true && $_Type == 'info')
-        $Command->setConfiguration('repeatEventManagement', 'never');
-      if ($_valuemin != 'default')
-        $Command->setConfiguration('minValue', $_valuemin);
-      if ($_valuemax != 'default')
-        $Command->setConfiguration('maxValue', $_valuemax);
-      if ($_warning != null)
-        $Command->setDisplay("warningif", $_warning);
-      if ($_order != null)
-        $Command->setOrder($_order);
-      if ($_danger != null)
-        $Command->setDisplay("dangerif", $_danger);
-      if ($_invert != null)
-        $Command->setDisplay('invertBinary', $_invert);
-      $Command->save();
-      // log::add(__CLASS__, 'debug', 'command saved');
+    $Command->setIsVisible($_IsVisible);
+    if ($_IsHistorized != null)
+      $Command->setIsHistorized(strval($_IsHistorized));
+    if ($_Template != null) {
+      $Command->setTemplate('dashboard', $_Template);
+      $Command->setTemplate('mobile', $_Template);
     }
+    if ($_unite != null && $_SubType == 'numeric')
+      $Command->setUnite($_unite);
+    if ($_icon != 'default')
+      $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
+    if ($_forceLineB != 'default')
+      $Command->setdisplay('forceReturnLineBefore', 1);
+    if ($_iconname != 'default')
+      $Command->setdisplay('showIconAndNamedashboard', 1);
+    if ($_noiconname != null) {
+      $Command->setdisplay('showIconAndNamedashboard', 0);
+      $Command->setdisplay('showNameOndashboard', 0);
+    }
+    if ($_calculValueOffset != null)
+      $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+    if ($_historizeRound != null)
+      $Command->setConfiguration('historizeRound', $_historizeRound);
+    if ($_generic_type != null)
+      $Command->setGeneric_type($_generic_type);
+    if ($_repeatevent == true && $_Type == 'info')
+      $Command->setConfiguration('repeatEventManagement', 'never');
+    if ($_valuemin != 'default')
+      $Command->setConfiguration('minValue', $_valuemin);
+    if ($_valuemax != 'default')
+      $Command->setConfiguration('maxValue', $_valuemax);
+    if ($_warning != null)
+      $Command->setDisplay("warningif", $_warning);
+    if ($_order != null)
+      $Command->setOrder($_order);
+    if ($_danger != null)
+      $Command->setDisplay("dangerif", $_danger);
+    if ($_invert != null)
+      $Command->setDisplay('invertBinary', $_invert);
+    $Command->save();
+    // log::add(__CLASS__, 'debug', 'command saved');
+    
     // log::add(__CLASS__, 'debug', ' addcommand end');
     return $Command;
   }
@@ -799,36 +792,30 @@ class jee4lm extends eqLogic
   {
     // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
-    $command = $this->getCmd(null, $_actionName);
+    $command = $this->getCmd('action', $_actionName);
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $_actionTitle);
-      if (is_object($command))
-        $createCmd = false;
+      if (is_object($command)) $createCmd = false;
     }
-    if ($createCmd) { // only if action is not yet defined
+    if ($createCmd)  // only if action is not yet defined
       if (!is_object($command)) {
         $command = new jee4lmCmd();
         $command->setLogicalId($_actionName);
-        $command->setIsVisible($_visible);
         $command->setName($_actionTitle);
+        $command->setType('action');
+        $command->setSubType($_SubType);
+        $command->setEqLogic_id($this->getId());
       }
-      if ($_template != null) {
-        $command->setTemplate('dashboard', $_template);
-        $command->setTemplate('mobile', $_template);
-      }
-      $command->setType('action');
-      $command->setSubType($_SubType);
-      $command->setEqLogic_id($this->getId());
-      if ($_generic_type != null)
-        $command->setGeneric_type($_generic_type);
-      if ($_min != null)
-        $command->setConfiguration('minValue', $_min);
-      if ($_max != null)
-        $command->setConfiguration('maxValue', $_max);
-      if ($_step != null)
-        $command->setDisplay('parameters', ['step' => $_step]);
-      $command->save();
+    $command->setIsVisible($_visible);
+    if ($_template != null) {
+      $command->setTemplate('dashboard', $_template);
+      $command->setTemplate('mobile', $_template);
     }
+    if ($_generic_type != null) $command->setGeneric_type($_generic_type);
+    if ($_min != null) $command->setConfiguration('minValue', $_min);
+    if ($_max != null) $command->setConfiguration('maxValue', $_max);
+    if ($_step != null) $command->setDisplay('parameters', ['step' => $_step]);
+    $command->save();
   }
 
   /**
@@ -1125,7 +1112,7 @@ class jee4lm extends eqLogic
         $eqLogic->setConfiguration('serialNumber', $machines['machine']['serialNumber']);
         $eqLogic->save();
         // create commands before setting display
-        jee4lm::readConfiguration($eqLogic);
+        jee4lm::CreateConfiguration($eqLogic);
         // set display
         $display_map = [
           'scalebattery' => [1, 3],
