@@ -914,7 +914,9 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
+    log::add(__CLASS__, 'debug', 'token get ok');
     $data = self::request($this->getPath($serial, $ip) . '/status', 'status=' . ($toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $ip!==''?$serial:null);
+    log::add(__CLASS__, 'debug', 'request onoff ok');
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
