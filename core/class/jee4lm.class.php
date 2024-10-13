@@ -912,12 +912,11 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
+//    $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
-    log::add(__CLASS__, 'debug', 'token get ok');
-    $data = self::request($this->getPath($serial, $ip) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $ip==''?$serial:null);
-    log::add(__CLASS__, 'debug', 'request onoff ok');
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+//    log::add(__CLASS__, 'debug', 'token get ok');
+    $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
+//    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
   /**
@@ -929,9 +928,9 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
+//    $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
-    $data = self::request($this->getPath($serial, $ip)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $ip==''?$serial:null);
+    $data = self::request($this->getPath($serial, '')  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $serial);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
