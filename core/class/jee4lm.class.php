@@ -1582,15 +1582,17 @@ public function AdaptDaemonPollingRate($_rate=0) {
     log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/jee4lmd.py");
     $result = exec($cmd . ' >> ' . log::getPathToLog('jee4lmd') . ' 2>&1 &');     
     $i = 0;
-    while ($i < 20) {
+    while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') {
+          log::add(__CLASS__, 'error', 'démon ok');
             break;
         }
         sleep(1);
         $i++;
+        log::add(__CLASS__, 'error', 'démon loop '.$i);
     }
-    if ($i >= 30) {
+    if ($i >= 10) {
         log::add(__CLASS__, 'error', __('Impossible de lancer le démon, vérifiez le log', __FILE__), 'unableStartDeamon');
         return false;
     }
@@ -1624,7 +1626,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
       log::add(__CLASS__, 'error', 'error opening socket');
       return;
     } 
-    if (!socket_connect($socket, '127.0.0.1', config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT)))
+    if (!socket_connect($socket, '127.0.0.1', JEEDOM_DAEMON_PORT))
       log::add(__CLASS__, 'error', 'error connecting to daemon socket port');
     else 
       if (!socket_write($socket, $payLoad, strlen($payLoad)))
