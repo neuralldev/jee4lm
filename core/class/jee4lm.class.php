@@ -1635,7 +1635,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
 }
   public static function dependancy_install() {
     log::remove(__CLASS__ . '_update');
-    return array('script' => dirname(__FILE__) . '/../../resources/install_apt.sh ' . jeedom::getTmpFolder(__CLASS__) . '/dependance', 'log' => log::getPathToLog(__CLASS__ . '_update'));
+    return array('script' => dirname(__FILE__) . '/../../resources/install_#stype#.sh ' . jeedom::getTmpFolder(__CLASS__) . '/dependance', 'log' => log::getPathToLog(__CLASS__ . '_update'));
   }
   
   public static function dependancy_info() {
