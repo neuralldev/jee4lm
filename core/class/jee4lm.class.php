@@ -1540,7 +1540,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
         $return['log'] = __CLASS__;
         $return['launchable'] = 'ok';
         $return['state'] = 'nok';
-        $pid_file = jeedom::getTmpFolder(__CLASS__) . '/daemon.pid';
+        $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
         log::add(__CLASS__, 'debug', 'démon search pid ={'.$pid_file.')');
         if (file_exists($pid_file)) {
           log::add(__CLASS__, 'debug', 'found file');
