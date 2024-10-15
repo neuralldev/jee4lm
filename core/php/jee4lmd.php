@@ -37,6 +37,7 @@ $eq = eqLogic::byId($result['id']);
 if ($eq==null) {
 	die();
 }
+
 jee4lm::RefreshAllInformation($eq);
 //alternative plus compliquée
 //$data = json_decode($result['data'],true);

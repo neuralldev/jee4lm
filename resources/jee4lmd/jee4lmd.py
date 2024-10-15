@@ -1,5 +1,6 @@
 import globals
 import logging
+import asyncio
 
 from jeedomdaemon.base_daemon import BaseDaemon
 
@@ -18,10 +19,14 @@ class MyDaemon(BaseDaemon):
         # if you don't have specific action to do on start, do not create this method
         pass
 
-
+    async def stop_after(delay, what):
+        await asyncio.sleep(delay)
+        await self.send_to_jeedom({'id':what})
+       
     async def on_message(self, message: list):
         logging.debug('on_message - Received command from jeedom : '+str(message['cmd']))
         if message['cmd'] == 'poll':
+            task1 = asyncio.create_task(self.stop_after(5, message['id']))
             logging.debug('on_message - start polling every 5 seconds on id '+str(message['id']))
         elif message['cmd'] == 'stop':
             logging.debug('on_message - stop polling every 5 seconds on id '+str(message['id']))
