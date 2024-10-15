@@ -19,17 +19,37 @@ class MyDaemon(BaseDaemon):
         # if you don't have specific action to do on start, do not create this method
         pass
 
+    async def istasks_from_id(id):
+        tasks = asyncio.all_tasks()
+        for t in tasks:
+            if t.get_name()==id:
+                return True
+        return False
+
+    async def cancel_all_tasks_from_id(id):
+        tasks = asyncio.all_tasks()
+        for t in tasks:
+            if t.get_name()==id:
+                t.cancel()
+         
     async def stop_after(delay, what):
-        await asyncio.sleep(delay)
-        await self.send_to_jeedom({'id':what})
-       
+        globals.READY=False
+        while 1:
+            logging.debug(f'send eqID {what} to refresh to jeedom callback')
+            await self.send_to_jeedom({'id':what})
+            await asyncio.sleep(delay)
+ 
     async def on_message(self, message: list):
-        logging.debug('on_message - Received command from jeedom : '+str(message['cmd']))
+        logging.debug('on_message - daemon received command : '+str(message['cmd'])+ 'for id '+str(message['id']))
         if message['cmd'] == 'poll':
-            task1 = asyncio.create_task(self.stop_after(5, message['id']))
-            logging.debug('on_message - start polling every 5 seconds on id '+str(message['id']))
+            if self.istasks_from_id(message['id']):
+                logging.debug('on_message - start polling on id '+str(message['id']))
+                task1 = asyncio.create_task(self.stop_after(5, message['id']),message['id'])
         elif message['cmd'] == 'stop':
-            logging.debug('on_message - stop polling every 5 seconds on id '+str(message['id']))
+            logging.debug('on_message - stop polling on id '+str(message['id']))
+            if self.istasks_from_id(message['id']):
+                self.cancel_all_tasks_from_id(message['id'])
+            globals.READY=True
         else:
             logging.debug('on_message - command not found')
 
