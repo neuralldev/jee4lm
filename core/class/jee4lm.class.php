@@ -1541,14 +1541,14 @@ public function AdaptDaemonPollingRate($_rate=0) {
         $return['launchable'] = 'ok';
         $return['state'] = 'nok';
         $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
-        log::add(__CLASS__, 'debug', 'démon search pid ={'.$pid_file.')');
+//        log::add(__CLASS__, 'debug', 'démon search pid ={'.$pid_file.')');
         if (file_exists($pid_file)) {
-          log::add(__CLASS__, 'debug', 'found file');
+  //        log::add(__CLASS__, 'debug', 'found file');
           if (@posix_getsid(trim(file_get_contents($pid_file)))) {
-            log::add(__CLASS__, 'debug', 'file ok');
+    //        log::add(__CLASS__, 'debug', 'file ok');
             $return['state'] = 'ok';
             } else {
-              log::add(__CLASS__, 'debug', 'removing');
+      //        log::add(__CLASS__, 'debug', 'removing');
               shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
             }
         }
@@ -1589,12 +1589,12 @@ public function AdaptDaemonPollingRate($_rate=0) {
     while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') {
-          log::add(__CLASS__, 'debug', 'démon ok');
+//          log::add(__CLASS__, 'debug', 'démon ok');
             break;
         }
         sleep(1);
         $i++;
-        log::add(__CLASS__, 'debug', 'démon loop '.$i);
+  //      log::add(__CLASS__, 'debug', 'démon loop '.$i);
     }
     if ($i >= 10) {
         log::add(__CLASS__, 'error', __('Impossible de lancer le démon, vérifiez le log', __FILE__), 'unableStartDeamon');
