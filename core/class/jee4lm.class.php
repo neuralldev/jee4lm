@@ -414,6 +414,15 @@ class jee4lm extends eqLogic
       $boilers = $machine['boilers'];
       $preinfusion = $machine['preinfusionSettings'];
       $fw = $machine['firmwareVersions'];
+      $mc = cache::byKey('jee4lm::laststate');
+      
+      $ls = $mc->getValue();
+      $ns = $machine['machineMode'] == "StandBy" ? false : true;
+      if ($ls != $ns) {
+        cache::set('jee4lm::laststate',$ns);
+        if (self::deamon_info()['state'] == 'ok')
+          self::deamon_send(['id' => $_eq, 'cmd'=> $ns ?'stop':'poll']);
+      }
 
       $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
       $_eq->checkAndUpdateCmd('backflush',$machine['isBackFlushEnabled']);
