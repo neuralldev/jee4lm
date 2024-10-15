@@ -10,13 +10,10 @@
         "pyserial" : {},    
     },
     "npm": {
-      "plugins/jee4lm/ressources/demaond"  : {}
     },
     "composer": {
-         "plugins/jee4lm"  : {}
     },
     "yarn": {
-      "plugins/jee4lm/ressources/demaond"  : {}
     },
     "plugin": {
     },

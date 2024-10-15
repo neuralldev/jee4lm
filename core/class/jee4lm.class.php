@@ -1567,7 +1567,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     }
 
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lmd'); // répertoire du démon à modifier
-    $cmd = __DIR__ . '/../../resources/venv/bin/python3' . " {$path}/jee4lmd.py"; // nom du démon à modifier
+    $cmd = system::getCmdPython3(__CLASS__) . " {$path}/jee4lmd.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
     $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'http:127.0.0.1:port:comp') . '/plugins/template/core/php/jee4lmd.php'; // chemin de la callback url à modifier (voir ci-dessous)
