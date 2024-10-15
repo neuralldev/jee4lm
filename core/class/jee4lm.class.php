@@ -15,7 +15,7 @@ const
   LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
   COFFEE_BOILER_1 = "CoffeeBoiler1",
   STEAM_BOILER = "SteamBoiler",
-  JEEDOM_DAEMON_PORT = '55444';
+  JEEDOM_DAEMON_PORT = '55044';
 
 /* source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
@@ -1527,32 +1527,26 @@ public function AdaptDaemonPollingRate($_rate=0) {
    */
   public static function deamon_info() {
     $return = array();
-    $return['log'] = __CLASS__;
-    $return['state'] = 'nok';
-    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
-    if (file_exists($pid_file)) {
-        if (@posix_getsid(trim(file_get_contents($pid_file)))) {
-            $return['state'] = 'ok';
-        } else {
-            shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
+        $return['log'] = __CLASS__;
+        $return['launchable'] = 'ok';
+        $return['state'] = 'nok';
+        $pid_file = jeedom::getTmpFolder(__CLASS__) . '/daemon.pid';
+        if (file_exists($pid_file)) {
+            if (@posix_getsid(trim(file_get_contents($pid_file)))) {
+                $return['state'] = 'ok';
+            } else {
+                shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
+            }
         }
+        return $return;  
     }
-    $return['launchable'] = 'ok';
-//    $user = config::byKey('user', __CLASS__); // exemple si votre démon à besoin de la config user,
-//    $pswd = config::byKey('password', __CLASS__); // password,
-//    $clientId = config::byKey('clientId', __CLASS__); // et clientId
-//    if ($user == '') {
-//        $return['launchable'] = 'nok';
-//        $return['launchable_message'] = __('Le nom d\'utilisateur n\'est pas configuré', __FILE__);
-//    } elseif ($pswd == '') {
-//       $return['launchable'] = 'nok';
-//        $return['launchable_message'] = __('Le mot de passe n\'est pas configuré', __FILE__);
-//    if ($clientId == '') {
-//        $return['launchable'] = 'nok';
-//        $return['launchable_message'] = __('La clé d\'application n\'est pas configurée', __FILE__);
-//    }
-    return $return;
-  }
+
+    private static function getPython3() {
+      if (method_exists('system', 'getCmdPython3')) {
+          return system::getCmdPython3(__CLASS__);
+      }
+      return 'python3 ';
+    }
 
   /**
    * Summary of deamon_start
@@ -1571,11 +1565,10 @@ public function AdaptDaemonPollingRate($_rate=0) {
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
     $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'http:127.0.0.1:port:comp') . '/plugins/template/core/php/jee4lmd.php'; // chemin de la callback url à modifier (voir ci-dessous)
-   // $cmd .= ' --user "' . trim(str_replace('"', '\"', config::byKey('user', __CLASS__))) . '"'; // on rajoute les paramètres utiles à votre démon, ici user
-   // $cmd .= ' --pswd "' . trim(str_replace('"', '\"', config::byKey('password', __CLASS__))) . '"'; // et password
+    $cmd .= ' --cycle ' . config::byKey('cycle', __CLASS__, 2);
     $cmd .= ' --apikey ' . jeedom::getApiKey(__CLASS__); // l'apikey pour authentifier les échanges suivants
     $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/deamon.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
-    log::add(__CLASS__, 'info', 'Lancement du démon');
+    log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/jee4lmd.py");
     $result = exec($cmd . ' >> ' . log::getPathToLog('jee4lmd') . ' 2>&1 &');     
     $i = 0;
     while ($i < 20) {
@@ -1633,46 +1626,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
         'resources/venv'
     ];
 }
-  public static function dependancy_install() {
-    log::remove(__CLASS__ . '_update');
-    return array('script' => dirname(__FILE__) . '/../../resources/install_#stype#.sh ' . jeedom::getTmpFolder(__CLASS__) . '/dependance', 'log' => log::getPathToLog(__CLASS__ . '_update'));
-  }
-  
-  public static function dependancy_info() {
-    $return = array();
-    $return['log'] = log::getPathToLog(__CLASS__ . '_update');
-    $return['progress_file'] = jeedom::getTmpFolder(__CLASS__) . '/dependance';
-    $return['state'] = 'ok';
-    if (file_exists(jeedom::getTmpFolder(__CLASS__) . '/dependance')) {
-        $return['state'] = 'in_progress';
-    } elseif (!self::pythonRequirementsInstalled(__DIR__ . '/../../resources/venv/bin/python3', __DIR__ . '/../../resources/requirements.txt')) {
-        $return['state'] = 'nok';
-    }
-    return $return;
-  }
-
-  private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
-    if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
-        return false;
-    }
-    exec("{$pythonPath} -m pip freeze", $packages_installed);
-    $packages = join("||", $packages_installed);
-    exec("cat {$requirementsPath}", $packages_needed);
-    foreach ($packages_needed as $line) {
-        if (preg_match('/([^\s]+)[\s]*([>=~]=)[\s]*([\d+\.?]+)$/', $line, $need) === 1) {
-            if (preg_match('/' . $need[1] . '==([\d+\.?]+)/', $packages, $install) === 1) {
-                if ($need[2] == '==' && $need[3] != $install[1]) {
-                    return false;
-                } elseif (version_compare($need[3], $install[1], '>')) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-    }
-    return true;
-  }
+ 
 }
 
 /**

@@ -1,3 +1,5 @@
+import globals
+
 from jeedomdaemon.base_daemon import BaseDaemon
 
 class MyDaemon(BaseDaemon):
