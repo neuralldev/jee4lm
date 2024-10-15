@@ -421,7 +421,7 @@ class jee4lm extends eqLogic
       if ($ls != $ns) {
         cache::set('jee4lm::laststate',$ns);
         if (self::deamon_info()['state'] == 'ok')
-          self::deamon_send(['id' => $_eq, 'cmd'=> $ns ?'stop':'poll']);
+          self::deamon_send(['id' => $_eq, 'cmd'=> $ns ?'poll':'stop']);
       }
 
       $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
