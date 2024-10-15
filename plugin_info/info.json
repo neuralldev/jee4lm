@@ -13,9 +13,9 @@
 		"max" : 12
 	},
 	"category": "automation",
-	"hasDependency": false,
+	"hasDependency": true,
 	"hasOwnDeamon": true,
-	"maxDependancyInstallTime": 0,
+	"maxDependancyInstallTime": 60,
 	"changelog_beta": "",
 	"changelog": "https:\/\/github.com\/neuralldev\/jee4lm\/template\/changelog",
 	"documentation_beta": "",

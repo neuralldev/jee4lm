@@ -1566,7 +1566,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     }
 
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lmd'); // répertoire du démon à modifier
-    $cmd = system::getCmdPython3(__CLASS__) . " {$path}/jee4lmd.py"; // nom du démon à modifier
+    $cmd = __DIR__ . '/../../resources/venv/bin/python3' . " {$path}/jee4lmd.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
     $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'http:127.0.0.1:port:comp') . '/plugins/template/core/php/jee4lmd.php'; // chemin de la callback url à modifier (voir ci-dessous)
@@ -1627,6 +1627,51 @@ public function AdaptDaemonPollingRate($_rate=0) {
     socket_close($socket);
   }
 
+  public static function backupExclude() {
+    return [
+        'resources/venv'
+    ];
+}
+  public static function dependancy_install() {
+    log::remove(__CLASS__ . '_update');
+    return array('script' => dirname(__FILE__) . '/../../resources/install_#stype#.sh ' . jeedom::getTmpFolder(__CLASS__) . '/dependance', 'log' => log::getPathToLog(__CLASS__ . '_update'));
+  }
+  
+  public static function dependancy_info() {
+    $return = array();
+    $return['log'] = log::getPathToLog(__CLASS__ . '_update');
+    $return['progress_file'] = jeedom::getTmpFolder(__CLASS__) . '/dependance';
+    $return['state'] = 'ok';
+    if (file_exists(jeedom::getTmpFolder(__CLASS__) . '/dependance')) {
+        $return['state'] = 'in_progress';
+    } elseif (!self::pythonRequirementsInstalled(__DIR__ . '/../../resources/venv/bin/python3', __DIR__ . '/../../resources/requirements.txt')) {
+        $return['state'] = 'nok';
+    }
+    return $return;
+  }
+
+  private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
+    if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
+        return false;
+    }
+    exec("{$pythonPath} -m pip freeze", $packages_installed);
+    $packages = join("||", $packages_installed);
+    exec("cat {$requirementsPath}", $packages_needed);
+    foreach ($packages_needed as $line) {
+        if (preg_match('/([^\s]+)[\s]*([>=~]=)[\s]*([\d+\.?]+)$/', $line, $need) === 1) {
+            if (preg_match('/' . $need[1] . '==([\d+\.?]+)/', $packages, $install) === 1) {
+                if ($need[2] == '==' && $need[3] != $install[1]) {
+                    return false;
+                } elseif (version_compare($need[3], $install[1], '>')) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    }
+    return true;
+  }
 }
 
 /**
