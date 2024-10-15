@@ -7,14 +7,4 @@
     "pip3": {
         "jeedomdaemon": {}
     },
-    "npm": {
-    },
-    "composer": {
-    },
-    "yarn": {
-    },
-    "plugin": {
-    },
-    "post-install": {
-    }
   }
