@@ -1,4 +1,5 @@
 import globals
+import logging
 
 from jeedomdaemon.base_daemon import BaseDaemon
 
@@ -19,11 +20,13 @@ class MyDaemon(BaseDaemon):
 
 
     async def on_message(self, message: list):
-        """
-        This function will be called once a message is received from Jeedom; check on api key is done already, just care about your logic
-        You must implement the different actions that your daemon can handle.
-        """
-        pass
+        logging.debug('on_message - Received command from jeedom : '+str(message['cmd']))
+        if message['cmd'] == 'poll':
+            logging.debug('on_message - start polling every 5 seconds on id '+str(message['id']))
+        elif message['cmd'] == 'stop':
+            logging.debug('on_message - stop polling every 5 seconds on id '+str(message['id']))
+        else:
+            logging.debug('on_message - command not found')
 
     async def on_stop(self):
         """
