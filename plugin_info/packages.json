@@ -2,10 +2,12 @@
     "pre-install": {
     },
     "apt": {
+        "python3-pyudev" : {},
+        "python3-requests" : {},
+        "python3-dev" : {}    
     },
     "pip3": {
-      "pyserial" : {"reinstall" : true},
-      "requests" : {"reinstall" : true}
+        "pyserial" : {},    
     },
     "npm": {
       "plugins/jee4lm/ressources/demaond"  : {}
