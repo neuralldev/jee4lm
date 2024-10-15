@@ -1541,12 +1541,15 @@ public function AdaptDaemonPollingRate($_rate=0) {
         $return['launchable'] = 'ok';
         $return['state'] = 'nok';
         $pid_file = jeedom::getTmpFolder(__CLASS__) . '/daemon.pid';
-        log::add(__CLASS__, 'debug', 'démon search pid ='.$pid_file);
+        log::add(__CLASS__, 'debug', 'démon search pid ={'.$pid_file.')');
         if (file_exists($pid_file)) {
-            if (@posix_getsid(trim(file_get_contents($pid_file)))) {
-                $return['state'] = 'ok';
+          log::add(__CLASS__, 'debug', 'found file');
+          if (@posix_getsid(trim(file_get_contents($pid_file)))) {
+            log::add(__CLASS__, 'debug', 'file ok');
+            $return['state'] = 'ok';
             } else {
-                shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
+              log::add(__CLASS__, 'debug', 'removing');
+              shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
             }
         }
         return $return;  
