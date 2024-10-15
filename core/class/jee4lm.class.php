@@ -1541,6 +1541,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
         $return['launchable'] = 'ok';
         $return['state'] = 'nok';
         $pid_file = jeedom::getTmpFolder(__CLASS__) . '/daemon.pid';
+        log::add(__CLASS__, 'debug', 'démon search pid ='.$pid_file);
         if (file_exists($pid_file)) {
             if (@posix_getsid(trim(file_get_contents($pid_file)))) {
                 $return['state'] = 'ok';
@@ -1585,12 +1586,12 @@ public function AdaptDaemonPollingRate($_rate=0) {
     while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') {
-          log::add(__CLASS__, 'error', 'démon ok');
+          log::add(__CLASS__, 'debug', 'démon ok');
             break;
         }
         sleep(1);
         $i++;
-        log::add(__CLASS__, 'error', 'démon loop '.$i);
+        log::add(__CLASS__, 'debug', 'démon loop '.$i);
     }
     if ($i >= 10) {
         log::add(__CLASS__, 'error', __('Impossible de lancer le démon, vérifiez le log', __FILE__), 'unableStartDeamon');
