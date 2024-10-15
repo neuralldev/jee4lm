@@ -14,7 +14,8 @@ const
   LMCLOUD_GW_MACHINE_BASE_URL = "https://gw-lmz.lamarzocco.io/v1/home/machines",
   LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
   COFFEE_BOILER_1 = "CoffeeBoiler1",
-  STEAM_BOILER = "SteamBoiler";
+  STEAM_BOILER = "SteamBoiler",
+  JEEDOM_DAEMON_PORT = '55444';
 
 /* source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
@@ -467,148 +468,53 @@ class jee4lm extends eqLogic
     //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
     if ($data['status'] == true) {
       $machine = $data['data'];
+//      $bbw = $machine['recipes'][0];
+      $bbwset = $machine['recipeAssignment'][0];
+      $g = $machine['groupCapabilities'][0];
+//      $reglage = $g['doses'][0];
+      $boilers = $machine['boilers'];
+//      $preinfusion = $machine['preinfusionSettings'];
+      $free=!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');
+
       if ($machine['machineCapabilities'][0]['family'] == 'LINEA') { // linea mini
-        //log::add(__CLASS__, 'debug', 'S/N='.$machine['machine_sn']);
-
-        $cmd = $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
-        $cmd->event($machine['isPlumbedIn']);
-        //log::add(__CLASS__, 'debug', 'plumbedin='.($machine['isPlumbedIn']?'yes':'no'));
-
-        $cmd = $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm::backflush", null, null, 0);
-        $cmd->event($machine['isBackFlushEnabled']);
-        //log::add(__CLASS__, 'debug', 'backflush='.($machine['isBackFlushEnabled']?'yes':'no'));
-
-        $cmd = $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-        $cmd->event(!$machine['tankStatus']);
-        //log::add(__CLASS__, 'debug', 'tankStatus='.($machine['tankStatus']?'ok':'empty'));
-
-        $bbw = $machine['recipes'][0];
-        $bbwset = $machine['recipeAssignment'][0];
-
-        $cmd = $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-        $cmd->event($bbwset['recipe_dose']);
-        // log::add(__CLASS__, 'debug', 'bbwmode='.$bbwset['recipe_dose']);
-
-        $cmd = $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-        $cmd->event($free = !$machine['scale']['connected']) || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');
-        //log::add(__CLASS__, 'debug', 'bbwfree='.($free?'vrai':'faux'));
-
-        $cmd = $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($bbwset['recipe_dose'] == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-        $cmd->event($bbw['recipe_doses'][0]['target']);
-        // log::add(__CLASS__, 'debug', 'bbwdoseA='.$bbw['recipe_doses'][0]['target']);
-
-        $cmd = $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($bbwset['recipe_dose'] == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-        $cmd->event($bbw['recipe_doses'][1]['target']);
-        //  log::add(__CLASS__, 'debug', 'bbwdoseB='.$bbw['recipe_doses'][1]['target']);
-
-        $g = $machine['groupCapabilities'][0];
-        $reglage = $g['doses'][0];
-
-        $cmd = $_eq->AddCommand("Groupe Réglage sur Dose", 'groupDoseMode', 'info', 'string', null, null, null, 0);
-        $cmd->event($reglage['doseIndex']);
-        // log::add(__CLASS__, 'debug', 'groupDoseMode='.$reglage['doseIndex']);
-
-        $cmd = $_eq->AddCommand("Groupe Type de Dose", 'groupDoseType', 'info', 'string', null, null, null, 0);
-        $cmd->event($reglage['doseType']);
-        //  log::add(__CLASS__, 'debug', 'groupDoseType='.$reglage['doseType']);
-
-        $cmd = $_eq->AddCommand("Groupe Dose max", 'groupDoseMax', 'info', 'numeric', null, "g", null, 0);
-        $cmd->event($reglage['stopTarget']);
-        //  log::add(__CLASS__, 'debug', 'groupDoseMax='.$reglage['stopTarget']);
-
-        $cmd = $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm::main", null, 'THERMOSTAT_STATE', 0);
-        $machinestate = ($machine['machineMode'] == "StandBy" ? false : true);
-        $cmd->event($machinestate);
-
-        //   log::add(__CLASS__, 'debug', 'machinemode='.$machine['machineMode']);
-
-        $cmd = $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
-        $cmd->event(($machine['scale']['address'] == '' ? false : true));
-        //  log::add(__CLASS__, 'debug', 'isbbw='.($machine['scale']['address']!=''?'yes':'no'));
-
-        $cmd = $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm::bbw", null, null, 1);
-        $cmd->event($machine['scale']['connected']);
-        //  log::add(__CLASS__, 'debug', 'isscaleconnected='.($machine['scale']['connected']?'yes':'no'));
-
-        //    log::add(__CLASS__, 'debug', 'scalemac='.$machine['scale']['address']);
+        $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
+        $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm::backflush", null, null, 0);
+        $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
+        $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($bbwset['recipe_dose'] == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($bbwset['recipe_dose'] == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+        $_eq->AddCommand("Groupe Réglage sur Dose", 'groupDoseMode', 'info', 'string', null, null, null, 0);
+        $_eq->AddCommand("Groupe Type de Dose", 'groupDoseType', 'info', 'string', null, null, null, 0);
+        $_eq->AddCommand("Groupe Dose max", 'groupDoseMax', 'info', 'numeric', null, "g", null, 0);
+        $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm::main", null, 'THERMOSTAT_STATE', 0);
+        $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
+        $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm::bbw", null, null, 1);
         $_eq->setConfiguration("scalemac", $machine['scale']['address']);
-
-        //    log::add(__CLASS__, 'debug', 'scalename='.$machine['scale']['name']);
         $_eq->setConfiguration("scalename", $machine['scale']['name']);
-
-        $cmd = $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
-        $cmd->event($machine['scale']['battery']);
-        //     log::add(__CLASS__, 'debug', 'scalebattery='.$machine['scale']['battery']);
-
-        $boilers = $machine['boilers'];
+        $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
         foreach ($boilers as $boiler) {
           if ($boiler['id'] == 'SteamBoiler') {
-            $cmd = $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
-            $cmd->event($boiler['isEnabled']);
-            //         log::add(__CLASS__, 'debug', 'steamenabled='.($boiler['isEnabled']?'yes':'no'));
-
-            $cmd = $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
-            $cmd->event($boiler['target']);
-
-            //         log::add(__CLASS__, 'debug', 'steamtarget='.$boiler['target']);
-
-            $cmd = $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
-            $cmd->event($boiler['current']);
-            //          log::add(__CLASS__, 'debug', 'steamcurrent='.$boiler['current']);
-
-            $cmd = $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
-            $cmd->setdisplay('showIconAndNamedashboard', 0);
-            $cmd->setdisplay('showNameOndashboard', 0);
-            $cmd->save();
-            // calcule affichage
-            $cmd->event($boiler['isEnabled'] ? "ON" : "OFF");
+            $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
+            $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+            $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+            $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
           }
           if ($boiler['id'] == 'CoffeeBoiler1') {
-            $cmd = $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
-            $cmd->event($boiler['isEnabled']);
-            //         log::add(__CLASS__, 'debug', 'coffeeenabled='.($boiler['isEnabled']?'yes':'no'));
-
-            $cmd = $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
-            $cmd->event($boiler['target']);
-            //         log::add(__CLASS__, 'debug', 'coffeetarget='.$boiler['target']);
-
-            $cmd = $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
-            $cmd->event($boiler['current']);
-            //        log::add(__CLASS__, 'debug', 'coffeecurrent='.$boiler['current']);
-
-            $cmd = $_eq->AddCommand("Chaudière café", 'displaycoffee', 'info', 'string', null, null, null, 1);
-            $cmd->setdisplay('showIconAndNamedashboard', 0);
-            $cmd->setdisplay('showNameOndashboard', 0);
-            $cmd->save();
+            $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
+            $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+            $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+            $_eq->AddCommand("Chaudière café", 'displaycoffee', 'info', 'string', null, null, null, 1);
             // calcule affichage
-            $cmd->event(!$machinestate ? '---' : "<span style='color:" . ($boiler['current'] + 2 >= $boiler['target'] ? 'green' : 'red') . ";'>" . $boiler['target'] . "°C / " . $boiler['current'] . "°C</span>");
           }
         }
-        $preinfusion = $machine['preinfusionSettings'];
-        $cmd = $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
-        $cmd->event($preinfusion['mode'] == 'Enabled');
-        //      log::add(__CLASS__, 'debug', 'preinfusionmode='.($preinfusion['mode']=='Enabled'));
+        $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+        $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
+        $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+        $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+        $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
+        $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
 
-        $cmd = $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
-        //     $cmd->event(($preinfusion['Group1'][0]['preWetTime']>0) && ($preinfusion['Group1'][0]['preWetHoldTime'] >0) && (!$plumbed)); 
-
-        $cmd = $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-        $cmd->event($preinfusion['Group1'][0]['preWetTime']);
-        //      log::add(__CLASS__, 'debug', 'prewetTime='.$preinfusion['Group1'][0]['preWetTime']);
-
-        $cmd = $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-        $cmd->event($preinfusion['Group1'][0]['preWetHoldTime']);
-        //      log::add(__CLASS__, 'debug', 'preWetHoldTime='.$preinfusion['Group1'][0]['preWetHoldTime']);
-
-        $fw = $machine['firmwareVersions'];
-        $cmd = $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
-        $cmd->event($fw[0]['fw_version']);
-        //     log::add(__CLASS__, 'debug', 'fwversion='.$fw[0]['fw_version']);
-
-        $cmd = $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
-        $cmd->event($fw[1]['fw_version']);
-        //     log::add(__CLASS__, 'debug', 'gwversion='.$fw[1]['fw_version']);
-// now create standard commands
         $_eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off", "button", 1);
         $_eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off", "button", 1);
         $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "button", 1);
@@ -632,8 +538,7 @@ class jee4lm extends eqLogic
         $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
         $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
         // add machine slug to display machine by type
-        $cmd = $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm::machine", null, null, 1);
-        $cmd->event($_eq->getConfiguration('type'));
+        $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm::machine", null, null, 1);
         $_eq->save();
       }
     }
@@ -653,8 +558,7 @@ class jee4lm extends eqLogic
    "scale":{"connected":false,"address":"44:b7:d0:74:5f:90","name":"LMZ-745F90","battery":64},
    "boilers":[{"id":"SteamBoiler","isEnabled":false,"target":0,"current":0},
    {"id":"CoffeeBoiler1","isEnabled":true,"target":89,"current":42}],"boilerTargetTemperature":{"SteamBoiler":0,"CoffeeBoiler1":89},
-   "preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}}
-  2223|[2024-08-31 14:49:02] DEBUG  
+   "preinfusionMode":{"Group1":{"groupNumber":"Group1","preinfusionStyle":"PreinfusionByDoseType"}},"preinfusionSettings":{"mode":"Enabled","Group1":[{"groupNumber":"Group1","doseType":"DoseA","preWetTime":2,"preWetHoldTime":3}]},"wakeUpSleepEntries":[{"id":"T6aLl42","days":["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],"steam":false,"enabled":false,"timeOn":"24:0","timeOff":"24:0"}],"smartStandBy":{"mode":"LastBrewing","minutes":10,"enabled":true},"clock":"2024-08-31T14:47:45","firmwareVersions":[{"name":"machine_firmware","fw_version":"2.12"},{"name":"gateway_firmware","fw_version":"v3.6-rc4"}]}} 
     */
     return true;
   }
@@ -899,10 +803,32 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'get basic counters');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $data = self::request($this->getPath($serial, $ip) . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $token = self::getToken();
+    $data = self::request($this->getPath($serial, '') . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
+
+/**
+ * adapt polling rate of Daemon 
+ * @param mixed $_rate 0=switch off, > 0 set polling interval, 10s is recommended
+ * @return void
+ */
+public function AdaptDaemonPollingRate($_rate=0) {
+  $state=$this->deamon_info();
+  if ($state['state']!='ok') {
+    log::add(__CLASS__, 'debug', 'cannot boost poll rate, daemon is not ok');
+    return; // is Deamon running? 
+  }
+  $p = [
+    "id"    =>  $this->getId(),             // eqlogic ID 
+    "rate"  =>  $_rate,                     // polling rate in seconds
+    "token" =>  $this->getConfiguration('communicationKey',''),
+    "host" =>  $this->getConfiguration('host',''), // IP Address of machine
+    "cmd"   =>  $_rate==0?"stop":"poll"    // start/stop loop per eqlogic ID
+  ];
+  $this->deamon_send($p);
+}
+
   /**
    * Switch machine ON/OFF accoding to a boolean value
    * @param mixed $_toggle
@@ -917,6 +843,10 @@ class jee4lm extends eqLogic
 //    log::add(__CLASS__, 'debug', 'token get ok');
     $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
 //    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+    if ($_toggle) 
+      $this->AdaptDaemonPollingRate(10); // refresh by 10s loop
+    else
+      $this->AdaptDaemonPollingRate(0);
   }
 
   /**
@@ -946,8 +876,8 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $data = self::request($this->getPath($serial, $ip). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $token = self::getToken();
+    $data = self::request($this->getPath($serial, ''). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -962,8 +892,8 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $data = self::request($this->getPath($serial, $ip). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $token = self::getToken();
+    $data = self::request($this->getPath($serial, ''). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
 
@@ -981,8 +911,8 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $data = self::request($this->getPath($serial, $ip). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"],$ip==''?$serial:null);
+    $token = self::getToken();
+    $data = self::request($this->getPath($serial, ''). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"],$ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -991,8 +921,8 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'get number of uses');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $data = self::request($this->getPath($serial, $ip). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $token = self::getToken();
+    $data = self::request($this->getPath($serial, ''). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
   }
 
@@ -1057,9 +987,9 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
+    $token = self::getToken();
     $data = self::request(
-      $this->getPath($serial, $ip) . '/enable-backflush',
+      $this->getPath($serial, '') . '/enable-backflush',
       'enable=true',
       'POST',
       ["Authorization: Bearer $token"],
@@ -1203,6 +1133,8 @@ class jee4lm extends eqLogic
           $eqLogic->setDisplay($key, $value);
 
         $eqLogic->save();
+        // read information for the first time
+        jee4lm::RefreshAllInformation($eqLogic);
         log::add(__CLASS__, 'debug', 'eqlogic saved');
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
@@ -1299,8 +1231,7 @@ class jee4lm extends eqLogic
       }
       return false;
     }
-    ;
-
+    
     // check if BLEA is installed and search for scale
     $jmqttCollection = eqLogic::byType('jmqtt', true);
     foreach ($jmqttCollection as $eqJ) {
@@ -1346,11 +1277,6 @@ class jee4lm extends eqLogic
     return false;
   }
 
-  public function getBBWSettings($_serial, $_token)
-  {
-
-  }
-
   /**
    * Refreshes the main counters and not all the information
    * @return bool
@@ -1361,7 +1287,6 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
-    $this->getBBWSettings($serial, $token);
     $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
     if (array_key_exists('status', $arr)) {
       $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS'] == 'BrewingMode'));
@@ -1595,6 +1520,113 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'info', '[VERSION] PluginVersion :: ' . $pluginVersion);
     return $pluginVersion;
   }
+  /**
+   * Summary of deamon_info
+   * @return array
+   */
+  public static function deamon_info() {
+    $return = array();
+    $return['log'] = __CLASS__;
+    $return['state'] = 'nok';
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
+    if (file_exists($pid_file)) {
+        if (@posix_getsid(trim(file_get_contents($pid_file)))) {
+            $return['state'] = 'ok';
+        } else {
+            shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
+        }
+    }
+    $return['launchable'] = 'ok';
+//    $user = config::byKey('user', __CLASS__); // exemple si votre démon à besoin de la config user,
+//    $pswd = config::byKey('password', __CLASS__); // password,
+//    $clientId = config::byKey('clientId', __CLASS__); // et clientId
+//    if ($user == '') {
+//        $return['launchable'] = 'nok';
+//        $return['launchable_message'] = __('Le nom d\'utilisateur n\'est pas configuré', __FILE__);
+//    } elseif ($pswd == '') {
+//       $return['launchable'] = 'nok';
+//        $return['launchable_message'] = __('Le mot de passe n\'est pas configuré', __FILE__);
+//    if ($clientId == '') {
+//        $return['launchable'] = 'nok';
+//        $return['launchable_message'] = __('La clé d\'application n\'est pas configurée', __FILE__);
+//    }
+    return $return;
+  }
+
+  /**
+   * Summary of deamon_start
+   * @throws \Exception
+   * @return bool
+   */
+  public static function deamon_start() {
+    self::deamon_stop();
+    $deamon_info = self::deamon_info();
+    if ($deamon_info['launchable'] != 'ok') {
+        throw new Exception(__('Veuillez vérifier la configuration', __FILE__));
+    }
+
+    $path = realpath(dirname(__FILE__) . '/../../resources/jee4lmd'); // répertoire du démon à modifier
+    $cmd = system::getCmdPython3(__CLASS__) . " {$path}/jee4lmd.py"; // nom du démon à modifier
+    $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
+    $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
+    $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'http:127.0.0.1:port:comp') . '/plugins/template/core/php/jee4lmd.php'; // chemin de la callback url à modifier (voir ci-dessous)
+   // $cmd .= ' --user "' . trim(str_replace('"', '\"', config::byKey('user', __CLASS__))) . '"'; // on rajoute les paramètres utiles à votre démon, ici user
+   // $cmd .= ' --pswd "' . trim(str_replace('"', '\"', config::byKey('password', __CLASS__))) . '"'; // et password
+    $cmd .= ' --apikey ' . jeedom::getApiKey(__CLASS__); // l'apikey pour authentifier les échanges suivants
+    $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/deamon.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
+    log::add(__CLASS__, 'info', 'Lancement du démon');
+    $result = exec($cmd . ' >> ' . log::getPathToLog('jee4lmd') . ' 2>&1 &');     
+    $i = 0;
+    while ($i < 20) {
+        $deamon_info = self::deamon_info();
+        if ($deamon_info['state'] == 'ok') {
+            break;
+        }
+        sleep(1);
+        $i++;
+    }
+    if ($i >= 30) {
+        log::add(__CLASS__, 'error', __('Impossible de lancer le démon, vérifiez le log', __FILE__), 'unableStartDeamon');
+        return false;
+    }
+    message::removeAll(__CLASS__, 'unableStartDeamon');
+    return true;
+  }
+
+  /**
+   * Summary of deamon_stop
+   * @return void
+   */
+  public static function deamon_stop() {
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid'; // ne pas modifier
+    if (file_exists($pid_file)) {
+        $pid = intval(trim(file_get_contents($pid_file)));
+        system::kill($pid);
+    }
+    system::kill('jee4lmd.py'); // nom du démon à modifier
+    sleep(1);
+  }
+
+  public static function deamon_send($_params) {
+    $deamon_info = self::deamon_info();
+    if ($deamon_info['state'] != 'ok') {
+        throw new Exception("Le démon n'est pas démarré");
+    }
+    $_params['apikey'] = jeedom::getApiKey(__CLASS__);
+    $payLoad = json_encode($_params);
+    $socket = socket_create(AF_INET, SOCK_STREAM, 0);
+    if (!$socket) {
+      log::add(__CLASS__, 'error', 'error opening socket');
+      return;
+    } 
+    if (!socket_connect($socket, '127.0.0.1', config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT)))
+      log::add(__CLASS__, 'error', 'error connecting to daemon socket port');
+    else 
+      if (!socket_write($socket, $payLoad, strlen($payLoad)))
+        log::add(__CLASS__, 'error', 'error writing payload on daemon socket port');
+    socket_close($socket);
+  }
+
 }
 
 /**

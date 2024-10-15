@@ -14,7 +14,7 @@
 	},
 	"category": "automation",
 	"hasDependency": false,
-	"hasOwnDeamon": false,
+	"hasOwnDeamon": true,
 	"maxDependancyInstallTime": 0,
 	"changelog_beta": "",
 	"changelog": "https:\/\/github.com\/neuralldev\/jee4lm\/template\/changelog",
