@@ -1,0 +1,23 @@
+{
+    "pre-install": {
+    },
+    "apt": {
+    },
+    "pip3": {
+      "pyserial" : {"reinstall" : true},
+      "requests" : {"reinstall" : true}
+    },
+    "npm": {
+      "plugins/jee4lm/ressources/demaond"  : {}
+    },
+    "composer": {
+         "plugins/jee4lm"  : {}
+    },
+    "yarn": {
+      "plugins/jee4lm/ressources/demaond"  : {}
+    },
+    "plugin": {
+    },
+    "post-install": {
+    }
+  }
