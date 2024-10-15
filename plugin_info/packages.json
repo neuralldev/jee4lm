@@ -2,12 +2,9 @@
     "pre-install": {
     },
     "apt": {
-        "python3-pyudev" : {},
-        "python3-requests" : {},
-        "python3-dev" : {}    
     },
     "pip3": {
-        "pyserial" : {},    
+        "jeedomdaemon": {}
     },
     "npm": {
     },
