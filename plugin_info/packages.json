@@ -2,6 +2,7 @@
     "pre-install": {
     },
     "apt": {
+        "python3-pip": {}
     },
     "pip3": {
         "jeedomdaemon": {}
