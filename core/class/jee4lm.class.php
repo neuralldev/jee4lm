@@ -15,8 +15,8 @@ const
   LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
   COFFEE_BOILER_1 = "CoffeeBoiler1",
   STEAM_BOILER = "SteamBoiler",
-  JEEDOM_DAEMON_PORT = '32500',
-  JEEDOM_DAEMON_HOST = '10.0.3.2';
+  JEEDOM_DAEMON_PORT = '6000',
+  JEEDOM_DAEMON_HOST = '127.0.0.1';
 
 /* source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
