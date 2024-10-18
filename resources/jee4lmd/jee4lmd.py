@@ -36,8 +36,11 @@ class Jee4LM(BaseDaemon):
     async def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
-            if t.get_name()==id:
+            n = t.get_name()
+            i = 'lmtask'+str(id)
+            if n==i:
                 t.cancel()
+                logging.debug(f'killed {i}')            
          
     async def stop_after(self, delay, what):
         globals.READY=False
