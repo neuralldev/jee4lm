@@ -38,7 +38,7 @@ class Jee4LM(BaseDaemon):
         globals.READY=False
         try:
             while 1:
-                logging.debug(f'send eqID {what} to refresh to jeedom callback')
+                logging.debug(f'send eqID {what} to refresh to jeedom callback every {delay} seconds')
                 await self.send_to_jeedom({'id':what})
                 await asyncio.sleep(delay)
         except asyncio.CancelledError:
@@ -49,7 +49,7 @@ class Jee4LM(BaseDaemon):
         if message['lm'] == 'poll':
             if self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(self.stop_after(5, message['id']))
+                task1 = asyncio.create_task(self.stop_after(10, message['id']))
                 background_tasks.add(task1)
             else:
                 logging.debug('task already running for '+str(message['id']))

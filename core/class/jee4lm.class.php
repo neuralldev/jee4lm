@@ -409,9 +409,12 @@ class jee4lm extends eqLogic
       $preinfusion = $machine['preinfusionSettings'];
       $fw = $machine['firmwareVersions'];
       $mc = cache::byKey('jee4lm::laststate');
-      
-      $ls = $mc->getValue();
-      $ns = $machine['machineMode'] == "StandBy" ? false : true;
+      if ($mc==null)
+        $ls = 0;
+      else
+        $ls = $mc->getValue();
+      $ns = $machine['machineMode'] == "StandBy" ? 0 : 1;
+      log::add(__CLASS__, 'debug', 'ls='.$ls.' ns='.$ns);
       if ($ls != $ns) {
         cache::set('jee4lm::laststate',$ns);
         if (self::deamon_info()['state'] == 'ok')
@@ -842,7 +845,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
 //    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
     if ($_toggle) 
-      $this->AdaptDaemonPollingRate(10); // off
+      $this->AdaptDaemonPollingRate(1); // off
     else
       $this->AdaptDaemonPollingRate(0); // poll
   }
