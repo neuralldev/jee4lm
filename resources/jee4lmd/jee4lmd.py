@@ -19,14 +19,14 @@ class Jee4LM(BaseDaemon):
         # if you don't have specific action to do on start, do not create this method
         pass
 
-    async def istasks_from_id(self, id):
+    def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
             if t.get_name()==id or id=='*':
                 return True
         return False
 
-    async def cancel_all_tasks_from_id(self, id):
+    def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
             if t.get_name()==id:
@@ -43,11 +43,11 @@ class Jee4LM(BaseDaemon):
              logging.info('cancel loop');
         
     async def on_message(self, message: list):
-        logging.debug('on_message - daemon received command : '+str(message['cmd'])+ 'for id '+str(message['id']))
+        logging.debug('on_message - daemon received command : '+str(message['cmd'])+ ' for id '+str(message['id']))
         if message['cmd'] == 'poll':
             if self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(self.stop_after(5, message['id']),message['id'])
+                task1 = asyncio.create_task(await self.stop_after(5, message['id']),message['id'])
             else:
                 logging.debug('task already running for '+str(message['id']))
         elif message['cmd'] == 'stop':
