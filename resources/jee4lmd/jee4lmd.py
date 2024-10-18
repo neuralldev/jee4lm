@@ -26,7 +26,7 @@ class Jee4LM(BaseDaemon):
                 return True
         return False
 
-    def cancel_all_tasks_from_id(self, id):
+    async def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
             if t.get_name()==id:
@@ -53,7 +53,7 @@ class Jee4LM(BaseDaemon):
         elif message['cmd'] == 'stop':
             logging.debug('on_message - stop polling on id '+str(message['id']))
             if self.istasks_from_id(message['id']):
-                self.cancel_all_tasks_from_id(message['id'])
+                await self.cancel_all_tasks_from_id(message['id'])
             else:
                 logging.debug('no task running for id'+str(message['id']))
             globals.READY=True
@@ -67,7 +67,7 @@ class Jee4LM(BaseDaemon):
         """
         # if you don't have specific action to do on stop, do not create this method
         logging.info('received stop signal, cancelling tasks...')
-        self.cancel_all_tasks_from_id('*')
+        await self.cancel_all_tasks_from_id('*')
         logging.info('exiting daemon')    
 
 Jee4LM().run()

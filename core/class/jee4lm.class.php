@@ -415,7 +415,7 @@ class jee4lm extends eqLogic
       if ($ls != $ns) {
         cache::set('jee4lm::laststate',$ns);
         if (self::deamon_info()['state'] == 'ok')
-          self::deamon_send(['id' => $_eq, 'cmd'=> $ns ?'poll':'stop']);
+          self::deamon_send(['id' => $id, 'cmd'=> $ns ?'poll':'stop']);
       }
 
       $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
@@ -824,14 +824,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     log::add(__CLASS__, 'debug', 'cannot start polling, daemon is not ok');
     return; // is Deamon running? 
   }
-  $p = [
-    "id"    =>  $this->getId(),             // eqlogic ID 
-    "rate"  =>  $_rate,                     // polling rate in seconds
-    "token" =>  $this->getConfiguration('communicationKey',''),
-    "host" =>  $this->getConfiguration('host',''), // IP Address of machine
-    "cmd"   =>  $_rate==0?"stop":"poll"    // start/stop loop per eqlogic ID
-  ];
-  $this->deamon_send($p);
+  $this->deamon_send(['id' => $this->getId(), $_rate==0?"stop":"poll"]);
 }
 
   /**
@@ -849,9 +842,9 @@ public function AdaptDaemonPollingRate($_rate=0) {
     $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
 //    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
     if ($_toggle) 
-      $this->AdaptDaemonPollingRate(10); // refresh by 10s loop
+      $this->AdaptDaemonPollingRate(10); // off
     else
-      $this->AdaptDaemonPollingRate(0);
+      $this->AdaptDaemonPollingRate(0); // poll
   }
 
   /**
