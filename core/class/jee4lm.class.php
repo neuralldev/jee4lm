@@ -234,7 +234,12 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'cron start');
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      if ($jee4lm->getIsEnable()) {
+      $mc = cache::byKey('jee4lm::laststate_'.$jee4lm->getId());
+      if ($mc==null)
+        $ls = 0;
+      else
+        $ls = $mc->getValue();
+      if ($jee4lm->getIsEnable()&&($ls==0)) { // suspend cron if there is a polling running (l>0)
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
           $slug = $jee4lm->getConfiguration('type');
