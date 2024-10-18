@@ -22,7 +22,7 @@ class Jee4LM(BaseDaemon):
     async def istasks_from_id(id):
         tasks = asyncio.all_tasks()
         for t in tasks:
-            if t.get_name()==id:
+            if t.get_name()==id or id=='*':
                 return True
         return False
 
@@ -67,9 +67,7 @@ class Jee4LM(BaseDaemon):
         """
         # if you don't have specific action to do on stop, do not create this method
         logging.info('received stop signal, cancelling tasks...')
-        for task in asyncio.Task.all_tasks():
-            task.cancel()
-        logging.info('exiting daemon')
-    
+        self.cancel_all_tasks_from_id('*')
+        logging.info('exiting daemon')    
 
 Jee4LM().run()
