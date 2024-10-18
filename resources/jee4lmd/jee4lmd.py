@@ -4,7 +4,9 @@ import asyncio
 
 from jeedomdaemon.base_daemon import BaseDaemon
 
+background_tasks = set()
 class Jee4LM(BaseDaemon):
+    
     def __init__(self) -> None:
         # Standard initialisation
         super().__init__(on_start_cb=self.on_start, on_message_cb=self.on_message, on_stop_cb=self.on_stop)
@@ -47,15 +49,17 @@ class Jee4LM(BaseDaemon):
         if message['lm'] == 'poll':
             if self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(await self.stop_after(5, message['id']))
+                task1 = asyncio.create_task(self.stop_after(5, message['id']))
+                background_tasks.add(task1)
             else:
                 logging.debug('task already running for '+str(message['id']))
         elif message['lm'] == 'stop':
             logging.debug('on_message - stop polling on id '+str(message['id']))
             if self.istasks_from_id(message['id']):
                 await self.cancel_all_tasks_from_id(message['id'])
+                task1.add_done_callback(background_tasks.discard)
             else:
-                logging.debug('no task running for id'+str(message['id']))
+                logging.debug('no task running for id '+str(message['id']))
             globals.READY=True
         else:
             logging.debug('on_message - command not found')
