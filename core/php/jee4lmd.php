@@ -25,6 +25,7 @@ if (!jeedom::apiAccess(init('apikey'), 'jee4lm')) {
 log::add('jee4lm', 'debug', 'callback incoming message');
 
 if (init('test') != '') {
+	log::add('jee4lm', 'debug', 'callback ack');
 	echo 'OK';
 	die();
 }
