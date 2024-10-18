@@ -26,11 +26,12 @@ class Jee4LM(BaseDaemon):
         logging.debug(f'search {id}')
         for t in tasks:
             n = t.get_name()
+            i = 'Task-'+str(id)
             logging.debug(f'try {n}')
-            if n==id or id=='*':
-                logging.debug(f'found')
+            if n==i or id=='*':
+                logging.debug(f'found {i}')
                 return True
-        logging.debug(f'not found')
+        logging.debug(f'not found {i}')
         return False
 
     async def cancel_all_tasks_from_id(self, id):
