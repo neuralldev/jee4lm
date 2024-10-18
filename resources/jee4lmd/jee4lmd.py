@@ -55,7 +55,7 @@ class Jee4LM(BaseDaemon):
                 logging.debug('task already running for '+str(message['id']))
         elif message['lm'] == 'stop':
             logging.debug('on_message - stop polling on id '+str(message['id']))
-            if self.istasks_from_id(message['id']):
+            if not self.istasks_from_id(message['id']):
                 await self.cancel_all_tasks_from_id(message['id'])
                 task1.add_done_callback(background_tasks.discard)
             else:
