@@ -26,7 +26,7 @@ class Jee4LM(BaseDaemon):
         logging.debug(f'search {id}')
         for t in tasks:
             n = t.get_name()
-            i = 'Task-'+str(id)
+            i = 'Task-lm'+str(id)
             logging.debug(f'try {n}')
             if n==i or id=='*':
                 logging.debug(f'found {i}')
@@ -55,7 +55,7 @@ class Jee4LM(BaseDaemon):
         if message['lm'] == 'poll':
             if not self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(self.stop_after(10, message['id']))
+                task1 = asyncio.create_task(self.stop_after(10, 'lm'+str(message['id'])))
                 background_tasks.add(message['id'])
             else:
                 logging.debug('task already running for '+str(message['id']))
