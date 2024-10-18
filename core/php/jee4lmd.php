@@ -30,13 +30,16 @@ if (init('test') != '') {
 }
 $result = json_decode(file_get_contents("php://input"), true);
 if (!is_array($result)) {
+	log::add('jee4lm', 'debug', 'callback incoming message not an array ='.$result);
 	die();
 }
-if (!isset($result['rest'])) {
+if (!isset($result['id'])) {
+	log::add('jee4lm', 'debug', 'callback id not set');
 	die();
 }
 $eq = eqLogic::byId($result['id']);
 if ($eq==null) {
+	log::add('jee4lm', 'debug', 'callback eqlogic not found');
 	die();
 }
 log::add('jee4lm', 'debug', 'refreshing...');
