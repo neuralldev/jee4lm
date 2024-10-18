@@ -25,8 +25,8 @@ class Jee4LM(BaseDaemon):
         tasks = asyncio.all_tasks()
         for t in tasks:
             if t.get_name()==id or id=='*':
-                return True
-        return False
+                return False
+        return True
 
     async def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
