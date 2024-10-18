@@ -849,6 +849,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     else
       $this->AdaptDaemonPollingRate(0); // poll
     */
+    self::RefreshAllInformation($this)
   }
 
   /**
