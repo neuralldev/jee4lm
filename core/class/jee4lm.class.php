@@ -844,10 +844,11 @@ public function AdaptDaemonPollingRate($_rate=0) {
 //    log::add(__CLASS__, 'debug', 'token get ok');
     $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
 //    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
-    if ($_toggle) 
+   /* if ($_toggle) 
       $this->AdaptDaemonPollingRate(1); // off
     else
       $this->AdaptDaemonPollingRate(0); // poll
+    */
   }
 
   /**
