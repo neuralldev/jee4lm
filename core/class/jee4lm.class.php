@@ -415,7 +415,7 @@ class jee4lm extends eqLogic
       if ($ls != $ns) {
         cache::set('jee4lm::laststate',$ns);
         if (self::deamon_info()['state'] == 'ok')
-          self::deamon_send(['id' => $id, 'cmd'=> $ns ?'poll':'stop']);
+          self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
       }
 
       $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
@@ -824,7 +824,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     log::add(__CLASS__, 'debug', 'cannot start polling, daemon is not ok');
     return; // is Deamon running? 
   }
-  $this->deamon_send(['id' => $this->getId(), $_rate==0?"stop":"poll"]);
+  $this->deamon_send(['id' => $this->getId(), 'lm' => $_rate==0?"stop":"poll"]);
 }
 
   /**

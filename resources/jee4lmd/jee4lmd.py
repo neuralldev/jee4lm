@@ -43,14 +43,14 @@ class Jee4LM(BaseDaemon):
              logging.info('cancel loop');
         
     async def on_message(self, message: list):
-        logging.debug('on_message - daemon received command : '+str(message['cmd'])+ ' for id '+str(message['id']))
-        if message['cmd'] == 'poll':
+        logging.debug('on_message - daemon received command : '+str(message['lm'])+ ' for id '+str(message['id']))
+        if message['lm'] == 'poll':
             if self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(await self.stop_after(5, message['id']),message['id'])
+                task1 = asyncio.create_task(await self.stop_after(5, message['id']))
             else:
                 logging.debug('task already running for '+str(message['id']))
-        elif message['cmd'] == 'stop':
+        elif message['lm'] == 'stop':
             logging.debug('on_message - stop polling on id '+str(message['id']))
             if self.istasks_from_id(message['id']):
                 await self.cancel_all_tasks_from_id(message['id'])
