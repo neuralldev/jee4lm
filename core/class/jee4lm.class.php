@@ -408,15 +408,15 @@ class jee4lm extends eqLogic
       $boilers = $machine['boilers'];
       $preinfusion = $machine['preinfusionSettings'];
       $fw = $machine['firmwareVersions'];
-      $mc = cache::byKey('jee4lm::laststate');
+      $mc = cache::byKey('jee4lm::laststate_'.$id);
       if ($mc==null)
         $ls = 0;
       else
         $ls = $mc->getValue();
       $ns = $machine['machineMode'] == "StandBy" ? 0 : 1;
-      log::add(__CLASS__, 'debug', 'ls='.$ls.' ns='.$ns);
+      log::add(__CLASS__, 'debug refresh info', 'ls='.$ls.' ns='.$ns);
       if ($ls != $ns) {
-        cache::set('jee4lm::laststate',$ns);
+        cache::set('jee4lm::laststate_'.$id,$ns);
         if (self::deamon_info()['state'] == 'ok')
           self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
       }

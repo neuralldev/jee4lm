@@ -4,7 +4,6 @@ import asyncio
 
 from jeedomdaemon.base_daemon import BaseDaemon
 
-background_tasks = set()
 class Jee4LM(BaseDaemon):
     
     def __init__(self) -> None:
@@ -26,7 +25,7 @@ class Jee4LM(BaseDaemon):
         logging.debug(f'search {id}')
         for t in tasks:
             n = t.get_name()
-            i = 'Task-lm'+str(id)
+            i = 'lmtask'+str(id)
             logging.debug(f'try {n}')
             if n==i or id=='*':
                 logging.debug(f'found {i}')
@@ -55,15 +54,14 @@ class Jee4LM(BaseDaemon):
         if message['lm'] == 'poll':
             if not self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(self.stop_after(10, 'lm'+str(message['id'])))
-                background_tasks.add(message['id'])
+                task1 = asyncio.create_task(self.stop_after(10, message['id']))
+                task1.set_name('lmtask'+str(message['id']))
             else:
                 logging.debug('task already running for '+str(message['id']))
         elif message['lm'] == 'stop':
             logging.debug('on_message - stop polling on id '+str(message['id']))
             if self.istasks_from_id(message['id']):
                 await self.cancel_all_tasks_from_id(message['id'])
-                background_tasks.discard
             else:
                 logging.debug('no task running for id '+str(message['id']))
             globals.READY=True
