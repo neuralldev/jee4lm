@@ -22,6 +22,8 @@ if (!jeedom::apiAccess(init('apikey'), 'jee4lm')) {
 	die();
 }
 
+log::add('jee4lm', 'debug', 'callback incoming message');
+
 if (init('test') != '') {
 	echo 'OK';
 	die();
@@ -37,9 +39,6 @@ $eq = eqLogic::byId($result['id']);
 if ($eq==null) {
 	die();
 }
+log::add('jee4lm', 'debug', 'refreshing...');
 
 jee4lm::RefreshAllInformation($eq);
-//alternative plus compliquée
-//$data = json_decode($result['data'],true);
-//foreach($data as $key)
-//	$eq->checkAndUpdateCmd(key['id'], $key['value']);

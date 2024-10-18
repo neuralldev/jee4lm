@@ -264,18 +264,12 @@ class jee4lm extends eqLogic
   }
 
   /**
-   * Summary of pull
+   * does nothing, here for backwards compatibiliy
    * @param mixed $_options
    * @return void
    */
   public static function pull($_options = null)
   {
-    //    log::add(__CLASS__, 'debug', 'pull start');
-    //$cron = cron::byClassAndFunction(__CLASS__, 'pull', $_options);
-    //if (is_object($cron)) {
-    //  $cron->remove();
-    //}
-    //  log::add(__CLASS__, 'debug', 'pull end');
   }
 
   /**
@@ -439,13 +433,13 @@ class jee4lm extends eqLogic
       $_eq->checkAndUpdateCmd('isscaleconnected',$machine['scale']['connected']);
       $_eq->checkAndUpdateCmd( 'scalebattery',$machine['scale']['battery']);
       foreach ($boilers as $boiler) {
-        if ($boiler['id'] == 'SteamBoiler') {
+        if ($boiler['id'] == STEAM_BOILER) {
           $_eq->checkAndUpdateCmd('steamenabled',$boiler['isEnabled']);
           $_eq->checkAndUpdateCmd('steamtarget',$boiler['target']);
           $_eq->checkAndUpdateCmd('steamcurrent',$boiler['current']); 
           $_eq->checkAndUpdateCmd( 'displaysteam',$boiler['isEnabled'] ?"ON":"OFF"); 
         }
-        if ($boiler['id'] == 'CoffeeBoiler1') {
+        if ($boiler['id'] == COFFEE_BOILER_1) {
           $_eq->checkAndUpdateCmd('coffeeenabled',$boiler['isEnabled']);
           $_eq->checkAndUpdateCmd('coffeetarget',$boiler['target']);
           $_eq->checkAndUpdateCmd('coffeecurrent',$boiler['current']); 
@@ -505,13 +499,13 @@ class jee4lm extends eqLogic
         $_eq->setConfiguration("scalename", $machine['scale']['name']);
         $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
         foreach ($boilers as $boiler) {
-          if ($boiler['id'] == 'SteamBoiler') {
+          if ($boiler['id'] == STEAM_BOILER) {
             $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
             $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
             $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
           }
-          if ($boiler['id'] == 'CoffeeBoiler1') {
+          if ($boiler['id'] == COFFEE_BOILER_1) {
             $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
             $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
@@ -820,14 +814,14 @@ class jee4lm extends eqLogic
   }
 
 /**
- * adapt polling rate of Daemon 
- * @param mixed $_rate 0=switch off, > 0 set polling interval, 10s is recommended
+ * Start of stop the Daemon to call the callback every 5 seconds 
+ * @param mixed $_rate 0=switch off, > 0 start calling callback every 5 seconds
  * @return void
  */
 public function AdaptDaemonPollingRate($_rate=0) {
   $state=$this->deamon_info();
   if ($state['state']!='ok') {
-    log::add(__CLASS__, 'debug', 'cannot boost poll rate, daemon is not ok');
+    log::add(__CLASS__, 'debug', 'cannot start polling, daemon is not ok');
     return; // is Deamon running? 
   }
   $p = [
@@ -927,6 +921,11 @@ public function AdaptDaemonPollingRate($_rate=0) {
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
+  /**
+   * Returns the total number of flushes of the coffee group done since the machine has been setup
+   * the information is not displayed by the plugin at the moment but will be used later
+   * @return void
+   */
   public function getMachineUses()
   {
     log::add(__CLASS__, 'debug', 'get number of uses');
@@ -945,8 +944,6 @@ public function AdaptDaemonPollingRate($_rate=0) {
    * @param mixed $dose
    * @return void
    */
-
-
   public function setRecipeDose($_weight, $_dose)
   {
     // $dose = 'A' or 'B'
@@ -1222,6 +1219,14 @@ public function AdaptDaemonPollingRate($_rate=0) {
   }
 
   // add logic to monitor BBW presence
+  // as jeedom does not have core Bluetooth support, 3 methodes are used to fetch scale presence
+  // first the routine searches for the mac addeess definition in a BLEA plugin on the same jeedom server
+  // in second it searches for any eqlogic of the jmqtt plugin that would have the mac address as name
+  // then third it searches for any eqlogic (virtual obviously) that has such a name set under the 'MAISON' object (small and caps accepted)
+  // in the case of mqtt or virtual object, it searches for the equivalence of a BLEA object, e.g. a "present" info command working the same way
+  // so, the BT monitoring can be set elsewhere and mirrored on the mosquitto server as a MQTT object then published on jeedom
+  // so that the plugin can see it even by remote
+
   public function searchForBBW()
   {
     $mac = $this->getConfiguration('scalemac');
@@ -1289,7 +1294,8 @@ public function AdaptDaemonPollingRate($_rate=0) {
   }
 
   /**
-   * Refreshes the main counters and not all the information
+   * Refreshes the main counters and not all the information, this is mostly used when there is no
+   * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
    * @return bool
    */
   public function getInformations()
@@ -1541,16 +1547,11 @@ public function AdaptDaemonPollingRate($_rate=0) {
         $return['launchable'] = 'ok';
         $return['state'] = 'nok';
         $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
-//        log::add(__CLASS__, 'debug', 'démon search pid ={'.$pid_file.')');
         if (file_exists($pid_file)) {
-  //        log::add(__CLASS__, 'debug', 'found file');
-          if (@posix_getsid(trim(file_get_contents($pid_file)))) {
-    //        log::add(__CLASS__, 'debug', 'file ok');
+          if (@posix_getsid(trim(file_get_contents($pid_file)))) 
             $return['state'] = 'ok';
-            } else {
-      //        log::add(__CLASS__, 'debug', 'removing');
-              shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
-            }
+          else 
+            shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
         }
         return $return;  
     }
@@ -1563,7 +1564,9 @@ public function AdaptDaemonPollingRate($_rate=0) {
     }
 
   /**
-   * Summary of deamon_start
+   * start the demon when it is asked from GUI or when jeedom is started
+   * there is no parameter to send as demon does not require custom information 
+   * the demon is just a loop that calls the callback function every 5 secondes when it is activated
    * @throws \Exception
    * @return bool
    */
@@ -1575,7 +1578,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     }
 
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lmd'); // répertoire du démon à modifier
-    $cmd = system::getCmdPython3(__CLASS__) . " {$path}/jee4lmd.py"; // nom du démon à modifier
+    $cmd = self::getPython3() . " {$path}/jee4lmd.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
    // $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
@@ -1588,13 +1591,10 @@ public function AdaptDaemonPollingRate($_rate=0) {
     $i = 0;
     while ($i < 10) {
         $deamon_info = self::deamon_info();
-        if ($deamon_info['state'] == 'ok') {
-//          log::add(__CLASS__, 'debug', 'démon ok');
-            break;
-        }
+        if ($deamon_info['state'] == 'ok') 
+          break;
         sleep(1);
         $i++;
-  //      log::add(__CLASS__, 'debug', 'démon loop '.$i);
     }
     if ($i >= 10) {
         log::add(__CLASS__, 'error', __('Impossible de lancer le démon, vérifiez le log', __FILE__), 'unableStartDeamon');
@@ -1605,7 +1605,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
   }
 
   /**
-   * Summary of deamon_stop
+   * stop the demon at the time it is asked from the GUI or when jeedom is stopped/rebooted
    * @return void
    */
   public static function deamon_stop() {
@@ -1617,7 +1617,17 @@ public function AdaptDaemonPollingRate($_rate=0) {
     system::kill('jee4lmd.py'); // nom du démon à modifier
     sleep(1);
   }
-
+  /**
+   * Send a payload to daemon running in background. 
+   * message accepted are 'cmd=poll' or 'cmd=stop' with 'id=eqID' encapsulated as json array
+   * demon start to query LM every 5 secondes for updating information on the local ip address when poll is selected
+   * when cmd=stop is sent, the demon stops to ask status every 5 seconds to machine
+   * example of string is json_encode(['cmd'=>'poll','id'=>1],true) to foll for eqlogic 1 status
+   * status is fetched based on configuration ip address (host info) if valid
+   * @param mixed $_params
+   * @throws \Exception
+   * @return void
+   */
   public static function deamon_send($_params) {
     $deamon_info = self::deamon_info();
     if ($deamon_info['state'] != 'ok') {
@@ -1642,9 +1652,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     return [
         'resources/venv'
     ];
-}
-  
-
+  }
 }
 
 /**
@@ -1696,10 +1704,10 @@ class jee4lmCmd extends cmd
         $eq->switchSteamBoilerONOFF($b);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_coffee_slider':
-        $eq->set_setpoint($_options, 'coffeetarget', 'CoffeeBoiler1');
+        $eq->set_setpoint($_options, 'coffeetarget', COFFEE_BOILER_1);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_steam_slider':
-        $eq->set_setpoint($_options, 'steamtarget', 'SteamBoiler');
+        $eq->set_setpoint($_options, 'steamtarget', STEAM_BOILER);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_doseA_slider':
         $eq->set_setpoint($_options, 'A', "");

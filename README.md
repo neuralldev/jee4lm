@@ -32,5 +32,7 @@ pour utiliser le plugin c'est facile
 source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
 
+démon inspiré de :
+https://github.com/Mips2648/jeedom-aiodemo/tree/master
 
 - 
