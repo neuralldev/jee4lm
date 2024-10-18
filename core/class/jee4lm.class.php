@@ -414,7 +414,7 @@ class jee4lm extends eqLogic
       else
         $ls = $mc->getValue();
       $ns = $machine['machineMode'] == "StandBy" ? 0 : 1;
-      log::add(__CLASS__, 'debug refresh info', 'ls='.$ls.' ns='.$ns);
+      log::add(__CLASS__, 'debug', 'ls='.$ls.' ns='.$ns);
       if ($ls != $ns) {
         cache::set('jee4lm::laststate_'.$id,$ns);
         if (self::deamon_info()['state'] == 'ok')
@@ -849,7 +849,7 @@ public function AdaptDaemonPollingRate($_rate=0) {
     else
       $this->AdaptDaemonPollingRate(0); // poll
     */
-    self::RefreshAllInformation($this)
+    self::RefreshAllInformation($this);
   }
 
   /**
