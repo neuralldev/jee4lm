@@ -19,20 +19,20 @@ class Jee4LM(BaseDaemon):
         # if you don't have specific action to do on start, do not create this method
         pass
 
-    async def istasks_from_id(id):
+    async def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
             if t.get_name()==id or id=='*':
                 return True
         return False
 
-    async def cancel_all_tasks_from_id(id):
+    async def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
             if t.get_name()==id:
                 t.cancel()
          
-    async def stop_after(delay, what):
+    async def stop_after(self, delay, what):
         globals.READY=False
         try:
             while 1:
