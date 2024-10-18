@@ -23,10 +23,15 @@ class Jee4LM(BaseDaemon):
 
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
+        logging.debug(f'search {id}')
         for t in tasks:
-            if t.get_name()==id or id=='*':
-                return False
-        return True
+            n = t.get_name()
+            logging.debug(f'try {n}')
+            if n==id or id=='*':
+                logging.debug(f'found')
+                return True
+        logging.debug(f'not found')
+        return False
 
     async def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
@@ -47,17 +52,17 @@ class Jee4LM(BaseDaemon):
     async def on_message(self, message: list):
         logging.debug('on_message - daemon received command : '+str(message['lm'])+ ' for id '+str(message['id']))
         if message['lm'] == 'poll':
-            if self.istasks_from_id(message['id']):
+            if not self.istasks_from_id(message['id']):
                 logging.debug('on_message - start polling on id '+str(message['id']))
                 task1 = asyncio.create_task(self.stop_after(10, message['id']))
-                background_tasks.add(task1)
+                background_tasks.add(message['id'])
             else:
                 logging.debug('task already running for '+str(message['id']))
         elif message['lm'] == 'stop':
             logging.debug('on_message - stop polling on id '+str(message['id']))
-            if not self.istasks_from_id(message['id']):
+            if self.istasks_from_id(message['id']):
                 await self.cancel_all_tasks_from_id(message['id'])
-                task1.add_done_callback(background_tasks.discard)
+                background_tasks.discard
             else:
                 logging.debug('no task running for id '+str(message['id']))
             globals.READY=True
