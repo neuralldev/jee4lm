@@ -454,6 +454,8 @@ class jee4lm extends eqLogic
             cache::set('jee4lm::laststate_'.$id,$ns);
             if (self::deamon_info()['state'] == 'ok') 
               self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
+            if ($ns==1) // on switch on, cancel read as demon will take over, else refresh
+              return true;
           }
           break; // refresh all info 
       }
