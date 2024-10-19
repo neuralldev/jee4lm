@@ -248,6 +248,11 @@ class jee4lm extends eqLogic
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
           if ($slug != '') { // if there is no ip set, get the information from the web site
+            if ($ls ==1) // if daemon is running no need to refresh, exit
+              {
+                log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
+                return;
+              }
             $token = self::getToken($jee4lm); // send query for token and refresh it if necessary
             if ($token != '')
               if ($ip!='')
@@ -447,6 +452,8 @@ class jee4lm extends eqLogic
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from cron");
           if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
             cache::set('jee4lm::laststate_'.$id,$ns);
+            if (self::deamon_info()['state'] == 'ok') 
+              self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
           }
           break; // refresh all info 
       }
