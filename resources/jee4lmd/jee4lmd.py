@@ -3,7 +3,6 @@ import logging
 import asyncio
 
 from jeedomdaemon.base_daemon import BaseDaemon
-from btlm import *
 
 lm = ''
 
