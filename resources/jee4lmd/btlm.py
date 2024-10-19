@@ -51,6 +51,7 @@ class LaMarzoccoBluetoothClient:
         scanner: BaseBleakScanner | BleakScanner | None = None,
     ) -> list[BLEDevice]:
         """Find machines based on model name."""
+        logging.debug('scanning devices')
         ble_devices: list[BLEDevice] = []
         if scanner is None:
             scanner = BleakScanner()
