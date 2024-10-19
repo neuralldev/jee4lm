@@ -74,22 +74,20 @@ class Jee4LM(BaseDaemon):
                     logging.debug('no task running for id '+str(message['id']))
                 globals.READY=True
             case 'bt':
-                logging.debug(f'on_message - BT command {message['bt']} for ID {message['id']}')
+                logging.debug('on_message - BT command '+message['bt']+' for ID '+message['id'])
                 match message['bt']:
                     case 'login':
-                        logging.debug(f'BT command u={message['username']}  t={message['token']} s={message['serial']} addr={message['dev']}')
+                        logging.debug('BT command u='+message['username']+' t='+message['token']+ ' s='+message['serial']+' addr='+message['dev'])
                         lm = LaMarzoccoBluetoothClient(message['username'],message['serial'],message['token'])
                         machines = lm.discover_devices()
                         for m in machines:
                             logging.debug(f'BT scan found '.str(m))
-
                     case 'scan':
-                        logging.debug(f'BT command u={message['sc']}  t={message['token']} s={message['serial']} addr={message['dev']}')
+                        logging.debug('BT command u='+message['sc']+' t='+message['token']+' s='+message['serial']+' addr='+message['dev'])
                     case 'switch':
-                        logging.debug(f'BT command u={message['boiler']}  t={message['state']}')
+                        logging.debug('BT command u='+message['boiler']+'  t='+message['state'])
                     case 'temp':
-                        logging.debug(f'BT command u={message['boiler']}  t={message['temp']}')
-                        
+                        logging.debug('BT command u='+message['boiler']+'  t='+message['temp'])                        
             case _:
                 logging.error('on_message - command not found')
         
