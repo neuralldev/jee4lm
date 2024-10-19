@@ -45,4 +45,4 @@ if ($eq==null) {
 }
 log::add('jee4lm', 'debug', 'refreshing...');
 
-jee4lm::RefreshAllInformation($eq);
+jee4lm::RefreshAllInformation($eq, 2);

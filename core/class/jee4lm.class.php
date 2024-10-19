@@ -251,12 +251,12 @@ class jee4lm extends eqLogic
             $token = self::getToken($jee4lm); // send query for token and refresh it if necessary
             if ($token != '')
               if ($ip!='')
-                $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
+                $error = !self::RefreshAllInformation($jee4lm, 3); // translate registers to jeedom values, return true if successful             
               else
                 if ($state == 0) // just scan status, all information will be refreshed only if up
                   $error = !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
                 else {
-                  $error = !self::RefreshAllInformation($jee4lm); // translate registers to jeedom values, return true if successful             
+                  $error = !self::RefreshAllInformation($jee4lm, 3); // translate registers to jeedom values, return true if successful             
                   if ($ip=='') $error |= !$jee4lm->getInformations(); // translate registers to jeedom values, return true if successful
                 }
             if ($error)
@@ -1710,7 +1710,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_off':
         $b = ($action == 'jee4lm_on');
         $eq->switchCoffeeBoilerONOFF($b);
-        return jee4lm::RefreshAllInformation($eq, true);
+        return jee4lm::RefreshAllInformation($eq, 1);
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = ($action == 'jee4lm_steam_on');
