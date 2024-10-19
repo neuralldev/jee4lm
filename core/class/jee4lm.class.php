@@ -390,21 +390,23 @@ class jee4lm extends eqLogic
    * Reads and refresh all the values of an equipment previously created by detection routine
    * the function takes only the target equipment to refresh as argument
    * @param eqLogic $_eq
+   * @param numeric $_poll 0 = regular call, 1 = switch on/off, 2 = called from callback, 3 = cron
    * @return bool
    */
-  public static function RefreshAllInformation($_eq)
+  public static function RefreshAllInformation($_eq, $_poll = 0)
   {
 //    log::add(__CLASS__, 'debug', 'refresh all information');
     $serial = $_eq->getConfiguration('serialNumber');
     $ip = $_eq->getConfiguration('host');
     $id = $_eq->getId();
-    log::add(__CLASS__, 'debug', "refresh serial=$serial id=$id ip=$ip");
+    $uid = uniqid();
+    log::add(__CLASS__, 'debug', "refresh $uid serial=$serial id=$id ip=$ip poll=$_poll");
     $token = self::getToken($_eq);
     $data = self::request($ip == '' ? $_eq->getPath($serial, $ip). '/configuration' : $_eq->getPath($serial, $ip)."/config" , null, 'GET', ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
     $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
     if ($isdata) { // check that we have information returned
-      log::add(__CLASS__, 'debug', 'parse info');
+      log::add(__CLASS__, 'debug', "refresh $uid parse info");
       $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
@@ -413,17 +415,40 @@ class jee4lm extends eqLogic
       $boilers = $machine['boilers'];
       $preinfusion = $machine['preinfusionSettings'];
       $fw = $machine['firmwareVersions'];
+
       $mc = cache::byKey('jee4lm::laststate_'.$id);
-      if ($mc==null)
-        $ls = 0;
-      else
-        $ls = $mc->getValue();
-      $ns = $machine['machineMode'] == "StandBy" ? 0 : 1;
-      log::add(__CLASS__, 'debug', 'ls='.$ls.' ns='.$ns);
-      if ($ls != $ns) {
-        cache::set('jee4lm::laststate_'.$id,$ns);
-        if (self::deamon_info()['state'] == 'ok')
-          self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
+      $ls = $mc==null ? 0: $mc->getValue(); //previous state
+      $ns = $machine['machineMode'] == "StandBy" ? 0 : 1; // next state
+      switch ($_poll) {
+        case 0: // called direct
+          log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from direct call");
+          if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
+            cache::set('jee4lm::laststate_'.$id,$ns);
+          }
+          break; // refresh all info 
+        case 1: // on manual action toggle daemon
+          log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from switch on/off action");
+          if ($ls != $ns) // if there is a state change
+            cache::set('jee4lm::laststate_'.$id,$ns);
+          if (self::deamon_info()['state'] == 'ok') 
+              self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
+          if ($ns == 1) // if switched on, exit as demon will refresh all info
+            return true;
+          break;
+        case 2 : // called from callback as refreshing value
+          log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from callback call");
+          if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
+            cache::set('jee4lm::laststate_'.$id,$ns);
+            if (self::deamon_info()['state'] == 'ok') 
+              self::deamon_send(['id' => $id, 'lm'=> 'stop']);
+          }
+          break; // refresh all info 
+        case 3 : // called from cron
+          log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from cron");
+          if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
+            cache::set('jee4lm::laststate_'.$id,$ns);
+          }
+          break; // refresh all info 
       }
 
       $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
@@ -461,6 +486,8 @@ class jee4lm extends eqLogic
       $_eq->checkAndUpdateCmd('prewetholdtime',$preinfusion['Group1'][0]['preWetHoldTime']);
       $_eq->checkAndUpdateCmd('fwversion',$fw[0]['fw_version']);
       $_eq->checkAndUpdateCmd('gwversion',$fw[1]['fw_version']);
+
+      // if boiler is set off stop polling
       return true;
     }
     return false;
@@ -826,14 +853,6 @@ class jee4lm extends eqLogic
  * @param mixed $_rate 0=switch off, > 0 start calling callback every 5 seconds
  * @return void
  */
-public function AdaptDaemonPollingRate($_rate=0) {
-  $state=$this->deamon_info();
-  if ($state['state']!='ok') {
-    log::add(__CLASS__, 'debug', 'cannot start polling, daemon is not ok');
-    return; // is Deamon running? 
-  }
-  $this->deamon_send(['id' => $this->getId(), 'lm' => $_rate==0?"stop":"poll"]);
-}
 
   /**
    * Switch machine ON/OFF accoding to a boolean value
@@ -844,17 +863,8 @@ public function AdaptDaemonPollingRate($_rate=0) {
   {
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
     $serial = $this->getConfiguration('serialNumber');
-//    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-//    log::add(__CLASS__, 'debug', 'token get ok');
     $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
-//    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
-   /* if ($_toggle) 
-      $this->AdaptDaemonPollingRate(1); // off
-    else
-      $this->AdaptDaemonPollingRate(0); // poll
-    */
-    self::RefreshAllInformation($this);
   }
 
   /**
@@ -1700,7 +1710,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_off':
         $b = ($action == 'jee4lm_on');
         $eq->switchCoffeeBoilerONOFF($b);
-        return jee4lm::RefreshAllInformation($eq);
+        return jee4lm::RefreshAllInformation($eq, true);
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = ($action == 'jee4lm_steam_on');
