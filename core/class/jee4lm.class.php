@@ -1751,7 +1751,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_doseB_slider':
         $eq->set_setpoint($_options, 'B', "");
         return jee4lm::RefreshAllInformation($eq);
-        case 'test':
+        case 'jee4lm_test':
           $eq->SetLMBluetooh();
       default:
         return true;
