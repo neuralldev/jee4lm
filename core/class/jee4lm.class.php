@@ -1250,7 +1250,7 @@ class jee4lm extends eqLogic
     $s=$this->getConfiguration('serialNumber');
     
     if (self::deamon_info()['state'] == 'ok') 
-      self::deamon_send(['id' => $id, 'lm'=> 'bt', 'bt'=>'login', 'user' => $u, 'token' => $t, 'serial' =>$s, 'dev' =>'']);
+      self::deamon_send(['id' => $id, 'lm'=> 'bt', 'bt'=>'login', 'username' => $u, 'token' => $t, 'serial' =>$s, 'dev' =>'']);
     log::add(__CLASS__, 'debug', '[bluetooth] stop');
   } 
 
