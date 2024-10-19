@@ -38,12 +38,6 @@ if (!isConnect()) {
         <a class="btn btn-default" id="bt_syncWithLMCloud"><i class="fas fa-sync"></i> {{Détecter mes équipements}}</a>
       </div>
     </div>
-    <div class="form-group">
-      <label class="col-lg-3 control-label">{{Coupler avec Bluetooth}}</label>
-      <div class="col-lg-4">
-        <a class="btn btn-default" id="bt_TestBT"><i class="fas fa-sync"></i> {{Détecter mes équipements}}</a>
-      </div>
-    </div>
   </fieldset>
 </form>
 

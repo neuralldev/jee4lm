@@ -564,6 +564,8 @@ class jee4lm extends eqLogic
         $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
         $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
 
+        $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
+
         $_eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off", "button", 1);
         $_eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off", "button", 1);
         $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "button", 1);
