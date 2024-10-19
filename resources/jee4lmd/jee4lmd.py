@@ -7,7 +7,6 @@ from btlm import *
 
 
 class Jee4LM(BaseDaemon):
-    
     def __init__(self) -> None:
         # Standard initialisation
         super().__init__(on_start_cb=self.on_start, on_message_cb=self.on_message, on_stop_cb=self.on_stop)
@@ -77,6 +76,8 @@ class Jee4LM(BaseDaemon):
                 match message['bt']:
                     case 'login':
                         logging.debug('BT command u='+message['username']+' t='+message['token']+ ' s='+message['serial']+' addr='+message['dev'])
+                        global lm
+                        lm = LaMarzoccoBluetoothClient(message['username'],message['serial'],message['token'],'')
                     case 'scan':
                         logging.debug('BT command u='+message['sc']+' t='+message['token']+' s='+message['serial']+' addr='+message['dev'])
                     case 'switch':
