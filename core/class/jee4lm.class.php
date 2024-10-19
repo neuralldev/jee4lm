@@ -239,7 +239,7 @@ class jee4lm extends eqLogic
         $ls = 0;
       else
         $ls = $mc->getValue();
-      if ($jee4lm->getIsEnable()&&($ls==0)) { // suspend cron if there is a polling running (l>0)
+      if ($jee4lm->getIsEnable()) { // suspend cron if there is a polling running (l>0)
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
           $slug = $jee4lm->getConfiguration('type');
