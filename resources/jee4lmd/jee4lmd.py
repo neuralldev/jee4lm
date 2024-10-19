@@ -73,7 +73,7 @@ class Jee4LM(BaseDaemon):
                     logging.debug('no task running for id '+str(message['id']))
                 globals.READY=True
             case 'bt':
-                logging.debug('on_message - BT command '+message['bt']+' for ID '+message['id']+' bt='+message['bt'])
+                logging.debug('on_message - BT command '+message['bt']+' for ID '+str(message['id'])+' bt='+message['bt'])
                 match message['bt']:
                     case 'login':
                         logging.debug('BT command u='+message['username']+' t='+message['token']+ ' s='+message['serial']+' addr='+message['dev'])
