@@ -24,7 +24,6 @@ try {
             throw new Exception(__("la détection ne peut se faire qu'une fois la connexion réussie", __FILE__));
     }
 
-
     if (init('action') == 'autoDEL_eq') {
         $eqLogic = jee4lm::byId(init('id'));
         if (!is_object($eqLogic)) {

@@ -87,7 +87,7 @@ class jee4lm extends eqLogic
    * @param mixed $_ip
    * @return mixed
    */
-  public function getPath($_serial, $_ip) {
+  public function getPath($_serial, $_ip='') {
     return $_ip == '' ? LMCLOUD_GW_MACHINE_BASE_URL. '/' . $_serial : "http://".$_ip.":".LMDEFAULT_PORT_LOCAL."/api/v1";
   }
 
@@ -853,7 +853,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial, '') . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $data = self::request($this->getPath($serial) . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -873,7 +873,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
     $serial = $this->getConfiguration('serialNumber');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial,'') . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
+    $data = self::request($this->getPath($serial) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
   }
 
   /**
@@ -887,7 +887,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
 //    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial, '')  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $serial);
+    $data = self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $serial);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -904,7 +904,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial, ''). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $data = self::request($this->getPath($serial). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -920,7 +920,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial, ''). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $data = self::request($this->getPath($serial). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
   }
 
@@ -939,7 +939,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial, ''). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"],$ip==''?$serial:null);
+    $data = self::request($this->getPath($serial). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"],$ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
@@ -954,7 +954,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial, ''). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
+    $data = self::request($this->getPath($serial). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"], $ip==''?$serial:null);
     log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
   }
 
@@ -998,7 +998,7 @@ class jee4lm extends eqLogic
 //      log::add(__CLASS__, 'debug', "send PUT ".$this->getPath($serial, $ip). '/recipes/ with d='.json_encode($d));
 // force by web site
     $req = self::request(
-      $this->getPath($serial,''). '/recipes/',
+      $this->getPath($serial). '/recipes/',
       $d,
       'PUT',
       ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
@@ -1019,7 +1019,7 @@ class jee4lm extends eqLogic
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $data = self::request(
-      $this->getPath($serial, '') . '/enable-backflush',
+      $this->getPath($serial) . '/enable-backflush',
       'enable=true',
       'POST',
       ["Authorization: Bearer $token"],
@@ -1239,6 +1239,18 @@ class jee4lm extends eqLogic
     */
     return true;
   }
+
+  public function SetLMBluetooh() {
+    log::add(__CLASS__, 'debug', '[bluetooth] start');
+    $id = $this->getId(); 
+    $u = config::byKey('userId','jee4lm');
+    $t = $this->getConfiguration('communicationKey');
+    $s=$this->getConfiguration('serialNumber');
+    
+    if (self::deamon_info()['state'] == 'ok') 
+      self::deamon_send(['id' => $id, 'lm'=> 'bt', 'bt'=>'login', 'user' => $u, 'token' => $t, 'serial' =>$s, 'dev' =>'']);
+    log::add(__CLASS__, 'debug', '[bluetooth] stop');
+  } 
 
   // add logic to monitor BBW presence
   // as jeedom does not have core Bluetooth support, 3 methodes are used to fetch scale presence
@@ -1737,6 +1749,8 @@ class jee4lmCmd extends cmd
       case 'jee4lm_doseB_slider':
         $eq->set_setpoint($_options, 'B', "");
         return jee4lm::RefreshAllInformation($eq);
+        case 'test':
+          $eq->SetLMBluetooh();
       default:
         return true;
     }

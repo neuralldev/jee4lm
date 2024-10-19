@@ -3,6 +3,9 @@ import logging
 import asyncio
 
 from jeedomdaemon.base_daemon import BaseDaemon
+from btlm import LaMarzoccoBluetoothClient
+
+lm = ''
 
 class Jee4LM(BaseDaemon):
     
@@ -18,7 +21,7 @@ class Jee4LM(BaseDaemon):
         This is the place where you should create your tasks, login to remote system, etc
         """
         # if you don't have specific action to do on start, do not create this method
-        pass
+   
 
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
@@ -26,7 +29,7 @@ class Jee4LM(BaseDaemon):
         for t in tasks:
             n = t.get_name()
             i = 'lmtask'+str(id)
-            logging.debug(f'try {n}')
+            # logging.debug(f'try {n}')
             if n==i or id=='*':
                 logging.debug(f'found {i}')
                 return True
@@ -38,7 +41,7 @@ class Jee4LM(BaseDaemon):
         for t in tasks:
             n = t.get_name()
             i = 'lmtask'+str(id)
-            if n==i:
+            if (n==i) or (id=='*' and n[:6]=='lmtask'):
                 t.cancel()
                 logging.debug(f'killed {i}')            
          
@@ -53,24 +56,43 @@ class Jee4LM(BaseDaemon):
              logging.info('cancel loop');
         
     async def on_message(self, message: list):
+        global lm
         logging.debug('on_message - daemon received command : '+str(message['lm'])+ ' for id '+str(message['id']))
-        if message['lm'] == 'poll':
-            if not self.istasks_from_id(message['id']):
-                logging.debug('on_message - start polling on id '+str(message['id']))
-                task1 = asyncio.create_task(self.stop_after(10, message['id']))
-                task1.set_name('lmtask'+str(message['id']))
-            else:
-                logging.debug('task already running for '+str(message['id']))
-        elif message['lm'] == 'stop':
-            logging.debug('on_message - stop polling on id '+str(message['id']))
-            if self.istasks_from_id(message['id']):
-                await self.cancel_all_tasks_from_id(message['id'])
-            else:
-                logging.debug('no task running for id '+str(message['id']))
-            globals.READY=True
-        else:
-            logging.debug('on_message - command not found')
+        match message['lm']:
+            case 'poll':
+                if not self.istasks_from_id(message['id']):
+                    logging.debug('on_message - start polling on id '+str(message['id']))
+                    task1 = asyncio.create_task(self.stop_after(10, message['id']))
+                    task1.set_name('lmtask'+str(message['id']))
+                else:
+                    logging.debug('task already running for '+str(message['id']))
+            case 'stop':
+                logging.debug('on_message - stop polling on id '+str(message['id']))
+                if self.istasks_from_id(message['id']):
+                    await self.cancel_all_tasks_from_id(message['id'])
+                else:
+                    logging.debug('no task running for id '+str(message['id']))
+                globals.READY=True
+            case 'bt':
+                logging.debug(f'on_message - BT command {message['bt']} for ID {message['id']}')
+                match message['bt']:
+                    case 'login':
+                        logging.debug(f'BT command u={message['username']}  t={message['token']} s={message['serial']} addr={message['dev']}')
+                        lm = LaMarzoccoBluetoothClient(message['username'],message['serial'],message['token'])
+                        machines = lm.discover_devices()
+                        for m in machines:
+                            logging.debug(f'BT scan found '.str(m))
 
+                    case 'scan':
+                        logging.debug(f'BT command u={message['sc']}  t={message['token']} s={message['serial']} addr={message['dev']}')
+                    case 'switch':
+                        logging.debug(f'BT command u={message['boiler']}  t={message['state']}')
+                    case 'temp':
+                        logging.debug(f'BT command u={message['boiler']}  t={message['temp']}')
+                        
+            case _:
+                logging.error('on_message - command not found')
+        
     async def on_stop(self):
         """
         This callback will be called when the daemon needs to stop`
