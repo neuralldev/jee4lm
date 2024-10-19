@@ -5,6 +5,7 @@
         "python3-pip": {}
     },
     "pip3": {
-        "jeedomdaemon": {}
-    },
+        "jeedomdaemon": {},
+        "bleak": {}
+    }
   }
