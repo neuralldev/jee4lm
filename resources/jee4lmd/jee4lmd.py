@@ -3,9 +3,8 @@ import logging
 import asyncio
 
 from jeedomdaemon.base_daemon import BaseDaemon
-from btlm import *
 
-lm = ''
+
 
 class Jee4LM(BaseDaemon):
     
@@ -78,10 +77,6 @@ class Jee4LM(BaseDaemon):
                 match message['bt']:
                     case 'login':
                         logging.debug('BT command u='+message['username']+' t='+message['token']+ ' s='+message['serial']+' addr='+message['dev'])
-                        lm = LaMarzoccoBluetoothClient(message['username'],message['serial'],message['token'])
-                        machines = lm.discover_devices()
-                        for m in machines:
-                            logging.debug(f'BT scan found '.str(m))
                     case 'scan':
                         logging.debug('BT command u='+message['sc']+' t='+message['token']+' s='+message['serial']+' addr='+message['dev'])
                     case 'switch':
