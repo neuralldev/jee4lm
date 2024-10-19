@@ -55,11 +55,15 @@ class LaMarzoccoBluetoothClient:
         ble_devices: list[BLEDevice] = []
         if scanner is None:
             scanner = BleakScanner()
+            logging.debug('scanning with BleakScanner')
         assert hasattr(scanner, "discover")
+        logging.debug('start scanning devices')
         devices: list[BLEDevice] = await scanner.discover()
+        logging.debug('end scanning devices')
         for device in devices:
             if device.name and device.name.startswith(BT_MODEL_PREFIXES):
                 ble_devices.append(device)
+        logging.debug('list filled with ble')
         return ble_devices
 
     @property

@@ -78,11 +78,11 @@ class Jee4LM(BaseDaemon):
                         logging.debug('BT command u='+message['username']+' t='+message['token']+ ' s='+message['serial']+' addr='+message['dev'])
                         global lm
                         lm = LaMarzoccoBluetoothClient(message['username'],message['serial'],message['token'],'')
-                        devices = lm.discover_devices()
-                        await devices
+                        bledevices = lm.discover_devices()
+                        await bledevices
                         logging.debug('object created')
-                        for d in devices:
-                            logging.debug('found device')
+                        for d in bledevices:
+                            logging.debug('found device'+d['name'])
                     case 'scan':
                         logging.debug('BT command u='+message['sc']+' t='+message['token']+' s='+message['serial']+' addr='+message['dev'])
                     case 'switch':
