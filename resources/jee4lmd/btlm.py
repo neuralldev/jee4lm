@@ -4,6 +4,7 @@ import base64
 import json
 import logging
 import asyncio
+import traceback
 
 from typing import Any
 
@@ -55,15 +56,19 @@ class LaMarzoccoBluetoothClient:
         logging.debug('scanning devices')
         ble_devices: list[BLEDevice] = []
         if scanner is None:
-            logging.debug('scanning with BleakScanner')
-            scanner = BleakScanner()
-            logging.debug('start scanner')
-            await scanner.start()
-            logging.debug('wait 10s')
-            await asyncio.sleep(10)
-            logging.debug('scanning stopped')
-            await scanner.stop()
-            logging.debug('scanner initialized')
+            try:
+                logging.debug('scanning with BleakScanner')
+                scanner = BleakScanner()
+                logging.debug('start scanner')
+                await scanner.start()
+                logging.debug('wait 10s')
+                await asyncio.sleep(10)
+                logging.debug('scanning stopped')
+                await scanner.stop()
+                logging.debug('scanner initialized')
+            except Exception:
+                        logging.debug(traceback.format_exc())
+            
         logging.debug('scanner object created')
         assert hasattr(scanner, "discover")
         devices: list[BLEDevice] = await scanner.discover()
