@@ -1249,9 +1249,10 @@ class jee4lm extends eqLogic
     $t = $this->getConfiguration('communicationKey');
     $s=$this->getConfiguration('serialNumber');
 
-//    $port = jeedom::getBluetoothMapping(config::byKey('port', 'blea'));
-
-    if (self::deamon_info()['state'] == 'ok') 
+    $port = jeedom::getBluetoothMapping(config::byKey('port', 'jee4lm'));
+    if ($port=='')
+      log::add(__CLASS__, 'debug', '[bluetooth] no port defined on plugin confifguration screen, abort');
+    elseif (self::deamon_info()['state'] == 'ok')
       self::deamon_send(['id' => $id, 'lm'=> 'bt', 'bt'=>'login', 'username' => $u, 'token' => $t, 'serial' =>$s, 'dev' =>'']);
     log::add(__CLASS__, 'debug', '[bluetooth] stop');
   } 
