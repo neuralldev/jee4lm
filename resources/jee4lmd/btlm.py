@@ -45,7 +45,7 @@ class LaMarzoccoBluetoothClient:
         )
         self._address_or_ble_device = address_or_ble_device
         self._client = BleakClient(address_or_ble_device)
-
+        
     @staticmethod
     async def discover_devices(
         scanner: BaseBleakScanner | BleakScanner | None = None,
@@ -55,9 +55,10 @@ class LaMarzoccoBluetoothClient:
         ble_devices: list[BLEDevice] = []
         if scanner is None:
             logging.debug('scanning with BleakScanner')
-            scanner = BleakScanner()
+            await scanner = BleakScanner()
+            logging.debug('scanner initialized')
         assert hasattr(scanner, "discover")
-        logging.debug('start scanning devices')
+        logging.debug('scanner object created')
         devices: list[BLEDevice] = await scanner.discover()
         logging.debug('end scanning devices')
         for device in devices:
