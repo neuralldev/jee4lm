@@ -28,7 +28,7 @@ if (!isConnect()) {
     <legend>{{Configuration connection cloud La Marzocco}}</legend>
     <div class="form-group">
       <label class="col-sm-3 control-label">{{Connection}}</label>
-      <div class="col-sm-7">
+      <div class="col-sm-3">
         <a class="btn btn-default" id="bt_loginToLMCloud">{{Se connecter}}</a>
       </div>
     </div>
@@ -39,8 +39,8 @@ if (!isConnect()) {
       </div>
     </div>
     <div class="form-group">
-        <label class="col-sm-4 control-label">{{Port clef bluetooth}}</label>
-        <div class="col-sm-2">
+        <label class="col-sm-3 control-label">{{Port clef bluetooth}}</label>
+        <div class="col-sm-3">
             <select class="configKey form-control" data-l1key="port">
                 <option value="none">{{Aucun}}</option>
                 <?php
