@@ -25,9 +25,9 @@ if (!isConnect()) {
 ?>
 <form class="form-horizontal">
   <fieldset>
-    <legend>{{Configuration connection cloud La Marzocco}}</legend>
+    <legend>{{Configuration connexion cloud La Marzocco}}</legend>
     <div class="form-group">
-      <label class="col-sm-3 control-label">{{Connection}}</label>
+      <label class="col-sm-3 control-label">{{Connexion}}</label>
       <div class="col-sm-3">
         <a class="btn btn-default" id="bt_loginToLMCloud">{{Se connecter}}</a>
       </div>
