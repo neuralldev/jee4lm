@@ -1241,7 +1241,11 @@ class jee4lm extends eqLogic
     */
     return true;
   }
-
+  /**
+   * test Bluetooth integration, send message to daemon only when a port is detected, in other cases 
+   * scale and machine are seen by remote BLEA and cannot be used by plugin directly
+   * @return void
+   */
   public function SetLMBluetooh() {
     log::add(__CLASS__, 'debug', '[bluetooth] start');
     $id = $this->getId(); 
@@ -1251,7 +1255,7 @@ class jee4lm extends eqLogic
 
     $port = jeedom::getBluetoothMapping(config::byKey('port', 'jee4lm'));
     if ($port=='')
-      log::add(__CLASS__, 'debug', '[bluetooth] no port defined on plugin confifguration screen, abort');
+      log::add(__CLASS__, 'debug', '[bluetooth] no port defined on plugin configuration screen, abort');
     elseif (self::deamon_info()['state'] == 'ok')
       self::deamon_send(['id' => $id, 'lm'=> 'bt', 'bt'=>'login', 'username' => $u, 'token' => $t, 'serial' =>$s, 'dev' =>'']);
     log::add(__CLASS__, 'debug', '[bluetooth] stop');

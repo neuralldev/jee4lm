@@ -47,7 +47,7 @@ class Jee4LM(BaseDaemon):
         globals.READY=False
         try:
             while 1:
-                logging.debug(f'send eqID {what} to refresh to jeedom callback every {delay} seconds')
+                logging.info(f'refresh eqlogic {what} information every {delay} seconds')
                 await self.send_to_jeedom({'id':what})
                 await asyncio.sleep(delay)
         except asyncio.CancelledError:
@@ -59,13 +59,13 @@ class Jee4LM(BaseDaemon):
         match message['lm']:
             case 'poll':
                 if not self.istasks_from_id(message['id']):
-                    logging.debug('on_message - start polling on id '+str(message['id']))
+                    logging.start('start refreshing eqlogic id '+str(message['id']))
                     task1 = asyncio.create_task(self.stop_after(10, message['id']))
                     task1.set_name('lmtask'+str(message['id']))
                 else:
                     logging.debug('task already running for '+str(message['id']))
             case 'stop':
-                logging.debug('on_message - stop polling on id '+str(message['id']))
+                logging.info('stop refreshing eslogic id '+str(message['id']))
                 if self.istasks_from_id(message['id']):
                     await self.cancel_all_tasks_from_id(message['id'])
                 else:
