@@ -57,6 +57,7 @@ class LaMarzoccoBluetoothClient:
         if scanner is None:
             logging.debug('scanning with BleakScanner')
             scanner = BleakScanner()
+            logging.debug('start scanner')
             await scanner.start()
             logging.debug('wait 10s')
             await asyncio.sleep(10)
