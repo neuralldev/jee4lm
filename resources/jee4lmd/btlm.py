@@ -54,8 +54,8 @@ class LaMarzoccoBluetoothClient:
         logging.debug('scanning devices')
         ble_devices: list[BLEDevice] = []
         if scanner is None:
-            scanner = BleakScanner()
             logging.debug('scanning with BleakScanner')
+            scanner = BleakScanner()
         assert hasattr(scanner, "discover")
         logging.debug('start scanning devices')
         devices: list[BLEDevice] = await scanner.discover()
