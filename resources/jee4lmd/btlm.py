@@ -183,3 +183,7 @@ class LaMarzoccoBluetoothClient:
             characteristic=AUTH_CHARACTERISTIC,
             message=auth_string,
         )
+        
+    async def __del__(self):
+        await self._client.disconnect()
+        
