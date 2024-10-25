@@ -1406,7 +1406,7 @@ class jee4lm extends eqLogic
   public function getjee4lm()
   {
     //    log::add(__CLASS__, 'debug', "getjee4lm");
-    $this->checkAndUpdateCmd(__CLASS__, "");
+    //$this->checkAndUpdateCmd(__CLASS__, "");
   }
 
   /**
@@ -1738,12 +1738,12 @@ class jee4lmCmd extends cmd
         return $eq->getInformations();
       case 'jee4lm_on':
       case 'jee4lm_off':
-        $b = ($action == 'jee4lm_on');
+        $b = $action == 'jee4lm_on';
         $eq->switchCoffeeBoilerONOFF($b);
         return jee4lm::RefreshAllInformation($eq, 1);
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
-        $b = ($action == 'jee4lm_steam_on');
+        $b = $action == 'jee4lm_steam_on';
         $eq->switchSteamBoilerONOFF($b);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_coffee_slider':
