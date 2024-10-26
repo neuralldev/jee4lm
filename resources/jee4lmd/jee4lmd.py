@@ -59,7 +59,7 @@ class Jee4LM(BaseDaemon):
         match message['lm']:
             case 'poll':
                 if not self.istasks_from_id(message['id']):
-                    logging.start('start refreshing eqlogic id '+str(message['id']))
+                    logging.debug('start refreshing eqlogic id '+str(message['id']))
                     task1 = asyncio.create_task(self.stop_after(10, message['id']))
                     task1.set_name('lmtask'+str(message['id']))
                 else:
