@@ -496,8 +496,11 @@ class jee4lm extends eqLogic
       $_eq->checkAndUpdateCmd('fwversion',$fw[0]['fw_version']);
       $_eq->checkAndUpdateCmd('gwversion',$fw[1]['fw_version']);
 
-      // if boiler is set off stop polling
-      return true;
+      // if we come from callback make an additional call to detect bbw info
+      if ($_poll == 2)
+        return $_eq->getInformations();
+      else
+        return true;
     }
     return false;
   }
@@ -1367,7 +1370,7 @@ class jee4lm extends eqLogic
         $display = 'OFF';
       else
         $display = "<span style='color:green'>ON</span>";
-        $this->checkAndUpdateCmd('displaysteam',$display);
+      $this->checkAndUpdateCmd('displaysteam',$display);
 
       if ($this->getCmd(null, 'isbbw')->execCmd())
         if ($this->searchForBBW()) { //present
