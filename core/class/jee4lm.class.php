@@ -1842,13 +1842,15 @@ class jee4lmCmd extends cmd
 
 }
 
-// Simple MDNS query object
-// Chris Ridings
-// www.chrisridings.com
+/**
+ * mDNS class allows to search for broadcasts of advertizing 
+ * it is used to search for la Marzocco local IP address advertizing
+ */
 class mDNS {
 	
 	private $mdnssocket; // Socket to listen to port 5353
-	// A = 1;
+  // type of records to be queried
+  // A = 1;
 	// PTR = 12;
 	// SRV = 33;
 	// TXT = 16;
@@ -1861,7 +1863,6 @@ class mDNS {
 			socket_close($this->mdnssocket);
 	 }
 	public function __construct() {
-		error_reporting(E_ERROR | E_PARSE);
 		// Create $mdnssocket, bind to 5353 and join multicast group 224.0.0.251
 		$this->mdnssocket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 		if ($this->mdnssocket != null) {
@@ -1882,7 +1883,6 @@ class mDNS {
 		if ($this->mdnssocket ==null) return;
 		// Sends a query
 		$p = new DNSPacket;
-		$p->clear();
 		$p->packetheader->setTransactionID(rand(1,32767));
 		$p->packetheader->setQuestions(1);
 		$q = new DNSQuestion();
@@ -1897,21 +1897,18 @@ class mDNS {
 			$data .= chr($b[$x]);
 		}
         $this->querycache = $data;
-		$r = socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251',5353);	
+		return socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251',5353);	
 	}
         
-        public function requery() {
-			if ($this->mdnssocket ==null) return;
-            // resend the last query
-            $r = socket_sendto($this->mdnssocket, $this->querycache, strlen($this->querycache), 0, '224.0.0.251',5353);
-        }
+ public function requery() {
+		if ($this->mdnssocket ==null) return;
+     // resend the last query
+      return socket_sendto($this->mdnssocket, $this->querycache, strlen($this->querycache), 0, '224.0.0.251',5353);
+  }
 	
 	public function readIncoming() {
 		if ($this->mdnssocket ==null) return null;
 		// Read some incoming data. Timeout after 1 second
-		$from = '0.0.0.0';
-		$port = 0;
-		$buf = '';
 		$response = "";
 		try {
 			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
@@ -1923,67 +1920,11 @@ class mDNS {
 		for ($x = 0; $x < strlen($response); $x++) {
 			array_push($bytes, ord(substr($response,$x,1)));
 		}
-		$p = new DNSPacket();
-		$p->load($bytes);
-		return $p;
+		return new DNSPacket($bytes);
 	}
 	
 	public function load($_data) {
-		$p = new DNSPacket();
-		$p->load($_data);
-		return $p;
-	}
-	
-	public function printPacket($p) {
-		// Echo a summary of packet contents to the screen
-        log::add(__CLASS__, 'debug', "Questions: " . $p->packetheader->getQuestions());
-		if ($p->packetheader->getQuestions() > 0) {
-			// List the AnswerRRs
-			for ($x=0; $x < $p->packetheader->getQuestions(); $x++) {
-                log::add(__CLASS__, 'debug', "  Question Number: " . $x );
-				$a = $p->questions[$x];
-				$this->printRR($a);
-			}
-		}
-        log::add(__CLASS__, 'debug', "AnswerRRs: " . $p->packetheader->getAnswerRRs() );
-		if ($p->packetheader->getAnswerRRs() > 0) {
-			// List the AnswerRRs
-			for ($x=0; $x < $p->packetheader->getAnswerRRs(); $x++) {
-                log::add(__CLASS__, 'debug', "  Answer Number: " . $x );
-				$a = $p->answerrrs[$x];
-				$this->printRR($a);
-			}
-		}
-        log::add(__CLASS__, 'debug', "AuthorityRRs: " . $p->packetheader->getAuthorityRRs()  );
-		if ($p->packetheader->getAuthorityRRs() > 0) {
-			// List the AnswerRRs
-			for ($x=0; $x < $p->packetheader->getAuthorityRRs(); $x++) {
-                log::add(__CLASS__, 'debug', "  AuthorityRR Number: " . $x );
-				$a = $p->authorityrrs[$x];
-				$this->printRR($a);
-			}
-		}
-        log::add(__CLASS__, 'debug', "AdditionalRRs: " . $p->packetheader->getAdditionalRRs());
-		if ($p->packetheader->getAdditionalRRs() > 0) {
-			// List the AnswerRRs
-			for ($x=0; $x < $p->packetheader->getAdditionalRRs(); $x++) {
-                log::add(__CLASS__, 'debug', "  Answer Number: " . $x );
-				$a = $p->additionalrrs[$x];
-				$this->printRR($a);
-			}
-		}		
-	}
-	
-	private function printRR($a) {
-        log::add(__CLASS__, 'debug', "    Name: " . $a->name);
-        log::add(__CLASS__, 'debug', "    QType: " . $a->qtype  );
-        log::add(__CLASS__, 'debug',  "    QClass: " . $a->qclass);
-        log::add(__CLASS__, 'debug', "    TTL: " . $a->ttl  );
-		$s = "";
-		for ($x=0; $x < sizeof($a->data); $x++) {
-			$s .= chr($a->data[$x]);
-		}
-        log::add(__CLASS__, 'debug', "    Data: " . $s );
+		return new DNSPacket($_data);
 	}
 	
 }
@@ -1996,13 +1937,16 @@ class DNSPacket {
 	public $additionalrrs; // array
 	public $offset = 0;
 	
-	public function __construct() {
-		$this->clear();
+	public function __construct($_data = null) {
+    if ($_data==null)
+     $this->clear();
+    else
+      $this->load($_data);
 	}
 	
 	public function clear() {
 		$this->packetheader = new DNSPacketHeader();
-		$this->packetheader->clear();
+//		$this->packetheader->clear();
 		$this->questions = array();
 		$this->answerrrs = array();
 		$this->authorityrrs = array();
@@ -2059,30 +2003,26 @@ class DNSPacket {
 				array_push($this->questions, $r);
 			}
 		}
-		if ($this->packetheader->getAnswerRRs() > 0) {
+		if ($this->packetheader->getAnswerRRs() > 0) 
 			// There are some answerrrs in this DNS Packet. Read them!
-			for ($xq = 1; $xq <= $this->packetheader->getAnswerRRs(); $xq++) {
-				$qr = $this->readRR($_data);
-				array_push($this->answerrrs, $qr);
-			}
-		}
-		if ($this->packetheader->getAuthorityRRs() > 0) {
+			for ($xq = 1; $xq <= $this->packetheader->getAnswerRRs(); $xq++) 
+				array_push($this->answerrrs, $this->readRR($_data));
+		if ($this->packetheader->getAuthorityRRs() > 0) 
 			// Read the authorityrrs
-			for ($xq = 1; $xq <= $this->packetheader->getAuthorityRRs(); $xq++) {
-				$qr = $this->readRR($_data);
-				array_push($this->authorityrrs, $qr);
-			}
-		}
-		if ($this->packetheader->getAdditionalRRs() > 0) {
+			for ($xq = 1; $xq <= $this->packetheader->getAuthorityRRs(); $xq++) 
+				array_push($this->authorityrrs, $this->readRR($_data));
+		if ($this->packetheader->getAdditionalRRs() > 0) 
 			// Finally read any additional rrs
-			for ($xq = 1; $xq <= $this->packetheader->getAdditionalRRs(); $xq++) {
-				$qr = $this->readRR($_data);
-				array_push($this->additionalrrs, $qr);
-			}
-		}
+			for ($xq = 1; $xq <= $this->packetheader->getAdditionalRRs(); $xq++) 
+				array_push($this->additionalrrs, $this->readRR($_data));
 	}
 	
-	public function readRR($data) {
+  /**
+   * Summary of readRR
+   * @param mixed $_data
+   * @return DNSResourceRecord
+   */
+	public function readRR($_data) {
 		// Returns a DNSResourceRecord object representing the $data (array of integers)
 		$name = "";
 		$size = 0;
@@ -2090,20 +2030,20 @@ class DNSPacket {
 		$firstreset = 0;
                 $sectionstart = $this->offset;
                 $sectionsize = 0;
-		while ($data[$this->offset]<>0) {
+		while ($_data[$this->offset]<>0) {
 			if ($size == 0) {
-				$size = $data[$this->offset];
+				$size = $_data[$this->offset];
                                 if ($sectionsize == 0) {
                                     $sectionsize = $size;
                                 }
 				if (($size & 192) == 192) {
 					if ($firstreset == 0 && $resetoffsetto <> 0) { $firstreset = $resetoffsetto; }
 					$resetoffsetto = $this->offset;
-					$this->offset = $data[$this->offset + 1] + (($data[$this->offset] - 192)*256);
-					$size = $data[$this->offset];
+					$this->offset = $_data[$this->offset + 1] + (($_data[$this->offset] - 192)*256);
+					$size = $_data[$this->offset];
 				}
 			} else {
-				$name = $name . chr($data[$this->offset]);
+				$name = $name . chr($_data[$this->offset]);
 				$size--;
 				if ($size == 0) { $name = $name . "."; }
 			}
@@ -2113,18 +2053,18 @@ class DNSPacket {
 		if ($resetoffsetto <> 0) { $this->offset = $resetoffsetto + 1; }
 		if (strlen($name) > 0) { $name = substr($name,0,strlen($name)-1); }
 		$this->offset = $this->offset + 1;
-		$qtype = ($data[$this->offset] * 256) + $data[$this->offset + 1];
-		$qclass = ($data[$this->offset + 2] * 256) + $data[$this->offset + 3];
+		$qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
+		$qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
 		$this->offset = $this->offset + 4;
 		$ttl = 1000;
 		$this->offset = $this->offset + 4;
 		// The next two bytes are the length of the data section
-		$dl = ($data[$this->offset] * 256) + $data[$this->offset + 1];
+		$dl = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
 		$this->offset = $this->offset + 2;
 		$oldoffset = $this->offset;
 		$ddata = array();
 		for ($x=0; $x < $dl; $x++) { 
-			array_push($ddata, $data[$this->offset]); 
+			array_push($ddata, $_data[$this->offset]); 
 			$this->offset = $this->offset + 1;
 		}
                 $storeoffset = $this->offset;
@@ -2135,17 +2075,17 @@ class DNSPacket {
 		if ($qtype == 12) {
 			$this->offset = $oldoffset;
 			$firstreset = 0;
-			while ($data[$this->offset]<> 0) {
+			while ($_data[$this->offset]<> 0) {
 				if ($size == 0) {
-					$size = $data[$this->offset];
+					$size = $_data[$this->offset];
 					if (($size & 192) == 192) {
 						if ($firstreset == 0 && $resetoffsetto <> 0) { $firstreset = $resetoffsetto; }
 						$resetoffsetto = $this->offset;
-						$this->offset = $data[$this->offset + 1];
-						$size = $data[$this->offset];
+						$this->offset = $_data[$this->offset + 1];
+						$size = $_data[$this->offset];
 					}
 				} else {
-						$datadecode = $datadecode . chr($data[$this->offset]);
+						$datadecode = $datadecode . chr($_data[$this->offset]);
 						$size = $size - 1;
 						if ($size == 0) { $datadecode = $datadecode . "."; }
 				}
@@ -2160,14 +2100,15 @@ class DNSPacket {
                                 $this->offset++;
                         }
 		}
-                $this->offset = $storeoffset;
-		$r = New DNSResourceRecord;
-		$r->name = $name;
+    $this->offset = $storeoffset;
+		return New DNSResourceRecord($name, $qtype, $qclass, $ttl, $ddata);
+/*		$r->name = $name;
 		$r->qclass = $qclass;
 		$r->qtype = $qtype;
 		$r->ttl = $ttl;
 		$r->data = $ddata;
 		return $r;
+*/
 	}
 	
 	public function makePacket() {
@@ -2211,7 +2152,10 @@ class DNSPacket {
 class DNSPacketHeader {
 	// Represents the 12 byte packet header of a DNS request or response
 	private $contents; // Byte() - in reality use an array of integers here
-	
+
+  public function __construct() {
+    $this->clear();
+  }
 	public function clear() {
 		$this->contents = array(0,0,0,0,0,0,0,0,0,0,0,0);
 	}
@@ -2220,29 +2164,28 @@ class DNSPacketHeader {
 		return $this->contents;
 	}
 	
-	public function load($data) {
+	public function load($_data) {
 		// Assume we're passed an array of bytes
 		$this->clear();
-		$this->contents = $data;
+		$this->contents = $_data;
 	}
 	
 	public function getTransactionID() {
 		return ($this->contents[0] * 256) + $this->contents[1];
 	}
 	
-	public function setTransactionID($value) {
-		$this->contents[0] = (int)($value / 256);
-		$this->contents[1] = $value % 256;
+	public function setTransactionID($_value) {
+		$this->contents[0] = (int)($_value / 256);
+		$this->contents[1] = $_value % 256;
 	}
 	
 	public function getMessageType() {
 		return ($this->contents[2] & 128) / 128;
 	}
 	
-	public function setMessageType($value) {
-		$value = $value * 128;
+	public function setMessageType($_value) {
 		$this->contents[2] = $this->contents[2] & 127;
-		$this->contents[2] = $this->contents[2] | $value;
+		$this->contents[2] = $this->contents[2] | ($_value*128);
 	}
 	
 	// As far as I know the opcode is always zero. But code it anyway (just in case)
@@ -2250,20 +2193,18 @@ class DNSPacketHeader {
 		return ($this->contents[2] & 120) / 8;
 	}
 	
-	public function setOpCode($value) {
-		$value = $value * 8;
+	public function setOpCode($_value) {
 		$this->contents[2] = $this->contents[2] & 135;
-		$this->contents[2] = $this->contents[2] | $value;
+		$this->contents[2] = $this->contents[2] | ($_value*8);
 	}
 	
 	public function getAuthorative() {
 		return ($this->contents[2] & 4) / 4;
 	}
 	
-	public function setAuthorative($value) {
-		$value = $value * 4;
+	public function setAuthorative($_value) {
 		$this->contents[2] = $this->contents[2] & 251;
-		$this->contents[2] = $this->contents[2] | $value;
+		$this->contents[2] = $this->contents[2] | ($_value*4);
 	}
 	
 	// We always want truncated to be 0 as this class doesn't support multi packet.
@@ -2272,10 +2213,9 @@ class DNSPacketHeader {
 		return ($this->contents[2] & 2) / 2;
 	}
 	
-	public function setTruncated($value) {
-		$value = $value * 2;
+	public function setTruncated($_value) {
 		$this->contents[2] = $this->contents[2] & 253;
-		$this->contents[2] = $this->contents[2] | $value;
+		$this->contents[2] = $this->contents[2] | ($_value*2);
 	}
 	
 	// We return this but we don't handle it!
@@ -2283,9 +2223,9 @@ class DNSPacketHeader {
 		return ($this->contents[2] & 1);
 	}
 	
-	public function setRecursionDesired($value) {
+	public function setRecursionDesired($_value) {
 		$this->contents[2] = $this->contents[2] & 254;
-		$this->contents[2] = $this->contents[2] | $value;
+		$this->contents[2] = $this->contents[2] | $_value;
 	}
 	
 	// We also return this but we don't handle it
@@ -2293,20 +2233,18 @@ class DNSPacketHeader {
 		return ($this->contents[3] & 128)/128;
 	}
 	
-	public function setRecursionAvailable($value) {
-		$value = $value * 128;
+	public function setRecursionAvailable($_value) {
 		$this->contents[3] = $this->contents[3] & 127;
-		$this->contents[3] = $this->contents[3] | $value;
+		$this->contents[3] = $this->contents[3] | ($_value*128);
 	}
 	
 	public function getReserved() {
 		return ($this->contents[3] & 64) / 64;
 	}
 	
-	public function setReserved($value) {
-		$value = $value * 64;
+	public function setReserved($_value) {
 		$this->contents[3] = $this->contents[3] & 191;
-		$this->contents[3] = $this->contents[3] | $value;
+		$this->contents[3] = $this->contents[3] | ($_value*64);
 	}
 	
 	// This always seems to be 0, but handle anyway
@@ -2314,10 +2252,9 @@ class DNSPacketHeader {
 		return ($this->contents[3] & 32) / 32;
 	}
 	
-	public function setAnswerAuthenticated($value) {
-		$value = $value * 32;
+	public function setAnswerAuthenticated($_value) {
 		$this->contents[3] = $this->contents[3] & 223;
-		$this->contents[3] = $this->contents[3] | $value;
+		$this->contents[3] = $this->contents[3] | ($_value *32);
 	}
 	
 	// This always seems to be 0, but handle anyway
@@ -2325,10 +2262,9 @@ class DNSPacketHeader {
 		return ($this->contents[3] & 16) / 16;
 	}
 	
-	public function setNonAuthenticatedData($value) {
-		$value = $value * 16;
+	public function setNonAuthenticatedData($_value) {
 		$this->contents[3] = $this->contents[3] & 239;
-		$this->contents[3] = $this->contents[3] | $value;
+		$this->contents[3] = $this->contents[3] | ($_value * 16);
 	}
 	
 	// We want this to be zero
@@ -2342,9 +2278,9 @@ class DNSPacketHeader {
 		return ($this->contents[3] & 15);
 	}
 	
-	public function setReplyCode($value) {
+	public function setReplyCode($_value) {
 		$this->contents[3] = $this->contents[3] & 240;
-		$this->contents[3] = $this->contents[3] | $value;
+		$this->contents[3] = $this->contents[3] | $_value;
 	}
 	
 	// The number of Questions in the packet
@@ -2352,9 +2288,9 @@ class DNSPacketHeader {
 		return ($this->contents[4] * 256) + $this->contents[5];
 	}
 	
-	public function setQuestions($value) {
-		$this->contents[4] = (int)($value / 256);
-		$this->contents[5] = $value % 256;
+	public function setQuestions($_value) {
+		$this->contents[4] = (int)($_value / 256);
+		$this->contents[5] = $_value % 256;
 	}
 	
 	// The number of AnswerRRs in the packet
@@ -2362,9 +2298,9 @@ class DNSPacketHeader {
 		return ($this->contents[6] * 256) + $this->contents[7];
 	}
 	
-	public function setAnswerRRs($value) {
-		$this->contents[6] = (int)($value / 256);
-		$this->contents[7] = $value % 256;
+	public function setAnswerRRs($_value) {
+		$this->contents[6] = (int)($_value / 256);
+		$this->contents[7] = $_value % 256;
 	}
 	
 	// The number of AuthorityRRs in the packet
@@ -2372,9 +2308,9 @@ class DNSPacketHeader {
 		return ($this->contents[8] * 256) + $this->contents[9];
 	}
 	
-	public function setAuthorityRRs($value) {
-		$this->contents[8] = (int)($value / 256);
-		$this->contents[9] = $value % 256;
+	public function setAuthorityRRs($_value) {
+		$this->contents[8] = (int)($_value / 256);
+		$this->contents[9] = $_value % 256;
 	}
 	
 	// The number of AdditionalRRs in the packet
@@ -2382,9 +2318,9 @@ class DNSPacketHeader {
 		return ($this->contents[10] * 256) + $this->contents[11];
 	}
 	
-	public function setAdditionalRRs($value) {
-		$this->contents[10] = (int)($value / 256);
-		$this->contents[11] = $value % 256;
+	public function setAdditionalRRs($_value) {
+		$this->contents[10] = (int)($_value / 256);
+		$this->contents[11] = $_value % 256;
 	}
 }
 class DNSQuestion {
@@ -2392,11 +2328,20 @@ class DNSQuestion {
 	public $qtype; // UInt16
 	public $qclass; // UInt16
 }
-class DNSResourceRecord {
-	public $name; // String
-	public $qtype; // UInt16
-	public $qclass; // UInt16
-	public $ttl; // UInt32
-	public $data; // Byte ()
+class DNSResourceRecord
+{
+  public $name; // String
+  public $qtype; // UInt16
+  public $qclass; // UInt16
+  public $ttl; // UInt32
+  public $data; // Byte ()
+
+  public function __construct($_name='', $_qtype=0, $_qclass=0, $_ttl=0, $_data=null) {
+    $this->name = $_name;
+    $this->qtype=  $_qtype;
+    $this->qclass= $_qclass;
+    $this->ttl=$_ttl;
+    $this->data=$_data;
+  }
 }
 

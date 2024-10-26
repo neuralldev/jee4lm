@@ -35,4 +35,7 @@ https://github.com/zweckj/pylamarzocco/tree/main
 démon inspiré de :
 https://github.com/Mips2648/jeedom-aiodemo/tree/master
 
-- 
+mDNS support by Chris Ridings
+https://www.chrisridings.com
+
+
