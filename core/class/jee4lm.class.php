@@ -1380,7 +1380,7 @@ class jee4lm extends eqLogic
           $this->getCmd(null, 'bbwfree')->setDisplay('template', $bbwmode == 'A' || $bbwmode == 'B' ? "jee4lm::bbw nodose inactive" : "jee4lm::bbw nodose active");
           $this->getCmd(null, 'bbwdoseA')->setDisplay('template', $bbwmode == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
           $this->getCmd(null, 'bbwdoseB')->setDisplay('template', $bbwmode == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
-          log::add(__CLASS__, 'debug', 'bbw scale on display');
+          log::add(__CLASS__, 'debug', "bbw scale on display mode=$bbwmode continuous=$free");
           // - 
         } else {
           $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
