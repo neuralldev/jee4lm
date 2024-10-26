@@ -159,7 +159,7 @@ class jee4lm extends eqLogic
       'POST'
     );
     log::add(__CLASS__, 'debug', 'login ' . json_encode($data, true));
-    cache::delete('jee4lm::access_token');
+    cache::delete('jee4lm::access_token'); // for any login attempt, reset cache with token, as it will change
     config::save('refreshToken', '', 'jee4lm');
     config::save('accessToken', '', 'jee4lm');
     if ($data['access_token'] != '') {
@@ -181,8 +181,8 @@ class jee4lm extends eqLogic
   public static function refreshToken()
   {
     $refresh = config::byKey('refreshToken', 'jee4lm');
-    $_username = config::byKey('userId', 'jee4lm');
-    $_password = config::byKey('userPwd', 'jee4lm');
+  //  $_username = config::byKey('userId', 'jee4lm');
+  //  $_password = config::byKey('userPwd', 'jee4lm');
     config::save('refreshToken', '', 'jee4lm');
     config::save('accessToken', '', 'jee4lm');
     // try to detect the machines only if token succeeded
@@ -409,8 +409,8 @@ class jee4lm extends eqLogic
     $token = self::getToken($_eq);
     $data = self::request($ip == '' ? $_eq->getPath($serial, $ip). '/configuration' : $_eq->getPath($serial, $ip)."/config" , null, 'GET', ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
-    $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
-    if ($isdata) { // check that we have information returned
+    //$isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
+    if (($data!=null && $ip!='') || ($ip='' && $data['status'] == true)) { // check that we have information returned
       log::add(__CLASS__, 'debug', "refresh $uid parse info");
       $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
@@ -423,14 +423,14 @@ class jee4lm extends eqLogic
 
       $mc = cache::byKey('jee4lm::laststate_'.$id);
       $ls = $mc==null ? 0: $mc->getValue(); //previous state
-      $ns = $machine['machineMode'] == "StandBy" ? 0 : 1; // next state
-      switch ($_poll) {
+      $ns = $machine['machineMode'] == "StandBy" ? 0 : 1; // next state (go to state)
+      switch ($_poll) { // select action based on source of call
         case 0: // called direct
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from direct call");
           if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
             cache::set('jee4lm::laststate_'.$id,$ns);
           }
-          break; // refresh all info 
+          break; // called from refresh all info 
         case 1: // on manual action toggle daemon
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from switch on/off action");
           if ($ls != $ns) // if there is a state change
@@ -503,7 +503,7 @@ class jee4lm extends eqLogic
   }
 
   /**
-   * Reads and create/refresh all the values of an equipment previously created by detection routine
+   * Reads and create/refresh all the values from the internet web site of an equipment previously created by detection routine
    * the function takes only the target equipment to refresh as argument
    * @param eqLogic $_eq
    * @return bool
@@ -517,12 +517,8 @@ class jee4lm extends eqLogic
     //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
     if ($data['status'] == true) {
       $machine = $data['data'];
-//      $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
-      $g = $machine['groupCapabilities'][0];
-//      $reglage = $g['doses'][0];
       $boilers = $machine['boilers'];
-//      $preinfusion = $machine['preinfusionSettings'];
       $free=!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');
 
       if ($machine['machineCapabilities'][0]['family'] == 'LINEA') { // linea mini
@@ -785,8 +781,8 @@ class jee4lm extends eqLogic
    */
   public function linksetpoint($_slider, $_setpointlogicalID)
   {
-    $set_setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $_slider);
-    $setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
+    $set_setpoint = $_slider!=null?cmd::byEqLogicIdAndLogicalId($this->getId(), $_slider):null;
+    $setpoint = $_setpointlogicalID!=null?cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID):null;
     if ($set_setpoint == null || $setpoint == null)
       log::add(__CLASS__, 'debug', "setpoint : command not found");
     else {
@@ -875,7 +871,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
     $serial = $this->getConfiguration('serialNumber');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
+    self::request($this->getPath($serial) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
   }
 
   /**
@@ -889,8 +885,8 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
 //    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $serial);
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+    self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"],  $serial);
+ //   log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
   /**
@@ -1000,7 +996,7 @@ class jee4lm extends eqLogic
 //      log::add(__CLASS__, 'debug', "send PUT ".$this->getPath($serial, $ip). '/recipes/ with d='.json_encode($d));
 // force by web site
     $req = self::request(
-      $this->getPath($serial). '/recipes/',
+      $this->getPath($serial).'/recipes/',
       $d,
       'PUT',
       ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
@@ -1349,19 +1345,19 @@ class jee4lm extends eqLogic
     $token = self::getToken($this);
     $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
     if (array_key_exists('status', $arr)) {
-      $this->getCmd(null, 'machinemode')->event(($arr['data']['MACHINE_STATUS'] == 'BrewingMode'));
-      $this->getCmd(null, 'coffeecurrent')->event($arr['data']['TEMP_COFFEE']);
+      $this->checkAndUpdateCmd('machinemode',$arr['data']['MACHINE_STATUS'] == 'BrewingMode');
+      $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
       //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
-      $this->getCmd(null, 'tankStatus')->event(!$arr['data']['LEVEL_TANK']);
-      $this->getCmd(null, 'backflush')->event($arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
-      $this->getCmd(null, 'steamenabled')->event($arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
-      $this->getCmd(null, 'plumbedin')->event($arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+      $this->checkAndUpdateCmd('tankStatus',$arr['data']['LEVEL_TANK']);
+      $this->checkAndUpdateCmd('backflush',$arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
+      $this->checkAndUpdateCmd('steamenabled',$arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
+      $this->checkAndUpdateCmd('plumbedin',$arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
 
       $machinestate = ($arr['data']['MACHINE_STATUS'] == 'BrewingMode');
       $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
       $display = !$machinestate ? '---' :
         "<span style='color:" . ($arr['data']['TEMP_COFFEE'] + 2 >= $coffeetarget ? 'green' : 'red') . ";'>" . $coffeetarget . "°C / " . $arr['data']['TEMP_COFFEE'] . "°C</span>";
-      $this->getCmd(null, 'displaycoffee')->event($display);
+        $this->checkAndUpdateCmd('displaycoffee',$display);
       log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $arr['data']['TEMP_COFFEE'] . ' tank=' . $arr['data']['LEVEL_TANK']);
 
       $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
@@ -1371,7 +1367,7 @@ class jee4lm extends eqLogic
         $display = 'OFF';
       else
         $display = "<span style='color:green'>ON</span>";
-      $this->getCmd(null, 'displaysteam')->event($display);
+        $this->checkAndUpdateCmd('displaysteam',$display);
 
       if ($this->getCmd(null, 'isbbw')->execCmd())
         if ($this->searchForBBW()) { //present
