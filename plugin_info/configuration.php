@@ -56,37 +56,35 @@ if (!isConnect()) {
 </form>
 
 <script>
-  $('#bt_loginToLMCloud').off('click').on('click', function () {
-    jeeDialog.dialog({
-      id: 'jee_LMModal',
-      title: '{{Connexion de Jeedom au Cloud La Marzocco}}',
-      width: '85vw',
-      height: '51vw',
-      top: '8vh',
-      contentUrl: 'index.php?v=d&modal=login&plugin=jee4lm'
-    })
+$('#bt_loginToLMCloud').off('click').on('click', function () {
+  jeeDialog.dialog({
+    id: 'jee_LMModal',
+    title: '{{Connexion de Jeedom au Cloud La Marzocco}}',
+    width: '85vw',
+    height: '51vw',
+    top: '8vh',
+    contentUrl: 'index.php?v=d&modal=login&plugin=jee4lm'
   })
+})
 
-  $('#bt_syncWithLMCloud').on('click', function () {
-    $.ajax({
-      type: "POST",
-      url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
-      data: {
-        action: "sync",
-      },
-      dataType: 'json',
-      error: function (request, status, error) {
-        handleAjaxError(request, status, error);
-      },
-      success: function (data) {
-        if (data.state != 'ok') {
-//          $('#div_alert').showAlert({message: data.result, level: 'danger' });
-            jeedomUtils.showAlert({message: data.result, level: 'danger' });
-            return;
-        }
-//        $('#div_alert').showAlert({ message: '{{Détection réussie}}', level: 'success' });
-        jeedomUtils.showAlert({'{{Détection réussie}}', level: 'success' });
+$('#bt_syncWithLMCloud').on('click', function () {
+  $.ajax({
+    type: "POST",
+    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
+    data: {
+      action: "sync",
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+          jeedomUtils.showAlert({message: data.result, level: 'danger' });
+          return;
       }
-    });
-  });
+      jeedomUtils.showAlert({message: '{{Détection réussie}}', level: 'success' });
+    }
+  })
+});
 </script>
