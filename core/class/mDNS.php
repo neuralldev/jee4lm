@@ -44,7 +44,7 @@ class mDNS {
 		}
 	}
 	
-	public function query($name, $qclass, $qtype, $data="") {
+	public function query($_name, $_qclass, $_qtype, $_data='') {
 		if ($this->mdnssocket ==null) return;
 		// Sends a query
 		$p = new DNSPacket;
@@ -52,13 +52,13 @@ class mDNS {
 		$p->packetheader->setTransactionID(rand(1,32767));
 		$p->packetheader->setQuestions(1);
 		$q = new DNSQuestion();
-		$q->name = $name;
-		$q->qclass = $qclass;
-		$q->qtype = $qtype;
+		$q->name = $_name;
+		$q->qclass = $_qclass;
+		$q->qtype = $_qtype;
 		array_push($p->questions, $q);
 		$b = $p->makePacket();
 		// Send the packet
-		$data = "";
+		$data = $_data;
 		for ($x = 0; $x < sizeof($b); $x++) { 
 			$data .= chr($b[$x]);
 		}
@@ -94,9 +94,9 @@ class mDNS {
 		return $p;
 	}
 	
-	public function load($data) {
+	public function load($_data) {
 		$p = new DNSPacket();
-		$p->load($data);
+		$p->load($_data);
 		return $p;
 	}
 	
@@ -175,7 +175,7 @@ class DNSPacket {
 		$this->additionalrrs = array();		
 	}
 	
-	public function load($data) {
+	public function load($_data) {
 		// $data is an array of integers representing the bytes.
 		// Load the data into the DNSPacket object.
 		$this->clear();
@@ -183,7 +183,7 @@ class DNSPacket {
 		// Read the first 12 bytes and load into the packet header
 		$headerbytes = array();
 		for ($x=0; $x< 12; $x++) {
-			$headerbytes[$x] = $data[$x];
+			$headerbytes[$x] = $_data[$x];
 		}
 		$this->packetheader->load($headerbytes);
 		$this->offset = 12;
@@ -195,17 +195,17 @@ class DNSPacket {
 				$size = 0;
 				$resetoffsetto = 0;
 				$firstreset = 0;
-				while ($data[$this->offset]<>0) {
+				while ($_data[$this->offset]<>0) {
 					if ($size == 0) {
-						$size = $data[$this->offset];
+						$size = $_data[$this->offset];
 						if (($size & 192) == 192) {
 							if ($firstreset == 0 && $resetoffsetto <> 0) { $firstrest = $resetoffsetto; }
 							$resetoffsetto = $this->offset;
-							$this->offset = $data[$this->offset + 1];
-							$size = $data[$this->offset];
+							$this->offset = $_data[$this->offset + 1];
+							$size = $_data[$this->offset];
 						}
 					} else {
-						$name = $name . chr($data[$this->offset]);
+						$name = $name . chr($_data[$this->offset]);
 						$size--;
 						if ($size == 0) { $name = $name . "."; }
 					}
@@ -215,8 +215,8 @@ class DNSPacket {
 				if ($resetoffsetto <> 0) { $this->offset = $resetoffsetto + 1; }
 				if (strlen($name) > 0) { $name = substr($name,0,strlen($name)-1); }
 				$this->offset = $this->offset + 1;
-				$qtype = ($data[$this->offset] * 256) + $data[$this->offset + 1];
-				$qclass = ($data[$this->offset + 2] * 256) + $data[$this->offset + 3];
+				$qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
+				$qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
 				$this->offset = $this->offset + 4;
 				$r = new DNSQuestion();
 				$r->name = $name;
@@ -228,21 +228,21 @@ class DNSPacket {
 		if ($this->packetheader->getAnswerRRs() > 0) {
 			// There are some answerrrs in this DNS Packet. Read them!
 			for ($xq = 1; $xq <= $this->packetheader->getAnswerRRs(); $xq++) {
-				$qr = $this->readRR($data);
+				$qr = $this->readRR($_data);
 				array_push($this->answerrrs, $qr);
 			}
 		}
 		if ($this->packetheader->getAuthorityRRs() > 0) {
 			// Read the authorityrrs
 			for ($xq = 1; $xq <= $this->packetheader->getAuthorityRRs(); $xq++) {
-				$qr = $this->readRR($data);
+				$qr = $this->readRR($_data);
 				array_push($this->authorityrrs, $qr);
 			}
 		}
 		if ($this->packetheader->getAdditionalRRs() > 0) {
 			// Finally read any additional rrs
 			for ($xq = 1; $xq <= $this->packetheader->getAdditionalRRs(); $xq++) {
-				$qr = $this->readRR($data);
+				$qr = $this->readRR($_data);
 				array_push($this->additionalrrs, $qr);
 			}
 		}

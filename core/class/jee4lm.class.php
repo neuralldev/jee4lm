@@ -1,7 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-require_once 'mDNS.php';
+//require_once 'mDNS.php';
 
 const
   LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg",
@@ -1030,6 +1030,7 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
+  /*
 public static function tcpdetect() 
 {
     log::add(__CLASS__, 'debug', '[detect] local ip');
@@ -1101,6 +1102,7 @@ public static function tcpdetect()
     return $lm;
 	}
 
+*/
 
   /**
    * Detect is the function used by the plugin configuration button to detect and create the equipments.

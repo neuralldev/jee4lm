@@ -23,15 +23,14 @@ try {
         else
             throw new Exception(__("la détection ne peut se faire qu'une fois la connexion réussie", __FILE__));
     }
-
+/*
     if (init('action') == 'tcpdetect') {
         if (jee4lm::tcpdetect())
             ajax::success();
         else
             throw new Exception(__("la détection de machine sur tcpip n'a pas trouvé de machines", __FILE__));
     }
-
-
+            */
     throw new Exception(__('Aucune méthode correspondant à : ', __FILE__) . init('action'));
 } catch (Exception $e) {
     ajax::error(displayException($e), $e->getCode());
