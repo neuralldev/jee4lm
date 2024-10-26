@@ -19,25 +19,29 @@ class mDNS {
 	// SRV = 33;
 	// TXT = 16;
         
-        // query cache for the last query packet sent
-        private $querycache = "";
+    // query cache for the last query packet sent
+     private $querycache = "";
 	
 	public function __construct() {
 		error_reporting(E_ERROR | E_PARSE);
 		// Create $mdnssocket, bind to 5353 and join multicast group 224.0.0.251
 		$this->mdnssocket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-		if (PHP_OS === "Darwin" || PHP_OS === "FreeBSD") {
-			socket_set_option($this->mdnssocket, SOL_SOCKET, SO_REUSEPORT, 1);
-		} else {
-			socket_set_option($this->mdnssocket,SOL_SOCKET,SO_REUSEADDR, 1);
+		if ($this->mdnssocket != null) {
+			if (PHP_OS === "Darwin" || PHP_OS === "FreeBSD") {
+				socket_set_option($this->mdnssocket, SOL_SOCKET, SO_REUSEPORT, 1);
+			} else {
+				socket_set_option($this->mdnssocket,SOL_SOCKET,SO_REUSEADDR, 1);
+			}
+			//socket_set_option($this->mdnssocket, SOL_SOCKET, SO_BROADCAST, 1);
+			socket_set_option($this->mdnssocket, IPPROTO_IP, MCAST_JOIN_GROUP, array('group'=>'224.0.0.251', 'interface'=>0));
+			socket_set_option($this->mdnssocket, SOL_SOCKET,SO_RCVTIMEO,array("sec"=>1,"usec"=>0));
+			if (!socket_bind($this->mdnssocket, "0.0.0.0", 5353))
+				$this->mdnssocket = null;	
 		}
-		//socket_set_option($this->mdnssocket, SOL_SOCKET, SO_BROADCAST, 1);
-		socket_set_option($this->mdnssocket, IPPROTO_IP, MCAST_JOIN_GROUP, array('group'=>'224.0.0.251', 'interface'=>0));
-		socket_set_option($this->mdnssocket, SOL_SOCKET,SO_RCVTIMEO,array("sec"=>1,"usec"=>0));
-		$bind = socket_bind($this->mdnssocket, "0.0.0.0", 5353);
 	}
 	
 	public function query($name, $qclass, $qtype, $data="") {
+		if ($this->mdnssocket ==null) return;
 		// Sends a query
 		$p = new DNSPacket;
 		$p->clear();
@@ -54,16 +58,18 @@ class mDNS {
 		for ($x = 0; $x < sizeof($b); $x++) { 
 			$data .= chr($b[$x]);
 		}
-                $this->querycache = $data;
+        $this->querycache = $data;
 		$r = socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251',5353);	
 	}
         
         public function requery() {
+			if ($this->mdnssocket ==null) return;
             // resend the last query
             $r = socket_sendto($this->mdnssocket, $this->querycache, strlen($this->querycache), 0, '224.0.0.251',5353);
         }
 	
 	public function readIncoming() {
+		if ($this->mdnssocket ==null) return null;
 		// Read some incoming data. Timeout after 1 second
 		$from = '0.0.0.0';
 		$port = 0;
@@ -73,7 +79,7 @@ class mDNS {
 			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
 		} catch (Exception $e) {
 		}
-                if (strlen($response) < 1) { return ""; }
+		if (strlen($response) < 1) { return null; }
 		// Create an array to represent the bytes
 		$bytes = array();
 		for ($x = 0; $x < strlen($response); $x++) {

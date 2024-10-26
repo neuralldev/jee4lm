@@ -1046,50 +1046,53 @@ public static function tcpdetect()
 			if ($inpacket != null && $inpacket->packetheader->getAnswerRRs()> 0) {
         log::add(__CLASS__, 'debug', '[detect] found an advertisement');
 				for ($x=0; $x < sizeof($inpacket->answerrrs); $x++) {
-					if ($inpacket->answerrrs[$x]->qtype == 12) {
+          switch ($inpacket->answerrrs[$x]->qtype) {
+            case 12:
 						if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local") {
-							$name = "";
-							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) {
-								$name .= chr($inpacket->answerrrs[$x]->data[$y]);
-							}
+//							$name = "";
+              $name = vsprintf(str_repeat('%c', sizeof($inpacket->answerrrs[$x]->data)), $inpacket->answerrrs[$x]->data);
+//							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) 
+//								$name .= chr($inpacket->answerrrs[$x]->data[$y]);
               log::add(__CLASS__, 'debug', '[detect] found an machine='.$name);
 							// The machine name is in $name. Send a a SRV query
 							$mdns->query($name, 1, 33, "");
 							$cc=15;
-						}
-					}
-					if ($inpacket->answerrrs[$x]->qtype == 33) {
-						$d = $inpacket->answerrrs[$x]->data;
-						$port = ($d[4] * 256) + $d[5];
-						// We need the target from the data
-						$offset = 6;
-						$size = $d[$offset];
-						$offset++;
-						$target = "";
-						for ($z=0; $z < $size; $z++) {
-							$target .= chr($d[$offset + $z]);
-						}
-						$target .= ".local";
-						$lm[$inpacket->answerrrs[$x]->name] = array("port"=>$port, "ip"=>"", "target"=>$target);
-  					// We know the name and port. Send an A query for the IP address
-						$mdns->query($target,1,1,"");
-						$cc=15;
-					}
-					if ($inpacket->answerrrs[$x]->qtype == 1) {
-						$d = $inpacket->answerrrs[$x]->data;
-						$ip = $d[0] . "." . $d[1] . "." . $d[2] . "." . $d[3];
-						// Loop through the machines and fill in the ip
-						foreach ($lm as $key=>$value) {
-							if ($value['target'] == $inpacket->answerrrs[$x]->name) {
-								$value['ip'] = $ip;	
-								$lm[$key] = $value;
-                log::add(__CLASS__, 'debug', '[detect] name='.$name.' ip='.$ip);
-							}
-						}
-					}
+						};
+            break;
+            case 33:
+              $d = $inpacket->answerrrs[$x]->data;
+              $port = ($d[4] * 256) + $d[5];
+              // extract target from data
+//              $size = $d[6];
+              $t = array_slice($d,7,$d[6]);
+              $target = vsprintf(str_repeat('%c', $d[6]), $t);
+//              $offset = 7;
+//              $target = "";
+//              for ($z=0; $z < $size; $z++) 
+//                $target .= chr($d[$offset + $z]);              
+              $target .= ".local";
+              $lm[$inpacket->answerrrs[$x]->name] = ["port"=>$port, "ip"=>"", "target"=>$target];
+              // We know the name and port. Send an A query for the IP address
+              $mdns->query($target,1,1,"");
+              $cc=15; // reset loop count
+              break;
+            case 1:
+              $d = $inpacket->answerrrs[$x]->data;
+              $ip = $d[0] . "." . $d[1] . "." . $d[2] . "." . $d[3];
+              // Loop through the machines and fill in the ip
+              foreach ($lm as $key=>$value) {
+                if ($value['target'] == $inpacket->answerrrs[$x]->name) {
+//                  $value['ip'] = $ip;
+                  $lm[$key]['ip'] = $ip;
+                  $lm[$key]['name'] = $inpacket->answerrrs[$x]->name;
+                  log::add(__CLASS__, 'debug', '[detect] name='.$inpacket->answerrrs[$x]->name.' ip='.$ip);
+                }
+              };
+              break;
+          }
 				}
 			} else        
-      log::add(__CLASS__, 'debug', '[detect] not found, looping cc='.$cc);
+      log::add(__CLASS__, 'debug', '[detect] looping cc='.$cc);
 			$cc--;
 		}
 		return $lm;
