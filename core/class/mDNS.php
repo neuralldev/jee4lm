@@ -22,6 +22,10 @@ class mDNS {
     // query cache for the last query packet sent
      private $querycache = "";
 	
+	 public function __destruct() {
+		if ($this->mdnssocket != null)
+			socket_close($this->mdnssocket);
+	 }
 	public function __construct() {
 		error_reporting(E_ERROR | E_PARSE);
 		// Create $mdnssocket, bind to 5353 and join multicast group 224.0.0.251

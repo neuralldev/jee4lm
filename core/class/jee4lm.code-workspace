@@ -8,7 +8,7 @@
 		}
 	],
 	"settings": {
-		"php.version": "8.3",
+		"php.version": "8.4",
 		"php.stubs": [
 			"pcntl",
 			"posix",

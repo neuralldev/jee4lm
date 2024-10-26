@@ -1032,70 +1032,73 @@ class jee4lm extends eqLogic
 
 public static function tcpdetect() 
 {
-  log::add(__CLASS__, 'debug', '[detect] local ip');
+    log::add(__CLASS__, 'debug', '[detect] local ip');
 
-  $mdns = new mDNS();
-  $mdns->query("_marzocco._tcp.local",1,12,"");
-  $cc = 15;
-  $lm = array();
-		while ($cc>0) {
+    $mdns = new mDNS();
+    $mdns->query("_marzocco._tcp.local", 1, 12, "");
+    $cc = 15;
+    $lm = [];
+    while ($cc > 0) {
       log::add(__CLASS__, 'debug', '[detect] call  read');
-			$inpacket = $mdns->readIncoming();
+      $inpacket = $mdns->readIncoming();
       log::add(__CLASS__, 'debug', '[detect] got read back');
-			// If our packet has answers, then read them
-			if ($inpacket != null && $inpacket->packetheader->getAnswerRRs()> 0) {
+      // If our packet has answers, then read them
+      if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
         log::add(__CLASS__, 'debug', '[detect] found an advertisement');
-				for ($x=0; $x < sizeof($inpacket->answerrrs); $x++) {
+        for ($x = 0; $x < sizeof($inpacket->answerrrs); $x++) {
           switch ($inpacket->answerrrs[$x]->qtype) {
             case 12:
-						if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local") {
-//							$name = "";
-              $name = vsprintf(str_repeat('%c', sizeof($inpacket->answerrrs[$x]->data)), $inpacket->answerrrs[$x]->data);
-//							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) 
+              if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local") {
+                //							$name = "";
+                $name = vsprintf(str_repeat('%c', sizeof($inpacket->answerrrs[$x]->data)), $inpacket->answerrrs[$x]->data);
+                //							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) 
 //								$name .= chr($inpacket->answerrrs[$x]->data[$y]);
-              log::add(__CLASS__, 'debug', '[detect] found an machine='.$name);
-							// The machine name is in $name. Send a a SRV query
-							$mdns->query($name, 1, 33, "");
-							$cc=15;
-						};
-            break;
+                log::add(__CLASS__, 'debug', '[detect] found an machine=' . $name);
+                // The machine name is in $name. Send a a SRV query
+                $mdns->query($name, 1, 33, "");
+                $cc = 15;
+              }
+              ;
+              break;
             case 33:
               $d = $inpacket->answerrrs[$x]->data;
               $port = ($d[4] * 256) + $d[5];
               // extract target from data
 //              $size = $d[6];
-              $t = array_slice($d,7,$d[6]);
+              $t = array_slice($d, 7, $d[6]);
               $target = vsprintf(str_repeat('%c', $d[6]), $t);
-//              $offset = 7;
+              //              $offset = 7;
 //              $target = "";
 //              for ($z=0; $z < $size; $z++) 
 //                $target .= chr($d[$offset + $z]);              
               $target .= ".local";
-              $lm[$inpacket->answerrrs[$x]->name] = ["port"=>$port, "ip"=>"", "target"=>$target];
+              $lm[$inpacket->answerrrs[$x]->name] = ["port" => $port, "ip" => "", "target" => $target];
               // We know the name and port. Send an A query for the IP address
-              $mdns->query($target,1,1,"");
-              $cc=15; // reset loop count
+              $mdns->query($target, 1, 1, "");
+              $cc = 15; // reset loop count
               break;
             case 1:
               $d = $inpacket->answerrrs[$x]->data;
               $ip = $d[0] . "." . $d[1] . "." . $d[2] . "." . $d[3];
               // Loop through the machines and fill in the ip
-              foreach ($lm as $key=>$value) {
+              foreach ($lm as $key => $value) {
                 if ($value['target'] == $inpacket->answerrrs[$x]->name) {
-//                  $value['ip'] = $ip;
+                  //                  $value['ip'] = $ip;
                   $lm[$key]['ip'] = $ip;
                   $lm[$key]['name'] = $inpacket->answerrrs[$x]->name;
-                  log::add(__CLASS__, 'debug', '[detect] name='.$inpacket->answerrrs[$x]->name.' ip='.$ip);
+                  log::add(__CLASS__, 'debug', '[detect] name=' . $inpacket->answerrrs[$x]->name . ' ip=' . $ip);
                 }
-              };
+              }
+              ;
               break;
           }
-				}
-			} else        
-      log::add(__CLASS__, 'debug', '[detect] looping cc='.$cc);
-			$cc--;
-		}
-		return $lm;
+        }
+      } else
+        log::add(__CLASS__, 'debug', '[detect] looping cc=' . $cc);
+      $cc--;
+    }
+    $mdns = null;
+    return $lm;
 	}
 
 
