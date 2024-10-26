@@ -1039,9 +1039,11 @@ public static function tcpdetect()
   $cc = 15;
   $lm = array();
 		while ($cc>0) {
+      log::add(__CLASS__, 'debug', '[detect] call  read');
 			$inpacket = $mdns->readIncoming();
+      log::add(__CLASS__, 'debug', '[detect] got read back');
 			// If our packet has answers, then read them
-			if ($inpacket->packetheader->getAnswerRRs()> 0) {
+			if ($inpacket != null && $inpacket->packetheader->getAnswerRRs()> 0) {
         log::add(__CLASS__, 'debug', '[detect] found an advertisement');
 				for ($x=0; $x < sizeof($inpacket->answerrrs); $x++) {
 					if ($inpacket->answerrrs[$x]->qtype == 12) {
@@ -1086,7 +1088,9 @@ public static function tcpdetect()
 						}
 					}
 				}
-			}
+			} else        
+      log::add(__CLASS__, 'debug', '[detect] null inbound');
+
 			$cc--;
 		}
 		return $lm;
