@@ -21,54 +21,6 @@ $('#div_pageContainer').off('click','.listCmdActionOther').on('click','.listCmdA
 	});
 });
 
-$('#bt_autoDEL_eq').on('click', function () {
-	var dialog_title = '{{Recréer les commandes}}';
-	var dialog_message = '<form class="form-horizontal onsubmit="return false;">';
-	dialog_title = '{{Recréer les commandes}}';
-	dialog_message += '<label class="lbl lbl-warning" for="name">{{Attention, cela va supprimer les commandes existantes.}}</label> ';
-	dialog_message += '</form>';
-	jeeDialog.dialog({
-		title: dialog_title,
-		message: dialog_message,
-		buttons: {
-			"{{Annuler}}": {
-				className: "btn-danger",
-				callback: function () {}
-			},
-			success: {
-				label: "{{Démarrer}}",
-				className: "btn-success",
-				callback: function () {
-					jeeDialog.confirm('{{Etes-vous sûr de vouloir récréer toutes les commandes ? Cela va supprimer les commandes existantes}}', function (result) {
-						if (result) {
-							$.ajax({
-								type: "POST",
-								url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
-								data: {
-									action: "autoDEL_eq",
-									id: $('.eqLogicAttr[data-l1key=id]').value(),
-								},
-								dataType: 'json',
-								error: function (request, status, error) {
-									handleAjaxError(request, status, error);
-								},
-								success: function (data) {
-									/*if (data.state != 'ok') {
-									    return;
-									} */
-									$('.eqLogicDisplayCard[data-eqLogic_id=' + $('.eqLogicAttr[data-l1key=id]').value() + ']').click();
-									//$('#div_alert').showAlert({message: '{{Opération réalisée avec succès}}',	level: 'success'});
-									jeedomUtils.showAlert({message: '{{Opération réalisée avec succès}}',level: 'success'});
-								}
-							});
-						}
-					});
-				}
-			},
-		}
-	});
-});
-
 
 /*
 * Fonction permettant l'affichage des commandes dans l'équipement
