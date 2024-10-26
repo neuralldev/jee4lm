@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
+require_once dirname(__FILE__) . './mDNS.php';
 
 const
   LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg",
@@ -1028,6 +1029,70 @@ class jee4lm extends eqLogic
     );
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
+
+public static function tcpdetect() 
+{
+  log::add(__CLASS__, 'debug', '[detect] local ip');
+
+  $mdns = new mDNS();
+  $mdns->query("_marzocco._tcp.local",1,12,"");
+  $cc = 15;
+  $lm = array();
+		while ($cc>0) {
+			$inpacket = $mdns->readIncoming();
+			// If our packet has answers, then read them
+			if ($inpacket->packetheader->getAnswerRRs()> 0) {
+        log::add(__CLASS__, 'debug', '[detect] found an advertisement');
+				for ($x=0; $x < sizeof($inpacket->answerrrs); $x++) {
+					if ($inpacket->answerrrs[$x]->qtype == 12) {
+						if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local") {
+							$name = "";
+							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) {
+								$name .= chr($inpacket->answerrrs[$x]->data[$y]);
+							}
+              log::add(__CLASS__, 'debug', '[detect] found an machine='.$name);
+							// The machine name is in $name. Send a a SRV query
+							$mdns->query($name, 1, 33, "");
+							$cc=15;
+						}
+					}
+					if ($inpacket->answerrrs[$x]->qtype == 33) {
+						$d = $inpacket->answerrrs[$x]->data;
+						$port = ($d[4] * 256) + $d[5];
+						// We need the target from the data
+						$offset = 6;
+						$size = $d[$offset];
+						$offset++;
+						$target = "";
+						for ($z=0; $z < $size; $z++) {
+							$target .= chr($d[$offset + $z]);
+						}
+						$target .= ".local";
+						$lm[$inpacket->answerrrs[$x]->name] = array("port"=>$port, "ip"=>"", "target"=>$target);
+  					// We know the name and port. Send an A query for the IP address
+						$mdns->query($target,1,1,"");
+						$cc=15;
+					}
+					if ($inpacket->answerrrs[$x]->qtype == 1) {
+						$d = $inpacket->answerrrs[$x]->data;
+						$ip = $d[0] . "." . $d[1] . "." . $d[2] . "." . $d[3];
+						// Loop through the machines and fill in the ip
+						foreach ($lm as $key=>$value) {
+							if ($value['target'] == $inpacket->answerrrs[$x]->name) {
+								$value['ip'] = $ip;	
+								$lm[$key] = $value;
+                log::add(__CLASS__, 'debug', '[detect] name='.$name.' ip='.$ip);
+							}
+						}
+					}
+				}
+			}
+			$cc--;
+		}
+		return $lm;
+	}
+
+
   /**
    * Detect is the function used by the plugin configuration button to detect and create the equipments.
    * this function shall be used only when new equipments are available. it is not necessary to ru it at regular.

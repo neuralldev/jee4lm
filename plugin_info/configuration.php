@@ -51,6 +51,12 @@ if (!isConnect()) {
            </select>
        </div>
    </div>
+   <div class="form-group">
+      <label class="col-lg-3 control-label">{{mDNS test}}</label>
+      <div class="col-lg-4">
+        <a class="btn btn-default" id="bt_tcpdetect"><i class="fas fa-sync"></i> {{Détecter les IP locales}}</a>
+      </div>
+    </div>
 
   </fieldset>
 </form>
@@ -87,4 +93,26 @@ $('#bt_syncWithLMCloud').on('click', function () {
     }
   })
 });
+
+$('#bt_tcpdetect').on('click', function () {
+  $.ajax({
+    type: "POST",
+    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
+    data: {
+      action: "tcpdetect",
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+          jeedomUtils.showAlert({message: data.result, level: 'danger' });
+          return;
+      }
+      jeedomUtils.showAlert({message: '{{Détection réussie, regardez les logs}}', level: 'success' });
+    }
+  })
+});
+
 </script>
