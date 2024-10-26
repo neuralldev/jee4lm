@@ -1089,8 +1089,7 @@ public static function tcpdetect()
 					}
 				}
 			} else        
-      log::add(__CLASS__, 'debug', '[detect] null inbound');
-
+      log::add(__CLASS__, 'debug', '[detect] not found, looping cc='.$cc);
 			$cc--;
 		}
 		return $lm;
