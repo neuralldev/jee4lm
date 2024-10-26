@@ -65,7 +65,7 @@ class Jee4LM(BaseDaemon):
                 else:
                     logging.debug('task already running for '+str(message['id']))
             case 'stop':
-                logging.info('stop refreshing eslogic id '+str(message['id']))
+                logging.info('stop refreshing eqlogic id '+str(message['id']))
                 if self.istasks_from_id(message['id']):
                     await self.cancel_all_tasks_from_id(message['id'])
                 else:
