@@ -47,31 +47,27 @@ if (!isConnect('admin')) {
 
 <script>
   $('#bt_validateLoginToLMCloud').off('click').on('click', function() {
-    $.ajax({
+    $.ajax(
+      {
       type: "POST",
       url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
       data: {
         action: "login",
         username: $('#in_jee4lmLogin_username').value(),
         password: $('#in_jee4lmLogin_password').value()
-      },
+        },
       dataType: 'json',
-      error: function(request, status, error) {
-        handleAjaxError(request, status, error);
-      },
+      error: function(request, status, error) {handleAjaxError(request, status, error);},
       success: function(data) {
         if (data.state != 'ok') {
-          $('#div_jee4lmLoginAlert').showAlert({
-            message: data.result,
-            level: 'danger'
-          });
+//          $('#div_jee4lmLoginAlert').showAlert({message: data.result,level: 'danger'});
+          jeedomUtils.showAlert({message: data.result,level: 'danger'});
           return;
         }
-        $('#div_jee4lmLoginAlert').showAlert({
-          message: '{{Connexion réussie}}',
-          level: 'success'
-        });
+//        $('#div_jee4lmLoginAlert').showAlert({message: '{{Connexion réussie}}',level: 'success'});
+        jeedomUtils.showAlert({message: '{{Connexion réussie}}',level: 'success'});
       }
-    });
+    }
+  )
   })
 </script>

@@ -2,8 +2,15 @@
 /*
 * Permet la réorganisation des commandes dans l'équipement
 */
-$("#table_cmd").sortable({axis: "y", cursor: "move", items: ".cmd", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
-
+$("#table_cmd").sortable({
+	axis: "y",
+	cursor: "move",
+	items: ".cmd",
+	placeholder: "ui-state-highlight",
+	tolerance: "intersect",
+	forcePlaceholderSize: true
+  })
+  
 /*
 * Fonction Spécifique Plugin
 */
@@ -20,7 +27,7 @@ $('#bt_autoDEL_eq').on('click', function () {
 	dialog_title = '{{Recréer les commandes}}';
 	dialog_message += '<label class="lbl lbl-warning" for="name">{{Attention, cela va supprimer les commandes existantes.}}</label> ';
 	dialog_message += '</form>';
-	bootbox.dialog({
+	jeeDialog.dialog({
 		title: dialog_title,
 		message: dialog_message,
 		buttons: {
@@ -32,7 +39,7 @@ $('#bt_autoDEL_eq').on('click', function () {
 				label: "{{Démarrer}}",
 				className: "btn-success",
 				callback: function () {
-					bootbox.confirm('{{Etes-vous sûr de vouloir récréer toutes les commandes ? Cela va supprimer les commandes existantes}}', function (result) {
+					jeeDialog.confirm('{{Etes-vous sûr de vouloir récréer toutes les commandes ? Cela va supprimer les commandes existantes}}', function (result) {
 						if (result) {
 							$.ajax({
 								type: "POST",
@@ -50,10 +57,8 @@ $('#bt_autoDEL_eq').on('click', function () {
 									    return;
 									} */
 									$('.eqLogicDisplayCard[data-eqLogic_id=' + $('.eqLogicAttr[data-l1key=id]').value() + ']').click();
-									$('#div_alert').showAlert({
-										message: '{{Opération réalisée avec succès}}',
-										level: 'success'
-									});
+									//$('#div_alert').showAlert({message: '{{Opération réalisée avec succès}}',	level: 'success'});
+									jeedomUtils.showAlert({message: '{{Opération réalisée avec succès}}',level: 'success'});
 								}
 							});
 						}
@@ -131,7 +136,8 @@ function addCmdToTable(_cmd) {
      	id:  $('.eqLogicAttr[data-l1key=id]').value(),
      	filter: {type: 'info'},
      	error: function (error) {
-       		$('#div_alert').showAlert({message: error.message, level: 'danger'});
+       		//$('#div_alert').showAlert({message: error.message, level: 'danger'});
+			   jeedomUtils.showAlert({message: error.message, level: 'danger'})
      	},
      	success: function (result) {
        	tr.find('.cmdAttr[data-l1key=value]').append(result);

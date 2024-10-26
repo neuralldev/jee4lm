@@ -80,16 +80,12 @@ if (!isConnect()) {
       },
       success: function (data) {
         if (data.state != 'ok') {
-          $('#div_alert').showAlert({
-            message: data.result,
-            level: 'danger'
-          });
-          return;
+//          $('#div_alert').showAlert({message: data.result, level: 'danger' });
+            jeedomUtils.showAlert({message: data.result, level: 'danger' });
+            return;
         }
-        $('#div_alert').showAlert({
-          message: '{{Détection réussie}}',
-          level: 'success'
-        });
+//        $('#div_alert').showAlert({ message: '{{Détection réussie}}', level: 'success' });
+        jeedomUtils.showAlert({'{{Détection réussie}}', level: 'success' });
       }
     });
   });
