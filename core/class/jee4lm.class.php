@@ -1923,7 +1923,12 @@ class mDNS {
 		} catch (Exception $e) {
       log::add(__CLASS__, 'debug', 'cannot read socket '.$e->getMessage());
 		}
-		if (strlen($response) < 1) { return null; }
+		if (strlen($response) < 1) { 
+      log::add(__CLASS__, 'debug', 'empty answer');
+      return null; 
+    }
+    else
+      log::add(__CLASS__, 'debug', 'got answer ='.$response);
 		// Create an array to represent the bytes
 		$bytes = array();
 		for ($x = 0; $x < strlen($response); $x++) {
