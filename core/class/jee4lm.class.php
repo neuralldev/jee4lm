@@ -1875,16 +1875,17 @@ class mDNS {
 			socket_set_option($this->mdnssocket, IPPROTO_IP, MCAST_JOIN_GROUP, array('group'=>'224.0.0.251', 'interface'=>0));
 			socket_set_option($this->mdnssocket, SOL_SOCKET,SO_RCVTIMEO,array("sec"=>1,"usec"=>0));
 			if (!socket_bind($this->mdnssocket, "0.0.0.0", 5353)) {
-        log::add(__CLASS__, 'debug', 'create socket failed ');
+        log::add('jee4lm', 'debug', 'create socket failed ');
 				$this->mdnssocket = null;	
       }
 		} else
-    log::add(__CLASS__, 'debug', 'create socket failed ');
+    log::add('jee4lm', 'debug', 'create socket failed ');
 	}
 	
 	public function query($_name, $_qclass, $_qtype, $_data='') {
+    log::add('jee4lm', 'debug', 'query start');
 		if ($this->mdnssocket ==null) {
-      log::add(__CLASS__, 'debug', 'cannot query as socket is null');
+      log::add('jee4lm', 'debug', 'cannot query as socket is null');
 	    return;
     }
 		// Sends a query
@@ -1903,7 +1904,7 @@ class mDNS {
 		for ($x = 0; $x < sizeof($b); $x++) { 
 			$data .= chr($b[$x]);
 		};
-    log::add(__CLASS__, 'debug', 'data='.$data);
+    log::add('jee4lm', 'debug', 'data='.$data);
     $this->querycache = $data;
 		return socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251',5353);	
 	}
@@ -1915,22 +1916,22 @@ class mDNS {
   }
 	
 	public function readIncoming() {
-    log::add(__CLASS__, 'debug', 'read incoming');
+    log::add('jee4lm', 'debug', 'read incoming');
 		if ($this->mdnssocket ==null) {
-      log::add(__CLASS__, 'debug', 'cannot read as socket is null');
+      log::add('jee4lm', 'debug', 'cannot read as socket is null');
       return null;
     }
 		// Read some incoming data. Timeout after 1 second
-    log::add(__CLASS__, 'debug', 'read incoming');
+    log::add('jee4lm', 'debug', 'read incoming');
 		$response = "";
 		try {
 			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
 		} catch (Exception $e) {
-      log::add(__CLASS__, 'debug', 'cannot read socket '.$e->getMessage());
+      log::add('jee4lm', 'debug', 'cannot read socket '.$e->getMessage());
 		}
-    log::add(__CLASS__, 'debug', 'socket returned r='.$response);
+    log::add('jee4lm', 'debug', 'socket returned r='.$response);
 		if (strlen($response) < 1) { 
-      log::add(__CLASS__, 'debug', 'empty answer');
+      log::add('jee4lm', 'debug', 'empty answer');
       return null; 
     }
 		// Create an array to represent the bytes
@@ -1938,7 +1939,7 @@ class mDNS {
 		for ($x = 0; $x < strlen($response); $x++) {
 			array_push($bytes, ord(substr($response,$x,1)));
 		}
-    log::add(__CLASS__, 'debug', 'byte array = '.json_encode($bytes));
+    log::add('jee4lm', 'debug', 'byte array = '.json_encode($bytes));
 		return new DNSPacket($bytes);
 	}
 	
@@ -1957,7 +1958,7 @@ class DNSPacket {
 	public $offset = 0;
 	
 	public function __construct($_data = null) {
-    log::add(__CLASS__, 'debug', 'build dns packet with= '.json_encode($_data));
+    log::add('jee4lm', 'debug', 'build dns packet with= '.json_encode($_data));
     if ($_data==null)
      $this->clear();
     else
