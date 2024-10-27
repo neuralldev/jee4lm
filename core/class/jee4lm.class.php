@@ -1876,11 +1876,15 @@ class mDNS {
 			socket_set_option($this->mdnssocket, SOL_SOCKET,SO_RCVTIMEO,array("sec"=>1,"usec"=>0));
 			if (!socket_bind($this->mdnssocket, "0.0.0.0", 5353))
 				$this->mdnssocket = null;	
-		}
+		} else
+    log::add(__CLASS__, 'debug', 'create socket failed ');
 	}
 	
 	public function query($_name, $_qclass, $_qtype, $_data='') {
-		if ($this->mdnssocket ==null) return;
+		if ($this->mdnssocket ==null) {
+      log::add(__CLASS__, 'debug', 'cannot query as socket is null');
+	    return;
+    }
 		// Sends a query
 		$p = new DNSPacket;
 		$p->packetheader->setTransactionID(rand(1,32767));
@@ -1907,7 +1911,10 @@ class mDNS {
   }
 	
 	public function readIncoming() {
-		if ($this->mdnssocket ==null) return null;
+		if ($this->mdnssocket ==null) {
+      log::add(__CLASS__, 'debug', 'cannot read as socket is null');
+      return null;
+    }
 		// Read some incoming data. Timeout after 1 second
 		$response = "";
 		try {
