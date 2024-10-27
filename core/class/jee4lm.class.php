@@ -1913,6 +1913,7 @@ class mDNS {
   }
 	
 	public function readIncoming() {
+    log::add(__CLASS__, 'debug', 'read incoming');
 		if ($this->mdnssocket ==null) {
       log::add(__CLASS__, 'debug', 'cannot read as socket is null');
       return null;
