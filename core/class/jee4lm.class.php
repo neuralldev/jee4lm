@@ -2319,7 +2319,7 @@ class DNSPacketHeader {
 	
 	// The number of AnswerRRs in the packet
 	public function getAnswerRRs() {
-    log::add('jee4lm', 'debug', 'answer rr='.($this->contents[6] * 256) + $this->contents[7]);
+    log::add('jee4lm', 'debug', 'answer rr='.$this->contents[6] * 256 + $this->contents[7]);
 		return ($this->contents[6] * 256) + $this->contents[7];
 	}
 	
