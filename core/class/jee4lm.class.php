@@ -1042,7 +1042,8 @@ public static function tcpdetect()
     while ($cc > 0) {
       log::add(__CLASS__, 'debug', '[detect] call  read');
       $inpacket = $mdns->readIncoming();
-      log::add(__CLASS__, 'debug', '[detect] got read back');
+      log::add(__CLASS__, 'debug', '[detect] got read back in q='.json_encode($inpacket->questions));
+      log::add(__CLASS__, 'debug', '[detect] got read back in r='.json_encode($inpacket->answerrrs));
       // If our packet has answers, then read them
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
         log::add(__CLASS__, 'debug', '[detect] found an advertisement');
