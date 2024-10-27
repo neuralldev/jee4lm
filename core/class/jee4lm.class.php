@@ -1918,23 +1918,24 @@ class mDNS {
       return null;
     }
 		// Read some incoming data. Timeout after 1 second
+    log::add(__CLASS__, 'debug', 'read incoming');
 		$response = "";
 		try {
 			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
 		} catch (Exception $e) {
       log::add(__CLASS__, 'debug', 'cannot read socket '.$e->getMessage());
 		}
+    log::add(__CLASS__, 'debug', 'socket returned r='.$response);
 		if (strlen($response) < 1) { 
       log::add(__CLASS__, 'debug', 'empty answer');
       return null; 
     }
-    else
-      log::add(__CLASS__, 'debug', 'got answer ='.$response);
 		// Create an array to represent the bytes
 		$bytes = array();
 		for ($x = 0; $x < strlen($response); $x++) {
 			array_push($bytes, ord(substr($response,$x,1)));
 		}
+    log::add(__CLASS__, 'debug', 'byte array = '.json_encode($bytes));
 		return new DNSPacket($bytes);
 	}
 	
@@ -1953,6 +1954,7 @@ class DNSPacket {
 	public $offset = 0;
 	
 	public function __construct($_data = null) {
+    log::add(__CLASS__, 'debug', 'build dns packet with= '.json_encode($_data));
     if ($_data==null)
      $this->clear();
     else
