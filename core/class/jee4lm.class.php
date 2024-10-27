@@ -1036,7 +1036,7 @@ public static function tcpdetect()
     log::add(__CLASS__, 'debug', '[detect] local ip');
 
     $mdns = new mDNS();
-    $mdns->query("_home-assistant._tcp.local", 1, 12, "");
+    $mdns->query("_marzocco._tcp.local", 1, 12, "");
     $cc = 15;
     $lm = [];
     while ($cc > 0) {
@@ -1900,8 +1900,9 @@ class mDNS {
 		$data = $_data;
 		for ($x = 0; $x < sizeof($b); $x++) { 
 			$data .= chr($b[$x]);
-		}
-        $this->querycache = $data;
+		};
+    log::add(__CLASS__, 'debug', 'data='.$data);
+    $this->querycache = $data;
 		return socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251',5353);	
 	}
         
