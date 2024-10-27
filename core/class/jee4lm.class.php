@@ -1889,11 +1889,12 @@ class mDNS {
 		$p = new DNSPacket;
 		$p->packetheader->setTransactionID(rand(1,32767));
 		$p->packetheader->setQuestions(1);
-		$q = new DNSQuestion();
+/*		$q = new DNSQuestion($_name, $_qtype, $_qclass);
 		$q->name = $_name;
 		$q->qclass = $_qclass;
 		$q->qtype = $_qtype;
-		array_push($p->questions, $q);
+  */
+		array_push($p->questions, new DNSQuestion($_name, $_qtype, $_qclass));
 		$b = $p->makePacket();
 		// Send the packet
 		$data = $_data;
@@ -1920,6 +1921,7 @@ class mDNS {
 		try {
 			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
 		} catch (Exception $e) {
+      log::add(__CLASS__, 'debug', 'cannot read socket '.$e->getMessage());
 		}
 		if (strlen($response) < 1) { return null; }
 		// Create an array to represent the bytes
@@ -2003,11 +2005,12 @@ class DNSPacket {
 				$qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
 				$qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
 				$this->offset = $this->offset + 4;
-				$r = new DNSQuestion();
+/*				$r = new DNSQuestion($name, $qtype, $qclass);
 				$r->name = $name;
 				$r->qclass = $qclass;
 				$r->qtype = $qtype;
-				array_push($this->questions, $r);
+*/
+				array_push($this->questions, new DNSQuestion($name, $qtype, $qclass));
 			}
 		}
 		if ($this->packetheader->getAnswerRRs() > 0) 
@@ -2164,7 +2167,7 @@ class DNSPacketHeader {
     $this->clear();
   }
 	public function clear() {
-		$this->contents = array(0,0,0,0,0,0,0,0,0,0,0,0);
+		$this->contents = [0,0,0,0,0,0,0,0,0,0,0,0];
 	}
 	
 	public function getBytes() {
@@ -2334,6 +2337,18 @@ class DNSQuestion {
 	public $name; // String
 	public $qtype; // UInt16
 	public $qclass; // UInt16
+
+  /**
+   * Summary of __construct
+   * @param mixed $_name
+   * @param integer $_qtype
+   * @param integer $_qclass
+   */
+  public function __construct($_name='', $_qtype=0, $_qclass=0) {
+    $this->name=$_name;
+    $this->qtype=$_qtype;
+    $this->qclass=$_qclass;
+  }
 }
 class DNSResourceRecord
 {
