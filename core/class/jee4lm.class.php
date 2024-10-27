@@ -1036,7 +1036,7 @@ public static function tcpdetect()
     log::add(__CLASS__, 'debug', '[detect] local ip');
 
     $mdns = new mDNS();
-    $mdns->query("_octoprint._tcp.local.", 1, 12, "");
+    $mdns->query("_home-assistant._tcp.local.", 1, 12, "");
     $cc = 15;
     $lm = [];
     while ($cc > 0) {
