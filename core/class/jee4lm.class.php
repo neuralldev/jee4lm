@@ -1036,7 +1036,7 @@ public static function tcpdetect()
     log::add(__CLASS__, 'debug', '[detect] local ip');
 
     $mdns = new mDNS();
-    $mdns->query("_marzocco._tcp.local", 1, 12, "");
+    $mdns->query("*._tcp.local", 1, 12, "");
     $cc = 15;
     $lm = [];
     while ($cc > 0) {
@@ -1059,6 +1059,8 @@ public static function tcpdetect()
                 $mdns->query($name, 1, 33, "");
                 $cc = 15;
               }
+              else
+              log::add(__CLASS__, 'debug', "[detect] entry $x skipped");
               ;
               break;
             case 33:
@@ -1922,7 +1924,6 @@ class mDNS {
       return null;
     }
 		// Read some incoming data. Timeout after 1 second
-    log::add('jee4lm', 'debug', 'read incoming');
 		$response = "";
 		try {
 			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
