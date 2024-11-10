@@ -1036,7 +1036,7 @@ public static function tcpdetect()
     log::add(__CLASS__, 'debug', '[detect] local ip');
 
     $mdns = new mDNS();
-    $mdns->query("_home-assistant._tcp.local.", 1, 12, "");
+    $mdns->query("_marzocco._tcp.local.", 1, 12, "");
     $cc = 15;
     $lm = [];
     while ($cc > 0) {
@@ -1050,7 +1050,7 @@ public static function tcpdetect()
         for ($x = 0; $x < sizeof($inpacket->answerrrs); $x++) {
           switch ($inpacket->answerrrs[$x]->qtype) {
             case 12:
-              if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local") {
+              if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local.") {
                 //							$name = "";
                 $name = vsprintf(str_repeat('%c', sizeof($inpacket->answerrrs[$x]->data)), $inpacket->answerrrs[$x]->data);
                 //							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) 
