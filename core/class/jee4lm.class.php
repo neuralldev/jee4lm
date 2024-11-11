@@ -1018,7 +1018,7 @@ class jee4lm extends eqLogic
     $token = self::getToken();
     $data = self::request(
       $this->getPath($serial) . '/setting-preinfusion',
-      "wetTimeMs=$_time&holdTimeMs=$_hold",
+      "group=Group1&button=DoseA&wetTimeMs=$_time&holdTimeMs=$_hold",
       'POST',
       ["Authorization: Bearer $token"],
       ''
