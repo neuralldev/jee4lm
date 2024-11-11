@@ -16,6 +16,9 @@ const
   LMCLOUD_AWS_PROXY = "https://gw-lmz.lamarzocco.io/v1/home/aws-proxy",
   COFFEE_BOILER_1 = "CoffeeBoiler1",
   STEAM_BOILER = "SteamBoiler",
+  BBWDOSE="MASSTYPE",
+  PREWET_TIME="PREWET",
+  PREWET_HOLD="PREWET_HOLD",
   JEEDOM_DAEMON_PORT = '50044',
   JEEDOM_DAEMON_HOST = '127.0.0.1';
 
@@ -1009,6 +1012,22 @@ class jee4lm extends eqLogic
 //      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
   }
 
+  public function setPreinfusionSettings($_time, $_hold) {
+    log::add(__CLASS__, 'debug', 'set preinfusion start');
+    $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
+    $token = self::getToken();
+    $data = self::request(
+      $this->getPath($serial) . '/setting-preinfusion',
+      'enable=true',
+      'POST',
+      ["Authorization: Bearer $token"],
+      $ip==''?$serial:null
+    );
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+
+  }
+
   /**
    * Start the Backflush. I recommend using the app for this purpose, it is much more convenient
    * as it monitors the backflush and this is not.
@@ -1426,54 +1445,54 @@ public static function tcpdetect()
     $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
     $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
-    if ($arr != null && array_key_exists('status', $arr)) {
-      $this->checkAndUpdateCmd('machinemode',$arr['data']['MACHINE_STATUS'] == 'BrewingMode');
-      $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
-      //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
-      $this->checkAndUpdateCmd('tankStatus',$arr['data']['LEVEL_TANK']);
-      $this->checkAndUpdateCmd('backflush',$arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
-      $this->checkAndUpdateCmd('steamenabled',$arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
-      $this->checkAndUpdateCmd('plumbedin',$arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+    if ($arr != null) 
+      if(array_key_exists('status', $arr)) {
+        $this->checkAndUpdateCmd('machinemode',$arr['data']['MACHINE_STATUS'] == 'BrewingMode');
+        $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
+        //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
+        $this->checkAndUpdateCmd('tankStatus',$arr['data']['LEVEL_TANK']);
+        $this->checkAndUpdateCmd('backflush',$arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
+        $this->checkAndUpdateCmd('steamenabled',$arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
+        $this->checkAndUpdateCmd('plumbedin',$arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
 
-      $machinestate = ($arr['data']['MACHINE_STATUS'] == 'BrewingMode');
-      $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
-      $display = !$machinestate ? '---' :
-        "<span style='color:" . ($arr['data']['TEMP_COFFEE'] + 2 >= $coffeetarget ? 'green' : 'red') . ";'>" . $coffeetarget . "°C / " . $arr['data']['TEMP_COFFEE'] . "°C</span>";
-        $this->checkAndUpdateCmd('displaycoffee',$display);
-      log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $arr['data']['TEMP_COFFEE'] . ' tank=' . $arr['data']['LEVEL_TANK']);
+        $machinestate = ($arr['data']['MACHINE_STATUS'] == 'BrewingMode');
+        $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
+        $display = !$machinestate ? '---' :
+          "<span style='color:" . ($arr['data']['TEMP_COFFEE'] + 2 >= $coffeetarget ? 'green' : 'red') . ";'>" . $coffeetarget . "°C / " . $arr['data']['TEMP_COFFEE'] . "°C</span>";
+          $this->checkAndUpdateCmd('displaycoffee',$display);
+        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $arr['data']['TEMP_COFFEE'] . ' tank=' . $arr['data']['LEVEL_TANK']);
 
-      $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
-      //      $steamcurrent = $arr['data']['TEMP_STEAM'];
-      //      $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
-      if (!$steamstate)
-        $display = 'OFF';
-      else
-        $display = "<span style='color:green'>ON</span>";
-      $this->checkAndUpdateCmd('displaysteam',$display);
+        $steamstate = $arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE'];
+        //      $steamcurrent = $arr['data']['TEMP_STEAM'];
+        //      $steamtarget = $this->getCmd(null, 'steamtarget')->execCmd();
+        if (!$steamstate)
+          $display = 'OFF';
+        else
+          $display = "<span style='color:green'>ON</span>";
+        $this->checkAndUpdateCmd('displaysteam',$display);
 
-      if ($this->getCmd(null, 'isbbw')->execCmd())
-        if ($this->searchForBBW()) { //present
-          // change display of doses
-          $free = $this->getCmd(null, 'bbwfree')->execCmd();
-          $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
-          $this->getCmd(null, 'bbwfree')->setDisplay('template', $bbwmode == 'A' || $bbwmode == 'B' ? "jee4lm::bbw nodose inactive" : "jee4lm::bbw nodose active");
-          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', $bbwmode == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
-          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', $bbwmode == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
-          log::add(__CLASS__, 'debug', "bbw scale on display mode=$bbwmode continuous=$free");
-          // - 
-        } else {
+        if ($this->getCmd(null, 'isbbw')->execCmd())
+          if ($this->searchForBBW()) { //present
+            // change display of doses
+            $free = $this->getCmd(null, 'bbwfree')->execCmd();
+            $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
+            $this->getCmd(null, 'bbwfree')->setDisplay('template', $bbwmode == 'A' || $bbwmode == 'B' ? "jee4lm::bbw nodose inactive" : "jee4lm::bbw nodose active");
+            $this->getCmd(null, 'bbwdoseA')->setDisplay('template', $bbwmode == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
+            $this->getCmd(null, 'bbwdoseB')->setDisplay('template', $bbwmode == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
+            log::add(__CLASS__, 'debug', "bbw scale on display mode=$bbwmode continuous=$free");
+            // - 
+          } else {
+            $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
+            $this->getCmd(null, 'bbwdoseA')->setDisplay('template', "jee4lm::bbw dose inactive");
+            $this->getCmd(null, 'bbwdoseB')->setDisplay('template', "jee4lm::bbw dose inactive");
+            log::add(__CLASS__, 'debug', 'bbw scale off display');
+          } else {
           $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
-          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', "jee4lm::bbw dose inactive");
-          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', "jee4lm::bbw dose inactive");
-          log::add(__CLASS__, 'debug', 'bbw scale off display');
-        } else {
-        $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
-        $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm::bbw dose inactive"));
-        $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm::bbw dose inactive"));
-      }
-      log::add(__CLASS__, 'debug', 'getinformation has refresh values');
-    }
-
+          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm::bbw dose inactive"));
+          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm::bbw dose inactive"));
+        }
+        log::add(__CLASS__, 'debug', 'getinformation has refresh values');
+     }
     return true;
   }
 
@@ -1836,7 +1855,10 @@ class jee4lmCmd extends cmd
       case 'jee4lm_doseB_slider':
         $eq->set_setpoint($_options, 'B', "");
         return jee4lm::RefreshAllInformation($eq);
-        case 'jee4lm_test':
+      case 'jee4lm_prewet_slider':
+      case 'jee4lm_prewet__time_slider':
+        return jee4lm::RefreshAllInformation($eq);
+      case 'jee4lm_test':
           $eq->SetLMBluetooh();
       default:
         return true;
