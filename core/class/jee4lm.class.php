@@ -1856,7 +1856,7 @@ class jee4lmCmd extends cmd
       case 'jee4lm_prewet_slider':
         $eq->set_setpoint($_options, '', PREWET_TIME);
         return jee4lm::RefreshAllInformation($eq);
-      case 'jee4lm_prewet__time_slider':
+      case 'jee4lm_prewet_time_slider':
         $eq->set_setpoint($_options, '', PREWET_HOLD);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_test':
