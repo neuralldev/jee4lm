@@ -1011,7 +1011,7 @@ class jee4lm extends eqLogic
    * @return void
    */
   public function setPreinfusionSettings($_time, $_hold) {
-    log::add(__CLASS__, 'debug', 'set preinfusion start');
+    log::add(__CLASS__, 'debug', "set preinfusion start t=$_time h=$_hold");
     $_time *=1000;
     $_hold *=1000;
     $serial = $this->getConfiguration('serialNumber');
@@ -1854,10 +1854,10 @@ class jee4lmCmd extends cmd
         $eq->set_setpoint($_options, 'B', BBWDOSE);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_prewet_slider':
-        $eq->set_setpoint($_options, '', PREWET_HOLD);
+        $eq->set_setpoint($_options, '', PREWET_TIME);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_prewet__time_slider':
-        $eq->set_setpoint($_options, '', PREWET_TIME);
+        $eq->set_setpoint($_options, '', PREWET_HOLD);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_test':
           $eq->SetLMBluetooh();
