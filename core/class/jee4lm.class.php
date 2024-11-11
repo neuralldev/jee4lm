@@ -1426,7 +1426,7 @@ public static function tcpdetect()
     $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
     $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
-    if (array_key_exists('status', $arr)) {
+    if ($arr != null && array_key_exists('status', $arr)) {
       $this->checkAndUpdateCmd('machinemode',$arr['data']['MACHINE_STATUS'] == 'BrewingMode');
       $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
       //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
@@ -1967,16 +1967,16 @@ class DNSPacket {
       $this->load($_data);
 	}
 	
-	public function clear() {
-		$this->packetheader = new DNSPacketHeader();
-//		$this->packetheader->clear();
+	private function clear() {
+		$this->packetheader = null;
+    $this->packetheader = new DNSPacketHeader();
 		$this->questions = array();
 		$this->answerrrs = array();
 		$this->authorityrrs = array();
 		$this->additionalrrs = array();		
 	}
 	
-	public function load($_data) {
+	private function load($_data) {
 		// $data is an array of integers representing the bytes.
 		// Load the data into the DNSPacket object.
 		$this->clear();
@@ -1992,6 +1992,7 @@ class DNSPacket {
 		if ($this->packetheader->getQuestions() > 0) {
 			// There are some questions in this DNS Packet. Read them!
 			for ($xq = 1; $xq <= $this->packetheader->getQuestions(); $xq++) {
+        log::add('jee4lm', 'debug', 'dns packet question found');
 				$name = "";
 				$size = 0;
 				$resetoffsetto = 0;
@@ -2025,7 +2026,8 @@ class DNSPacket {
 				$r->qtype = $qtype;
 */
 				array_push($this->questions, new DNSQuestion($name, $qtype, $qclass));
-			}
+        log::add('jee4lm', 'debug', 'build dns packet question qtype='.$qtype. "qclass=".$qclass);
+      }
 		}
 		if ($this->packetheader->getAnswerRRs() > 0) 
 			// There are some answerrrs in this DNS Packet. Read them!
@@ -2180,12 +2182,9 @@ class DNSPacketHeader {
   public function __construct() {
     $this->clear();
   }
-	public function clear() {
+
+	private function clear() {
 		$this->contents = [0,0,0,0,0,0,0,0,0,0,0,0];
-	}
-	
-	public function getBytes() {
-		return $this->contents;
 	}
 	
 	public function load($_data) {
@@ -2193,7 +2192,15 @@ class DNSPacketHeader {
 		$this->clear();
 		$this->contents = $_data;
 	}
-	
+
+  /**
+   * Summary of getBytes
+   * @return array 
+   */
+	public function getBytes() {
+		return $this->contents;
+	}
+		
 	public function getTransactionID() {
 		return ($this->contents[0] * 256) + $this->contents[1];
 	}
