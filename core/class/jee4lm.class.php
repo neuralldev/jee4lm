@@ -801,28 +801,6 @@ class jee4lm extends eqLogic
   }
 
   /**
-   * this function allows to update the value of a slider according to a value sent. 
-   * the absolute parameters tells whether the $value is an offset to add or the value to replace the actual one
-   * @param mixed $_value
-   * @param mixed $_absolute
-   * @param mixed $_setpointlogicalID
-   * @param mixed $_type
-   * @return void
-   */
-  public function updatesetpoint($_value, $_absolute = false, $_setpointlogicalID, $_type)
-  {
-    $setpoint = cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID);
-    $v = $_absolute ? floatval($_value) : floatval($setpoint->execCmd()) + $_value;
-    log::add(__CLASS__, 'debug', "setpoint : new set point set to " . $v);
-    if ($v > 0)
-      if ($_type != '')
-        $this->setBoilerTarget($v, $_type);
-      else
-        $this->setRecipeDose($v, $_setpointlogicalID);
-  }
-
-
-  /**
    * this function is used to set the Boiler value on the LM machine according to the slider
    * it is called when the user change the value of the slider on the desktop with the chosen value
    * note that type is used to set the coffee or steam boiler target
@@ -838,13 +816,27 @@ class jee4lm extends eqLogic
     // log::add(__CLASS__, 'debug', 'slider value='.$v);
     //find setpoint value and store it on stove as it after slider move
     if ($v > 0)
-      if ($_type != '')
-        $this->setBoilerTarget($v, $_type);
-      else
-        $this->setRecipeDose($v, $_logicalID);
-    // log::add(__CLASS__, 'debug', 'set setpoint end');   
-    // now refresh display  
-//    $this->getInformations();
+      switch($_type) {
+        case BBWDOSE:
+          // set dose for Brew by Weight doses A and B
+          $this->setRecipeDose($v, $_logicalID);
+          break;
+        case COFFEE_BOILER_1:
+        case STEAM_BOILER:
+          // set coffee boiler temperature targer (does not work on steam boiler of linea mini)
+          $this->setBoilerTarget($v, $_type);
+          break;
+        case PREWET_TIME:
+          // read actual value for the other slider as both have to be sent together
+          $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewetholdtime')->execCmd();
+          $this->setPreinfusionSettings($v,$d);
+          break;
+        case PREWET_HOLD:
+          // read actual value for the other slider as both have to be sent together
+          $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewettime')->execCmd();
+          $this->setPreinfusionSettings($d, $v);
+          break;
+        }
   }
 
   /**
@@ -1012,20 +1004,26 @@ class jee4lm extends eqLogic
 //      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
   }
 
+  /**
+   * Summary of setPreinfusionSettings
+   * @param int $_time 
+   * @param int $_hold
+   * @return void
+   */
   public function setPreinfusionSettings($_time, $_hold) {
     log::add(__CLASS__, 'debug', 'set preinfusion start');
+    $_time *=1000;
+    $_hold *=1000;
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $data = self::request(
       $this->getPath($serial) . '/setting-preinfusion',
-      'enable=true',
+      "wetTimeMs=$_time&holdTimeMs=$_hold",
       'POST',
       ["Authorization: Bearer $token"],
-      $ip==''?$serial:null
+      ''
     );
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
-
+    log::add(__CLASS__, 'debug', 'preinfusion=' . json_encode($data, true));
   }
 
   /**
@@ -1850,13 +1848,16 @@ class jee4lmCmd extends cmd
         $eq->set_setpoint($_options, 'steamtarget', STEAM_BOILER);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_doseA_slider':
-        $eq->set_setpoint($_options, 'A', "");
+        $eq->set_setpoint($_options, 'A', BBWDOSE);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_doseB_slider':
-        $eq->set_setpoint($_options, 'B', "");
+        $eq->set_setpoint($_options, 'B', BBWDOSE);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_prewet_slider':
+        $eq->set_setpoint($_options, '', PREWET_HOLD);
+        return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_prewet__time_slider':
+        $eq->set_setpoint($_options, '', PREWET_TIME);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_test':
           $eq->SetLMBluetooh();
