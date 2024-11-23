@@ -104,7 +104,7 @@ class jee4lm extends eqLogic
    * @param mixed $_type
    * @param mixed $_header
    * @param mixed $_serial
-   * @return mixed
+   * @return array
    */
   public static function request($_path, $_data = null, $_type = 'GET', $_header = null, $_serial = null)
   {
@@ -1440,9 +1440,9 @@ public static function tcpdetect()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken($this);
-    $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
+//    $ip = $this->getConfiguration('host');
+    $token = self::getToken();
+    $arr = self::request($this->getPath($serial) . '/status', '', 'GET', ["Authorization: Bearer $token"], $serial);
     log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_decode($arr,true));
     if ($arr != null) {
 //      log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_decode($arr,true));
