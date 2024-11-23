@@ -1443,7 +1443,7 @@ public static function tcpdetect()
 //    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $arr = self::request($this->getPath($serial) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_decode($arr,true));
+    log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_encode($arr));
     if ($arr != null) {
 //      log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_decode($arr,true));
       if(array_key_exists('status', $arr)) {
