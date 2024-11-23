@@ -1443,8 +1443,10 @@ public static function tcpdetect()
     $ip = $this->getConfiguration('host');
     $token = self::getToken($this);
     $arr = self::request($this->getPath($serial, $ip) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
-    if ($arr != null) 
+    if ($arr != null) {
+      log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_decode($arr,true));
       if(array_key_exists('status', $arr)) {
+        log::add(__CLASS__, 'debug', 'getinformation process information');
         $this->checkAndUpdateCmd('machinemode',$arr['data']['MACHINE_STATUS'] == 'BrewingMode');
         $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
         //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
@@ -1490,7 +1492,8 @@ public static function tcpdetect()
           $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm::bbw dose inactive"));
         }
         log::add(__CLASS__, 'debug', 'getinformation has refresh values');
-     }
+     }      
+    }
     return true;
   }
 
