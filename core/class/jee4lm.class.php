@@ -1451,7 +1451,7 @@ public static function tcpdetect()
         $this->checkAndUpdateCmd('machinemode',$arr['data']['MACHINE_STATUS'] == 'BrewingMode');
         $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
         //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
-        $this->checkAndUpdateCmd('tankStatus',$arr['data']['LEVEL_TANK']);
+        $this->checkAndUpdateCmd('tankStatus',$arr['data']['LEVEL_TANK']?0:1);
         $this->checkAndUpdateCmd('backflush',$arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
         $this->checkAndUpdateCmd('steamenabled',$arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
         $this->checkAndUpdateCmd('plumbedin',$arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
