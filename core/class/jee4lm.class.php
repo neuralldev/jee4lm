@@ -1092,10 +1092,10 @@ public static function tcpdetect()
           switch ($inpacket->answerrrs[$x]->qtype) {
             case 12:
               if ($inpacket->answerrrs[$x]->name == "_marzocco._tcp.local.") {
-                //							$name = "";
-                $name = vsprintf(str_repeat('%c', sizeof($inpacket->answerrrs[$x]->data)), $inpacket->answerrrs[$x]->data);
-                //							for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) 
-//								$name .= chr($inpacket->answerrrs[$x]->data[$y]);
+                							$name = "";
+               // $name = vsprintf(str_repeat('%c', sizeof($inpacket->answerrrs[$x]->data)), $inpacket->answerrrs[$x]->data);
+                for ($y = 0; $y < sizeof($inpacket->answerrrs[$x]->data); $y++) 
+  								$name .= chr($inpacket->answerrrs[$x]->data[$y]);
                 log::add(__CLASS__, 'debug', '[detect] found an machine=' . $name);
                 // The machine name is in $name. Send a a SRV query
                 $mdns->query($name, 1, 33, "");
