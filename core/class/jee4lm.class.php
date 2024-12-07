@@ -1985,7 +1985,7 @@ class mDNS {
 		}
     //log::add('jee4lm', 'debug', 'socket returned r='.$response);
 		if (strlen($response) < 1) { 
-      log::add('jee4lm', 'debug', 'empty answer');
+      log::add('jee4lm', 'debug', 'empty answer '.$response);
       return null; 
     }
 		// Create an array to represent the bytes
