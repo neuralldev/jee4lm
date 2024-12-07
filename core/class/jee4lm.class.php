@@ -1077,7 +1077,7 @@ public static function tcpdetect()
     log::add(__CLASS__, 'debug', '[detect] local ip');
 
     $mdns = new mDNS();
-    $mdns->query("_marzocco._tcp.local.", 1, 12, "");
+    $mdns->query("*_marzocco._tcp.local", 1, 12, "");
     $cc = 15;
     $lm = [];
     while ($cc > 0) {
@@ -1888,7 +1888,8 @@ class jee4lmCmd extends cmd
         $eq->set_setpoint($_options, '', PREWET_HOLD);
         return jee4lm::RefreshAllInformation($eq);
       case 'jee4lm_test':
-          $eq->SetLMBluetooh();
+//          $eq->SetLMBluetooh();
+        $eq->tcpdetect();
       default:
         return true;
     }
