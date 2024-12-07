@@ -1081,13 +1081,13 @@ public static function tcpdetect()
     $cc = 15;
     $lm = [];
     while ($cc > 0) {
-      log::add(__CLASS__, 'debug', '[detect] call  read');
+//      log::add(__CLASS__, 'debug', '[detect] call  read');
       $inpacket = $mdns->readIncoming();
-      log::add(__CLASS__, 'debug', '[detect] got read back in q='.json_encode($inpacket->questions));
-      log::add(__CLASS__, 'debug', '[detect] got read back in r='.json_encode($inpacket->answerrrs));
       // If our packet has answers, then read them
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
-        log::add(__CLASS__, 'debug', '[detect] found an advertisement');
+        log::add(__CLASS__, 'debug', '[detect] got read back in q='.json_encode($inpacket->questions));
+        log::add(__CLASS__, 'debug', '[detect] got read back in r='.json_encode($inpacket->answerrrs));
+//        log::add(__CLASS__, 'debug', '[detect] found an advertisement');
         for ($x = 0; $x < sizeof($inpacket->answerrrs); $x++) {
           switch ($inpacket->answerrrs[$x]->qtype) {
             case 12:
@@ -1971,7 +1971,7 @@ class mDNS {
   }
 	
 	public function readIncoming() {
-    log::add('jee4lm', 'debug', 'read incoming');
+//    log::add('jee4lm', 'debug', 'read incoming');
 		if ($this->mdnssocket ==null) {
       log::add('jee4lm', 'debug', 'cannot read as socket is null');
       return null;
@@ -1983,9 +1983,9 @@ class mDNS {
 		} catch (Exception $e) {
       log::add('jee4lm', 'debug', 'cannot read socket '.$e->getMessage());
 		}
-    log::add('jee4lm', 'debug', 'socket returned r='.$response);
+    //log::add('jee4lm', 'debug', 'socket returned r='.$response);
 		if (strlen($response) < 1) { 
-      log::add('jee4lm', 'debug', 'empty answer');
+     // log::add('jee4lm', 'debug', 'empty answer');
       return null; 
     }
 		// Create an array to represent the bytes
@@ -1993,7 +1993,7 @@ class mDNS {
 		for ($x = 0; $x < strlen($response); $x++) {
 			array_push($bytes, ord(substr($response,$x,1)));
 		}
-    log::add('jee4lm', 'debug', 'byte array = '.json_encode($bytes));
+  //  log::add('jee4lm', 'debug', 'byte array = '.json_encode($bytes));
 		return new DNSPacket($bytes);
 	}
 	
@@ -2078,7 +2078,7 @@ class DNSPacket {
 				$r->qtype = $qtype;
 */
 				array_push($this->questions, new DNSQuestion($name, $qtype, $qclass));
-        log::add('jee4lm', 'debug', 'build dns packet question qtype='.$qtype. "qclass=".$qclass);
+        log::add('jee4lm', 'debug', 'build dns packet question qtype='.$qtype. " qclass=".$qclass);
       }
 		}
 		if ($this->packetheader->getAnswerRRs() > 0) 
