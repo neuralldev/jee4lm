@@ -1004,6 +1004,30 @@ class jee4lm extends eqLogic
 //      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
   }
 
+/**
+ * select which brew by weight dose is used, either A or B
+ * @param mixed $_dose
+ * @param integer $_weight
+ * @return void
+ */
+public function setScaleTarget($_dose, $_weight) {
+  log::add(__CLASS__, 'debug', "set dose $_dose to $_weight");
+  if ($this->getCmd(null, 'isbbw')->execCmd()) {
+    $_weight=  $this->getCmd(null, 'bbwDose'.$_dose)->execCmd();
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken($serial);
+    $data = self::request(
+      $this->getPath($serial) . '/scale/target-dose',
+      "group=Group1&dose_index=Dose$_dose&dose_type=MassType&value=$_weight",
+      'POST',
+      ["Authorization: Bearer $token"],
+      ''
+    );
+    log::add(__CLASS__, 'debug', 'scaletarget=' . json_encode($data, true));
+
+  }
+}
+
   /**
    * Summary of setPreinfusionSettings
    * @param int $_time 
@@ -1443,7 +1467,7 @@ public static function tcpdetect()
 //    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $arr = self::request($this->getPath($serial) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_encode($arr));
+//    log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_encode($arr));
     if ($arr != null) {
 //      log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_decode($arr,true));
       if(array_key_exists('status', $arr)) {
@@ -1452,9 +1476,9 @@ public static function tcpdetect()
         $this->checkAndUpdateCmd('coffeecurrent',$arr['data']['TEMP_COFFEE']);
         //      $this->getCmd(null, 'steamcurrent')->event($arr['data']['TEMP_STEAM']);
         $this->checkAndUpdateCmd('tankStatus',$arr['data']['LEVEL_TANK']?0:1);
-        $this->checkAndUpdateCmd('backflush',$arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']);
-        $this->checkAndUpdateCmd('steamenabled',$arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']);
-        $this->checkAndUpdateCmd('plumbedin',$arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']);
+        $this->checkAndUpdateCmd('backflush',$arr['data']['MACHINE_REMOTSETS']['BACKFLUSH_ENABLE']?1:0);
+        $this->checkAndUpdateCmd('steamenabled',$arr['data']['MACHINE_REMOTSETS']['BOILER_ENABLE']?1:0);
+        $this->checkAndUpdateCmd('plumbedin',$arr['data']['MACHINE_REMOTSETS']['PLUMBIN_ENABLE']?1:0);
 
         $machinestate = ($arr['data']['MACHINE_STATUS'] == 'BrewingMode');
         $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
