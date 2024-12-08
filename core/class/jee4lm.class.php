@@ -519,6 +519,7 @@ class jee4lm extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'read configuration');
     $serial = $_eq->getConfiguration('serialNumber');
+    $slug = $_eq->getConfiguration('type');
     $token = self::getToken();
     $data = self::request(LMCLOUD_GW_MACHINE_BASE_URL . '/' . $serial . '/configuration', null, 'GET', ["Authorization: Bearer $token"]);
     //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
@@ -528,7 +529,7 @@ class jee4lm extends eqLogic
       $boilers = $machine['boilers'];
       $free=!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');
 
-      if ($machine['machineCapabilities'][0]['family'] == 'LINEA') { // linea mini
+      if ($slug = "linea_mini") { // linea mini
         $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
         $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm::backflush", null, null, 0);
         $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
