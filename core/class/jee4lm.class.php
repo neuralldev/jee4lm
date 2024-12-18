@@ -177,6 +177,7 @@ class jee4lm extends eqLogic
     }
     return '';
   }
+
   /**
    * Refresh the token by checking if it is expired, then asks for its renewal if necessary.
    * the new token is stored in the cache with the expiricy set as well to 300
@@ -2044,44 +2045,39 @@ class DNSPacket {
 		
 		if ($this->packetheader->getQuestions() > 0) {
 			// There are some questions in this DNS Packet. Read them!
-			for ($xq = 1; $xq <= $this->packetheader->getQuestions(); $xq++) {
-        log::add('jee4lm', 'debug', 'dns packet question found');
-				$name = "";
-				$size = 0;
-				$resetoffsetto = 0;
-				$firstreset = 0;
-				while ($_data[$this->offset]<>0) {
-					if ($size == 0) {
-						$size = $_data[$this->offset];
-						if (($size & 192) == 192) {
-							if ($firstreset == 0 && $resetoffsetto <> 0) { $firstrest = $resetoffsetto; }
-							$resetoffsetto = $this->offset;
-							$this->offset = $_data[$this->offset + 1];
-							$size = $_data[$this->offset];
-						}
-					} else {
-						$name = $name . chr($_data[$this->offset]);
-						$size--;
-						if ($size == 0) { $name = $name . "."; }
-					}
-					$this->offset++;
-				}
-				if ($firstreset <> 0) { $resetoffsetto = $firstreset; }
-				if ($resetoffsetto <> 0) { $this->offset = $resetoffsetto + 1; }
-				if (strlen($name) > 0) { $name = substr($name,0,strlen($name)-1); }
-				$this->offset = $this->offset + 1;
-				$qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
-				$qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
-				$this->offset = $this->offset + 4;
-/*				$r = new DNSQuestion($name, $qtype, $qclass);
-				$r->name = $name;
-				$r->qclass = $qclass;
-				$r->qtype = $qtype;
-*/
-				array_push($this->questions, new DNSQuestion($name, $qtype, $qclass));
-        log::add('jee4lm', 'debug', 'build dns packet question qtype='.$qtype. " qclass=".$qclass);
-      }
-		}
+      for ($xq = 1; $xq <= $this->packetheader->getQuestions(); $xq++) {
+    log::add('jee4lm', 'debug', 'dns packet question found');
+        $name = "";
+        $size = 0;
+        $resetoffsetto = 0;
+        $firstreset = 0;
+        while ($_data[$this->offset] <> 0) {
+          if ($size == 0) {
+            $size = $_data[$this->offset];
+            if (($size & 192) == 192) {
+              if ($firstreset == 0 && $resetoffsetto <> 0) { $firstreset = $resetoffsetto; }
+              $resetoffsetto = $this->offset;
+              $this->offset = $_data[$this->offset + 1];
+              $size = $_data[$this->offset];
+            }
+          } else {
+            $name .= chr($_data[$this->offset]);
+            $size--;
+            if ($size == 0) { $name .= "."; }
+          }
+          $this->offset++;
+        }
+        if ($firstreset <> 0) { $resetoffsetto = $firstreset; }
+        if ($resetoffsetto <> 0) { $this->offset = $resetoffsetto + 1; }
+        if (strlen($name) > 0) { $name = substr($name, 0, -1); }
+        $this->offset++;
+        $qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
+        $qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
+        $this->offset += 4;
+        array_push($this->questions, new DNSQuestion($name, $qtype, $qclass));
+    log::add('jee4lm', 'debug', 'build dns packet question qtype=' . $qtype . " qclass=" . $qclass);
+    }
+    }
 		if ($this->packetheader->getAnswerRRs() > 0) 
 			// There are some answerrrs in this DNS Packet. Read them!
 			for ($xq = 1; $xq <= $this->packetheader->getAnswerRRs(); $xq++) 
@@ -2268,8 +2264,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setMessageType($_value) {
-		$this->contents[2] = $this->contents[2] & 127;
-		$this->contents[2] = $this->contents[2] | ($_value*128);
+		$this->contents[2] = $this->contents[2] & 127 | ($_value*128);
 	}
 	
 	// As far as I know the opcode is always zero. But code it anyway (just in case)
@@ -2278,8 +2273,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setOpCode($_value) {
-		$this->contents[2] = $this->contents[2] & 135;
-		$this->contents[2] = $this->contents[2] | ($_value*8);
+		$this->contents[2] = $this->contents[2] & 135 | ($_value*8);
 	}
 	
 	public function getAuthorative() {
@@ -2287,8 +2281,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setAuthorative($_value) {
-		$this->contents[2] = $this->contents[2] & 251;
-		$this->contents[2] = $this->contents[2] | ($_value*4);
+		$this->contents[2] = $this->contents[2] & 251 | ($_value*4);
 	}
 	
 	// We always want truncated to be 0 as this class doesn't support multi packet.
@@ -2298,8 +2291,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setTruncated($_value) {
-		$this->contents[2] = $this->contents[2] & 253;
-		$this->contents[2] = $this->contents[2] | ($_value*2);
+		$this->contents[2] = $this->contents[2] & 253| ($_value*2);
 	}
 	
 	// We return this but we don't handle it!
@@ -2308,8 +2300,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setRecursionDesired($_value) {
-		$this->contents[2] = $this->contents[2] & 254;
-		$this->contents[2] = $this->contents[2] | $_value;
+    $this->contents[2] = ($this->contents[2] & 254) | $_value;
 	}
 	
 	// We also return this but we don't handle it
@@ -2317,19 +2308,17 @@ class DNSPacketHeader {
 		return ($this->contents[3] & 128)/128;
 	}
 	
-	public function setRecursionAvailable($_value) {
-		$this->contents[3] = $this->contents[3] & 127;
-		$this->contents[3] = $this->contents[3] | ($_value*128);
-	}
+  public function setRecursionAvailable($_value) {
+    $this->contents[3] = ($this->contents[3] & 127) | ($_value * 128);
+  }
 	
 	public function getReserved() {
 		return ($this->contents[3] & 64) / 64;
 	}
 	
-	public function setReserved($_value) {
-		$this->contents[3] = $this->contents[3] & 191;
-		$this->contents[3] = $this->contents[3] | ($_value*64);
-	}
+  public function setReserved($_value) {
+    $this->contents[3] = ($this->contents[3] & 191) | ($_value * 64);
+  }
 	
 	// This always seems to be 0, but handle anyway
 	public function getAnswerAuthenticated() {
@@ -2337,8 +2326,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setAnswerAuthenticated($_value) {
-		$this->contents[3] = $this->contents[3] & 223;
-		$this->contents[3] = $this->contents[3] | ($_value *32);
+    $this->contents[3] = ($this->contents[3] & 223) | ($_value * 32);
 	}
 	
 	// This always seems to be 0, but handle anyway
@@ -2347,8 +2335,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setNonAuthenticatedData($_value) {
-		$this->contents[3] = $this->contents[3] & 239;
-		$this->contents[3] = $this->contents[3] | ($_value * 16);
+    $this->contents[3] = ($this->contents[3] & 239) | ($_value * 16);
 	}
 	
 	// We want this to be zero
@@ -2363,8 +2350,7 @@ class DNSPacketHeader {
 	}
 	
 	public function setReplyCode($_value) {
-		$this->contents[3] = $this->contents[3] & 240;
-		$this->contents[3] = $this->contents[3] | $_value;
+    $this->contents[3] = ($this->contents[3] & 240) | $_value;
 	}
 	
 	// The number of Questions in the packet
