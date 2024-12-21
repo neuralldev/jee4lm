@@ -62,7 +62,7 @@ if (!isConnect()) {
 </form>
 
 <script>
-$('#bt_loginToLMCloud').off('click').on('click', function () {
+document.getElementById('bt_loginToLMCloud').addEventListener('click', function () {
   jeeDialog.dialog({
     id: 'jee_LMModal',
     title: '{{Connexion de Jeedom au Cloud La Marzocco}}',
@@ -70,49 +70,44 @@ $('#bt_loginToLMCloud').off('click').on('click', function () {
     height: '51vw',
     top: '8vh',
     contentUrl: 'index.php?v=d&modal=login&plugin=jee4lm'
-  })
-})
-
-$('#bt_syncWithLMCloud').on('click', function () {
-  $.ajax({
-    type: "POST",
-    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
-    data: {
-      action: "sync",
-    },
-    dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
-    success: function (data) {
-      if (data.state != 'ok') {
-          jeedomUtils.showAlert({message: data.result, level: 'danger' });
-          return;
-      }
-      jeedomUtils.showAlert({message: '{{Détection réussie}}', level: 'success' });
-    }
-  })
+  });
 });
 
-$('#bt_tcpdetect').on('click', function () {
-  $.ajax({
-    type: "POST",
-    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
-    data: {
-      action: "tcpdetect",
+document.getElementById('bt_syncWithLMCloud').addEventListener('click', function () {
+  fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
     },
-    dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
-    success: function (data) {
-      if (data.state != 'ok') {
-          jeedomUtils.showAlert({message: data.result, level: 'danger' });
-          return;
-      }
-      jeedomUtils.showAlert({message: '{{Détection réussie, regardez les logs}}', level: 'success' });
-    }
+    body: JSON.stringify({ action: 'sync' })
   })
+  .then(response => response.json())
+  .then(data => {
+    if (data.state !== 'ok') {
+      jeedomUtils.showAlert({ message: data.result, level: 'danger' });
+      return;
+    }
+    jeedomUtils.showAlert({ message: '{{Détection réussie}}', level: 'success' });
+  })
+  .catch(error => handleAjaxError(null, null, error));
 });
 
+document.getElementById('bt_tcpdetect').addEventListener('click', function () {
+  fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ action: 'tcpdetect' })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.state !== 'ok') {
+      jeedomUtils.showAlert({ message: data.result, level: 'danger' });
+      return;
+    }
+    jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
+  })
+  .catch(error => handleAjaxError(null, null, error));
+});
 </script>

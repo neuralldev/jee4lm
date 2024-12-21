@@ -16,90 +16,90 @@ class Jee4LM(BaseDaemon):
     async def on_start(self):
         """
         This method will be called when your daemon starts.
-        This is the place where you should create your tasks, login to remote system, etc
+        This is the place where you should create your tasks, login to remote system, etc.
         """
-        # if you don't have specific action to do on start, do not create this method
-   
+        pass
 
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
-        logging.debug(f'search {id}')
+        logging.debug(f'Searching for task with id {id}')
         for t in tasks:
             n = t.get_name()
-            i = 'lmtask'+str(id)
-            # logging.debug(f'try {n}')
-            if n==i or id=='*':
-                logging.debug(f'found {i}')
+            i = 'lmtask' + str(id)
+            if n == i or id == '*':
+                logging.debug(f'Found task {i}')
                 return True
-        logging.debug(f'not found {i}')
+        logging.debug(f'Task {i} not found')
         return False
 
     async def cancel_all_tasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         for t in tasks:
             n = t.get_name()
-            i = 'lmtask'+str(id)
-            if (n==i) or (id=='*' and n[:6]=='lmtask'):
+            i = 'lmtask' + str(id)
+            if n == i or (id == '*' and n.startswith('lmtask')):
                 t.cancel()
-                logging.debug(f'killed {i}')            
-         
+                logging.debug(f'Cancelled task {i}')
+                try:
+                    await t
+                except asyncio.CancelledError:
+                    logging.debug(f'Task {i} successfully cancelled')
+
     async def stop_after(self, delay, what):
-        globals.READY=False
+        globals.READY = False
         try:
-            while 1:
-                logging.info(f'refresh eqlogic {what} information every {delay} seconds')
-                await self.send_to_jeedom({'id':what})
+            while True:
+                logging.info(f'Refreshing eqlogic {what} information every {delay} seconds')
+                await self.send_to_jeedom({'id': what})
                 await asyncio.sleep(delay)
         except asyncio.CancelledError:
-             logging.info('cancel loop');
-        
-    async def on_message(self, message: list):
-        global lm
-        logging.debug('on_message - daemon received command : '+str(message['lm'])+ ' for id '+str(message['id']))
+            logging.info('Loop cancelled')
+
+    async def on_message(self, message: dict):
+        logging.debug(f'on_message - daemon received command: {message["lm"]} for id {message["id"]}')
         match message['lm']:
             case 'poll':
                 if not self.istasks_from_id(message['id']):
-                    logging.debug('start refreshing eqlogic id '+str(message['id']))
+                    logging.debug(f'Start refreshing eqlogic id {message["id"]}')
                     task1 = asyncio.create_task(self.stop_after(10, message['id']))
-                    task1.set_name('lmtask'+str(message['id']))
+                    task1.set_name('lmtask' + str(message['id']))
                 else:
-                    logging.debug('task already running for '+str(message['id']))
+                    logging.debug(f'Task already running for id {message["id"]}')
             case 'stop':
-                logging.info('stop refreshing eqlogic id '+str(message['id']))
+                logging.info(f'Stop refreshing eqlogic id {message["id"]}')
                 if self.istasks_from_id(message['id']):
                     await self.cancel_all_tasks_from_id(message['id'])
                 else:
-                    logging.debug('no task running for id '+str(message['id']))
-                globals.READY=True
+                    logging.debug(f'No task running for id {message["id"]}')
+                globals.READY = True
             case 'bt':
-                logging.debug('on_message - BT command '+message['bt']+' for ID '+str(message['id'])+' bt='+message['bt'])
+                logging.debug(f'on_message - BT command {message["bt"]} for ID {message["id"]}')
                 match message['bt']:
                     case 'login':
-                        logging.debug('BT command u='+message['username']+' t='+message['token']+ ' s='+message['serial']+' addr='+message['dev'])
+                        logging.debug(f'BT command u={message["username"]} t={message["token"]} s={message["serial"]} addr={message["dev"]}')
                         global lm
-                        lm = LaMarzoccoBluetoothClient(message['username'],message['serial'],message['token'],'')
+                        lm = LaMarzoccoBluetoothClient(message['username'], message['serial'], message['token'], '')
                         logging.debug('lm object created')
                         bledevices: list[BLEDevice] = await lm.discover_devices()
-                        logging.debug('scan finished')
+                        logging.debug('Scan finished')
                         for d in bledevices:
-                            logging.debug('found device '+str(d))
+                            logging.debug(f'Found device {d}')
                     case 'scan':
-                        logging.debug('BT command u='+message['sc']+' t='+message['token']+' s='+message['serial']+' addr='+message['dev'])
+                        logging.debug(f'BT command u={message["sc"]} t={message["token"]} s={message["serial"]} addr={message["dev"]}')
                     case 'switch':
-                        logging.debug('BT command u='+message['boiler']+'  t='+message['state'])
+                        logging.debug(f'BT command u={message["boiler"]} t={message["state"]}')
                     case 'temp':
-                        logging.debug('BT command u='+message['boiler']+'  t='+message['temp'])                        
+                        logging.debug(f'BT command u={message["boiler"]} t={message["temp"]}')
             case _:
                 logging.error('on_message - command not found')
-        
+
     async def on_stop(self):
         """
-        This callback will be called when the daemon needs to stop`
-        You need to close your remote connexions and cancel background tasks if any here.
+        This callback will be called when the daemon needs to stop.
+        You need to close your remote connections and cancel background tasks if any here.
         """
-        # if you don't have specific action to do on stop, do not create this method
-        logging.info('received stop signal, cancelling tasks...')
+        logging.info('Received stop signal, cancelling tasks...')
         await self.cancel_all_tasks_from_id('*')
-        logging.info('exiting daemon')    
+        logging.info('Exiting daemon')
 
 Jee4LM().run()

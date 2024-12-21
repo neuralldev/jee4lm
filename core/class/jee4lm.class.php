@@ -1939,32 +1939,24 @@ class mDNS {
     log::add('jee4lm', 'debug', 'create socket failed ');
 	}
 	
-	public function query($_name, $_qclass, $_qtype, $_data='') {
+  public function query($_name, $_qclass, $_qtype, $_data = '') {
     log::add('jee4lm', 'debug', 'query start');
-		if ($this->mdnssocket ==null) {
+    if ($this->mdnssocket == null) {
       log::add('jee4lm', 'debug', 'cannot query as socket is null');
-	    return;
+      return;
     }
-		// Sends a query
-		$p = new DNSPacket;
-		$p->packetheader->setTransactionID(rand(1,32767));
-		$p->packetheader->setQuestions(1);
-/*		$q = new DNSQuestion($_name, $_qtype, $_qclass);
-		$q->name = $_name;
-		$q->qclass = $_qclass;
-		$q->qtype = $_qtype;
-  */
-		array_push($p->questions, new DNSQuestion($_name, $_qtype, $_qclass));
-		$b = $p->makePacket();
-		// Send the packet
-		$data = $_data;
-		for ($x = 0; $x < sizeof($b); $x++) { 
-			$data .= chr($b[$x]);
-		};
-    log::add('jee4lm', 'debug', 'data='.$data);
+    // Sends a query
+    $p = new DNSPacket();
+    $p->packetheader->setTransactionID(rand(1, 32767));
+    $p->packetheader->setQuestions(1);
+    $p->questions[] = new DNSQuestion($_name, $_qtype, $_qclass);
+    $b = $p->makePacket();
+    // Send the packet
+    $data = $_data . implode('', array_map('chr', $b));
+    log::add('jee4lm', 'debug', 'data=' . $data);
     $this->querycache = $data;
-		return socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251',5353);	
-	}
+    return socket_sendto($this->mdnssocket, $data, strlen($data), 0, '224.0.0.251', 5353);
+  }
         
  public function requery() {
 		if ($this->mdnssocket ==null) return;
@@ -1972,36 +1964,35 @@ class mDNS {
       return socket_sendto($this->mdnssocket, $this->querycache, strlen($this->querycache), 0, '224.0.0.251',5353);
   }
 	
-	public function readIncoming() {
-//    log::add('jee4lm', 'debug', 'read incoming');
-		if ($this->mdnssocket ==null) {
+  public function readIncoming() {
+    if ($this->mdnssocket === null) {
       log::add('jee4lm', 'debug', 'cannot read as socket is null');
       return null;
     }
-		// Read some incoming data. Timeout after 1 second
-		$response = "";
-		try {
-			$response = socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
-		} catch (Exception $e) {
-      log::add('jee4lm', 'debug', 'cannot read socket '.$e->getMessage());
-		}
-    //log::add('jee4lm', 'debug', 'socket returned r='.$response);
-		if (strlen($response) < 1) { 
-      log::add('jee4lm', 'debug', 'empty answer '.$response);
-      return null; 
+
+    $response = '';
+    try {
+      $response = @socket_read($this->mdnssocket, 1024, PHP_BINARY_READ);
+      if ($response === false) {
+        throw new Exception(socket_strerror(socket_last_error($this->mdnssocket)));
+      }
+    } catch (Exception $e) {
+      log::add('jee4lm', 'debug', 'cannot read socket: ' . $e->getMessage());
+      return null;
     }
-		// Create an array to represent the bytes
-		$bytes = array();
-		for ($x = 0; $x < strlen($response); $x++) {
-			array_push($bytes, ord(substr($response,$x,1)));
-		}
-  //  log::add('jee4lm', 'debug', 'byte array = '.json_encode($bytes));
-		return new DNSPacket($bytes);
-	}
-	
-	public function load($_data) {
-		return new DNSPacket($_data);
-	}
+
+    if (strlen($response) < 1) {
+      log::add('jee4lm', 'debug', 'empty answer');
+      return null;
+    }
+
+    $bytes = array_map('ord', str_split($response));
+    return new DNSPacket($bytes);
+  }
+  
+  public function load($_data) {
+    return new DNSPacket($_data);
+  }
 	
 }
 /**
@@ -2241,64 +2232,64 @@ class DNSPacketHeader {
 	}
 	
 	public function getMessageType() {
-		return ($this->contents[2] & 128) / 128;
+		return ($this->contents[2] & 0b10000000 ) >> 7;
 	}
 	
 	public function setMessageType($_value) {
-		$this->contents[2] = $this->contents[2] & 127 | ($_value*128);
+		$this->contents[2] = $this->contents[2] & 0b01111111 | ($_value << 7);
 	}
 	
 	// As far as I know the opcode is always zero. But code it anyway (just in case)
 	public function getOpCode() {
-		return ($this->contents[2] & 120) / 8;
+		return ($this->contents[2] & 0b11111000) >> 3;
 	}
 	
 	public function setOpCode($_value) {
-		$this->contents[2] = $this->contents[2] & 135 | ($_value*8);
+		$this->contents[2] = $this->contents[2] & 0b00000111 | ($_value << 3);
 	}
 	
 	public function getAuthorative() {
-		return ($this->contents[2] & 4) / 4;
+		return ($this->contents[2] & 0b00000100) >> 2;
 	}
 	
 	public function setAuthorative($_value) {
-		$this->contents[2] = $this->contents[2] & 251 | ($_value*4);
+		$this->contents[2] = $this->contents[2] & 0b11111011 | ($_value << 2);
 	}
 	
 	// We always want truncated to be 0 as this class doesn't support multi packet.
 	// But handle the value anyway
 	public function getTruncated() {
-		return ($this->contents[2] & 2) / 2;
+		return ($this->contents[2] & 0b00000010) >> 1;
 	}
 	
 	public function setTruncated($_value) {
-		$this->contents[2] = $this->contents[2] & 253| ($_value*2);
+		$this->contents[2] = $this->contents[2] & 0b11111101 | ($_value << 1);
 	}
 	
 	// We return this but we don't handle it!
 	public function getRecursionDesired() {
-		return ($this->contents[2] & 1);
+		return ($this->contents[2] & 0b00000001);
 	}
 	
 	public function setRecursionDesired($_value) {
-    $this->contents[2] = ($this->contents[2] & 254) | $_value;
+    $this->contents[2] = ($this->contents[2] & 0b10000000 ) | $_value;
 	}
 	
 	// We also return this but we don't handle it
 	public function getRecursionAvailable() {
-		return ($this->contents[3] & 128)/128;
+		return ($this->contents[3] & 0b10000000) >> 7;
 	}
 	
   public function setRecursionAvailable($_value) {
-    $this->contents[3] = ($this->contents[3] & 127) | ($_value * 128);
+    $this->contents[3] = ($this->contents[3] & 0b01111111) | ($_value << 7);
   }
 	
 	public function getReserved() {
-		return ($this->contents[3] & 64) / 64;
+		return ($this->contents[3] & 0b01000000) >> 6;
 	}
 	
   public function setReserved($_value) {
-    $this->contents[3] = ($this->contents[3] & 191) | ($_value * 64);
+    $this->contents[3] = ($this->contents[3] & 0b10111111) | ($_value << 6);
   }
 	
 	// This always seems to be 0, but handle anyway
