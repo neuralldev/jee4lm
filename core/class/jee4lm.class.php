@@ -2004,226 +2004,207 @@ class mDNS {
 	}
 	
 }
+/**
+ * Summary of DNSPacket
+ */
 class DNSPacket {
-	// Represents and processes a DNS packet
-	public $packetheader; // DNSPacketHeader
-	public $questions; // array
-	public $answerrrs; // array
-	public $authorityrrs; // array
-	public $additionalrrs; // array
-	public $offset = 0;
-	
-	public function __construct($_data = null) {
-    log::add('jee4lm', 'debug', 'build dns packet with= '.json_encode($_data));
-    if ($_data==null)
-     $this->clear();
-    else
+  // Represents and processes a DNS packet
+  public $packetheader; // DNSPacketHeader
+  public $questions; // array
+  public $answerrrs; // array
+  public $authorityrrs; // array
+  public $additionalrrs; // array
+  public $offset = 0;
+
+  public function __construct($_data = null) {
+    log::add('jee4lm', 'debug', 'build dns packet with= ' . json_encode($_data));
+    $this->clear();
+    if ($_data != null) 
       $this->load($_data);
-	}
-	
-	private function clear() {
-		$this->packetheader = null;
+  }
+
+  /**
+   * Summary of clear
+   * @return void
+   */
+  private function clear() {
     $this->packetheader = new DNSPacketHeader();
-		$this->questions = array();
-		$this->answerrrs = array();
-		$this->authorityrrs = array();
-		$this->additionalrrs = array();		
-	}
-	
-	private function load($_data) {
-		// $data is an array of integers representing the bytes.
-		// Load the data into the DNSPacket object.
-		$this->clear();
-		
-		// Read the first 12 bytes and load into the packet header
-		$headerbytes = array();
-		for ($x=0; $x< 12; $x++) {
-			$headerbytes[$x] = $_data[$x];
-		}
-		$this->packetheader->load($headerbytes);
-		$this->offset = 12;
-		
-		if ($this->packetheader->getQuestions() > 0) {
-			// There are some questions in this DNS Packet. Read them!
-      for ($xq = 1; $xq <= $this->packetheader->getQuestions(); $xq++) {
-    log::add('jee4lm', 'debug', 'dns packet question found');
-        $name = "";
-        $size = 0;
-        $resetoffsetto = 0;
-        $firstreset = 0;
-        while ($_data[$this->offset] <> 0) {
-          if ($size == 0) {
-            $size = $_data[$this->offset];
-            if (($size & 192) == 192) {
-              if ($firstreset == 0 && $resetoffsetto <> 0) { $firstreset = $resetoffsetto; }
-              $resetoffsetto = $this->offset;
-              $this->offset = $_data[$this->offset + 1];
-              $size = $_data[$this->offset];
-            }
-          } else {
-            $name .= chr($_data[$this->offset]);
-            $size--;
-            if ($size == 0) { $name .= "."; }
-          }
-          $this->offset++;
-        }
-        if ($firstreset <> 0) { $resetoffsetto = $firstreset; }
-        if ($resetoffsetto <> 0) { $this->offset = $resetoffsetto + 1; }
-        if (strlen($name) > 0) { $name = substr($name, 0, -1); }
-        $this->offset++;
-        $qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
-        $qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
-        $this->offset += 4;
-        array_push($this->questions, new DNSQuestion($name, $qtype, $qclass));
-    log::add('jee4lm', 'debug', 'build dns packet question qtype=' . $qtype . " qclass=" . $qclass);
+    $this->questions = [];
+    $this->answerrrs = [];
+    $this->authorityrrs = [];
+    $this->additionalrrs = [];
+  }
+
+  /**
+   * Summary of load
+   * @param mixed $_data
+   * @return void
+   */
+  private function load($_data) {
+    // $data is an array of integers representing the bytes.
+    // Load the data into the DNSPacket object.
+
+    // Read the first 12 bytes and load into the packet header
+    $headerbytes = array_slice($_data, 0, 12);
+    $this->packetheader->load($headerbytes);
+    $this->offset = 12;
+
+    $this->readSections($_data, $this->packetheader->getQuestions(), $this->questions, 'readQuestion');
+    $this->readSections($_data, $this->packetheader->getAnswerRRs(), $this->answerrrs, 'readRR');
+    $this->readSections($_data, $this->packetheader->getAuthorityRRs(), $this->authorityrrs, 'readRR');
+    $this->readSections($_data, $this->packetheader->getAdditionalRRs(), $this->additionalrrs, 'readRR');
+  }
+
+  /**
+   * Summary of readSections
+   * @param mixed $_data
+   * @param int $count
+   * @param mixed $section
+   * @param mixed $method
+   * @return void
+   */
+  private function readSections($_data, $count, &$section, $method) {
+    for ($i = 0; $i < $count; $i++) {
+      array_push($section, $this->$method($_data));
     }
-    }
-		if ($this->packetheader->getAnswerRRs() > 0) 
-			// There are some answerrrs in this DNS Packet. Read them!
-			for ($xq = 1; $xq <= $this->packetheader->getAnswerRRs(); $xq++) 
-				array_push($this->answerrrs, $this->readRR($_data));
-		if ($this->packetheader->getAuthorityRRs() > 0) 
-			// Read the authorityrrs
-			for ($xq = 1; $xq <= $this->packetheader->getAuthorityRRs(); $xq++) 
-				array_push($this->authorityrrs, $this->readRR($_data));
-		if ($this->packetheader->getAdditionalRRs() > 0) 
-			// Finally read any additional rrs
-			for ($xq = 1; $xq <= $this->packetheader->getAdditionalRRs(); $xq++) 
-				array_push($this->additionalrrs, $this->readRR($_data));
-	}
-	
+  }
+
+  /**
+   * Summary of readQuestion
+   * @param mixed $_data
+   * @return DNSQuestion
+   */
+  private function readQuestion($_data) {
+    $name = $this->readName($_data);
+    $qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
+    $qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
+    $this->offset += 4;
+    return new DNSQuestion($name, $qtype, $qclass);
+  }
+
   /**
    * Summary of readRR
    * @param mixed $_data
    * @return DNSResourceRecord
    */
-	public function readRR($_data) {
-		// Returns a DNSResourceRecord object representing the $data (array of integers)
-		$name = "";
-		$size = 0;
-		$resetoffsetto = 0;
-		$firstreset = 0;
-                $sectionstart = $this->offset;
-                $sectionsize = 0;
-		while ($_data[$this->offset]<>0) {
-			if ($size == 0) {
-				$size = $_data[$this->offset];
-                                if ($sectionsize == 0) {
-                                    $sectionsize = $size;
-                                }
-				if (($size & 192) == 192) {
-					if ($firstreset == 0 && $resetoffsetto <> 0) { $firstreset = $resetoffsetto; }
-					$resetoffsetto = $this->offset;
-					$this->offset = $_data[$this->offset + 1] + (($_data[$this->offset] - 192)*256);
-					$size = $_data[$this->offset];
-				}
-			} else {
-				$name = $name . chr($_data[$this->offset]);
-				$size--;
-				if ($size == 0) { $name = $name . "."; }
-			}
-			$this->offset++;
-		}
-		if ($firstreset <> 0) { $resetoffsetto = $firstreset; }
-		if ($resetoffsetto <> 0) { $this->offset = $resetoffsetto + 1; }
-		if (strlen($name) > 0) { $name = substr($name,0,strlen($name)-1); }
-		$this->offset = $this->offset + 1;
-		$qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
-		$qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
-		$this->offset = $this->offset + 4;
-		$ttl = 1000;
-		$this->offset = $this->offset + 4;
-		// The next two bytes are the length of the data section
-		$dl = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
-		$this->offset = $this->offset + 2;
-		$oldoffset = $this->offset;
-		$ddata = array();
-		for ($x=0; $x < $dl; $x++) { 
-			array_push($ddata, $_data[$this->offset]); 
-			$this->offset = $this->offset + 1;
-		}
-                $storeoffset = $this->offset;
-		// For PTR, SRV, and TXT records we need to uncompress the data
-		$datadecode = "";
-		$size = 0;
-		$resetoffsetto = 0;
-		if ($qtype == 12) {
-			$this->offset = $oldoffset;
-			$firstreset = 0;
-			while ($_data[$this->offset]<> 0) {
-				if ($size == 0) {
-					$size = $_data[$this->offset];
-					if (($size & 192) == 192) {
-						if ($firstreset == 0 && $resetoffsetto <> 0) { $firstreset = $resetoffsetto; }
-						$resetoffsetto = $this->offset;
-						$this->offset = $_data[$this->offset + 1];
-						$size = $_data[$this->offset];
-					}
-				} else {
-						$datadecode = $datadecode . chr($_data[$this->offset]);
-						$size = $size - 1;
-						if ($size == 0) { $datadecode = $datadecode . "."; }
-				}
-				$this->offset++;
-			}
-			if ($firstreset <> 0) { $resetoffsetto = $firstreset; }
-			//if ($resetoffseto <> 0) { $offset = $resetoffsetto + 1; }
-			$datadecode = substr($datadecode, 0, strlen($datadecode)-1);
-			$ddata = array();
-			for ($x = 0; $x < strlen($datadecode); $x++) {
-				array_push($ddata, ord(substr($datadecode,$x,1)));
-                                $this->offset++;
-                        }
-		}
-    $this->offset = $storeoffset;
-		return New DNSResourceRecord($name, $qtype, $qclass, $ttl, $ddata);
-/*		$r->name = $name;
-		$r->qclass = $qclass;
-		$r->qtype = $qtype;
-		$r->ttl = $ttl;
-		$r->data = $ddata;
-		return $r;
-*/
-	}
-	
-	public function makePacket() {
-		// For the current DNS packet produce an array of bytes to send.
-		// Should make this support unicode, but currently it doesn't :(
-		$bytes = array();
-		// First copy the header in
-		$header = $this->packetheader->getBytes();
-		for ($x=0; $x < sizeof($header); $x++) {
-			array_push($bytes, $header[$x]);
-		}
-		$this->offset = 12;
-		if (sizeof($this->questions) > 0) {
-			// We have some questions to encode
-			for ($pp = 0; $pp < sizeof($this->questions); $pp++) {
-				$thisq = $this->questions[$pp];
-				$thisname = $thisq->name;
-				$undotted = "";
-				while (strpos($thisname,".") > 0) {
-					$undotted .= chr(strpos($thisname,".")) . substr($thisname, 0,strpos($thisname,"."));
-					$thisname = substr($thisname, strpos($thisname,".") + 1);
-				}
-				$undotted .= chr(strlen($thisname)) . $thisname . chr(0);
-				for ($pq = 0; $pq < strlen($undotted); $pq++) {
-					array_push($bytes, ord(substr($undotted,$pq,1)));
-				}
-				$this->offset = $this->offset + strlen($undotted);
-				array_push($bytes,(int)($thisq->qtype/256));
-				array_push($bytes, $thisq->qtype%256);
-				$this->offset = $this->offset + 2;
-				array_push($bytes,(int)($thisq->qclass/256));
-				array_push($bytes,$thisq->qclass%256);
-				$this->offset = $this->offset + 2;
-			}
-		}
-		// Questions are done. Others go here.
-		// Maybe do this later, but for now we're only asking questions!
-		return $bytes;
-	}
+  public function readRR($_data) {
+    $name = $this->readName($_data);
+    $qtype = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
+    $qclass = ($_data[$this->offset + 2] * 256) + $_data[$this->offset + 3];
+    $this->offset += 4;
+    $ttl = 1000;
+    $this->offset += 4;
+    $dl = ($_data[$this->offset] * 256) + $_data[$this->offset + 1];
+    $this->offset += 2;
+    $ddata = array_slice($_data, $this->offset, $dl);
+    $this->offset += $dl;
+    if ($qtype == 12) 
+      $ddata = $this->readName($_data, $this->offset - $dl);
+    return new DNSResourceRecord($name, $qtype, $qclass, $ttl, $ddata);
+  }
+
+  /**
+   * Summary of readName
+   * @param mixed $_data
+   * @param int $startOffset
+   * @return string
+   */
+  private function readName($_data, $startOffset = null) {
+    if ($startOffset !== null) {
+      $this->offset = $startOffset;
+    }
+    $name = "";
+    $size = 0;
+    $resetoffsetto = 0;
+    $firstreset = 0;
+    while ($_data[$this->offset] != 0) {
+      if ($size == 0) {
+        $size = $_data[$this->offset];
+        if (($size & 192) == 192) {
+          if ($firstreset == 0 && $resetoffsetto != 0) {
+            $firstreset = $resetoffsetto;
+          }
+          $resetoffsetto = $this->offset;
+          $this->offset = $_data[$this->offset + 1] + (($_data[$this->offset] - 192) * 256);
+          $size = $_data[$this->offset];
+        }
+      } else {
+        $name .= chr($_data[$this->offset]);
+        $size--;
+        if ($size == 0) {
+          $name .= ".";
+        }
+      }
+      $this->offset++;
+    }
+    if ($firstreset != 0) {
+      $resetoffsetto = $firstreset;
+    }
+    if ($resetoffsetto != 0) {
+      $this->offset = $resetoffsetto + 1;
+    }
+    if (strlen($name) > 0) {
+      $name = substr($name, 0, -1);
+    }
+    $this->offset++;
+    return $name;
+  }
+
+  /**
+   * Summary of makePacket
+   * @return int[]
+   */
+  public function makePacket() {
+    // For the current DNS packet produce an array of bytes to send.
+    // Should make this support unicode, but currently it doesn't :(
+    $bytes = array_merge($this->packetheader->getBytes(), $this->encodeQuestions());
+    return $bytes;
+  }
+
+  /**
+   * Summary of encodeQuestions
+   * @return int[]
+   */
+  private function encodeQuestions() {
+    $bytes = [];
+    foreach ($this->questions as $question) {
+      if (is_object($question)) {
+        $undotted = $this->encodeName( $question->name);
+        $bytes = array_merge($bytes, $undotted, $this->encodeTypeClass($question->qtype, $question->qclass));
+      }
+    }
+    return $bytes;
+  }
+
+  /**
+   * Summary of encodeName
+   * @param string $name
+   * @return int[]
+   */
+  private function encodeName($name) {
+    $undotted = "";
+    while (strpos($name, ".") > 0) {
+      $undotted .= chr(strpos($name, ".")) . substr($name, 0, strpos($name, "."));
+      $name = substr($name, strpos($name, ".") + 1);
+    }
+    $undotted .= chr(strlen($name)) . $name . chr(0);
+    return array_map('ord', str_split($undotted));
+  }
+
+  /**
+   * Summary of encodeTypeClass
+   * @param int $qtype
+   * @param int $qclass
+   * @return int[]
+   */
+  private function encodeTypeClass($qtype, $qclass) {
+    return [
+      (int)($qtype / 256), $qtype % 256,
+      (int)($qclass / 256), $qclass % 256
+    ];
+  }
 }
+
 class DNSPacketHeader {
 	// Represents the 12 byte packet header of a DNS request or response
 	private $contents; // Byte() - in reality use an array of integers here
