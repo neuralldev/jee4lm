@@ -75,7 +75,7 @@ document.getElementById('bt_loginToLMCloud').addEventListener('click', function 
 
 document.getElementById('bt_syncWithLMCloud').addEventListener('click', function () {
   fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
-    method: 'GET',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -94,7 +94,7 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
 
 document.getElementById('bt_tcpdetect').addEventListener('click', function () {
   fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
-    method: 'GET',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
