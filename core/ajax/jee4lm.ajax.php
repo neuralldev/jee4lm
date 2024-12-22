@@ -7,8 +7,11 @@ try {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
 
-    foreach (getallheaders() as $name => $value) { 
-        log::add('jee4lm', 'debug', 'header '.$name.' = '.$value);
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (is_array($data)) {
+        foreach ($data as $key => $value) {
+            $_POST[$key] = $value;
+        }
     }
     $action = init('action');
     log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
