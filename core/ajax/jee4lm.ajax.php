@@ -7,10 +7,10 @@ try {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
 
-    log::add('jee4lm', 'debug', ' action request =  ' . init('action'));
     ajax::init();
 
     $action = init('action');
+    log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
     switch ($action) {
         case 'login':
             if (jee4lm::login(init('username'), init('password'))) {
