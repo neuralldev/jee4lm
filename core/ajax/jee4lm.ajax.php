@@ -7,12 +7,14 @@ try {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
 
+    // necessary for jeedom 4.5 which does not use jquery anymore
     $data = json_decode(file_get_contents('php://input'), true);
     if (is_array($data)) {
         foreach ($data as $key => $value) {
             $_POST[$key] = $value;
         }
     }
+
     $action = init('action');
     log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
     switch ($action) {

@@ -28,6 +28,39 @@ from exceptions import (
 )
 
 class LaMarzoccoBluetoothClient:
+    """
+    LaMarzoccoBluetoothClient is a class to interact with a La Marzocco coffee machine via Bluetooth.
+    Attributes:
+        _username (str): The username for authentication.
+        _serial_number (str): The serial number of the machine.
+        _token (str): The token for authentication.
+        _address (str): The Bluetooth MAC address of the machine.
+        _address_or_ble_device (BLEDevice | str): The BLE device or address.
+        _client (BleakClient): The BleakClient instance for Bluetooth communication.
+    Methods:
+        __init__(username: str, serial_number: str, token: str, address_or_ble_device: BLEDevice | str) -> None:
+            Initializes a new LaMarzoccoBluetoothClient instance.
+        discover_devices(scanner: BaseBleakScanner | BleakScanner | None = None) -> list[BLEDevice]:
+            Static method to find machines based on model name.
+        address() -> str:
+            Returns the Bluetooth MAC address of the machine.
+        connected() -> bool:
+            Returns the connection status.
+        set_power(enabled: bool) -> None:
+            Powers on or off the machine.
+        set_steam(enabled: bool) -> None:
+            Powers on or off the steam boiler.
+        set_temp(boiler: BoilerType, temperature: float) -> None:
+            Sets the boiler temperature (in Celsius).
+        _write_bluetooth_message(characteristic: str, message: bytes | str) -> None:
+            Connects to the machine and writes a message.
+        _write_bluetooth_json_message(data: dict[str, Any], characteristic: str = SETTINGS_CHARACTERISTIC) -> None:
+            Writes a JSON message to the machine.
+        _authenticate() -> None:
+            Builds an authentication string and sends it to the machine.
+        __del__() -> None:
+            Disconnects the client.
+    """
     """Class to interact with machine via Bluetooth."""
     def __init__(
         self,

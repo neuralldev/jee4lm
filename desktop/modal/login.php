@@ -46,28 +46,31 @@ if (!isConnect('admin')) {
 </form>
 
 <script>
-  $('#bt_validateLoginToLMCloud').off('click').on('click', function() {
-    $.ajax(
-      {
-      type: "POST",
-      url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
-      data: {
-        action: "login",
-        username: $('#in_jee4lmLogin_username').value(),
-        password: $('#in_jee4lmLogin_password').value()
+  document.getElementById('bt_validateLoginToLMCloud').addEventListener('click', function() {
+    const username = document.getElementById('in_jee4lmLogin_username').value;
+    const password = document.getElementById('in_jee4lmLogin_password').value;
+
+    fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
         },
-      dataType: 'json',
-      error: function(request, status, error) {handleAjaxError(request, status, error);},
-      success: function(data) {
-        if (data.state != 'ok') {
-//          $('#div_jee4lmLoginAlert').showAlert({message: data.result,level: 'danger'});
-          jeedomUtils.showAlert({message: data.result,level: 'danger'});
-          return;
+        body: JSON.stringify({
+            action: 'login',
+            username: username,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.state !== 'ok') {
+            jeedomUtils.showAlert({message: data.result, level: 'danger'});
+            return;
         }
-//        $('#div_jee4lmLoginAlert').showAlert({message: '{{Connexion réussie}}',level: 'success'});
-        jeedomUtils.showAlert({message: '{{Connexion réussie}}',level: 'success'});
-      }
-    }
-  )
-  })
+        jeedomUtils.showAlert({message: '{{Connexion réussie}}', level: 'success'});
+    })
+    .catch(error => {
+        handleAjaxError(null, null, error);
+    });
+  });
 </script>

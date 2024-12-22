@@ -5,8 +5,31 @@ import asyncio
 from jeedomdaemon.base_daemon import BaseDaemon
 from btlm import *
 
+"""
+    Jee4LM is a daemon class that extends the BaseDaemon class. It provides methods to handle asynchronous tasks, 
+    manage Bluetooth connections, and communicate with a remote system.
 
-class Jee4LM(BaseDaemon):
+    Methods:
+        __init__() -> None:
+            Initializes the Jee4LM daemon with standard initialization and any additional setup required.
+
+        async on_start():
+            Called when the daemon starts. This method is used to create tasks, login to remote systems, etc.
+
+        istasks_from_id(id: str) -> bool:
+            Checks if there are any tasks with the given id. Returns True if a task is found, otherwise False.
+
+        async cancel_all_tasks_from_id(id: str):
+            Cancels all tasks with the given id. If id is '*', it cancels all tasks that start with 'lmtask'.
+
+        async stop_after(delay: int, what: str):
+            Periodically sends information to Jeedom every 'delay' seconds until the task is cancelled.
+
+        async on_message(message: dict):
+            Handles incoming messages and executes commands based on the message content. Supports 'poll', 'stop', and 'bt' commands.
+
+        async on_stop():
+            Called when the daemon needs to stop. This method closes remote connections and cancels background tasks.
     def __init__(self) -> None:
         # Standard initialisation
         super().__init__(on_start_cb=self.on_start, on_message_cb=self.on_message, on_stop_cb=self.on_stop)
@@ -14,11 +37,11 @@ class Jee4LM(BaseDaemon):
         # Add here any initialisation your daemon would need
 
     async def on_start(self):
-        """
+        
         This method will be called when your daemon starts.
         This is the place where you should create your tasks, login to remote system, etc.
-        """
-        pass
+"""
+class Jee4LM(BaseDaemon):
 
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
