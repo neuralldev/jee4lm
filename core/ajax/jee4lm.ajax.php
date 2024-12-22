@@ -10,6 +10,7 @@ try {
     ajax::init();
 
     $action = init('action');
+    log::add('jee4lm', 'debug', ' action POST '.json_encode($_POST));    
     log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
     switch ($action) {
         case 'login':
