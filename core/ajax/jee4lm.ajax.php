@@ -7,10 +7,10 @@ try {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
 
-//    ajax::init();
-
+    foreach (getallheaders() as $name => $value) { 
+        log::add('jee4lm', 'debug', 'header '.$name.' = '.$value);
+    }
     $action = init('action');
-    log::add('jee4lm', 'debug', ' action POST '.json_encode($_POST));    
     log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
     switch ($action) {
         case 'login':
