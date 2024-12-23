@@ -514,12 +514,12 @@ class jee4lm extends eqLogic
     
     // as machine is not reachable, hide on/off button
 
-    if ($data['status'] == false && $data['error'] == 7) { // if machine is not reachable, hide on/off button
-      log::add(__CLASS__, 'debug', 'machine not reachable section code');
-      $_eq->checkAndUpdateCmd('displaycoffee','OFF');
-    }
   }
-    return false;
+  if ($data['status'] == false && $data['error'] == 7) { // if machine is not reachable, hide on/off button
+    log::add(__CLASS__, 'debug', 'machine not reachable section code');
+    $_eq->checkAndUpdateCmd('displaycoffee','OFF');
+  }
+  return false;
   }
 
   /**
