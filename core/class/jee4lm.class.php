@@ -1094,7 +1094,7 @@ public static function tcpdetect()
 
   // qtype is the type of the query, i.e. the type of Resource Record which should be returned in responses.
   // qclass is Class code, 1 a.k.a. "IN" for the Internet and IP networks
-  $mdns->query("_marzocco._tcp.local", 1, 12, "");
+  $mdns->query("_hap._tcp.local", 1, 12, "");
   $cc = 15;
   $lm = [];
 
