@@ -1,7 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-require_once './mdns.class.php';
+require_once dirname(__FILE__) . '/mdns.class.php';
 
 const
   LMCLIENT_ID = "7_1xwei9rtkuckso44ks4o8s0c0oc4swowo00wgw0ogsok84kosg",
