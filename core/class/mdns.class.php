@@ -113,7 +113,7 @@ class DNSPacket {
   public $offset = 0;
 
   public function __construct($_data = null) {
-    log::add('jee4lm', 'debug', 'build dns packet with= ' . json_encode($_data));
+//    log::add('jee4lm', 'debug', 'build dns packet with= ' . json_encode($_data));
     $this->clear();
     if ($_data != null) 
       $this->load($_data);
