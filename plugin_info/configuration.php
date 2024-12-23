@@ -85,6 +85,7 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
   .then(response => response.json())
   .then(data => {
     if (data.state !== 'ok') {
+      domUtils.hideLoading();
       jeedomUtils.showAlert({ message: data.result, level: 'danger' });
       return;
     }
@@ -106,6 +107,7 @@ document.getElementById('bt_tcpdetect').addEventListener('click', function () {
   .then(response => response.json())
   .then(data => {
     if (data.state !== 'ok') {
+      domUtils.hideLoading();
       jeedomUtils.showAlert({ message: data.result, level: 'danger' });
       return;
     }
