@@ -53,6 +53,7 @@ class mDNS {
     $p->packetheader->setTransactionID(rand(1, 32767));
     $p->packetheader->setQuestions(1);
     $p->questions[] = new DNSQuestion($_name, $_qtype, $_qclass);
+    log::add('jee4lm', 'debug', 'query=' . json_encode($p));
     $b = $p->makePacket();
     // Send the packet
     $data = $_data . implode('', array_map('chr', $b));
