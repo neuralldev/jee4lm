@@ -69,7 +69,7 @@ class mDNS {
   }
 	
   public function readIncoming() {
-    log::add('jee4lm', 'debug', 'read incoming');
+   // log::add('jee4lm', 'debug', 'read incoming');
     if ($this->mdnssocket === null) {
       log::add('jee4lm', 'debug', 'cannot read as socket is null');
       return null;
