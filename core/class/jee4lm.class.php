@@ -470,7 +470,6 @@ class jee4lm extends eqLogic
           }
           break; // refresh all info 
       }
-      $_eq->setConfiguration('danger', true);
       $_eq->checkAndUpdateCmd('plumbedin', $machine['isPlumbedIn']);
       $_eq->checkAndUpdateCmd('backflush',$machine['isBackFlushEnabled']);
       $_eq->checkAndUpdateCmd('tankStatus',!$machine['tankStatus']);
@@ -481,7 +480,7 @@ class jee4lm extends eqLogic
       $_eq->checkAndUpdateCmd('groupDoseMode',$reglage['doseIndex']);
       $_eq->checkAndUpdateCmd('groupDoseType',$reglage['doseType']);
       $_eq->checkAndUpdateCmd('groupDoseMax',$reglage['stopTarget']);
-        $_eq->checkAndUpdateCmd('machinemode',$machine['machineMode'] == "StandBy" ? false : true);
+      $_eq->checkAndUpdateCmd('machinemode',$machine['machineMode'] == "StandBy" ? false : true);
       $_eq->checkAndUpdateCmd('isbbw',$machine['scale']['address'] == '' ? false : true);
       $_eq->checkAndUpdateCmd('isscaleconnected',$machine['scale']['connected']);
       $_eq->checkAndUpdateCmd( 'scalebattery',$machine['scale']['battery']);
@@ -515,7 +514,6 @@ class jee4lm extends eqLogic
     }
     // as machine is not reachable, hide on/off button
 
-    $_eq->setConfiguration('danger', true);
 
     return false;
   }
