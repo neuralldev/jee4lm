@@ -88,10 +88,10 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
       jeedomUtils.showAlert({ message: data.result, level: 'danger' });
       return;
     }
+    domUtils.hideLoading();
     jeedomUtils.showAlert({ message: '{{Détection réussie}}', level: 'success' });
   })
   .catch(error => handleAjaxError(null, null, error));
-  domUtils.hideLoading();
 });
 
 document.getElementById('bt_tcpdetect').addEventListener('click', function () {
@@ -109,9 +109,9 @@ document.getElementById('bt_tcpdetect').addEventListener('click', function () {
       jeedomUtils.showAlert({ message: data.result, level: 'danger' });
       return;
     }
+    domUtils.hideLoading();
     jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
   })
   .catch(error => handleAjaxError(null, null, error));
-  domUtils.hideLoading();
 });
 </script>
