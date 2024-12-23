@@ -1110,7 +1110,7 @@ public static function tcpdetect()
             case 12: //PTR
               log::add(__CLASS__, 'debug', '[detect] found pointer on ' . $answer->name);
               if ($answer->name == "_hap._tcp.local") {
-                $mdns->query($$answer->data, 1, 33, "");
+                $mdns->query($answer->data, 1, 33, "");
                 $cc = 15;
               }
               break;
