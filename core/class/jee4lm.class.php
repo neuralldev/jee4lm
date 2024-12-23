@@ -481,7 +481,9 @@ class jee4lm extends eqLogic
       $_eq->checkAndUpdateCmd('groupDoseMode',$reglage['doseIndex']);
       $_eq->checkAndUpdateCmd('groupDoseType',$reglage['doseType']);
       $_eq->checkAndUpdateCmd('groupDoseMax',$reglage['stopTarget']);
-      $_eq->getCmd(',machinemode')->setIsVisible(1); // machine is reachable, show on/off button
+//      $_eq->getCmd(',machinemode')->setIsVisible(1); // machine is reachable, show on/off button
+      $_eq->getCmd(',jee4lm_on')->setIsVisible(1); // machine is reachable, show on/off button
+      $_eq->getCmd(',jee4lm_off')->setIsVisible(1); // machine is reachable, show on/off button
       $_eq->checkAndUpdateCmd('machinemode',$machine['machineMode'] == "StandBy" ? false : true);
       $_eq->checkAndUpdateCmd('isbbw',$machine['scale']['address'] == '' ? false : true);
       $_eq->checkAndUpdateCmd('isscaleconnected',$machine['scale']['connected']);
@@ -515,7 +517,10 @@ class jee4lm extends eqLogic
         return true;
     }
     // as machine is not reachable, hide on/off button
-    $_eq->getCmd(',machinemode')->setIsVisible(0);
+//    $_eq->getCmd(',machinemode')->setIsVisible(0);
+    $_eq->getCmd(',jee4lm_on')->setIsVisible(0); // machine is reachable, show on/off button
+    $_eq->getCmd(',jee4lm_off')->setIsVisible(0); // machine is reachable, show on/off button
+
     return false;
   }
 
