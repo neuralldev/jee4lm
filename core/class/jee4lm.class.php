@@ -1105,7 +1105,7 @@ public static function tcpdetect()
         if (is_object($answer)) {
           switch ($answer->qtype) {
             case 12: //PTR
-              if ($answer->name == "_marzocco._tcp.local.") {
+              if ($answer->name == "_marzocco._tcp.local") {
                 $name = implode('', array_map('chr', $answer->data));
                 log::add(__CLASS__, 'debug', '[detect] found a machine=' . $name);
                 $mdns->query($name, 1, 33, "");
