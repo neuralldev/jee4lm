@@ -200,7 +200,7 @@ class DNSPacket {
 
   /**
    * Summary of readName
-   * @param mixed $_data
+   * @param array $_data
    * @param int $startOffset
    * @return string
    */
@@ -222,7 +222,7 @@ class DNSPacket {
       $resetOffsetTo = $this->offset;
       $this->offset = ($_data[$this->offset + 1]) + (($size & 0b00111111) << 8);
       } else {
-        $name .= substr($_data, $this->offset + 1, $size) . '.';
+        $name .= substr(implode('', array_map('chr', array_slice($_data, $this->offset + 1, $size))), 0, $size) . '.';
         $this->offset += $size + 1;
       }
     }
