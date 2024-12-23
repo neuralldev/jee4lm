@@ -1102,9 +1102,11 @@ public static function tcpdetect()
       $inpacket = $mdns->readIncoming();
 //      log::add(__CLASS__, 'debug', '[detect] packet=' . json_encode($inpacket, true));
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
+        log::add(__CLASS__, 'debug', '[detect] found answers');
         if (is_object($answer)) {
           switch ($answer->qtype) {
             case 12: //PTR
+              log::add(__CLASS__, 'debug', '[detect] found pointer on ' . $answer->name);
               if ($answer->name == "_hap._tcp.local") {
                 $name = implode('', array_map('chr', $answer->data));
                 log::add(__CLASS__, 'debug', '[detect] found a machine=' . $name);
