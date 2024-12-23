@@ -74,6 +74,7 @@ document.getElementById('bt_loginToLMCloud').addEventListener('click', function 
 });
 
 document.getElementById('bt_syncWithLMCloud').addEventListener('click', function () {
+  domutils.showloading();
   fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
     method: 'POST',
     headers: {
@@ -90,9 +91,11 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
     jeedomUtils.showAlert({ message: '{{Détection réussie}}', level: 'success' });
   })
   .catch(error => handleAjaxError(null, null, error));
+  domutils.hideloading();
 });
 
 document.getElementById('bt_tcpdetect').addEventListener('click', function () {
+  domutils.showloading();
   fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
     method: 'POST',
     headers: {
@@ -109,5 +112,6 @@ document.getElementById('bt_tcpdetect').addEventListener('click', function () {
     jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
   })
   .catch(error => handleAjaxError(null, null, error));
+  domutils.hideloading();
 });
 </script>
