@@ -421,7 +421,7 @@ class jee4lm extends eqLogic
     $data = self::request($ip == '' ? $_eq->getPath($serial, $ip). '/configuration' : $_eq->getPath($serial, $ip)."/config" , null, 'GET', ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
     //$isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
-    if (($data!=null && $ip!='') || ($ip='' && $data['status'] == true)) { // check that we have information returned
+    if ($data['status'] == true) { // check that we have information returned
       log::add(__CLASS__, 'debug', "refresh $uid parse info");
       $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
