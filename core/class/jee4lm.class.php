@@ -1100,7 +1100,7 @@ public static function tcpdetect()
 
     while ($cc > 0) {
       $inpacket = $mdns->readIncoming();
-
+      log::add(__CLASS__, 'debug', '[detect] packet=' . json_encode($inpacket, true));
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
         if (is_object($answer)) {
           switch ($answer->qtype) {
