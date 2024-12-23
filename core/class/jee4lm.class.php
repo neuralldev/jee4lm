@@ -1102,7 +1102,7 @@ public static function tcpdetect()
       $inpacket = $mdns->readIncoming();
 //      log::add(__CLASS__, 'debug', '[detect] packet=' . json_encode($inpacket, true));
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
-        log::add(__CLASS__, 'debug', '[detect] found answers');
+        log::add(__CLASS__, 'debug', '[detect] found answers of qype='.$answer->qtype);
         if (is_object($answer)) {
           switch ($answer->qtype) {
             case 12: //PTR
