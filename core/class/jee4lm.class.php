@@ -258,7 +258,7 @@ class jee4lm extends eqLogic
           $state = 0 + cmd::byEqLogicIdAndLogicalId($id, 'machinemode')->execCmd();
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
-          if ($slug != '') { // if there is no ip set, get the information from the web site
+          if ($slug != '') { // if there is a type of machine defined 
             if ($ls ==1) // if daemon is running no need to refresh, exit
               {
                 log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
@@ -542,7 +542,7 @@ class jee4lm extends eqLogic
       $boilers = $machine['boilers'];
       $free=!$machine['scale']['connected'] || ($machine['scale']['connected'] && $bbwset['recipe_dose'] != 'A' && $bbwset['recipe_dose'] != 'B');
 
-      if ($slug = "linea_mini") { // linea mini
+      if ($slug == "linea_mini") { // linea mini
         $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
         $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm::backflush", null, null, 0);
         $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
@@ -690,17 +690,16 @@ class jee4lm extends eqLogic
       if (is_object($Command)) $createCmd = false;
     }
 
-    if ($createCmd) 
-      if (!is_object($Command)) {
-        // basic settings
-        $Command = new jee4lmCmd();
-        // $Command->setId(null);
-        $Command->setLogicalId($_logicalId);
-        $Command->setEqLogic_id($this->getId());
-        $Command->setName($_Name);
-        $Command->setType($_Type);
-        $Command->setSubType($_SubType);
-      }
+    if ($createCmd) {
+      // basic settings
+      $Command = new jee4lmCmd();
+      // $Command->setId(null);
+      $Command->setLogicalId($_logicalId);
+      $Command->setEqLogic_id($this->getId());
+      $Command->setName($_Name);
+      $Command->setType($_Type);
+      $Command->setSubType($_SubType);
+    }
 
     $Command->setIsVisible($_IsVisible);
     if ($_IsHistorized != null)
@@ -771,7 +770,7 @@ class jee4lm extends eqLogic
       if (is_object($command)) $createCmd = false;
     }
     if ($createCmd)  // only if action is not yet defined
-      if (!is_object($command)) {
+      {
         $command = new jee4lmCmd();
         $command->setLogicalId($_actionName);
         $command->setName($_actionTitle);
@@ -1712,25 +1711,26 @@ public static function tcpdetect()
    * @return array
    */
   public static function deamon_info() {
-    $return = array();
-        $return['log'] = __CLASS__;
-        $return['launchable'] = 'ok';
-        $return['state'] = 'nok';
-        $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
-        if (file_exists($pid_file)) {
-          if (@posix_getsid(trim(file_get_contents($pid_file)))) 
-            $return['state'] = 'ok';
-          else 
-            shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
-        }
-        return $return;  
+    $return = [
+      'log' => __CLASS__,
+      'launchable' => 'ok',
+      'state' => 'nok'
+    ];
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/deamon.pid';
+    if (file_exists($pid_file)) {
+      $pid = trim(file_get_contents($pid_file));
+      if (@posix_getsid($pid)) {
+        $return['state'] = 'ok';
+      } else {
+        shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
+      }
     }
+    return $return;
+  }
 
     private static function getPython3() {
-      if (method_exists('system', 'getCmdPython3')) {
-          return system::getCmdPython3(__CLASS__);
-      }
-      return 'python3 ';
+      return  method_exists('system', 'getCmdPython3') ? 
+        system::getCmdPython3(__CLASS__) : 'python3 ';
     }
 
   /**
@@ -1800,9 +1800,8 @@ public static function tcpdetect()
    */
   public static function deamon_send($_params) {
     $deamon_info = self::deamon_info();
-    if ($deamon_info['state'] != 'ok') {
-        throw new Exception("Le démon n'est pas démarré");
-    }
+    if ($deamon_info['state'] != 'ok') 
+        throw new Exception("Le démon n'est pas démarré");    
     $_params['apikey'] = jeedom::getApiKey(__CLASS__);
     $payLoad = json_encode($_params);
     $socket = socket_create(AF_INET, SOCK_STREAM, 0);
@@ -1832,10 +1831,7 @@ class jee4lmCmd extends cmd
 {
   public function dontRemoveCmd()
   {
-    if ($this->getLogicalId() == 'refresh') {
-      return true;
-    }
-    return false;
+    return $this->getLogicalId() == 'refresh';
   }
 
   public function getLMValue($_logicalID, $_expected_value)
