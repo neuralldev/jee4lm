@@ -1094,22 +1094,21 @@ public static function tcpdetect()
 
   // qtype is the type of the query, i.e. the type of Resource Record which should be returned in responses.
   // qclass is Class code, 1 a.k.a. "IN" for the Internet and IP networks
-  $mdns->query("_hap._tcp.local", 1, 12, "");
+  $mdns->query("_marzocco._tcp.local", 1, 12, "");
   $cc = 15;
   $lm = [];
 
     while ($cc > 0) {
       $inpacket = $mdns->readIncoming();
-      log::add(__CLASS__, 'debug', '[detect] packet=' . json_encode($inpacket, true));
+//      log::add(__CLASS__, 'debug', '[detect] packet=' . json_encode($inpacket, true));
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
-//        $answer = $inpacket->getAnswer();
         log::add(__CLASS__, 'debug', '[detect] found '.$inpacket->packetheader->getAnswerRRs().' answers');
         $answer = $inpacket->answerrrs[0];
         if (is_object($answer)) {
           switch ($answer->qtype) {
             case 12: //PTR
               log::add(__CLASS__, 'debug', '[detect] found pointer on ' . $answer->name);
-              if ($answer->name == "_hap._tcp.local") {
+              if ($answer->name == "_marzocco._tcp.local") {
                 $mdns->query($answer->data, 1, 33, "");
                 $cc = 15;
               }
