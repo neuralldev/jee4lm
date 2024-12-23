@@ -511,10 +511,14 @@ class jee4lm extends eqLogic
         return $_eq->getInformations();
       else
         return true;
-    }
+    
     // as machine is not reachable, hide on/off button
 
-
+    if ($data['status'] == false && $data['error'] == 7) { // if machine is not reachable, hide on/off button
+      log::add(__CLASS__, 'debug', 'machine not reachable section code');
+      $_eq->checkAndUpdateCmd('displaycoffee','OFF');
+    }
+  }
     return false;
   }
 
@@ -1147,9 +1151,6 @@ public static function tcpdetect()
     }
     return $lm;
 }
-
-
-
 
   /**
    * Detect is the function used by the plugin configuration button to detect and create the equipments.
