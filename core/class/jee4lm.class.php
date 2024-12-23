@@ -1103,7 +1103,8 @@ public static function tcpdetect()
       log::add(__CLASS__, 'debug', '[detect] packet=' . json_encode($inpacket, true));
       if ($inpacket != null && $inpacket->packetheader->getAnswerRRs() > 0) {
 //        $answer = $inpacket->getAnswer();
-        log::add(__CLASS__, 'debug', '[detect] found answers'.json_encode($answer, true));
+        log::add(__CLASS__, 'debug', '[detect] found '.$inpacket->packetheader->getAnswerRRs().' answers');
+        $answer = $inpacket->answerrrs[0];
         if (is_object($answer)) {
           switch ($answer->qtype) {
             case 12: //PTR
