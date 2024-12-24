@@ -110,27 +110,7 @@ document.getElementById('bt_tcpdetect').addEventListener('click', function () {
     success: function(data) {
       jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
     }
-})
-/*
-  domUtils.showLoading();
-  fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ action: 'tcpdetect' })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.state !== 'ok') {
-      domUtils.hideLoading();
-      jeedomUtils.showAlert({ message: data.result, level: 'danger' });
-      return;
-    }
-    domUtils.hideLoading();
-    jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
-  })
-  .catch(error => handleAjaxError(null, null, error));
+  });
 });
-*/
+
 </script>
