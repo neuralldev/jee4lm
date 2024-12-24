@@ -75,27 +75,27 @@ document.getElementById('bt_loginToLMCloud').addEventListener('click', function 
 
 document.getElementById('bt_syncWithLMCloud').addEventListener('click', function () {
   domUtils.showLoading();
-  fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
+  domUtils.ajax({
+    type: "POST",
+    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
+    data: {
+        action: "sync"
     },
-    body: JSON.stringify({ action: 'sync' })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.state !== 'ok') {
+    dataType: 'json',
+    global: false,
+    error: function(error) {
+        jeedomUtils.showAlert({ message: error.message, level: 'danger' });
+        domUtils.hideLoading();
+    },
+    success: function(data) {
+      jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
       domUtils.hideLoading();
-      jeedomUtils.showAlert({ message: data.result, level: 'danger' });
-      return;
     }
-    domUtils.hideLoading();
-    jeedomUtils.showAlert({ message: '{{Détection réussie}}', level: 'success' });
-  })
-  .catch(error => handleAjaxError(null, null, error));
+  });
 });
 
 document.getElementById('bt_tcpdetect').addEventListener('click', function () {
+  domUtils.showLoading();
   domUtils.ajax({
     type: "POST",
     url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
@@ -106,9 +106,11 @@ document.getElementById('bt_tcpdetect').addEventListener('click', function () {
     global: false,
     error: function(error) {
         jeedomUtils.showAlert({ message: error.message, level: 'danger' });
+        domUtils.hideLoading();
     },
     success: function(data) {
       jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
+      domUtils.hideLoading();
     }
   });
 });
