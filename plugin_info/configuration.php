@@ -96,6 +96,22 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
 });
 
 document.getElementById('bt_tcpdetect').addEventListener('click', function () {
+  domUtils.ajax({
+    type: "POST",
+    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
+    data: {
+        action: "tcpdetect"
+    },
+    dataType: 'json',
+    global: false,
+    error: function(error) {
+        jeedomUtils.showAlert({ message: error.message, level: 'danger' });
+    },
+    success: function(data) {
+      jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
+    }
+})
+/*
   domUtils.showLoading();
   fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
     method: 'POST',
@@ -116,4 +132,5 @@ document.getElementById('bt_tcpdetect').addEventListener('click', function () {
   })
   .catch(error => handleAjaxError(null, null, error));
 });
+*/
 </script>
