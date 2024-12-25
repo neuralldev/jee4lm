@@ -519,6 +519,8 @@ class jee4lm extends eqLogic
     log::add(__CLASS__, 'debug', 'machine not reachable section code');
     $_eq->checkAndUpdateCmd('displaycoffee','OFF');
     $_eq->checkAndUpdateCmd('machinemode',false);
+    $_eq->checkAndUpdateCmd('tankStatus',false);
+
   }
   return false;
   }
@@ -1222,6 +1224,7 @@ public static function tcpdetect()
           'preinfusionmode' => [5, 1],
           'groupDoseType' => [1, 1],
           'prewet' => [5, 1],
+          'plumbedin' => [5, 2],
           'prewettime' => [5, 3],
           'prewetholdtime' => [5, 3],
           'jee4lm_doseA_slider' => [6, 3],
@@ -1231,7 +1234,6 @@ public static function tcpdetect()
           'jee4lm_prewet_time_slider' => [6, 2],
           //  'jee4lm_steam_slider' => [6,1],
           'tankStatus' => [1, 1],
-          'plumbedin' => [5, 2],
           'jee4lm_steam_off' => [2, 3],
           'jee4lm_steam_on' => [2, 3],
           //  'steamcurrent' => [3,3],
