@@ -31,18 +31,19 @@ if (init('test') != '') {
 }
 $result = json_decode(file_get_contents("php://input"), true);
 if (!is_array($result)) {
-	log::add('jee4lm', 'debug', 'callback incoming message not an array ='.$result);
+	log::add('jee4lm', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
 	die();
 }
 if (!isset($result['id'])) {
-	log::add('jee4lm', 'debug', 'callback id not set');
+	log::add('jee4lm', 'error', 'daemon callback id not set');
 	die();
 }
 $eq = eqLogic::byId($result['id']);
 if ($eq==null) {
-	log::add('jee4lm', 'debug', 'callback eqlogic not found');
+	log::add('jee4lm', 'warning', 'daemon callback eqlogic not found');
 	die();
 }
-log::add('jee4lm', 'debug', 'refreshing...');
+log::add('jee4lm', 'debug', 'daemon callback, refreshing...');
 
 jee4lm::RefreshAllInformation($eq, 2);
+log::add('jee4lm', 'debug', 'daemon callbach, refreshed');

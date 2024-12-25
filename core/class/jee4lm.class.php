@@ -1189,9 +1189,9 @@ public static function tcpdetect()
           $eqLogic->setName($machines['name']);
           $eqLogic->setCategory('other', 1);
           $eqLogic->setIsVisible(1);
-          log::add(__CLASS__, 'debug', 'uuid created');
+          log::add(__CLASS__, 'debug', 'create eqlogif for uuid '.$uuid);
         } else
-          log::add(__CLASS__, 'debug', 'uuid update only');
+          log::add(__CLASS__, 'debug', $uuid.' uuid already exists, update only');
         $eqLogic->setConfiguration('type', $slug);
         $eqLogic->setConfiguration('communicationKey', $machines['communicationKey']);
         $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
@@ -1290,9 +1290,9 @@ public static function tcpdetect()
           $eqLogic->setDisplay($key, $value);
 
         $eqLogic->save();
+        log::add(__CLASS__, 'debug', 'eqlogic saved');
         // read information for the first time
         jee4lm::RefreshAllInformation($eqLogic);
-        log::add(__CLASS__, 'debug', 'eqlogic saved');
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     }
@@ -1372,7 +1372,7 @@ public static function tcpdetect()
    * @return void
    */
   public function SetLMBluetooh() {
-    log::add(__CLASS__, 'debug', '[bluetooth] start');
+    log::add(__CLASS__, 'debug', '[setbluetooth] start');
     $id = $this->getId(); 
     $u = config::byKey('userId','jee4lm');
     $t = $this->getConfiguration('communicationKey');
@@ -1383,7 +1383,7 @@ public static function tcpdetect()
       log::add(__CLASS__, 'debug', '[bluetooth] no port defined on plugin configuration screen, abort');
     elseif (self::deamon_info()['state'] == 'ok')
       self::deamon_send(['id' => $id, 'lm'=> 'bt', 'bt'=>'login', 'username' => $u, 'token' => $t, 'serial' =>$s, 'dev' =>'']);
-    log::add(__CLASS__, 'debug', '[bluetooth] stop');
+    log::add(__CLASS__, 'debug', '[setbluetooth] stop');
   } 
 
   // add logic to monitor BBW presence
@@ -1398,8 +1398,7 @@ public static function tcpdetect()
   public function searchForBBW()
   {
     $mac = $this->getConfiguration('scalemac');
-    if ($mac == '')
-      return false;
+    if ($mac == '') return false; // no scale found while detecting eqlogic, if scale was added later, rescan to create information
 
     log::add(__CLASS__, 'debug', 'search scale ' . $mac);
 
@@ -1416,39 +1415,28 @@ public static function tcpdetect()
       return false;
     }
     
-    // check if BLEA is installed and search for scale
+    // check if JMQTT is installed and search for scale
     $jmqttCollection = eqLogic::byType('jmqtt', true);
     foreach ($jmqttCollection as $eqJ) {
-      $jobjName = $eqJ->getName();
-      log::add(__CLASS__, 'debug', 'jmqtt check equipment' . $jobjName);
-      if (strcasecmp($jobjName, $mac) == 0) {
-        $bbwID = $eqJ->getId();
-        $jcmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
-        log::add(__CLASS__, 'debug', 'jmqtt search present info on eq=' . $bbwID);
+      if (strcasecmp($eqJ->getName(), $mac) == 0) {
+        $jcmd = cmd::byEqLogicIdCmdName($eqJ->getId(), 'present');
         if ($jcmd != null) {
           $present = $jcmd->execCmd();
           log::add(__CLASS__, 'debug', 'found scale in jmqtt with BT address ' . ($present == 1 ? 'allumé' : 'éteint'));
           return $present;
         }
-        return false;
+        return false;    
       }
       log::add(__CLASS__, 'debug', 'jmqtt loop');
     }
+
     // search as an object name in root MAISON object
     $bbwcollection = eqLogic::byObjectNameEqLogicName('MAISON', $mac);
     $bbwcollection1 = eqLogic::byObjectNameEqLogicName('MAISON', strtoupper($mac));
-    if ($bbwcollection != null || $bbwcollection1 != null) {
+    $bbwcollection = array_merge($bbwcollection, $bbwcollection1);
+    if ($bbwcollection != null) {
       foreach ($bbwcollection as $bbw) {
         //       log::add(__CLASS__, 'debug', 'bbw='.json_encode($bbw));
-        $bbwID = $bbw->getId();
-        $scmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
-        if ($scmd != null) {
-          $present = $scmd->execCmd();
-          log::add(__CLASS__, 'debug', 'found scale as standard equipment with BT address ' . ($present == 1 ? 'allumé' : 'éteint'));
-          return $present;
-        }
-      }
-      foreach ($bbwcollection1 as $bbw) {
         $bbwID = $bbw->getId();
         $scmd = cmd::byEqLogicIdCmdName($bbwID, 'present');
         if ($scmd != null) {
@@ -1502,27 +1490,20 @@ public static function tcpdetect()
           $display = "<span style='color:green'>ON</span>";
         $this->checkAndUpdateCmd('displaysteam',$display);
 
-        if ($this->getCmd(null, 'isbbw')->execCmd())
-          if ($this->searchForBBW()) { //present
-            // change display of doses
-            $free = $this->getCmd(null, 'bbwfree')->execCmd();
-            $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
-            $this->getCmd(null, 'bbwfree')->setDisplay('template', $bbwmode == 'A' || $bbwmode == 'B' ? "jee4lm::bbw nodose inactive" : "jee4lm::bbw nodose active");
-            $this->getCmd(null, 'bbwdoseA')->setDisplay('template', $bbwmode == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
-            $this->getCmd(null, 'bbwdoseB')->setDisplay('template', $bbwmode == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
-            log::add(__CLASS__, 'debug', "bbw scale on display mode=$bbwmode continuous=$free");
-            // - 
-          } else {
+        if (!$this->getCmd(null, 'isbbw')->execCmd() || !$this->searchForBBW()) { //present
             $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
-            $this->getCmd(null, 'bbwdoseA')->setDisplay('template', "jee4lm::bbw dose inactive");
-            $this->getCmd(null, 'bbwdoseB')->setDisplay('template', "jee4lm::bbw dose inactive");
-            log::add(__CLASS__, 'debug', 'bbw scale off display');
+            $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm::bbw dose inactive"));
+            $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm::bbw dose inactive"));
+            log::add(__CLASS__, 'debug', 'getinformation no scale');
           } else {
-          $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
-          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm::bbw dose inactive"));
-          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm::bbw dose inactive"));
-        }
-        log::add(__CLASS__, 'debug', 'getinformation has refresh values');
+          // change display of doses
+          $free = $this->getCmd(null, 'bbwfree')->execCmd();
+          $bbwmode = $this->getCmd(null, 'bbwmode')->execCmd();
+          $this->getCmd(null, 'bbwfree')->setDisplay('template', $bbwmode == 'A' || $bbwmode == 'B' ? "jee4lm::bbw nodose inactive" : "jee4lm::bbw nodose active");
+          $this->getCmd(null, 'bbwdoseA')->setDisplay('template', $bbwmode == 'A' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
+          $this->getCmd(null, 'bbwdoseB')->setDisplay('template', $bbwmode == 'B' && !$free ? "jee4lm::bbw dose" : "jee4lm::bbw dose inactive");
+          log::add(__CLASS__, 'debug', "bbw scale on display mode=$bbwmode continuous=$free");
+        } 
      }      
     }
     return true;
@@ -1804,19 +1785,19 @@ public static function tcpdetect()
   public static function deamon_send($_params) {
     $deamon_info = self::deamon_info();
     if ($deamon_info['state'] != 'ok') 
-        throw new Exception("Le démon n'est pas démarré");    
+        throw new Exception("send to daemon, daemon not started");    
     $_params['apikey'] = jeedom::getApiKey(__CLASS__);
     $payLoad = json_encode($_params);
     $socket = socket_create(AF_INET, SOCK_STREAM, 0);
     if (!$socket) {
-      log::add(__CLASS__, 'error', 'error opening socket');
+      log::add(__CLASS__, 'error', 'send to daemon, error opening socket');
       return;
     } 
     if (!socket_connect($socket, '127.0.0.1', JEEDOM_DAEMON_PORT))
-      log::add(__CLASS__, 'error', 'error connecting to daemon socket port');
+      log::add(__CLASS__, 'error', 'send to daemon, error connecting to daemon socket port');
     else 
       if (!socket_write($socket, $payLoad, strlen($payLoad)))
-        log::add(__CLASS__, 'error', 'error writing payload on daemon socket port');
+        log::add(__CLASS__, 'error', 'send to daemon, error writing payload on daemon socket port');
     socket_close($socket);
   }
 
@@ -1840,8 +1821,7 @@ class jee4lmCmd extends cmd
   public function getLMValue($_logicalID, $_expected_value)
   {
     $r = cmd::byLogicalId($_logicalID);
-    $v = is_object($r) ? $r->execCmd() : null;
-    return $v != $_expected_value;
+    return is_object($r) && $r->execCmd() != $_expected_value;
   }
 
   /**
