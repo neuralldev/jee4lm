@@ -259,6 +259,10 @@ class jee4lm extends eqLogic
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
           if ($slug != '') { // if there is a type of machine defined 
+            if ($state == 0) { // if machine is off, refresh all information
+            log::add(__CLASS__, 'debug', 'cron exit machine is off');
+            return;
+            }
             if ($ls ==1) // if daemon is running no need to refresh, exit
               {
                 log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
