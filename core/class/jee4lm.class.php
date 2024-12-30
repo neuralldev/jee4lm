@@ -1191,7 +1191,7 @@ public static function tcpdetect()
           $eqLogic->setEqType_name('jee4lm');
           $eqLogic->setIsEnable(1);
           $eqLogic->setName($machines['name']);
-          $eqLogic->setCategory('automation', 1);
+          $eqLogic->setCategory('heating', 1);
           $eqLogic->setIsVisible(1);
           log::add(__CLASS__, 'debug', 'create eqlogif for uuid '.$uuid);
         } else
