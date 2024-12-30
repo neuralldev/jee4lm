@@ -592,11 +592,11 @@ class jee4lm extends eqLogic
         $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
         $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
 
-        $_eq->AddAction("jee4lm_on", "heat", "jee4lm::main on off", "button", 1);
-        $_eq->AddAction("jee4lm_off", "off", "jee4lm::main on off", "button", 1);
-        $_eq->AddAction("jee4lm_auto", "Auto", "default", "THERMOSTAT_MODE", 0);
-        $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "THERMOSTAT_MODE", 1);
-        $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off", "THERMOSTAT_MODE", 1);
+        $_eq->AddAction("jee4lm_on", "heat", "jee4lm::main on off", "THERMOSTAT_MODE", 1);
+        $_eq->AddAction("jee4lm_off", "off", "jee4lm::main on off", "THERMOSTAT_MODE", 1);
+        $_eq->AddAction("jee4lm_auto", "Auto", "jee4lm::main on off", "THERMOSTAT_MODE", 0);
+        $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "", 1);
+        $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off", "", 1);
         $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
         $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85, 105, 0.5);
         //      $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 39,134, 1);
