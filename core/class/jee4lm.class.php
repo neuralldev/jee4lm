@@ -485,6 +485,8 @@ class jee4lm extends eqLogic
       $_eq->checkAndUpdateCmd('groupDoseType',$reglage['doseType']);
       $_eq->checkAndUpdateCmd('groupDoseMax',$reglage['stopTarget']);
       $_eq->checkAndUpdateCmd('machinemode',$machine['machineMode'] == "StandBy" ? false : true);
+      $_eq->checkAndUpdateCmd('hbmode',$machine['machineMode'] == "StandBy" ? 'off' : 'heat');
+      
       $_eq->checkAndUpdateCmd('isbbw',$machine['scale']['address'] == '' ? false : true);
       $_eq->checkAndUpdateCmd('isscaleconnected',$machine['scale']['connected']);
       $_eq->checkAndUpdateCmd( 'scalebattery',$machine['scale']['battery']);
@@ -587,13 +589,14 @@ class jee4lm extends eqLogic
         $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
         $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
         $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
-
+        $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
         $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
 
-        $_eq->AddAction("jee4lm_on", "Machine ON", "jee4lm::main on off", "button", 1);
-        $_eq->AddAction("jee4lm_off", "Machine OFF", "jee4lm::main on off", "button", 1);
-        $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "button", 1);
-        $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off", "button", 1);
+        $_eq->AddAction("jee4lm_on", "heat", "jee4lm::main on off", "button", 1);
+        $_eq->AddAction("jee4lm_off", "off", "jee4lm::main on off", "button", 1);
+        $_eq->AddAction("jee4lm_auto", "Auto", "default", "THERMOSTAT_MODE", 0);
+        $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm::steam on off", "THERMOSTAT_MODE", 1);
+        $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm::steam on off", "THERMOSTAT_MODE", 1);
         $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
         $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 85, 105, 0.5);
         //      $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", 39,134, 1);
@@ -891,6 +894,7 @@ class jee4lm extends eqLogic
     $serial = $this->getConfiguration('serialNumber');
     $token = self::getToken();
     self::request($this->getPath($serial) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
+    $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
 
   /**
