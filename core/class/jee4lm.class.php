@@ -20,7 +20,8 @@ const
   PREWET_TIME="PREWET",
   PREWET_HOLD="PREWET_HOLD",
   JEEDOM_DAEMON_PORT = '50044',
-  JEEDOM_DAEMON_HOST = '127.0.0.1';
+  JEEDOM_DAEMON_HOST = '127.0.0.1',
+  LMBT_ADVERTISING = "_marzocco._tcp.local";
 
 /* source api from HA
 https://github.com/zweckj/pylamarzocco/tree/main
@@ -158,6 +159,11 @@ class jee4lm extends eqLogic
    */
   public static function login($_username, $_password)
   {
+
+    if ($_username == '' || $_password == '') {
+      log::add(__CLASS__, 'debug', 'login empty username or password');
+      return '';
+    }
     // login to LM cloud attempt to get the token 
     $data = self::request(
       LMCLOUD_TOKEN,
@@ -250,7 +256,6 @@ class jee4lm extends eqLogic
         $ls = 0;
       else
         $ls = $mc->getValue();
-      if ($jee4lm->getIsEnable()) { // suspend cron if there is a polling running (l>0)
         if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
           /* lire les infos de l'équipement ici */
           $slug = $jee4lm->getConfiguration('type');
@@ -259,7 +264,7 @@ class jee4lm extends eqLogic
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
           if ($slug != '') { // if there is a type of machine defined 
-            if ($state == 0) { // if machine is off, refresh all information
+            if ($state == 0) { // if machine is off, do  not refresh all information
             log::add(__CLASS__, 'debug', 'cron exit machine is off');
             return;
             }
@@ -283,9 +288,8 @@ class jee4lm extends eqLogic
               log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           }
         } else
-          log::add(__CLASS__, 'debug', 'equipment is disabled, cron skiped');
+          log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
       }
-    }
   }
 
   /**
@@ -1025,7 +1029,7 @@ class jee4lm extends eqLogic
       ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"],
       $serial
     );
-//      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
+      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
   }
 
 /**
@@ -1116,7 +1120,7 @@ public static function tcpdetect()
 
   // qtype is the type of the query, i.e. the type of Resource Record which should be returned in responses.
   // qclass is Class code, 1 a.k.a. "IN" for the Internet and IP networks
-  $mdns->query("_marzocco._tcp.local", 1, 12, "");
+  $mdns->query(LMBT_ADVERTISING, 1, 12, "");
   $cc = 15;
   $lm = [];
 
@@ -1130,7 +1134,7 @@ public static function tcpdetect()
           switch ($answer->qtype) {
             case 12: //PTR
               log::add(__CLASS__, 'debug', '[detect] found pointer on ' . $answer->name);
-              if ($answer->name == "_marzocco._tcp.local") {
+              if ($answer->name == LMBT_ADVERTISING) {
                 $mdns->query($answer->data, 1, 33, "");
                 $cc = 15;
               }
