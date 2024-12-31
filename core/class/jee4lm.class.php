@@ -603,6 +603,8 @@ class jee4lm extends eqLogic
         $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
         $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
 
+        $_eq->AddAction("jee4lm_bbwA","BBW Dose A","button","",1);
+        $_eq->AddAction("jee4lm_bbwB","BBW Dose B","button","",1);
         $_eq->AddAction("jee4lm_on", "heat", "jee4lm::main on off", "THERMOSTAT_MODE", 1);
         $_eq->AddAction("jee4lm_off", "off", "jee4lm::main on off", "THERMOSTAT_MODE", 1);
         $_eq->AddAction("jee4lm_auto", "Auto", "jee4lm::main on off", "THERMOSTAT_MODE", 0);
@@ -1286,7 +1288,9 @@ public static function tcpdetect()
           'gwversion' => [7, 3],
           'groupDoseMax' => [1, 1],
           'displaycoffee' => [3, 1],
-          'displaysteam' => [3, 3]
+          'displaysteam' => [3, 3],
+          'jee4lm_bbwA' => [7, 2],
+          'jee4lm_bbwB' => [7, 2]
         ];
 
         $displayStuff = [
@@ -1913,6 +1917,10 @@ class jee4lmCmd extends cmd
       case 'jee4lm_prewet_time_slider':
         $eq->set_setpoint($_options, '', PREWET_HOLD);
         return jee4lm::RefreshAllInformation($eq);
+        case 'jee4lm_bbwA':
+        case 'jee4lm_bbwB':
+            $eq->setActiveBBWRecipe($_options=='jee4lm_bbwA'?'A':'B');
+            return jee4lm::RefreshAllInformation($eq);          
       case 'jee4lm_test':
 //          $eq->SetLMBluetooh();
         $eq->tcpdetect();
