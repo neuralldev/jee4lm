@@ -424,9 +424,16 @@ class jee4lm extends eqLogic
     $ip = $_eq->getConfiguration('host');
     $id = $_eq->getId();
     $uid = uniqid();
-    log::add(__CLASS__, 'debug', "refresh $uid serial=$serial id=$id ip=$ip poll=$_poll");
+    $localcall = $ip !='' ? 'local' : 'remote';
+    log::add(__CLASS__, 'debug', "refresh $uid $localcall serial=$serial id=$id ip=$ip poll=$_poll");
     $token = self::getToken($_eq);
-    $data = self::request($ip == '' ? $_eq->getPath($serial, $ip). '/configuration' : $_eq->getPath($serial, $ip)."/config" , null, 'GET', ["Authorization: Bearer $token"]);
+    $data = self::request(
+      $ip == '' ? 
+        $_eq->getPath($serial, $ip). '/configuration' : 
+        $_eq->getPath($serial, $ip)."/config" ,
+      null, 
+      'GET', 
+      ["Authorization: Bearer $token"]);
     // check if local or remote config info is fetched
     //$isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
     if ($data['status'] == true) { // check that we have information returned
@@ -1030,6 +1037,30 @@ class jee4lm extends eqLogic
       $serial
     );
       log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
+  }
+
+  public function setActiveBBWRecipe($_dose)
+  {
+    log::add(__CLASS__, 'debug', "set bbw active dose to $_dose");
+
+    // $dose = 'A' or 'B'
+    $d = ["group"=> "Group1",
+            "doseIndex"=> "DoseA",
+            "recipeId"=> "Recipe1",
+            "recipeDose"=> "Dose".$_dose];
+    
+    $serial = $this->getConfiguration('serialNumber');
+    $ip = $this->getConfiguration('host');
+    $token = self::getToken();
+
+    $req = self::request(
+      $this->getPath($serial).'/recipes/active-recipe',
+      $d,
+      'POST',
+      ["Authorization: Bearer $token"],
+      ''
+    );
+      log::add(__CLASS__, 'debug', "set bbw active dose returned=".json_encode($req));
   }
 
 /**
