@@ -15,10 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
-require_once dirname(__FILE__) . "/../../../../core/php/core.inc.php";
+
+ require_once dirname(__FILE__) . "/../../../../core/php/core.inc.php";
 
 if (!jeedom::apiAccess(init('apikey'), 'jee4lm')) {
-	echo 'Clef API non valide, vous n\'etes pas autorisé à effectuer cette action';
+//	echo 'Clef API non valide, vous n\'etes pas autorisé à effectuer cette action';
 	die();
 }
 

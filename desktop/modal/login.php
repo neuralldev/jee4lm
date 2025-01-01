@@ -20,7 +20,6 @@ if (!isConnect('admin')) {
   throw new Exception('{{401 - Accès non autorisé}}');
 }
 ?>
-
 <div id='div_jee4lmLoginAlert' style="display: none;"></div>
 <form class="form-horizontal">
   <fieldset>

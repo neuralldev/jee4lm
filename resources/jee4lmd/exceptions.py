@@ -1,6 +1,5 @@
 """Exceptions jee4lm"""
 
-
 class AuthFail(Exception):
     """Error to indicate there is invalid auth info."""
 

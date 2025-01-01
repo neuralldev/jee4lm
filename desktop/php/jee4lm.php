@@ -214,7 +214,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 		</div><!-- /.tab-content -->
 	</div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
-
 <?php
 include_file('desktop', 'jee4lm', 'js', 'jee4lm');
 include_file('core', 'plugin.template', 'js');

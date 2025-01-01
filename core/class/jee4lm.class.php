@@ -1039,7 +1039,7 @@ class jee4lm extends eqLogic
       $serial
     );
       log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
-  }
+  } 
 
   public function setActiveBBWRecipe($_dose)
   {

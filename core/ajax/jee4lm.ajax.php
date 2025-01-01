@@ -1,4 +1,10 @@
 <?php
+/**
+ * 
+ * This script handles AJAX requests for the JEE4LM application.
+ * 
+ * @throws Exception If an error occurs during the execution of the try block.
+ */
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
     include_file('core', 'authentification', 'php');

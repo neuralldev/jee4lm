@@ -172,8 +172,7 @@ class DNSPacket {
    */
   private function readQuestion($_data) {
     $name = $this->readName($_data);
-    $qtype = ($_data[$this->offset] << 8) + $_data[$this->offset + 1];
-    $qclass = ($_data[$this->offset + 2] << 8) + $_data[$this->offset + 3];
+    list($qtype, $qclass) = array_values(unpack('nqtype/nqclass', pack('C*', $_data[$this->offset], $_data[$this->offset + 1], $_data[$this->offset + 2], $_data[$this->offset + 3])));
     $this->offset += 4;
     return new DNSQuestion($name, $qtype, $qclass);
   }
@@ -185,12 +184,11 @@ class DNSPacket {
    */
   public function readRR($_data) {
     $name = $this->readName($_data);
-    $qtype = ($_data[$this->offset] << 8) + $_data[$this->offset + 1];
-    $qclass = ($_data[$this->offset + 2] << 8) + $_data[$this->offset + 3];
+    list($qtype, $qclass) = array_values(unpack('nqtype/nqclass', pack('C*', $_data[$this->offset], $_data[$this->offset + 1], $_data[$this->offset + 2], $_data[$this->offset + 3])));
     $this->offset += 4;
-    $ttl = ($_data[$this->offset] << 24) + ($_data[$this->offset + 1] << 16) + ($_data[$this->offset + 2] << 8) + $_data[$this->offset + 3];
+    $ttl = unpack('N', pack('C*', $_data[$this->offset], $_data[$this->offset + 1], $_data[$this->offset + 2], $_data[$this->offset + 3]))[1];
     $this->offset += 4;
-    $dl = ($_data[$this->offset] << 8) + $_data[$this->offset + 1];
+    $dl = unpack('n', pack('C*', $_data[$this->offset], $_data[$this->offset + 1]))[1];
     $this->offset += 2;
     $ddata = array_slice($_data, $this->offset, $dl);
     $this->offset += $dl;
@@ -289,8 +287,8 @@ class DNSPacket {
    */
   private function encodeTypeClass($qtype, $qclass) {
     return [
-      (int)($qtype / 256), $qtype % 256,
-      (int)($qclass / 256), $qclass % 256
+      $qtype >> 8, $qtype & 0xFF,
+      $qclass >> 8, $qclass & 0xFF
     ];
   }
 }
@@ -307,7 +305,12 @@ class DNSPacketHeader {
 		$this->contents = [0,0,0,0,0,0,0,0,0,0,0,0];
 	}
 	
-	public function load($_data) {
+  /**
+   * Summary of load
+   * @param int[] $_data
+   * @return void
+   */
+  public function load($_data) {
 		// Assume we're passed an array of bytes
 		$this->clear();
 		$this->contents = $_data;
@@ -325,9 +328,9 @@ class DNSPacketHeader {
         return ($this->contents[0] << 8) + $this->contents[1];
 	}
 	
-	public function setTransactionID($_value) {
-		$this->contents[0] = (int)($_value / 256);
-		$this->contents[1] = $_value % 256;
+  public function setTransactionID($_value) {
+    $this->contents[0] = $_value >> 8;
+    $this->contents[1] = $_value & 0xFF;
 	}
 	
     private function getBitValue($byteIndex, $bitMask, $shiftRight) {
@@ -437,39 +440,57 @@ class DNSPacketHeader {
 	}
 	
 	public function setQuestions($_value) {
-		$this->contents[4] = (int)($_value / 256);
-		$this->contents[5] = $_value % 256;
+    $this->contents[4] = $_value >> 8;
+    $this->contents[5] = $_value & 0xFF;
 	}
 	
 	// The number of AnswerRRs in the packet
 	public function getAnswerRRs() {
    // log::add('jee4lm', 'debug', 'answer rr='.$this->contents[6] * 256 + $this->contents[7]);
-		return ($this->contents[6] * 256) + $this->contents[7];
+    return ($this->contents[6] << 8) + $this->contents[7];
 	}
 	
-	public function setAnswerRRs($_value) {
-		$this->contents[6] = (int)($_value / 256);
-		$this->contents[7] = $_value % 256;
-	}
+  /**
+   * Summary of setAnswerRRs
+   * @param int $_value
+   * @return void
+   */
+  public function setAnswerRRs($_value) {
+    $this->contents[6] = $_value >> 8;
+    $this->contents[7] = $_value & 0xFF;
+  }
 	
 	// The number of AuthorityRRs in the packet
-	public function getAuthorityRRs() {
-		return ($this->contents[8] * 256) + $this->contents[9];
-	}
-	
-	public function setAuthorityRRs($_value) {
-		$this->contents[8] = (int)($_value / 256);
-		$this->contents[9] = $_value % 256;
-	}
-	
-	// The number of AdditionalRRs in the packet
-	public function getAdditionalRRs() {
-		return ($this->contents[10] * 256) + $this->contents[11];
-	}
-	
-	public function setAdditionalRRs($_value) {
-		$this->contents[10] = (int)($_value / 256);
-		$this->contents[11] = $_value % 256;
+  public function getAuthorityRRs() {
+    return ($this->contents[8] << 8) + $this->contents[9];
+  }
+  
+  /**
+   * Summary of setAuthorityRRs
+   * @param int $_value
+   * @return void
+   */
+  public function setAuthorityRRs($_value) {
+    $this->contents[8] = $_value >> 8;
+    $this->contents[9] = $_value & 0xFF;
+  }
+  
+  
+  /**
+   * The number of AdditionalRRs in the packet
+   * @return int
+   */
+  public function getAdditionalRRs() {
+    return ($this->contents[10] << 8) + $this->contents[11];
+  }
+  /**
+   * Summary of setAdditionalRRs
+   * @param int $_value
+   * @return void
+   */
+  public function setAdditionalRRs($_value) {
+    $this->contents[10] = $_value >> 8;
+    $this->contents[11] = $_value & 0xFF;
 	}
 }
 class DNSQuestion {
@@ -479,9 +500,9 @@ class DNSQuestion {
 
   /**
    * Summary of __construct
-   * @param mixed $_name
-   * @param integer $_qtype
-   * @param integer $_qclass
+   * @param string $_name
+   * @param int $_qtype
+   * @param int $_qclass
    */
   public function __construct($_name='', $_qtype=0, $_qclass=0) {
     $this->name=$_name;
@@ -497,6 +518,14 @@ class DNSResourceRecord
   public $ttl; // UInt32
   public $data; // Byte ()
 
+  /**
+   * Summary of __construct
+   * @param string $_name
+   * @param integer $_qtype
+   * @param integer $_qclass
+   * @param integer $_ttl
+   * @param int[] $_data
+   */
   public function __construct($_name='', $_qtype=0, $_qclass=0, $_ttl=0, $_data=null) {
     $this->name = $_name;
     $this->qtype=  $_qtype;

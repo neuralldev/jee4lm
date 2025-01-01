@@ -21,7 +21,6 @@ $('#div_pageContainer').off('click','.listCmdActionOther').on('click','.listCmdA
 	});
 });
 
-
 /*
 * Fonction permettant l'affichage des commandes dans l'équipement
 */

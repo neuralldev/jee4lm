@@ -42,7 +42,6 @@ from btlm import *
         This is the place where you should create your tasks, login to remote system, etc.
 """
 class Jee4LM(BaseDaemon):
-
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         logging.debug(f'Searching for task with id {id}')

@@ -1,4 +1,4 @@
-"""Bluetooth class for La Marzocco machines."""
+"""Bluetooth class for La Marzocco machines. adapted to Linea Mini"""
 
 import base64
 import json
