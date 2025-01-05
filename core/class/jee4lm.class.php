@@ -258,7 +258,7 @@ class jee4lm extends eqLogic
 
     // Tester si l'heure est entre 22h et 6h
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
-      log::add(__CLASS__, 'debug', 'cron exit out of hours');
+      log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
       return;
     } else {
       log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
