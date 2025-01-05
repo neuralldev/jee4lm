@@ -904,7 +904,7 @@ class jee4lm extends eqLogic
    */
   public function switchCoffeeBoilerONOFF($_toggle)
   {
-    log::add(__CLASS__, 'debug', 'switch coffee boiler on or off');
+    log::add(__CLASS__, 'debug', 'switch coffee boiler to '.($_toggle ? 'ON' : 'OFF'));
     $serial = $this->getConfiguration('serialNumber');
     $token = self::getToken();
     self::request($this->getPath($serial) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"],  $serial);
