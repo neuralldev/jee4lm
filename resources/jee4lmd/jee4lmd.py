@@ -8,7 +8,7 @@ from btlm import *
 class Jee4LM(BaseDaemon):
     def __init__(self) -> None:
     # Standard initialisation
-        super().__init__(on_start_cb=self.on_start, on_message_cb=self.on_message, on_stop_cb=self.on_stop)
+        super().__init__(on_message_cb=self.on_message, on_stop_cb=self.on_stop)
 
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
@@ -82,9 +82,6 @@ class Jee4LM(BaseDaemon):
                         logging.debug(f'BT command u={message["boiler"]} t={message["temp"]}')
             case _:
                 logging.error('on_message - command not found')
-
-    async def on_start(self):
-        logging.info('Received start command, running daemon')
 
     async def on_stop(self):
         logging.info('Received stop signal, cancelling tasks...')
