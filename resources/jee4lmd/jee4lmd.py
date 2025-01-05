@@ -83,6 +83,9 @@ class Jee4LM(BaseDaemon):
             case _:
                 logging.error('on_message - command not found')
 
+    async def on_start(self):
+        logging.info('Received start command, running daemon')
+
     async def on_stop(self):
         logging.info('Received stop signal, cancelling tasks...')
         await self.cancel_all_tasks_from_id('*')
