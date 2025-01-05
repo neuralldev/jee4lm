@@ -260,7 +260,9 @@ class jee4lm extends eqLogic
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
       log::add(__CLASS__, 'debug', 'cron exit out of hours');
       return;
-    };
+    } else {
+      log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
+    }
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       $mc = cache::byKey('jee4lm::laststate_'.$jee4lm->getId());
       if ($mc==null)
