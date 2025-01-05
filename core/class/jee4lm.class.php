@@ -44,7 +44,7 @@ class jee4lm extends eqLogic
    */
   public static function checkrequest($_response, $_serial = null, $_header = null)
   {
-    //   log::add(__CLASS__, 'debug', 'check request');
+    log::add(__CLASS__, 'debug', 'check request');
     if ($_response == '') return true;
     //   log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($_response, true);
@@ -62,7 +62,7 @@ class jee4lm extends eqLogic
 
     // if there is a commandID then wait for command to succeed   
     for ($i = 0; $i < 5; $i++) {
-      //     log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
+      log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY . "/" . $_serial . "/commands/" . $commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
