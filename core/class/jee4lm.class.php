@@ -250,6 +250,17 @@ class jee4lm extends eqLogic
   public static function cron()
   {
     log::add(__CLASS__, 'debug', 'cron start');
+
+// suspension des tests pendant une tranche horaire où la machine à café ne sera jamais utilisée.
+// cette section devra évoluer pour saisie de la tranche dans le plugin
+
+    $heureActuelle = date('H');
+
+    // Tester si l'heure est entre 22h et 6h
+    if ($heureActuelle >= 22 || $heureActuelle < 6) {
+      log::add(__CLASS__, 'debug', 'cron exit out of hours');
+      return;
+    };
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       $mc = cache::byKey('jee4lm::laststate_'.$jee4lm->getId());
       if ($mc==null)
