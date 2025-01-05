@@ -6,6 +6,10 @@ from jeedomdaemon.base_daemon import BaseDaemon
 from btlm import *
 
 class Jee4LM(BaseDaemon):
+    def __init__(self) -> None:
+    # Standard initialisation
+        super().__init__(on_start_cb=self.on_start, on_message_cb=self.on_message, on_stop_cb=self.on_stop)
+
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         logging.debug(f'Searching for task with id {id}')
