@@ -460,7 +460,7 @@ class jee4lm extends eqLogic
           break; // called from refresh all info 
         case 1: // on manual action toggle daemon
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from switch on/off action");
-          if ($ls != $ns) // if there is a state change
+         // if ($ls != $ns) // if there is a state change, supprimé car souci si le cache est planté
             cache::set('jee4lm::laststate_'.$id,$ns);
           if (self::deamon_info()['state'] == 'ok') 
               self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
