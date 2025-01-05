@@ -434,9 +434,10 @@ class jee4lm extends eqLogic
       null, 
       'GET', 
       ["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', "refresh called got data ".json_encode($data));
     // check if local or remote config info is fetched
-    //$isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
-    if ($data['status'] == true) { // check that we have information returned
+    $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
+    if ($isdata) { // check that we have information returned
       log::add(__CLASS__, 'debug', "refresh $uid parse info");
       $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
