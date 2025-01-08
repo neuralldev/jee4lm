@@ -255,6 +255,7 @@ class jee4lm extends eqLogic
 // cette section devra évoluer pour saisie de la tranche dans le plugin
 
     $heureActuelle = date('H');
+    $minuteActuelle = date('i');
 
     // Tester si l'heure est entre 22h et 6h
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
@@ -277,10 +278,13 @@ class jee4lm extends eqLogic
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
           if ($slug != '') { // if there is a type of machine defined 
-            if ($state == 0) { // if machine is off, do  not refresh all information
-            log::add(__CLASS__, 'debug', 'cron exit machine is off');
-            return;
+            if ($state == 0) { // if machine is off, refresh information only every 5 minutes
+              if ($minuteActuelle % 5 == 0) {
+                log::add(__CLASS__, 'debug', 'cron exit machine is off');
+                return;
+              }
             }
+            
             if ($ls ==1) // if daemon is running no need to refresh, exit
               {
                 log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
