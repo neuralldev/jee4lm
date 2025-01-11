@@ -44,9 +44,9 @@ class jee4lm extends eqLogic
    */
   public static function checkrequest($_response, $_serial = null, $_header = null)
   {
-    log::add(__CLASS__, 'debug', 'check request');
+ //   log::add(__CLASS__, 'debug', 'check request');
     if ($_response == '') return true;
-    log::add(__CLASS__, 'debug', 'check request not empty');
+  //  log::add(__CLASS__, 'debug', 'check request not empty');
     $r = json_decode($_response, true);
     if ($r==null) return true;
     if (!array_key_exists('data', $r)) return true;    
@@ -62,7 +62,7 @@ class jee4lm extends eqLogic
 
     // if there is a commandID then wait for command to succeed   
     for ($i = 0; $i < 5; $i++) {
-      log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
+  //    log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
       $ch = curl_init();
       curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY . "/" . $_serial . "/commands/" . $commandID);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -141,8 +141,8 @@ class jee4lm extends eqLogic
         curl_close($ch);
         return $err;
       }
-    } else
-      log::add(__CLASS__, 'debug', "request response ok with ".$response); //.$response);
+    } // else
+ //     log::add(__CLASS__, 'debug', "request response ok with ".$response); //.$response);
     curl_close($ch);
  //   log::add(__CLASS__, 'debug', 'request stop');
     if ($_serial !='') jee4lm::checkrequest($response, $_serial, $_header);
@@ -259,10 +259,10 @@ class jee4lm extends eqLogic
 
     // Tester si l'heure est entre 22h et 6h
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
-      log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
+//      log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
       return;
     } else {
-      log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
+//      log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
     }
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       $mc = cache::byKey('jee4lm::laststate_'.$jee4lm->getId());
