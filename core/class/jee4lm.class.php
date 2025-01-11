@@ -451,11 +451,11 @@ class jee4lm extends eqLogic
       null, 
       'GET', 
       ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', "refresh called got data ".json_encode($data));
+    //log::add(__CLASS__, 'debug', "refresh called got data ".json_encode($data));
     // check if local or remote config info is fetched
     $isdata = ($data!=null && $ip!='') || ($ip='' && $data['status'] == true);
     if ($isdata) { // check that we have information returned
-      log::add(__CLASS__, 'debug', "refresh $uid parse info");
+      //log::add(__CLASS__, 'debug', "refresh $uid parse info");
       $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
@@ -531,7 +531,7 @@ class jee4lm extends eqLogic
           $_eq->checkAndUpdateCmd('coffeetarget',$boiler['target']);
           $_eq->checkAndUpdateCmd('coffeecurrent',$boiler['current']); 
           $_eq->checkAndUpdateCmd('displaycoffee',$machine['machineMode']=="StandBy" ? $boiler['current']." °C":"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
-          log::add(__CLASS__, 'debug', $boiler['current']." ".$boiler['target']);
+          //log::add(__CLASS__, 'debug', $boiler['current']." ".$boiler['target']);
         }
       }
       $_eq->checkAndUpdateCmd('preinfusionmode',$preinfusion['mode'] == 'Enabled');
