@@ -530,7 +530,7 @@ class jee4lm extends eqLogic
           $_eq->checkAndUpdateCmd('coffeeenabled',$boiler['isEnabled']);
           $_eq->checkAndUpdateCmd('coffeetarget',$boiler['target']);
           $_eq->checkAndUpdateCmd('coffeecurrent',$boiler['current']); 
-          $_eq->checkAndUpdateCmd('displaycoffee',$machine['machineMode']=="StandBy" ? '---':"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
+          $_eq->checkAndUpdateCmd('displaycoffee',$machine['machineMode']=="StandBy" ? $boiler['current']." °C":"<span style='color:".($boiler['current']+2>=$boiler['target']?'green':'red').";'>".$boiler['target']."°C / ".$boiler['current']."°C</span>"); 
           log::add(__CLASS__, 'debug', $boiler['current']." ".$boiler['target']);
         }
       }
@@ -1541,7 +1541,7 @@ public static function tcpdetect()
 
         $machinestate = ($arr['data']['MACHINE_STATUS'] == 'BrewingMode');
         $coffeetarget = $this->getCmd(null, 'coffeetarget')->execCmd();
-        $display = !$machinestate ? '---' :
+        $display = !$machinestate ? $arr['data']['TEMP_COFFEE'].' °C' :
           "<span style='color:" . ($arr['data']['TEMP_COFFEE'] + 2 >= $coffeetarget ? 'green' : 'red') . ";'>" . $coffeetarget . "°C / " . $arr['data']['TEMP_COFFEE'] . "°C</span>";
           $this->checkAndUpdateCmd('displaycoffee',$display);
         log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $arr['data']['TEMP_COFFEE'] . ' tank=' . $arr['data']['LEVEL_TANK']);
