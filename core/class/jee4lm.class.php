@@ -468,6 +468,8 @@ class jee4lm extends eqLogic
       $mc = cache::byKey('jee4lm::laststate_'.$id);
       $ls = $mc==null ? 0: $mc->getValue(); //previous state
       $ns = $machine['machineMode'] == "StandBy" ? 0 : 1; // next state (go to state)
+      $_eq->checkAndUpdateCmd('hbmode',$ns ? 'off' : 'heat');
+
       switch ($_poll) { // select action based on source of call
         case 0: // called direct
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from direct call");
