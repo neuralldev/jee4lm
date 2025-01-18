@@ -278,8 +278,8 @@ class jee4lm extends eqLogic
           $ip = $jee4lm->getConfiguration('host');
           log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state host=$ip");
           if ($slug != '') { // if there is a type of machine defined 
-            if ($state == 0) { // if machine is off, refresh information only every 5 minutes
-              if ($minuteActuelle % 5 != 0) {
+            if ($state == 0) { // if machine is off, refresh information only every 5 minutes if on the web, every minute if local
+              if ($minuteActuelle % 5 && $ip == '') {
                 log::add(__CLASS__, 'debug', 'cron exit machine is off');
                 return;
               }
