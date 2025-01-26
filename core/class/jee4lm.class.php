@@ -1798,6 +1798,11 @@ public static function tcpdetect()
         throw new Exception(__('Veuillez vérifier la configuration', __FILE__));
     }
 
+    // before running daemon, check if all cache values are cleared
+    foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
+      cache::set('jee4lm::laststate_'.$jee4lm->getId(),0);
+    }
+
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lmd'); // répertoire du démon à modifier
     $cmd = self::getPython3() . " {$path}/jee4lmd.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
@@ -1809,7 +1814,6 @@ public static function tcpdetect()
     $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/deamon.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
     log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/jee4lmd.py");
     $result = exec($cmd . ' >> ' . log::getPathToLog('jee4lmd') . ' 2>&1 &');     
-    $i = 0;
     while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') 
@@ -1837,6 +1841,11 @@ public static function tcpdetect()
     }
     system::kill('jee4lmd.py'); // nom du démon à modifier
     sleep(1);
+    // before running daemon, check if all cache values are cleared
+    foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
+      cache::set('jee4lm::laststate_'.$jee4lm->getId(),0);
+    }
+    
   }
   /**
    * Send a payload to daemon running in background. 
