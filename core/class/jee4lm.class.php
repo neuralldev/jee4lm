@@ -442,7 +442,7 @@ class jee4lm extends eqLogic
     $id = $_eq->getId();
     $uid = uniqid();
     $localcall = $ip !='' ? 'local' : 'remote';
-    log::add(__CLASS__, 'debug', "refresh $uid $localcall serial=$serial id=$id ip=$ip poll=$_poll");
+  //  log::add(__CLASS__, 'debug', "refresh $uid $localcall serial=$serial id=$id ip=$ip poll=$_poll");
     $token = self::getToken($_eq);
     $data = self::request(
       $ip == '' ? 
