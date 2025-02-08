@@ -453,10 +453,10 @@ class jee4lm extends eqLogic
       ["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', "refresh called got data ".json_encode($data));
     // check if local or remote config info is fetched
-    $isdata = $data && ($ip || $data['status']);
-    if ($isdata) { // check that we have information returned
+    if ($data && ($ip || $data['status'])) { // check that we have information returned
       //log::add(__CLASS__, 'debug', "refresh $uid parse info");
-      $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
+      $machine = $data['data'] ?? $data;
+      // $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
       $bbwset = $machine['recipeAssignment'][0];
       $g = $machine['groupCapabilities'][0];
@@ -1556,6 +1556,11 @@ public static function tcpdetect()
         else
           $display = "<span style='color:green'>ON</span>";
         $this->checkAndUpdateCmd('displaysteam',$display);
+
+        // if machine is on hide HEAT button else show it
+        $cmd = $this->getCmd(null, 'jee4lm_on');
+        $cmd->setIsVisible(!$machinestate);          
+        $cmd->save();
 
         if (!$this->getCmd(null, 'isbbw')->execCmd() || !$this->searchForBBW()) { //present
             $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm::bbw nodose active");
