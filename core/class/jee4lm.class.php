@@ -445,9 +445,7 @@ class jee4lm extends eqLogic
   //  log::add(__CLASS__, 'debug', "refresh $uid $localcall serial=$serial id=$id ip=$ip poll=$_poll");
     $token = self::getToken($_eq);
     $data = self::request(
-      $ip == '' ? 
-        $_eq->getPath($serial, $ip). '/configuration' : 
-        $_eq->getPath($serial, $ip)."/config" ,
+        $_eq->getPath($serial, $ip). ($ip == '' ? '/configuration' : "/config"),
       null, 
       'GET', 
       ["Authorization: Bearer $token"]);
@@ -473,9 +471,8 @@ class jee4lm extends eqLogic
       switch ($_poll) { // select action based on source of call
         case 0: // called direct
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from direct call");
-          if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
+          if ($ls != $ns)  // if there is a state change, this is switch off as demon is running when on
             cache::set('jee4lm::laststate_'.$id,$ns);
-          }
           break; // called from refresh all info 
         case 1: // on manual action toggle daemon
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from switch on/off action");
