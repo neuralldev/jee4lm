@@ -1556,7 +1556,7 @@ public static function tcpdetect()
 
         // if machine is on hide HEAT button else show it
         $cmd = $this->getCmd(null, 'jee4lm_on');
-        $cmd->setIsVisible(!$machinestate);          
+        $cmd->setIsVisible($machinestate?0:1);          
         $cmd->save();
 
         if (!$this->getCmd(null, 'isbbw')->execCmd() || !$this->searchForBBW()) { //present
