@@ -136,7 +136,7 @@ class jee4lm extends eqLogic
       $err_no = curl_errno($ch);
       log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
       if ($err_no == 7) {// connection problem 
-        log::add(__CLASS__, 'debug', "disabling ON/OFF as no connection to machine");
+        // log::add(__CLASS__, 'debug', "disabling ON/OFF as no connection to machine");
         $err =[ 'status' => false, 'error'=>$err_no];
         curl_close($ch);
         return $err;
@@ -485,7 +485,7 @@ class jee4lm extends eqLogic
           break;
         case 2 : // called from callback as refreshing value
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from callback call");
-          if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
+          if ($ls != $ns || $ns==1) { // if there is a state change, this is switch off as demon is running when on
             cache::set('jee4lm::laststate_'.$id,$ns);
             if (self::deamon_info()['state'] == 'ok') 
               self::deamon_send(['id' => $id, 'lm'=> 'stop']);
