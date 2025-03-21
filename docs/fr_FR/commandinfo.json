@@ -1,0 +1,127 @@
+#comandi ancora non disponibili: 
+- scaldatazze
+- accensione/spegnimento macchina
+- autolavaggio
+
+{
+    "commands": [
+        //set point temperatura in caldaia
+        {
+            "name": "SettingBoilerTarget",
+            "displayName": "Setting - Boiler Target Temperature",
+            "parameter": "object",
+            "schema": {
+                "identifier": "string",
+                "value": "number"
+            }
+        },
+        //set valore della dose 
+        {
+            "name": "SettingGroupDose",
+            "displayName": "Setting - Group Dose",
+            "parameter": "object",
+            "schema": {
+                "group": "string", //identificativo gruppo 
+                "dose_index": "string", // SingleEspresso, DoubleEspresso, TwoDoubleEspressos, TwoSingleEspressos
+                "dose_type": "string", // PulsesType, MassType or BrewRatioType
+                "value": "number"
+            }
+        },
+        //set valore della modalità di misura della dose
+        {
+            "name": "SettingGroupDoseMode",
+            "displayName": "Setting - Group Dose Mode",
+            "parameter": "object",
+            "schema": {
+                "group": "string", // PulsesType, MassType or BrewRatioType
+                "brewing_type": "string"
+            }
+        },
+        {
+            "name": "SettingBoilerEnable",
+            "displayName": "Setting - Boiler Enable",
+            "parameter": "object",
+            "schema": {
+                "identifier": "string", //identificativo boiler
+                "state": "boolean" //true, false
+            }
+        },
+        //modalità della macchina
+        //non lo trovo nel design da chiedere 
+        {
+            "name": "MachineChangeMode",
+            "displayName": "Setting - Machine Change Mode",
+            "parameter": "object",
+            "schema": {
+                "mode": "string" //StandBy (spento),BrewingMode (acceso),SettingsMen,EcoMode,AlertMode,ErrorMode
+            }
+        },
+        // stessa cosa del comando prima 
+        {
+            "name": "GroupChangeMode",
+            "displayName": "Setting - Machine Change Mode",
+            "parameter": "object",
+            "schema": {
+                "group": "string", //nome del gruppo 
+                "mode": "string" //StandBy (spento),BrewingMode (acceso),SettingsMen,EcoMode,AlertMode,ErrorMode
+            }
+        },
+        //ogni volta che ci si connette alla macchina va richiamato il comando per settare il timestampp 
+        {
+            "name": "TimeStampUpdate",
+            "displayName": "Time Update",
+            "parameter": "object",
+            "schema": {
+                "time": "string" //in formato RFC3339 es: 2006-01-02T15:04:05Z07:00
+            }
+        },
+        //non penso si possa provare
+        {
+            "name": "SettingPreinfusion",
+            "displayName": "Setting - Preinfusion Setting By Button",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "button": "string",
+                /**
+                    * DoubleEspresso
+                    * ContinuousDose
+                    * SingleLungo
+                    * DoubleLungo
+                    * TwoSingleEspressos
+                    * TwoDoubleEspressos
+                    
+                    * ManualPressureMass
+                    * ManualPressurePulses
+                    * ManualPressureTime
+                    * ManualVoltageMass
+                    * ManualVoltagePulses
+                    * ManualVoltageTime
+                    * ProfileIndex0
+                    * ProfileIndex1
+                    * ProfileIndex2
+                    * ProfileIndex3
+                    * ProfileIndex4
+                    * ProfileIndex5
+                    * ProfileIndex6
+                    * ProfileIndex7
+                    * ProfileIndex8
+                    * ProfileIndex9
+                    * ProfileIndex10
+                    * ProfileIndex11
+                    * ProfileIndex12
+                    * ProfileIndex13
+                    * ProfileIndex14
+                    * AVModeIndex0
+                    * AVModeIndex1
+                    * AVModeIndex2
+                    * AVModeIndex3
+                    * AVModeIndex4
+                    * AVModeIndex5
+                */
+                "wetTimeMs": "integer", //per quanto tempo bagnare il caffè
+                "holdTimeMs": "integer" //quanto tempo deve tenere prima dell'erogazione
+            }
+        },
+    ]
+}

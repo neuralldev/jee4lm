@@ -1,0 +1,2635 @@
+{
+    "description": "bar machine model version",
+    "measurements": [
+        {
+            "name": "MachineConfiguration",
+            "type": "string",
+            "displayName": "JSON machine configuration",
+            "unit": "N/A"
+        },
+        {
+            "name": "SteamBoilerUpdateTemperature",
+            "type": "number",
+            "displayName": "SteamBoiler current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "SteamBoilerUpdateSetPoint",
+            "type": "number",
+            "displayName": "SteamBoiler current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "SteamBoilerUpdateOnOff",
+            "type": "boolean",
+            "displayName": "SteamBoiler current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "SteamBoilerUpdateDutyCycle",
+            "type": "number",
+            "displayName": "SteamBoiler current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "SteamBoilerUpdatePressure",
+            "type": "number",
+            "displayName": "SteamBoiler current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "CoffeeBoiler1UpdateTemperature",
+            "type": "number",
+            "displayName": "CoffeeBoiler1 current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler1UpdateSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler1 current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler1UpdateOnOff",
+            "type": "boolean",
+            "displayName": "CoffeeBoiler1 current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "CoffeeBoiler1UpdateDutyCycle",
+            "type": "number",
+            "displayName": "CoffeeBoiler1 current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "CoffeeBoiler1UpdatePressure",
+            "type": "number",
+            "displayName": "CoffeeBoiler1 current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "CoffeeBoiler2UpdateTemperature",
+            "type": "number",
+            "displayName": "CoffeeBoiler2 current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler2UpdateSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler2 current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler2UpdateOnOff",
+            "type": "boolean",
+            "displayName": "CoffeeBoiler2 current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "CoffeeBoiler2UpdateDutyCycle",
+            "type": "number",
+            "displayName": "CoffeeBoiler2 current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "CoffeeBoiler2UpdatePressure",
+            "type": "number",
+            "displayName": "CoffeeBoiler2 current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "CoffeeBoiler3UpdateTemperature",
+            "type": "number",
+            "displayName": "CoffeeBoiler3 current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler3UpdateSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler3 current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler3UpdateOnOff",
+            "type": "boolean",
+            "displayName": "CoffeeBoiler3 current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "CoffeeBoiler3UpdateDutyCycle",
+            "type": "number",
+            "displayName": "CoffeeBoiler3 current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "CoffeeBoiler3UpdatePressure",
+            "type": "number",
+            "displayName": "CoffeeBoiler3 current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "CoffeeBoiler4UpdateTemperature",
+            "type": "number",
+            "displayName": "CoffeeBoiler4 current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler4UpdateSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler4 current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler4UpdateOnOff",
+            "type": "boolean",
+            "displayName": "CoffeeBoiler4 current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "CoffeeBoiler4UpdateDutyCycle",
+            "type": "number",
+            "displayName": "CoffeeBoiler4 current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "CoffeeBoiler4UpdatePressure",
+            "type": "number",
+            "displayName": "CoffeeBoiler4 current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G1NeckHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G1NeckHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G1NeckHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G1NeckHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G1NeckHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G1NeckHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G1NeckHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G1NeckHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G1NeckHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G1NeckHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G2NeckHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G2NeckHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G2NeckHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G2NeckHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G2NeckHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G2NeckHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G2NeckHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G2NeckHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G2NeckHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G2NeckHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G3NeckHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G3NeckHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G3NeckHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G3NeckHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G3NeckHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G3NeckHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G3NeckHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G3NeckHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G3NeckHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G3NeckHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G4NeckHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G4NeckHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G4NeckHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G4NeckHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G4NeckHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G4NeckHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G4NeckHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G4NeckHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G4NeckHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G4NeckHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G1RingkHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G1RingkHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G1RingkHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G1RingkHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G1RingkHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G1RingkHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G1RingkHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G1RingkHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G1RingkHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G1RingkHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G2RingkHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G2RingkHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G2RingkHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G2RingkHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G2RingkHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G2RingkHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G2RingkHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G2RingkHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G2RingkHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G2RingkHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G3RingkHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G3RingkHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G3RingkHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G3RingkHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G3RingkHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G3RingkHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G3RingkHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G3RingkHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G3RingkHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G3RingkHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "G4RingkHeaterUpdateTemperature",
+            "type": "number",
+            "displayName": "G4RingkHeater current temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G4RingkHeaterUpdateSetPoint",
+            "type": "number",
+            "displayName": "G4RingkHeater current target temperature",
+            "unit": "C°"
+        },
+        {
+            "name": "G4RingkHeaterUpdateOnOff",
+            "type": "boolean",
+            "displayName": "G4RingkHeater current state (on or off)",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "G4RingkHeaterUpdateDutyCycle",
+            "type": "number",
+            "displayName": "G4RingkHeater current duty cycle",
+            "unit": "percentage"
+        },
+        {
+            "name": "G4RingkHeaterUpdatePressure",
+            "type": "number",
+            "displayName": "G4RingkHeater current pressure",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingStartedGroup1StopType",
+            "type": "string",
+            "displayName": "Group 1 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStartedGroup1DoseIndex",
+            "type": "string",
+            "displayName": "Group 1 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStartedGroup1PreWetWetTime",
+            "type": "number",
+            "displayName": "Number of seconds solenoid will be open before closing for hold",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup1PreWetHoldTime",
+            "type": "number",
+            "displayName": "Number of seconds the solenoid will be closed for the hold time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup1MassTarget",
+            "type": "number",
+            "displayName": "Group 1 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStartedGroup1TimeTarget",
+            "type": "number",
+            "displayName": "Group 1 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup1VolumeTarget",
+            "type": "number",
+            "displayName": "Group 1 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStartedGroup1AbrTarget",
+            "type": "number",
+            "displayName": "Group 1 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup1StopType",
+            "type": "string",
+            "displayName": "Group 1 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStoppedGroup1StopReason",
+            "type": "string",
+            "displayName": "Group 1 stop reason (manual or automatic)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup1DoseIndex",
+            "type": "string",
+            "displayName": "Group 1 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup1Mass",
+            "type": "number",
+            "displayName": "Group 1 mass value at stop",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup1Time",
+            "type": "number",
+            "displayName": "Group 1 time value at stop",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup1Volume",
+            "type": "number",
+            "displayName": "Group 1 volume value at stop",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup1MassTarget",
+            "type": "number",
+            "displayName": "Group 1 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup1TimeTarget",
+            "type": "number",
+            "displayName": "Group 1 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup1VolumeTarget",
+            "type": "number",
+            "displayName": "Group 1 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup1AbrTarget",
+            "type": "number",
+            "displayName": "Group 1 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup1TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 1 time since start",
+            "unit": "s"
+        },
+        {
+            "name": "FlushStoppedGroup1DoseIndex",
+            "type": "string",
+            "displayName": "Group 1 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "FlushStoppedGroup1FlowRate",
+            "type": "number",
+            "displayName": "Group 1 flush flow rate value",
+            "unit": "pls/s"
+        },
+        {
+            "name": "FlushStoppedGroup1Time",
+            "type": "number",
+            "displayName": "Group 1 flush time value",
+            "unit": "s"
+        },
+        {
+            "name": "FlushStoppedGroup1Volume",
+            "type": "number",
+            "displayName": "Group 1 flush volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup1Mass",
+            "type": "number",
+            "displayName": "Group 1 current mass value",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingUpdateGroup1Time",
+            "type": "number",
+            "displayName": "Group 1 current time value",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingUpdateGroup1Volume",
+            "type": "number",
+            "displayName": "Group 1 current volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup1Pressure",
+            "type": "number",
+            "displayName": "Group 1 current pressure value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup1IsSolenoidOpen",
+            "type": "boolean",
+            "displayName": "Group 1 solenoid currently open",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup1PumpTarget",
+            "type": "number",
+            "displayName": "Group 1 pump current target value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup1PumpDutyCycle",
+            "type": "number",
+            "displayName": "Group 1 pump current duty cycle ",
+            "unit": "percentage"
+        },
+        {
+            "name": "BrewingUpdateGroup1FlowRate",
+            "type": "number",
+            "displayName": "Group 1 current flow rate",
+            "unit": "pls/s"
+        },
+        {
+            "name": "BrewingUpdateGroup1IsPreinfusion",
+            "type": "boolean",
+            "displayName": "Group 1 currently in preinfusion",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup1InPostBrew",
+            "type": "boolean",
+            "displayName": "Group 1 currently in post brewing",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup1TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 1 time since brewing started",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup2StopType",
+            "type": "string",
+            "displayName": "Group 2 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStartedGroup2DoseIndex",
+            "type": "string",
+            "displayName": "Group 2 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStartedGroup2PreWetWetTime",
+            "type": "number",
+            "displayName": "Number of seconds solenoid will be open before closing for hold",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup2PreWetHoldTime",
+            "type": "number",
+            "displayName": "Number of seconds the solenoid will be closed for the hold time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup2MassTarget",
+            "type": "number",
+            "displayName": "Group 2 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStartedGroup2TimeTarget",
+            "type": "number",
+            "displayName": "Group 2 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup2VolumeTarget",
+            "type": "number",
+            "displayName": "Group 2 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStartedGroup2AbrTarget",
+            "type": "number",
+            "displayName": "Group 2 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup2StopType",
+            "type": "string",
+            "displayName": "Group 2 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStoppedGroup2StopReason",
+            "type": "string",
+            "displayName": "Group 2 stop reason (manual or automatic)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup2DoseIndex",
+            "type": "string",
+            "displayName": "Group 2 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup2Mass",
+            "type": "number",
+            "displayName": "Group 2 mass value at stop",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup2Time",
+            "type": "number",
+            "displayName": "Group 2 time value at stop",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup2Volume",
+            "type": "number",
+            "displayName": "Group 2 volume value at stop",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup2MassTarget",
+            "type": "number",
+            "displayName": "Group 2 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup2TimeTarget",
+            "type": "number",
+            "displayName": "Group 2 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup2VolumeTarget",
+            "type": "number",
+            "displayName": "Group 2 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup2AbrTarget",
+            "type": "number",
+            "displayName": "Group 2 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup2TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 2 time since start",
+            "unit": "s"
+        },
+        {
+            "name": "FlushStoppedGroup2DoseIndex",
+            "type": "string",
+            "displayName": "Group 2 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "FlushStoppedGroup2FlowRate",
+            "type": "number",
+            "displayName": "Group 2 flush flow rate value",
+            "unit": "pls/s"
+        },
+        {
+            "name": "FlushStoppedGroup2Time",
+            "type": "number",
+            "displayName": "Group 2 flush time value",
+            "unit": "s"
+        },
+        {
+            "name": "FlushStoppedGroup2Volume",
+            "type": "number",
+            "displayName": "Group 2 flush volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup2Mass",
+            "type": "number",
+            "displayName": "Group 2 current mass value",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingUpdateGroup2Time",
+            "type": "number",
+            "displayName": "Group 2 current time value",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingUpdateGroup2Volume",
+            "type": "number",
+            "displayName": "Group 2 current volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup2Pressure",
+            "type": "number",
+            "displayName": "Group 2 current pressure value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup2IsSolenoidOpen",
+            "type": "boolean",
+            "displayName": "Group 2 solenoid currently open",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup2PumpTarget",
+            "type": "number",
+            "displayName": "Group 2 pump current target value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup2PumpDutyCycle",
+            "type": "number",
+            "displayName": "Group 2 pump current duty cycle ",
+            "unit": "percentage"
+        },
+        {
+            "name": "BrewingUpdateGroup2FlowRate",
+            "type": "number",
+            "displayName": "Group 2 current flow rate",
+            "unit": "pls/s"
+        },
+        {
+            "name": "BrewingUpdateGroup2IsPreinfusion",
+            "type": "boolean",
+            "displayName": "Group 2 currently in preinfusion",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup2InPostBrew",
+            "type": "boolean",
+            "displayName": "Group 2 currently in post brewing",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup2TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 2 time since brewing started",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup3StopType",
+            "type": "string",
+            "displayName": "Group 3 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStartedGroup3DoseIndex",
+            "type": "string",
+            "displayName": "Group 3 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStartedGroup3PreWetWetTime",
+            "type": "number",
+            "displayName": "Number of seconds solenoid will be open before closing for hold",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup3PreWetHoldTime",
+            "type": "number",
+            "displayName": "Number of seconds the solenoid will be closed for the hold time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup3MassTarget",
+            "type": "number",
+            "displayName": "Group 3 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStartedGroup3TimeTarget",
+            "type": "number",
+            "displayName": "Group 3 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup3VolumeTarget",
+            "type": "number",
+            "displayName": "Group 3 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStartedGroup3AbrTarget",
+            "type": "number",
+            "displayName": "Group 3 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup3StopType",
+            "type": "string",
+            "displayName": "Group 3 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStoppedGroup3StopReason",
+            "type": "string",
+            "displayName": "Group 3 stop reason (manual or automatic)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup3DoseIndex",
+            "type": "string",
+            "displayName": "Group 3 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup3Mass",
+            "type": "number",
+            "displayName": "Group 3 mass value at stop",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup3Time",
+            "type": "number",
+            "displayName": "Group 3 time value at stop",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup3Volume",
+            "type": "number",
+            "displayName": "Group 3 volume value at stop",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup3MassTarget",
+            "type": "number",
+            "displayName": "Group 3 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup3TimeTarget",
+            "type": "number",
+            "displayName": "Group 3 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup3VolumeTarget",
+            "type": "number",
+            "displayName": "Group 3 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup3AbrTarget",
+            "type": "number",
+            "displayName": "Group 3 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup3TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 3 time since start",
+            "unit": "s"
+        },
+        {
+            "name": "FlushStoppedGroup3DoseIndex",
+            "type": "string",
+            "displayName": "Group 3 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "FlushStoppedGroup3FlowRate",
+            "type": "number",
+            "displayName": "Group 3 flush flow rate value",
+            "unit": "pls/s"
+        },
+        {
+            "name": "FlushStoppedGroup3Time",
+            "type": "number",
+            "displayName": "Group 3 flush time value",
+            "unit": "seconds"
+        },
+        {
+            "name": "FlushStoppedGroup3Volume",
+            "type": "number",
+            "displayName": "Group 3 flush volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup3Mass",
+            "type": "number",
+            "displayName": "Group 3 current mass value",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingUpdateGroup3Time",
+            "type": "number",
+            "displayName": "Group 3 current time value",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingUpdateGroup3Volume",
+            "type": "number",
+            "displayName": "Group 3 current volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup3Pressure",
+            "type": "number",
+            "displayName": "Group 3 current pressure value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup3IsSolenoidOpen",
+            "type": "boolean",
+            "displayName": "Group 3 solenoid currently open",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup3PumpTarget",
+            "type": "number",
+            "displayName": "Group 3 pump current target value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup3PumpDutyCycle",
+            "type": "number",
+            "displayName": "Group 3 pump current duty cycle ",
+            "unit": "percentage"
+        },
+        {
+            "name": "BrewingUpdateGroup3FlowRate",
+            "type": "number",
+            "displayName": "Group 3 current flow rate",
+            "unit": "pls/s"
+        },
+        {
+            "name": "BrewingUpdateGroup3IsPreinfusion",
+            "type": "boolean",
+            "displayName": "Group 3 currently in preinfusion",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup3InPostBrew",
+            "type": "boolean",
+            "displayName": "Group 3 currently in post brewing",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup3TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 3 time since brewing started",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup4StopType",
+            "type": "string",
+            "displayName": "Group 4 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStartedGroup4DoseIndex",
+            "type": "string",
+            "displayName": "Group 4 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStartedGroup4PreWetWetTime",
+            "type": "number",
+            "displayName": "Number of seconds solenoid will be open before closing for hold",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup4PreWetHoldTime",
+            "type": "number",
+            "displayName": "Number of seconds the solenoid will be closed for the hold time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup4MassTarget",
+            "type": "number",
+            "displayName": "Group 4 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStartedGroup4TimeTarget",
+            "type": "number",
+            "displayName": "Group 4 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStartedGroup4VolumeTarget",
+            "type": "number",
+            "displayName": "Group 4 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStartedGroup4AbrTarget",
+            "type": "number",
+            "displayName": "Group 4 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup4StopType",
+            "type": "string",
+            "displayName": "Group 4 stop method",
+            "unit": "enum"
+        },
+        {
+            "name": "BrewingStoppedGroup4StopReason",
+            "type": "string",
+            "displayName": "Group 4 stop reason (manual or automatic)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup4DoseIndex",
+            "type": "string",
+            "displayName": "Group 4 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup4Mass",
+            "type": "number",
+            "displayName": "Group 4 mass value at stop",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup4Time",
+            "type": "number",
+            "displayName": "Group 4 time value at stop",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup4Volume",
+            "type": "number",
+            "displayName": "Group 4 volume value at stop",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup4MassTarget",
+            "type": "number",
+            "displayName": "Group 4 target mass",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingStoppedGroup4TimeTarget",
+            "type": "number",
+            "displayName": "Group 4 target time",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingStoppedGroup4VolumeTarget",
+            "type": "number",
+            "displayName": "Group 4 target volume",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingStoppedGroup4AbrTarget",
+            "type": "number",
+            "displayName": "Group 4 target abr (mass)",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingStoppedGroup4TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 4 time since start",
+            "unit": "s"
+        },
+        {
+            "name": "FlushStoppedGroup4DoseIndex",
+            "type": "string",
+            "displayName": "Group 4 dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "FlushStoppedGroup4FlowRate",
+            "type": "number",
+            "displayName": "Group 4 flush flow rate value",
+            "unit": "pls/s"
+        },
+        {
+            "name": "FlushStoppedGroup4Time",
+            "type": "number",
+            "displayName": "Group 4 flush time value",
+            "unit": "seconds"
+        },
+        {
+            "name": "FlushStoppedGroup4Volume",
+            "type": "number",
+            "displayName": "Group 4 flush volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup4Mass",
+            "type": "number",
+            "displayName": "Group 4 current mass value",
+            "unit": "g"
+        },
+        {
+            "name": "BrewingUpdateGroup4Time",
+            "type": "number",
+            "displayName": "Group 4 current time value",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingUpdateGroup4Volume",
+            "type": "number",
+            "displayName": "Group 4 current volume value",
+            "unit": "pls"
+        },
+        {
+            "name": "BrewingUpdateGroup4Pressure",
+            "type": "number",
+            "displayName": "Group 4 current pressure value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup4IsSolenoidOpen",
+            "type": "boolean",
+            "displayName": "Group 4 solenoid currently open",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup4PumpTarget",
+            "type": "number",
+            "displayName": "Group 4 pump current target value",
+            "unit": "bar"
+        },
+        {
+            "name": "BrewingUpdateGroup4PumpDutyCycle",
+            "type": "number",
+            "displayName": "Group 4 pump current duty cycle ",
+            "unit": "percentage"
+        },
+        {
+            "name": "BrewingUpdateGroup4FlowRate",
+            "type": "number",
+            "displayName": "Group 4 current flow rate",
+            "unit": "pls/s"
+        },
+        {
+            "name": "BrewingUpdateGroup4IsPreinfusion",
+            "type": "boolean",
+            "displayName": "Group 4 currently in preinfusion",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup4InPostBrew",
+            "type": "boolean",
+            "displayName": "Group 4 currently in post brewing",
+            "unit": "yes/no"
+        },
+        {
+            "name": "BrewingUpdateGroup4TimeSinceStart",
+            "type": "number",
+            "displayName": "Group 4 time since brewing started",
+            "unit": "s"
+        },
+        {
+            "name": "BrewingSnapshotGroup1",
+            "type": "string",
+            "displayName": "Group 1 brewing snapshot",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingSnapshotGroup2",
+            "type": "string",
+            "displayName": "Group 2 brewing snapshot",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingSnapshotGroup3",
+            "type": "string",
+            "displayName": "Group 3 brewing snapshot",
+            "unit": "N/A"
+        },
+        {
+            "name": "BrewingSnapshotGroup4",
+            "type": "string",
+            "displayName": "Group 4 brewing snapshot",
+            "unit": "N/A"
+        },
+        {
+            "name": "SteamBoilerAutoFillInProgress",
+            "type": "boolean",
+            "displayName": "If the Autofilling is active now",
+            "unit": "true/false"
+        },
+        {
+            "name": "SteamBoilerAutoFillTime",
+            "type": "number",
+            "displayName": "Number of seconds the autofill was active for",
+            "unit": "s"
+        },
+        {
+            "name": "SteamBoilerAutoFillStopType",
+            "type": "string",
+            "displayName": "Auto fill cause",
+            "unit": "enum"
+        },
+        {
+            "name": "UserInitiatedEventType",
+            "type": "string",
+            "displayName": "Other user initiated event type",
+            "unit": "enum"
+        },
+        {
+            "name": "LeftProportionalSteamInProgress",
+            "type": "boolean",
+            "displayName": "If the left steam is active",
+            "unit": "true/false"
+        },
+        {
+            "name": "RightProportionalSteamInProgress",
+            "type": "boolean",
+            "displayName": "If the right steam is active",
+            "unit": "true/false"
+        },
+        {
+            "name": "LeftProportionalSteamTime",
+            "type": "number",
+            "displayName": "Number of seconds the left steam is active",
+            "unit": "s"
+        },
+        {
+            "name": "RightProportionalSteamTime",
+            "type": "number",
+            "displayName": "Number of seconds the right steam is active",
+            "unit": "s"
+        },
+        {
+            "name": "PumpTimesTurnedOn",
+            "type": "integer",
+            "displayName": "Number of times the pump was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "PumpNumberOfSecondsOn",
+            "type": "number",
+            "displayName": "Number of seconds the pump was turned on since last measure",
+            "unit": "s"
+        },
+        {
+            "name": "MachineMode",
+            "type": "string",
+            "displayName": "JSON that represent machine current mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group1Mode",
+            "type": "string",
+            "displayName": "JSON that represent Group 1 current mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group2Mode",
+            "type": "string",
+            "displayName": "JSON that represent Group 2 current mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group3Mode",
+            "type": "string",
+            "displayName": "JSON that represent Group 3 current mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group4Mode",
+            "type": "string",
+            "displayName": "JSON that represent Group 4 current mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group1ScaleCalibration",
+            "type": "string",
+            "displayName": "JSON that represent scale calibration data",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group2ScaleCalibration",
+            "type": "string",
+            "displayName": "JSON that represent scale calibration data",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group3ScaleCalibration",
+            "type": "string",
+            "displayName": "JSON that represent scale calibration data",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group4ScaleCalibration",
+            "type": "string",
+            "displayName": "JSON that represent scale calibration data",
+            "unit": "N/A"
+        },
+        {
+            "name": "HotWaterButtonUsed",
+            "type": "string",
+            "displayName": "JSON that represent tea button usage",
+            "unit": "enum"
+        },
+        {
+            "name": "HotWaterInProgress",
+            "type": "boolean",
+            "displayName": "Represents if tea is in progress",
+            "unit": "true/false"
+        },
+        {
+            "name": "HotWaterStopTime",
+            "type": "number",
+            "displayName": "Represents tea stop time",
+            "unit": "s"
+        },
+        {
+            "name": "HotWaterStopReason",
+            "type": "string",
+            "displayName": "Represents tea button usage",
+            "unit": "enum"
+        },
+        {
+            "name": "SteamBoilerSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "SteamBoiler target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler1SettingTargetSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler1 target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler2SettingTargetSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler2 target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler3SettingTargetSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler3 target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "CoffeeBoiler4SettingTargetSetPoint",
+            "type": "number",
+            "displayName": "CoffeeBoiler4 target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G1NeckHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G1NeckHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G2NeckHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G2NeckHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G3NeckHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G3NeckHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G4NeckHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G4NeckHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G1RingkHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G1RingkHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G2RingkHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G2RingkHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G3RingkHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G3RingkHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "G4RingkHeaterSettingTargetSetPoint",
+            "type": "number",
+            "displayName": "G4RingkHeater target temperature setting",
+            "unit": "C°"
+        },
+        {
+            "name": "SteamBoilerSettingEnableState",
+            "type": "string",
+            "displayName": "SteamBoiler state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler1SettingEnableState",
+            "type": "string",
+            "displayName": "CoffeeBoiler1 state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler2SettingEnableState",
+            "type": "string",
+            "displayName": "CoffeeBoiler2 state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler3SettingEnableState",
+            "type": "string",
+            "displayName": "CoffeeBoiler3 state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler4SettingEnableState",
+            "type": "string",
+            "displayName": "CoffeeBoiler4 state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G1NeckHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G1NeckHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G2NeckHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G2NeckHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G3NeckHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G3NeckHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G4NeckHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G4NeckHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G1RingkHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G1RingkHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G2RingkHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G2RingkHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G3RingkHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G3RingkHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "G4RingkHeaterSettingEnableState",
+            "type": "string",
+            "displayName": "G4RingkHeater state (enabled or disabled)",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group1DoseSettings",
+            "type": "string",
+            "displayName": "JSON that represent group 1 settings",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group2DoseSettings",
+            "type": "string",
+            "displayName": "JSON that represent group 2 settings",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group3DoseSettings",
+            "type": "string",
+            "displayName": "JSON that represent group 3 settings",
+            "unit": "N/A"
+        },
+        {
+            "name": "Group4DoseSettings",
+            "type": "string",
+            "displayName": "JSON that represent group 4 settings",
+            "unit": "N/A"
+        },
+        {
+            "name": "CupwarmerStatus",
+            "type": "boolean",
+            "displayName": "Cupwarmer Status",
+            "unit": "enable/disable"
+        },
+        {
+            "name": "WaterConductivity",
+            "type": "number",
+            "displayName": "Water conductivity",
+            "unit": "TDS"
+        },
+        {
+            "name": "WaterHardness",
+            "type": "number",
+            "displayName": "Water hardness",
+            "unit": "ppm"
+        },
+        {
+            "name": "ABRCoffeeMassGroup1",
+            "type": "number",
+            "displayName": "Group 1 ABR Coffee Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRCoffeeMassGroup2",
+            "type": "number",
+            "displayName": "Group 2 ABR Coffee Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRCoffeeMassGroup3",
+            "type": "number",
+            "displayName": "Group 3 ABR Coffee Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRCoffeeMassGroup4",
+            "type": "number",
+            "displayName": "Group 4 ABR Coffee Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRPortafilterMassGroup1",
+            "type": "number",
+            "displayName": "Group 1 ABR Portafilter Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRPortafilterMassGroup2",
+            "type": "number",
+            "displayName": "Group 2 ABR Portafilter Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRPortafilterMassGroup3",
+            "type": "number",
+            "displayName": "Group 3 ABR Portafilter Mass",
+            "unit": "g"
+        },
+        {
+            "name": "ABRPortafilterMassGroup4",
+            "type": "number",
+            "displayName": "Group 4 ABR Portafilter Mass",
+            "unit": "g"
+        },
+        {
+            "name": "SteamBoilerTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times SteamBoiler was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler1TimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times CoffeeBoiler1 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler2TimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times CoffeeBoiler2 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler3TimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times CoffeeBoiler3 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler4TimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times CoffeeBoiler4 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G1NeckHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G1NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G2NeckHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G2NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G3NeckHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G3NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G4NeckHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G4NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G1RingkHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G1RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G2RingkHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G2RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G3RingkHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G3RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G4RingkHeaterTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times G4RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CupwarmerTimesTurnedOn",
+            "type": "number",
+            "displayName": "Number of times Cupwarmer was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "SteamBoilerNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds Boiler 1 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler1NumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds CoffeeBoiler1 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler2NumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds CoffeeBoiler2 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler3NumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds CoffeeBoiler3 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CoffeeBoiler4NumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds CoffeeBoiler4 was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G1NeckHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G1NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G2NeckHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G2NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G3NeckHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G3NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G4NeckHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G4NeckHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G1RingkHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G1RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G2RingkHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G2RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G3RingkHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G3RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "G4RingkHeaterNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds G4RingkHeater was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "CupwarmerNumberOfSecondsOn",
+            "type": "integer",
+            "displayName": "Number of seconds Cupwarmer was turned on since last measure",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup1",
+            "type": "string",
+            "displayName": "JSON that represent group 1 preinfusion setting",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup2",
+            "type": "string",
+            "displayName": "JSON that represent group 2 preinfusion setting",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup3",
+            "type": "string",
+            "displayName": "JSON that represent group 3 preinfusion setting",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup4",
+            "type": "string",
+            "displayName": "JSON that represent group 4 preinfusion setting",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup1Mode",
+            "type": "string",
+            "displayName": "JSON that represent group 1 preinfusion mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup2Mode",
+            "type": "string",
+            "displayName": "JSON that represent group 2 preinfusion mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup3Mode",
+            "type": "string",
+            "displayName": "JSON that represent group 3 preinfusion mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingPreinfusionGroup4Mode",
+            "type": "string",
+            "displayName": "JSON that represent group 4 preinfusion mode",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingAutoOnOffConfig",
+            "type": "string",
+            "displayName": "JSON that represent auto on off configuration",
+            "unit": "N/A"
+        },
+        {
+            "name": "SettingAutoOnOffEnabled",
+            "type": "boolean",
+            "displayName": "Auto configuration enabled (true) or disabled (false)",
+            "unit": "enabled/disabled"
+        },
+        {
+            "name": "TeaStartedStopType",
+            "type": "string",
+            "displayName": "Tea started stop type",
+            "unit": "N/A"
+        },
+        {
+            "name": "TeaStartedDoseIndex",
+            "type": "string",
+            "displayName": "Tea started dose index",
+            "unit": "N/A"
+        },
+        {
+            "name": "TeaStartedStopTarget",
+            "type": "string",
+            "displayName": "Tea started stop target",
+            "unit": "s"
+        },
+        {
+            "name": "TeaDoseSettings",
+            "type": "string",
+            "displayName": "JSON that represent tea dose settings",
+            "unit": "N/A"
+        },
+        {
+            "name": "TeaDoseEnabled",
+            "type": "boolean",
+            "displayName": "Tea doses enabled (true) or disabled (false)",
+            "unit": "enabled/disabled"
+        },
+        {
+            "name": "Settings",
+            "type": "string",
+            "displayName": "Map of all the machine settings",
+            "unit": "N/A"
+        },
+        {
+            "name": "SystemInfo",
+            "type": "string",
+            "displayName": "JSON system info",
+            "unit": "N/A"
+        },
+        {
+            "name": "KeepAlive",
+            "type": "integer",
+            "displayName": "Keep Alive message to keep up connection to Relayr broker",
+            "unit": "N/A"
+        },
+        {
+            "name": "ResetCounters",
+            "type": "integer",
+            "unit": "N/A"
+        }
+    ],
+    "alerts": [
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "SteamBoilerOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "CoffeeBoiler1Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "CoffeeBoiler2Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "CoffeeBoiler3Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "CoffeeBoiler4Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G1NeckHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G2NeckHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G3NeckHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G4NeckHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G1RingHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G2RingHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G3RingHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler went above the allowed temperature",
+            "name": "G4RingHeaterOverheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater went above the allowed temperature",
+            "name": "Group1Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater went above the allowed temperature",
+            "name": "Group2Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater went above the allowed temperature",
+            "name": "Group3Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater went above the allowed temperature",
+            "name": "Group4Overheated",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "SteamBoilerNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "CoffeeBoiler1NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "CoffeeBoiler2NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "CoffeeBoiler3NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "CoffeeBoiler4NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G1NeckHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G2NeckHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G3NeckHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G4NeckHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G1RingHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G2RingHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G3RingHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is not heating properly",
+            "name": "G4RingHeaterNotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater is not heating properly",
+            "name": "Group1NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater is not heating properly",
+            "name": "Group2NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater is not heating properly",
+            "name": "Group3NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Ring/Neck heater is not heating properly",
+            "name": "Group4NotHeating",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "SteamBoilerTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "CoffeeBoiler1TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "CoffeeBoiler2TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "CoffeeBoiler3TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "CoffeeBoiler4TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G1NeckHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G2NeckHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G3NeckHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G4NeckHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G1RingHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G2RingHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G3RingHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler temperature probe in the boiler is not functioning",
+            "name": "G4RingHeaterTemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "Leva Ring/Neck heater boiler temperature probe is not working",
+            "name": "Group1TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "Leva Ring/Neck heater boiler temperature probe is not working",
+            "name": "Group2TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "Leva Ring/Neck heater boiler temperature probe is not working",
+            "name": "Group3TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "Leva Ring/Neck heater boiler temperature probe is not working",
+            "name": "Group4TemperatureProbeFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "SteamBoilerHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "CoffeeBoiler1HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "CoffeeBoiler2HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "CoffeeBoiler3HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "CoffeeBoiler4HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G1NeckHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G2NeckHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G3NeckHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G4NeckHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G1RingHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G2RingHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G3RingHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The boiler is heating while Off",
+            "name": "G4RingHeaterHeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva/Neck Ring Heater is heating while Off",
+            "name": "Group1HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva/Neck Ring Heater is heating while Off",
+            "name": "Group2HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva/Neck Ring Heater is heating while Off",
+            "name": "Group3HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva/Neck Ring Heater is heating while Off",
+            "name": "Group4HeatingWhileOff",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter has shorted to ground",
+            "name": "Group1Shorted",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter has shorted to ground",
+            "name": "Group2Shorted",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter has shorted to ground",
+            "name": "Group3Shorted",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter has shorted to ground",
+            "name": "Group4Shorted",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter is not pulsing during brewing",
+            "name": "Group1NoPulse",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter is not pulsing during brewing",
+            "name": "Group2NoPulse",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter is not pulsing during brewing",
+            "name": "Group3NoPulse",
+            "severity": 7
+        },
+        {
+            "displayName": "The Flowmeter is not pulsing during brewing",
+            "name": "Group4NoPulse",
+            "severity": 7
+        },
+        {
+            "displayName": "The Steam Boiler is not filling properly",
+            "name": "SteamBoilerAutofillFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The Steam Boiler is empty",
+            "name": "SteamBoilerEmpty",
+            "severity": 7
+        },
+        {
+            "displayName": "The Bluetooth Chip is not functioning properly",
+            "name": "MachineBluetoothFailed",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Microswitch is broken",
+            "name": "Group1BrokenMicroSwitch",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Microswitch is broken",
+            "name": "Group2BrokenMicroSwitch",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Microswitch is broken",
+            "name": "Group3BrokenMicroSwitch",
+            "severity": 7
+        },
+        {
+            "displayName": "The Leva Microswitch is broken",
+            "name": "Group4BrokenMicroSwitch",
+            "severity": 7
+        },
+        {
+            "displayName": "The Steam Board is missing",
+            "name": "MachineMissingSteam",
+            "severity": 7
+        },
+        {
+            "displayName": "The 2nd Steam Board is missing",
+            "name": "MachineMissingAuxSteam",
+            "severity": 7
+        },
+        {
+            "displayName": "The “Profiles” board is missing",
+            "name": "MachineMissingStradaEP",
+            "severity": 7
+        },
+        {
+            "displayName": "The Graphic Display Board is missing",
+            "name": "Group1MissingGraphicDisplay",
+            "severity": 7
+        },
+        {
+            "displayName": "The Graphic Display Board is missing",
+            "name": "Group2MissingGraphicDisplay",
+            "severity": 7
+        },
+        {
+            "displayName": "The Graphic Display Board is missing",
+            "name": "Group3MissingGraphicDisplay",
+            "severity": 7
+        },
+        {
+            "displayName": "The Graphic Display Board is missing",
+            "name": "Group4MissingGraphicDisplay",
+            "severity": 7
+        },
+        {
+            "displayName": "The Pressure Sensor is reporting a pressure that is unexpected",
+            "name": "Group1PressureSensorOutOfRange",
+            "severity": 7
+        },
+        {
+            "displayName": "The Pressure Sensor is reporting a pressure that is unexpected",
+            "name": "Group2PressureSensorOutOfRange",
+            "severity": 7
+        },
+        {
+            "displayName": "The Pressure Sensor is reporting a pressure that is unexpected",
+            "name": "Group3PressureSensorOutOfRange",
+            "severity": 7
+        },
+        {
+            "displayName": "The Pressure Sensor is reporting a pressure that is unexpected",
+            "name": "Group4PressureSensorOutOfRange",
+            "severity": 7
+        },
+        {
+            "displayName": "The Profiles Board ADC is not functioning",
+            "name": "MachineEPBoardADCBroken",
+            "severity": 7
+        },
+        {
+            "displayName": "It is recommended that the Water Filter be changed",
+            "name": "MachineWaterFilterAlarm",
+            "severity": 7
+        },
+        {
+            "displayName": "The user is pairing a Bluetooth device",
+            "name": "MachineBluetoothShowPasskey",
+            "severity": 7
+        },
+        {
+            "displayName": "The 220V Universal Board is Missing",
+            "name": "MachineBoardMissingUniversal",
+            "severity": 7
+        },
+        {
+            "displayName": "The 24V Universal Board is Missing",
+            "name": "MachineBoardMissingUniversal24V",
+            "severity": 7
+        },
+        {
+            "displayName": "The 3rd Steam Board is missing",
+            "name": "MachineBoardMissingSteamAux2",
+            "severity": 7
+        }
+    ],
+    "commands": [
+        {
+            "name": "SettingBoilerTarget",
+            "displayName": "Setting - Boiler Target Temperature",
+            "parameter": "object",
+            "schema": {
+                "identifier": "string",
+                "value": "number"
+            }
+        },
+        {
+            "name": "SettingGroupDose",
+            "displayName": "Setting - Group Dose",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "dose_index": "string",
+                "dose_type": "string",
+                "value": "number"
+            }
+        },
+        {
+            "name": "SettingGroupDoseMode",
+            "displayName": "Setting - Group Dose Mode",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "brewing_type": "string"
+            }
+        },
+        {
+            "name": "SettingBoilerEnable",
+            "displayName": "Setting - Boiler Enable",
+            "parameter": "object",
+            "schema": {
+                "identifier": "string",
+                "state": "boolean"
+            }
+        },
+        {
+            "name": "MachineChangeMode",
+            "displayName": "Setting - Machine Change Mode",
+            "parameter": "object",
+            "schema": {
+                "mode": "string"
+            }
+        },
+        {
+            "name": "GroupChangeMode",
+            "displayName": "Setting - Machine Change Mode",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "mode": "string"
+            }
+        },
+        {
+            "name": "TimeStampUpdate",
+            "displayName": "Time Update",
+            "parameter": "object",
+            "schema": {
+                "time": "string"
+            }
+        },
+        {
+            "name": "SettingPreinfusion",
+            "displayName": "Setting - Preinfusion Setting By Button",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "button": "string",
+                "wetTimeMs": "integer",
+                "holdTimeMs": "integer"
+            }
+        },
+        {
+            "name": "SettingPreinfusionMode",
+            "displayName": "Setting - Preinfusion Mode",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "style": "string"
+            }
+        },
+        {
+            "name": "SettingABRCoffeeMass",
+            "displayName": "Setting - ABR Coffee Mass",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "mass": "number"
+            }
+        },
+        {
+            "name": "SettingABRPortafilterMass",
+            "displayName": "Setting - ABR Portafilter Mass",
+            "parameter": "object",
+            "schema": {
+                "group": "string",
+                "mass": "number"
+            }
+        },
+        {
+            "name": "SettingCupwarmerEnableDisable",
+            "displayName": "Setting - Cupwarmer Enable or Disable",
+            "parameter": "object",
+            "schema": {
+                "enabled": "boolean"
+            }
+        },
+        {
+            "name": "AutoOnOff",
+            "displayName": "Setting - Auto On Off Configuration",
+            "parameter": "object",
+            "schema": {
+                "onTimeHours": "integer",
+                "onTimeMinutes": "integer",
+                "offTimeHours": "integer",
+                "offTimeMinutes": "integer",
+                "closedDay": "integer"
+            }
+        },
+        {
+            "name": "AutoOnOffEnable",
+            "displayName": "Setting - Auto On Off Enable or Disable",
+            "parameter": "object",
+            "schema": {
+                "enabled": "boolean"
+            }
+        },
+        {
+            "name": "SettingTeaDose",
+            "displayName": "Setting - Tea Dose",
+            "parameter": "object",
+            "schema": {
+                "doseIndex": "string",
+                "stopTarget": "integer"
+            }
+        },
+        {
+            "name": "SettingTeaDoseEnabled",
+            "displayName": "Setting - Tea Dose Enable or Disable",
+            "parameter": "object",
+            "schema": {
+                "enabled": "boolean"
+            }
+        },
+        {
+            "name": "TokenCreate",
+            "displayName": "Create Token",
+            "parameter": "object",
+            "schema": {
+                "user_digest": "string",
+                "user_role": "string"
+            }
+        },
+        {
+            "name": "TokenGet",
+            "displayName": "Get Token",
+            "parameter": "object",
+            "schema": {
+                "user_digest": "string"
+            }
+        },
+        {
+            "name": "TokenUpdate",
+            "displayName": "Update Token",
+            "parameter": "object",
+            "schema": {
+                "user_token": "string",
+                "user_role": "string"
+            }
+        },
+        {
+            "name": "TokenDelete",
+            "displayName": "Delete Token",
+            "parameter": "object",
+            "schema": {
+                "user_digest": "string"
+            }
+        }
+    ],
+    "measurementCounters": [
+        {
+            "name": "BrewingStoppedGroup1Counter",
+            "trigger": "BrewingStoppedGroup1StopType",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "BrewingStoppedGroup2Counter",
+            "trigger": "BrewingStoppedGroup2StopType",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "BrewingStoppedGroup3Counter",
+            "trigger": "BrewingStoppedGroup3StopType",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "BrewingStoppedGroup4Counter",
+            "trigger": "BrewingStoppedGroup4StopType",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "FlushStoppedGroup1Counter",
+            "trigger": "FlushStoppedGroup1Time",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "FlushStoppedGroup2Counter",
+            "trigger": "FlushStoppedGroup2Time",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "FlushStoppedGroup3Counter",
+            "trigger": "FlushStoppedGroup3Time",
+            "reset": "ResetCounters"
+        },
+        {
+            "name": "FlushStoppedGroup4Counter",
+            "trigger": "FlushStoppedGroup4Time",
+            "reset": "ResetCounters"
+        }
+    ],
+    "fileModelIds": [
+        "e233138b-687a-415e-a433-cd69c401ae50"
+    ]
+}
