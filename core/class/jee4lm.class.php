@@ -452,7 +452,7 @@ class jee4lm extends eqLogic
     //log::add(__CLASS__, 'debug', "refresh called got data ".json_encode($data));
     // check if local or remote config info is fetched
     if ($data && ($ip || $data['status'])) { // check that we have information returned
-      //log::add(__CLASS__, 'debug', "refresh $uid parse info");
+      log::add(__CLASS__, 'debug', "refresh $uid parse info");
       $machine = $data['data'] ?? $data;
       // $machine = $ip!=''?$data:$data['data']; // structure of returned information is the same but not at same level
       $bbw = $machine['recipes'][0];
@@ -1526,7 +1526,7 @@ public static function tcpdetect()
 //    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $arr = self::request($this->getPath($serial) . '/status', '', 'GET', ["Authorization: Bearer $token"]);
-//    log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_encode($arr));
+    log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_encode($arr));
     if ($arr != null) {
       log::add(__CLASS__, 'debug', 'getinformation got feedback '.json_encode($arr));
       if(array_key_exists('status', $arr)) {
