@@ -554,6 +554,7 @@ class jee4lm extends eqLogic
     $_eq->checkAndUpdateCmd('displaycoffee','OFF');
     $_eq->checkAndUpdateCmd('machinemode',false);
     $_eq->checkAndUpdateCmd('tankStatus',false);
+    cache::set('jee4lm::laststate_'.$id,0);
 
   }
   return false;
