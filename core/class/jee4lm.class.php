@@ -111,7 +111,7 @@ class jee4lm extends eqLogic
   {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
    log::add(__CLASS__, 'debug', 'request query url='.$_path." with date=".$_data." and type=".$_type);
-
+   
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $_path);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
