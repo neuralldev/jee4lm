@@ -486,7 +486,7 @@ class jee4lm extends eqLogic
         case 2 : // called from callback as refreshing value
           log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from callback call");
           if ($ls != $ns || $ns==1) { // if there is a state change, this is switch off as demon is running when on
-            cache::set('jee4lm::laststate_'.$id,$ns);
+            cache::set('jee4lm::laststate_'.$id,0);
             if (self::deamon_info()['state'] == 'ok') 
               self::deamon_send(['id' => $id, 'lm'=> 'stop']);
           }
