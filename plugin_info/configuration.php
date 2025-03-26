@@ -48,7 +48,7 @@ document.getElementById('bt_loginToLMCloud').addEventListener('click', function 
     width: '85vw',
     height: '51vw',
     top: '8vh',
-    contentUrl: 'index.php?v=d&modal=login&plugin=jee4lm'
+    contentUrl: 'index.php?v=d&modal=login&plugin=jee4lm5'
   });
 });
 
