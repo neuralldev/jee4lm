@@ -1466,7 +1466,7 @@ public function setScaleTarget($_dose, $_weight) {
     }
 
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lm5d'); // répertoire du démon à modifier
-    $cmd = self::getPython3() . " {$path}/jee4lmd5.py"; // nom du démon à modifier
+    $cmd = self::getPython3() . " {$path}/jee4lmd5d.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
    // $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
