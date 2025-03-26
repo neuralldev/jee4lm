@@ -22,7 +22,7 @@ try {
     }
 
     $action = init('action');
-    log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
+    log::add('jee4lm5', 'debug', ' action request = (' . $action. ')');
     switch ($action) {
         case 'login':
             if (jee4lm5::login(init('username'), init('password'))) {

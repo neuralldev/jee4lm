@@ -146,6 +146,7 @@ class jee4lm5 extends eqLogic
   public static function login($_username, $_password)
   {
 
+    log::add(__CLASS__, 'debug', 'login start');
     if ($_username == '' || $_password == '') {
       log::add(__CLASS__, 'debug', 'login empty username or password');
       return '';
