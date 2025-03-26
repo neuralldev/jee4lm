@@ -49,7 +49,7 @@ if (!isConnect('admin')) {
     const username = document.getElementById('in_jee4lmLogin_username').value;
     const password = document.getElementById('in_jee4lmLogin_password').value;
 
-    fetch('plugins/jee4lm/core/ajax/jee4lm.ajax.php', {
+    fetch('plugins/jee4lm5/core/ajax/jee4lm5.ajax.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
