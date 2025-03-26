@@ -1429,7 +1429,7 @@ public function setScaleTarget($_dose, $_weight) {
       'launchable' => 'ok',
       'state' => 'nok'
     ];
-    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5.pid';
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid';
     if (file_exists($pid_file)) {
       $pid = trim(file_get_contents($pid_file));
       if (@posix_getsid($pid)) {
@@ -1466,7 +1466,7 @@ public function setScaleTarget($_dose, $_weight) {
     }
 
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lm5d'); // répertoire du démon à modifier
-    $cmd = self::getPython3() . " {$path}/jee4lmd5d.py"; // nom du démon à modifier
+    $cmd = self::getPython3() . " {$path}/jee4lm5d.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
    // $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
@@ -1496,7 +1496,7 @@ public function setScaleTarget($_dose, $_weight) {
    * @return void
    */
   public static function deamon_stop() {
-    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5.pid'; // ne pas modifier
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid'; // ne pas modifier
     if (file_exists($pid_file)) {
         $pid = intval(trim(file_get_contents($pid_file)));
         system::kill($pid);
