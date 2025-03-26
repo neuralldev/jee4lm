@@ -8,7 +8,7 @@ const
   LMCLOUD = 'https://lion.lamarzocco.io/api/customer-app/',
  
   JEEDOM_DAEMON_PORT = '50045',
-  //JEEDOM_DAEMON_HOST = '127.0.0.1';
+  JEEDOM_DAEMON_HOST = '127.0.0.1';
   //LMBT_ADVERTISING = "_marzocco._tcp.local";
 
 /* source api from HA
