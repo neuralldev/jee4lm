@@ -8,7 +8,7 @@ const
   LMCLOUD = 'https://lion.lamarzocco.io/api/customer-app/',
  
   JEEDOM_DAEMON_PORT = '50045',
-  JEEDOM_DAEMON_HOST = '127.0.0.1';
+  //JEEDOM_DAEMON_HOST = '127.0.0.1';
   //LMBT_ADVERTISING = "_marzocco._tcp.local";
 
 /* source api from HA
@@ -1468,7 +1468,7 @@ public function setScaleTarget($_dose, $_weight) {
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lm5d'); // répertoire du démon à modifier
     $cmd = self::getPython3() . " {$path}/jee4lm5d.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
-    $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
+//    $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
     $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/jee4lm5/core/php/jee4lm5.php'; // chemin de la callback url à modifier (voir ci-dessous)
     $cmd .= ' --cycle ' . config::byKey('cycle', __CLASS__, 2);
