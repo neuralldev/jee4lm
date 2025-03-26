@@ -25,7 +25,7 @@ try {
     log::add('jee4lm', 'debug', ' action request = (' . $action. ')');
     switch ($action) {
         case 'login':
-            if (jee4lm::login(init('username'), init('password'))) {
+            if (jee4lm5::login(init('username'), init('password'))) {
                 ajax::success();
             } else {
                 throw new Exception(__('informations de connexion incorrectes', __FILE__));
@@ -33,18 +33,10 @@ try {
             break;
 
         case 'sync':
-            if (jee4lm::detect()) {
+            if (jee4lm5::detect()) {
                 ajax::success();
             } else {
                 throw new Exception(__("la détection ne peut se faire qu'une fois la connexion réussie", __FILE__));
-            }
-            break;
-
-        case 'tcpdetect':
-            if (jee4lm::tcpdetect()) {
-                ajax::success();
-            } else {
-                throw new Exception(__("la détection de machine sur tcpip n'a pas trouvé de machines", __FILE__));
             }
             break;
 

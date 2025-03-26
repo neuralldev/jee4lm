@@ -3,7 +3,7 @@ if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
 }
 // Déclaration des variables obligatoires
-$plugin = plugin::byId('jee4lm');
+$plugin = plugin::byId('jee4lm5');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
@@ -161,17 +161,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 							</div>
 
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
-							<div class="form-group">
-								<label class="col-md-4 control-label">{{Adresse IP}}
-									<sup><i class="fas fa-question-circle tooltips"
-											title="{{adresse IP de la machine}}"></i></sup>
-								</label>
-								<div class="col-md-6">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="host"
-										type="text" placeholder="{{adresse IP de la machine}}">
-									<span style="font-size: 75%;">({{exemple : 192.168.101.35}})</span>
-								</div>
-							</div>
 						</div>
 						<!-- Partie droite de l'onglet "Équipement" -->
 						<!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->

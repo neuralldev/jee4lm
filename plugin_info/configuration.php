@@ -36,26 +36,7 @@ if (!isConnect()) {
         <a class="btn btn-default" id="bt_syncWithLMCloud"><i class="fas fa-sync"></i> {{Détecter mes équipements}}</a>
       </div>
     </div>
-    <div class="form-group">
-        <label class="col-sm-3 control-label">{{Port clef bluetooth}}</label>
-        <div class="col-sm-3">
-            <select class="configKey form-control" data-l1key="port">
-                <option value="none">{{Aucun}}</option>
-                <?php
-                  foreach (jeedom::getBluetoothMapping() as $name => $value) {
-                    echo '<option value="' . $name . '">' . $name . ' (' . $value . ')</option>';
-                  }
-                ?>
-           </select>
-       </div>
    </div>
-   <div class="form-group">
-      <label class="col-lg-3 control-label">{{mDNS test}}</label>
-      <div class="col-lg-4">
-        <a class="btn btn-default" id="bt_tcpdetect"><i class="fas fa-sync"></i> {{Détecter les IP locales}}</a>
-      </div>
-    </div>
-
   </fieldset>
 </form>
 
@@ -75,30 +56,9 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
   domUtils.showLoading();
   domUtils.ajax({
     type: "POST",
-    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
+    url: "plugins/jee4lm5/core/ajax/jee4lm5.ajax.php",
     data: {
         action: "sync"
-    },
-    dataType: 'json',
-    global: false,
-    error: function(error) {
-        jeedomUtils.showAlert({ message: error.message, level: 'danger' });
-        domUtils.hideLoading();
-    },
-    success: function(data) {
-      jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
-      domUtils.hideLoading();
-    }
-  });
-});
-
-document.getElementById('bt_tcpdetect').addEventListener('click', function () {
-  domUtils.showLoading();
-  domUtils.ajax({
-    type: "POST",
-    url: "plugins/jee4lm/core/ajax/jee4lm.ajax.php",
-    data: {
-        action: "tcpdetect"
     },
     dataType: 'json',
     global: false,

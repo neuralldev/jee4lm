@@ -18,33 +18,33 @@
 
  require_once dirname(__FILE__) . "/../../../../core/php/core.inc.php";
 
-if (!jeedom::apiAccess(init('apikey'), 'jee4lm')) {
+if (!jeedom::apiAccess(init('apikey'), 'jee4lm5')) {
 //	echo 'Clef API non valide, vous n\'etes pas autorisé à effectuer cette action';
 	die();
 }
 
-log::add('jee4lm', 'debug', 'callback incoming message');
+log::add('jee4lm5', 'debug', 'callback incoming message');
 
 if (init('test') != '') {
-	log::add('jee4lm', 'debug', 'callback ack');
+	log::add('jee4lm5', 'debug', 'callback ack');
 	echo 'OK';
 	die();
 }
 $result = json_decode(file_get_contents("php://input"), true);
 if (!is_array($result)) {
-	log::add('jee4lm', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
+	log::add('jee4lm5', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
 	die();
 }
 if (!isset($result['id'])) {
-	log::add('jee4lm', 'error', 'daemon callback id not set');
+	log::add('jee4lm5', 'error', 'daemon callback id not set');
 	die();
 }
 $eq = eqLogic::byId($result['id']);
 if ($eq==null) {
-	log::add('jee4lm', 'warning', 'daemon callback eqlogic not found');
+	log::add('jee4lm5', 'warning', 'daemon callback eqlogic not found');
 	die();
 }
-log::add('jee4lm', 'debug', 'daemon callback, refreshing...');
+log::add('jee4lm5', 'debug', 'daemon callback, refreshing...');
 
 jee4lm::RefreshAllInformation($eq, 2);
-log::add('jee4lm', 'debug', 'daemon callbach, refreshed');
+log::add('jee4lm5', 'debug', 'daemon callbach, refreshed');

@@ -17,15 +17,15 @@
  */
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-function jee4lm_install()
+function jee4lm5_install()
 {
 }
 
-function jee4lm_update()
+function jee4lm5_update()
 {
 }
 
-function jee4lm_remove()
+function jee4lm5_remove()
 {
 }
 
