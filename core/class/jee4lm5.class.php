@@ -1013,11 +1013,11 @@ public function setScaleTarget($_dose, $_weight) {
     if ($data == '')
       return false;
     foreach ($data as $machines) {
-      log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffeeStation']['id']) . " " . $machines['name'] . '(' . $machines['machine']['modelcode'] . ') SN=' . $machines['serialNumber']);
+      log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffeeStation']['id']) . " " . $machines['name'] . '(' . $machines['modelcode'] . ') SN=' . $machines['serialNumber']);
       log::add(__CLASS__, 'debug', 'type=' . $machines['type']);
       if ($machines['type'] == 'CoffeeMachine') {
         $d = DateTime::createFromFormat(DateTime::ATOM, $machines['connectionDate']);
-        log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
+        //log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
         // now check if machine is already created as an eqlogic
         $eqLogic = eqLogic::byLogicalId($uuid, 'jee4lm5');
         if (!is_object($eqLogic)) {
@@ -1031,7 +1031,11 @@ public function setScaleTarget($_dose, $_weight) {
         } else
           log::add(__CLASS__, 'debug', $uuid.' uuid already exists, update only');
         $eqLogic->setConfiguration('type', $machines['type']);
-        $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
+        if ($d instanceof DateTime) {
+            $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
+        } else {
+            log::add(__CLASS__, 'error', 'Invalid date format for pairingDate');
+        }
         $eqLogic->setConfiguration('modelName', $machines['modelName']);
         $eqLogic->setConfiguration('modelCode', $machines['modelCode']);
         $eqLogic->setLogicalId($uuid);
@@ -1432,13 +1436,13 @@ public function setScaleTarget($_dose, $_weight) {
     ];
     $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid';
     if (file_exists($pid_file)) {
-      log::add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file); 
+      //log::add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file); 
       $pid = trim(file_get_contents($pid_file));
       if (@posix_getsid($pid)) {
         $return['state'] = 'ok';
       } else {
         shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
-        log::add(__CLASS__, 'debug', 'deamon_info rm pid=' . $pid_file);
+        //log::add(__CLASS__, 'debug', 'deamon_info rm pid=' . $pid_file);
       }
     }
     return $return;
@@ -1500,11 +1504,11 @@ public function setScaleTarget($_dose, $_weight) {
    */
   public static function deamon_stop() {
     $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid'; // ne pas modifier
-    log::add(__CLASS__, 'debug', 'deamon_stop pid_file=' . $pid_file);
+  //  log::add(__CLASS__, 'debug', 'deamon_stop pid_file=' . $pid_file);
     if (file_exists($pid_file)) {
         $pid = intval(trim(file_get_contents($pid_file)));
         system::kill($pid);
-        log::add(__CLASS__, 'debug', 'deamon_stop pid=' . $pid);
+      //  log::add(__CLASS__, 'debug', 'deamon_stop pid=' . $pid);
     }
     system::kill('jee4lm5d.py'); // nom du démon à modifier
     sleep(1);
