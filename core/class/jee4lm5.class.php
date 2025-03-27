@@ -1504,7 +1504,7 @@ public function setScaleTarget($_dose, $_weight) {
     if (file_exists($pid_file)) {
         $pid = intval(trim(file_get_contents($pid_file)));
         system::kill($pid);
-        log:add(__CLASS__, 'debug', 'deamon_stop pid=' . $pid);
+        log::add(__CLASS__, 'debug', 'deamon_stop pid=' . $pid);
     }
     system::kill('jee4lm5d.py'); // nom du démon à modifier
     sleep(1);
