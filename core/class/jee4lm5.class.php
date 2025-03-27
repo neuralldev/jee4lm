@@ -1432,11 +1432,13 @@ public function setScaleTarget($_dose, $_weight) {
     ];
     $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid';
     if (file_exists($pid_file)) {
+      log:add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file);
       $pid = trim(file_get_contents($pid_file));
       if (@posix_getsid($pid)) {
         $return['state'] = 'ok';
       } else {
         shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
+        log::add(__CLASS__, 'debug', 'deamon_info rm pid=' . $pid_file);
       }
     }
     return $return;
@@ -1463,7 +1465,7 @@ public function setScaleTarget($_dose, $_weight) {
 
     // before running daemon, check if all cache values are cleared
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      cache::set('jee4lm::laststate_'.$jee4lm->getId(),0);
+      cache::set('jee4lm5::laststate_'.$jee4lm->getId(),0);
     }
     log::add(__CLASS__, 'debug', 'network='.network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') );
     $path = realpath(dirname(__FILE__) . '/../../resources/jee4lm5d'); // répertoire du démon à modifier
@@ -1474,7 +1476,7 @@ public function setScaleTarget($_dose, $_weight) {
     $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/jee4lm5/core/php/jee4lm5d.php'; // chemin de la callback url à modifier (voir ci-dessous)
     $cmd .= ' --cycle ' . config::byKey('cycle', __CLASS__, 2);
     $cmd .= ' --apikey ' . jeedom::getApiKey(__CLASS__); // l'apikey pour authentifier les échanges suivants
-    $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/jee4lm5.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
+    $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
     log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/jee4lm5d.py");
     $result = exec($cmd . ' >> ' . log::getPathToLog('jee4lm5d') . ' 2>&1 &');     
     while ($i < 10) {
@@ -1498,15 +1500,17 @@ public function setScaleTarget($_dose, $_weight) {
    */
   public static function deamon_stop() {
     $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid'; // ne pas modifier
+    log::add(__CLASS__, 'debug', 'deamon_stop pid_file=' . $pid_file);
     if (file_exists($pid_file)) {
         $pid = intval(trim(file_get_contents($pid_file)));
         system::kill($pid);
+        log:add(__CLASS__, 'debug', 'deamon_stop pid=' . $pid);
     }
     system::kill('jee4lm5d.py'); // nom du démon à modifier
     sleep(1);
     // before running daemon, check if all cache values are cleared
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      cache::set('jee4lm::laststate_'.$jee4lm->getId(),0);
+      cache::set('jee4lm5::laststate_'.$jee4lm->getId(),0);
     }
     
   }
