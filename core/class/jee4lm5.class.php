@@ -1432,7 +1432,7 @@ public function setScaleTarget($_dose, $_weight) {
     ];
     $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid';
     if (file_exists($pid_file)) {
-      log::add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file);
+      log::add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file); 
       $pid = trim(file_get_contents($pid_file));
       if (@posix_getsid($pid)) {
         $return['state'] = 'ok';
