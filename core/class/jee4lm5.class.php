@@ -1471,7 +1471,7 @@ public function setScaleTarget($_dose, $_weight) {
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
 //    $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
-    $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/jee4lm5/core/php/jee4lm5.php'; // chemin de la callback url à modifier (voir ci-dessous)
+    $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/jee4lm5/core/php/jee4lm5d.php'; // chemin de la callback url à modifier (voir ci-dessous)
     $cmd .= ' --cycle ' . config::byKey('cycle', __CLASS__, 2);
     $cmd .= ' --apikey ' . jeedom::getApiKey(__CLASS__); // l'apikey pour authentifier les échanges suivants
     $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/jee4lm5.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
