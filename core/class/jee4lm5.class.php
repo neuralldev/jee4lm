@@ -384,7 +384,8 @@ class jee4lm5 extends eqLogic
     $mc = cache::byKey('jee4lm::laststate_'.$id);
     $ls = $mc==null ? 0: $mc->getValue(); //previous state
 
-    if ($_poll == 2) $ret = $_eq->getInformations(); // refresh
+    log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' ls='.$ls.' poll='.$_poll);
+    $ret = $_eq->getInformations(); // refresh
 
     $ns = $_eq->getCmd(null, 'machinemode')->execCmd();
     $_eq->checkAndUpdateCmd('hbmode',$ns ? 'off' : 'heat');
