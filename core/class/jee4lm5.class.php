@@ -218,7 +218,7 @@ class jee4lm5 extends eqLogic
     $access_token = $mc->getValue();
  //   if (config::byKey('accessToken', 'jee4lm5') == '') // no login performed yet
  //     return '';
-    if ($access_token == '' || $access_token == null || $_force) {
+    if ($access_token == '' || $access_token == null || $_force) 
       $access_token = self::refreshToken();
     return $access_token;
   }
