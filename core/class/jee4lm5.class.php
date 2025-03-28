@@ -463,13 +463,15 @@ class jee4lm5 extends eqLogic
           $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm5::bbw", null, null, 1);
           $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
           $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g");
-          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g");
-          $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 1);
-          $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 1);
+          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g",0);
+          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g",0);
+          $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 0);
+          $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 0);
           $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
           $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5, 100, 0.5);
-           }
+          $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
+          $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
+        }
         if ($w["code"] == "ThingScale") {
           log::add(__CLASS__, 'debug', 'scale');
           $_eq->setConfiguration("scalename", $w["output"]["name"]);
