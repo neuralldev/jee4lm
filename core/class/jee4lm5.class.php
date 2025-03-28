@@ -210,7 +210,7 @@ class jee4lm5 extends eqLogic
    * @param $_local jee4lm
    * @return mixed
    */
-  public static function getToken($_local = null)
+  public static function getToken()
   {
     $mc = cache::byKey('jee4lm5::access_token');
     $access_token = $mc->getValue();
@@ -244,7 +244,7 @@ class jee4lm5 extends eqLogic
     }
 
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      $mc = cache::byKey('jee4lm::laststate_'.$jee4lm->getId());
+      $mc = cache::byKey('jee4lm5::laststate_'.$jee4lm->getId());
       $ls = $mc==null?0:$mc->getValue();
       if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
         /* lire les infos de l'équipement ici */
@@ -264,7 +264,7 @@ class jee4lm5 extends eqLogic
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
               return;
             }
-          $token = self::getToken($jee4lm); // send query for token and refresh it if necessary
+          $token = self::getToken(); // send query for token and refresh it if necessary
           if ($token != '') {
             if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           }
               log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
@@ -437,87 +437,92 @@ class jee4lm5 extends eqLogic
    */
   public static function CreateConfiguration($_eq)
   {
-    log::add(__CLASS__, 'debug', 'read configuration');
+    log::add(__CLASS__, 'debug', 'create configuration');
     $serial = $_eq->getConfiguration('serialNumber');
     $slug = $_eq->getConfiguration('type');
     $token = self::getToken();
     $data = self::request(LMCLOUD . 'things/' . $serial . '/dashboard', null, 'GET', ["Authorization: Bearer $token"]);
-    //log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
     if ($data != '') {
-      foreach($data['widgets'] as $w) {
-        if ($w["code"]=="CMBrewByWeightDoses") {
-          $free=!$data["output"]["mode"]=="Continuous";
+      foreach ($data['widgets'] as $w) {
+        if ($w["code"] == "CMBrewByWeightDoses") {
+          log::add(__CLASS__, 'debug', 'brewbyweight');
+          $free = !$data["output"]["mode"] == "Continuous";
           $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
           $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm5::bbw", null, null, 1);
-          $_eq->AddAction("jee4lm_bbwA","BBW Dose A","button","",1);
-          $_eq->AddAction("jee4lm_bbwB","BBW Dose B","button","",1);
-      
-          }
-        if ($w["code"]=="ThingScale") {
-          $_eq->setConfiguration("scalename", $w["output"]["name"]);  
-          $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');  
+          $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 1);
+          $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 1);
+
         }
-        if ($w["code"]=="CMCoffeeBoiler") {
+        if ($w["code"] == "ThingScale") {
+          log::add(__CLASS__, 'debug', 'scale');
+          $_eq->setConfiguration("scalename", $w["output"]["name"]);
+          $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
+        }
+        if ($w["code"] == "CMCoffeeBoiler") {
+          log::add(__CLASS__, 'debug', 'coffee');
           $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
           $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
           $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
           $_eq->AddCommand("Chaudière café", 'displaycoffee', 'info', 'string', null, null, null, 1);
           $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
-             // calcule affichage
+          // calcule affichage
+        }
+        if ($w["code"] == "CMSteamBoilerTemperature") {
+          log::add(__CLASS__, 'debug', 'steam');
+          $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
+          $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+          $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+          $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
+          $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
+        }
+        if ($w["code"] == "CMPreExtraction") {
+          log::add(__CLASS__, 'debug', 'preinfusion');
+          $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
+          $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
+        }
       }
-      if ($w["code"]=="CMSteamBoilerTemperature") {
-        $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
-        $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
-        $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
-        $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
-        $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
-      }
-      if ($w["code"]=="CMPreExtraction") {
-        $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
-        $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider",  $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
-      }
-    }      
-    $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
-    $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm::backflush", null, null, 0);
-    $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-    $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-    $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-    $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($data["output"]["mode"] =="Dose1"? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-    $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($data["output"]["mode"]=="Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-    $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm5::main", null, 'THERMOSTAT_STATE', 0);
-    $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
-    $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
-    $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-    $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-    $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
-    $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
-    $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
-    $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
-    $_eq->AddAction("jee4lm_on", "heat", "jee4lm5::main on off", "THERMOSTAT_MODE", 1);
-    $_eq->AddAction("jee4lm_off", "off", "jee4lm5::main on off", "THERMOSTAT_MODE", 1);
-    $_eq->AddAction("jee4lm_auto", "Auto", "jee4lm5::main on off", "THERMOSTAT_MODE", 0);
-    $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm5::steam on off", "", 1);
-    $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm5::steam on off", "", 1);
-    $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
-    $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
-    $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5, 100, 0.5);
-    $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm5::backflush on off");
-    $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget");
-    //    $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget"); 
-    $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime");
-    $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime");
-    $_eq->linksetpoint("jee4lm_on", "machinemode");
-    $_eq->linksetpoint("jee4lm_off", "machinemode");
-    $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
-    $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
-    $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
-    $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
-        // add machine slug to display machine by type
-    $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm5::machine", null, null, 1);
-    $_eq->save();
-      
+      $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
+      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm5::backflush", null, null, 0);
+      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm5::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+      $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
+      $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+      $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($data["output"]["mode"] == "Dose1" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+      $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($data["output"]["mode"] == "Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+      $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm5::main", null, 'THERMOSTAT_STATE', 0);
+      $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+      $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
+      $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+      $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+      $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
+      $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
+      $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
+      $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
+      $_eq->AddAction("jee4lm_on", "heat", "jee4lm5::main on off", "THERMOSTAT_MODE", 1);
+      $_eq->AddAction("jee4lm_off", "off", "jee4lm5::main on off", "THERMOSTAT_MODE", 1);
+      $_eq->AddAction("jee4lm_auto", "Auto", "jee4lm5::main on off", "THERMOSTAT_MODE", 0);
+      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm5::steam on off", "", 1);
+      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm5::steam on off", "", 1);
+      $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
+      $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
+      $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5, 100, 0.5);
+      $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm5::backflush on off");
+      $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget");
+      $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget");
+      $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime");
+      $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime");
+      $_eq->linksetpoint("jee4lm_on", "machinemode");
+      $_eq->linksetpoint("jee4lm_off", "machinemode");
+      $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
+      $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
+      $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
+      $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
+      // add machine slug to display machine by type
+      $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm5::machine", null, null, 1);
+      $_eq->save();
+
     }
-    
+
     return true;
   }
 
@@ -941,7 +946,7 @@ public function setScaleTarget($_dose, $_weight) {
   if ($this->getCmd(null, 'isbbw')->execCmd()) {
     $_weight=  $this->getCmd(null, 'bbwDose'.$_dose)->execCmd();
     $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken($serial);
+    $token = self::getToken();
     $data = self::request(
       $this->getPath($serial) . '/scale/target-dose',
       "group=Group1&dose_index=Dose$_dose&dose_type=MassType&value=$_weight",
@@ -1103,7 +1108,7 @@ public function setScaleTarget($_dose, $_weight) {
           "layout::dashboard::table::parameters" =>
             [
               "center" => "0",
-              "styletable" => "background-image: url(/plugins/jee4lm/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletable" => "background-image: url(/plugins/jee4lm5/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
               "styletd" => "",
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
