@@ -8,7 +8,10 @@ const
   LMCLOUD = 'https://lion.lamarzocco.io/api/customer-app/',
  
   JEEDOM_DAEMON_PORT = '50044',
-  JEEDOM_DAEMON_HOST = '192.168.1.113';
+  JEEDOM_DAEMON_HOST = '192.168.1.113',
+  TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
+  PENDING_COMMAND_TIMEOUT = 10;
+
   //LMBT_ADVERTISING = "_marzocco._tcp.local";
 
 /* source api from HA
@@ -166,7 +169,7 @@ class jee4lm5 extends eqLogic
       config::save('accessToken', $data['accessToken'], 'jee4lm5');
       config::save('userId', $_username, 'jee4lm5');
       config::save('userPwd', $_password, 'jee4lm5');
-      cache::set('jee4lm5::access_token', $data['accessToken'], 5 * 60 * 24);
+      cache::set('jee4lm5::access_token', $data['accessToken'], TOKEN_TIME_TO_REFRESH);
       log::add(__CLASS__, 'debug', 'login valid');
       return $data['accessToken'];
     }
@@ -181,19 +184,18 @@ class jee4lm5 extends eqLogic
   public static function refreshToken()
   {
     $refresh = config::byKey('refreshToken', 'jee4lm5');
+    $username = config::byKey('userId', 'jee4lm5');
     config::save('refreshToken', '', 'jee4lm5');
     config::save('accessToken', '', 'jee4lm5');
     // try to detect the machines only if token succeeded
     log::add(__CLASS__, 'debug', 'refresh token');
+    
     $data = self::request(
-      LMCLOUD,
-      'grant_type=refresh_token' .
-      '&refresh_token=' . $refresh .
-      '&client_id=' . "".
-      '&client_secret=' . "LMCLIENT_SECRET",
+      LMCLOUD."auth/refreshtoken",
+        '{"username": "'.$username.'", "refresh_token": "'.$refresh.'"}',
       'POST'
     );
-    //    log::add(__CLASS__, 'debug', 'tokenrequest=' . json_encode($data, true));
+    log::add(__CLASS__, 'debug', 'tokenrequest returned =' . json_encode($data, true));
     cache::delete('jee4lm::access_token');
     if ($data['access_token'] != '') {
       cache::set('jee4lm5::access_token', $data['access_token'], 300);
@@ -254,12 +256,6 @@ class jee4lm5 extends eqLogic
         $state = 0 + ($m!=null?($m->execCmd()?1:0):0);
         log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state");
         if ($slug != '') { // if there is a type of machine defined 
-          if ($state == 0) { // if machine is off, refresh information only every 5 minutes if on the web, every minute if local
-            if ($minuteActuelle % 5) {
-              log::add(__CLASS__, 'debug', 'cron exit machine is off');
-              return;
-            }
-          }
           if ($ls ==1) // if daemon is running no need to refresh, exit
             {
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
@@ -1127,7 +1123,7 @@ public function setScaleTarget($_dose, $_weight) {
           "layout::dashboard::table::parameters" =>
             [
               "center" => "0",
-              "styletable" => "background-image: url(/plugins/jee4lm5/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletable" => "background-image: url(".$machines['imageUrl'].");background-repeat: no-repeat; background-size: 100% 36%;",
               "styletd" => "",
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
