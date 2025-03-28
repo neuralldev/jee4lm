@@ -1184,7 +1184,7 @@ public function setScaleTarget($_dose, $_weight) {
       // lire le constenu json équivalent à lineamin_dashboard.json
       $this->checkAndUpdateCmd('tankStatus', 0);
       foreach($arr['widgets'] as $w) {
-        log::add(__CLASS__, 'debug', 'getinformation iteration on widget=' . $w['code']);
+        log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
           case "CMMachineStatus":
             log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['mode']);
