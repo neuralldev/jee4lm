@@ -251,7 +251,7 @@ class jee4lm5 extends eqLogic
         $slug = $jee4lm->getConfiguration('type');
         $id = $jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
-        $state = 0 + ($m!=null?$m->execCmd():0);
+        $state = 0 + ($m!=null?($m->execCmd()?1:0):0);
         log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state");
         if ($slug != '') { // if there is a type of machine defined 
           if ($state == 0) { // if machine is off, refresh information only every 5 minutes if on the web, every minute if local
