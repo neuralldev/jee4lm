@@ -84,7 +84,7 @@ class jee4lm5 extends eqLogic
    * @return mixed
    */
   public function getPath($_serial) {
-    return LMCLOUD. '/things/' . $_serial;
+    return LMCLOUD. 'things/' . $_serial;
   }
 
   /**
