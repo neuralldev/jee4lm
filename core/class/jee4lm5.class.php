@@ -580,11 +580,12 @@ class jee4lm5 extends eqLogic
     $_invert = 0
   ) {
     $createCmd = true;
+    log::add(__CLASS__, 'debug', 'add command ' . $_Name . ' logicalId=' . $_logicalId . ' type=' . $_Type . ' subtype=' . $_SubType);
     $Command = $this->getCmd('info', $_logicalId);
     if (!is_object($Command)) { // check if info is already defined, if yes avoid duplicating
       $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
       if (is_object($Command)) $createCmd = false;
-    }
+       }
 
     if ($createCmd) {
       // basic settings
@@ -595,6 +596,7 @@ class jee4lm5 extends eqLogic
       $Command->setName($_Name);
       $Command->setType($_Type);
       $Command->setSubType($_SubType);
+      log::add(__CLASS__, 'debug', 'add command create object ' . $_Name);
     }
 
     $Command->setIsVisible($_IsVisible);
@@ -637,7 +639,7 @@ class jee4lm5 extends eqLogic
     if ($_invert != null)
       $Command->setDisplay('invertBinary', $_invert);
     $Command->save();
-    // log::add(__CLASS__, 'debug', 'command saved');
+    log::add(__CLASS__, 'debug', 'command saved');
     
     // log::add(__CLASS__, 'debug', ' addcommand end');
     return $Command;
