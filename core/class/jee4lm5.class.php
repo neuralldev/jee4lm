@@ -451,13 +451,15 @@ class jee4lm5 extends eqLogic
           //$free = !$data["output"]["mode"] == "Continuous";
           $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
           $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm5::bbw", null, null, 1);
-          $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 1);
-          $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 1);
           $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
           $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', $w["output"]["mode"] == "Dose1" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive", "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', $w["output"]["mode"] == "Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive", "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-        }
+          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g");
+          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g");
+          $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 1);
+          $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 1);
+          $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
+          $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5, 100, 0.5);
+           }
         if ($w["code"] == "ThingScale") {
           log::add(__CLASS__, 'debug', 'scale');
           $_eq->setConfiguration("scalename", $w["output"]["name"]);
@@ -504,9 +506,10 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm5::steam on off", "", 1);
       $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm5::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
-      $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
-      $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose B", "button", "", 1, "slider", 5, 100, 0.5);
       $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm5::backflush on off");
+      // add machine slug to display machine by type
+      $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm5::machine", null, null, 1);
+      $_eq->save();
       $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget");
       $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget");
       $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime");
@@ -515,11 +518,6 @@ class jee4lm5 extends eqLogic
       $_eq->linksetpoint("jee4lm_off", "machinemode");
       $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
       $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
-      $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
-      $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
-      // add machine slug to display machine by type
-      $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm5::machine", null, null, 1);
-      $_eq->save();
 
     }
 
@@ -554,6 +552,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_invert
    * @return mixed
    */
+  
   public function AddCommand(
     $_Name,
     $_logicalId,
@@ -602,21 +601,21 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'add command set visible ' . $_Name);
     if ($_IsHistorized != null)
       $Command->setIsHistorized(strval($_IsHistorized));
-    log::add(__CLASS__, 'debug', 'add command set historized ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set historized ' . $_IsHistorized);
     if ($_Template != null) {
       $Command->setTemplate('dashboard', $_Template);
       $Command->setTemplate('mobile', $_Template);
     }
-    log::add(__CLASS__, 'debug', 'add command set template ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set template ' . $_Template);
     if ($_unite != null && $_SubType == 'numeric')
       $Command->setUnite($_unite);
-    log::add(__CLASS__, 'debug', 'add command set unite ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set unite ' . $_unite);
       if ($_icon != 'default')
       $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
     log::add(__CLASS__, 'debug', 'add command set icon ' . $_Name);
       if ($_forceLineB != 'default')
       $Command->setdisplay('forceReturnLineBefore', 1);
-    log::add(__CLASS__, 'debug', 'add command set forceLineB ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set forceLineB ' . $_icon);
     if ($_iconname != 'default')
       $Command->setdisplay('showIconAndNamedashboard', 1);
     log::add(__CLASS__, 'debug', 'add command set iconname ' . $_Name);
@@ -627,34 +626,34 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'add command set noiconname ' . $_Name);
     if ($_calculValueOffset != null)
       $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
-    log::add(__CLASS__, 'debug', 'add command set calculValueOffset ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set calculValueOffset ' . $_calculValueOffset);
     if ($_historizeRound != null)
       $Command->setConfiguration('historizeRound', $_historizeRound);
-    log::add(__CLASS__, 'debug', 'add command set historizeRound ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set historizeRound ' . $_historizeRound);
     if ($_generic_type != null)
       $Command->setGeneric_type($_generic_type);
-    log::add(__CLASS__, 'debug', 'add command set generic_type ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set generic_type ' . $_generic_type);
     if ($_repeatevent == true && $_Type == 'info')
       $Command->setConfiguration('repeatEventManagement', 'never');
     log::add(__CLASS__, 'debug', 'add command set repeatevent ' . $_Name);
     if ($_valuemin != 'default')
       $Command->setConfiguration('minValue', $_valuemin);
-    log::add(__CLASS__, 'debug', 'add command set valuemin ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set valuemin ' . $_valuemin);
     if ($_valuemax != 'default')
       $Command->setConfiguration('maxValue', $_valuemax);
-    log::add(__CLASS__, 'debug', 'add command set valuemax ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set valuemax ' . $_valuemax);
     if ($_warning != null)
       $Command->setDisplay("warningif", $_warning);
-    log::add(__CLASS__, 'debug', 'add command set warning ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set warning ' . $_warning);
     if ($_order != null)
       $Command->setOrder($_order);
-    log::add(__CLASS__, 'debug', 'add command set order ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set order ' . $_order);
     if ($_danger != null)
       $Command->setDisplay("dangerif", $_danger);
-    log::add(__CLASS__, 'debug', 'add command set danger ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set danger ' . $_danger);
     if ($_invert != null)
       $Command->setDisplay('invertBinary', $_invert);
-    log::add(__CLASS__, 'debug', 'add command set invert ' . $_Name);
+    log::add(__CLASS__, 'debug', 'add command set invert ' . $_invert);
     $Command->save();
     log::add(__CLASS__, 'debug', 'command saved');
     
