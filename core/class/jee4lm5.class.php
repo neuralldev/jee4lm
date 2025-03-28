@@ -1235,7 +1235,7 @@ public function setScaleTarget($_dose, $_weight) {
               break; 
           case "CMPreExtraction":
               $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
-              $this->checkAndUpdateCmd('prewetholdtime',$w['Out']['seconds']);
+              $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['Out']['seconds']);
               $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']);
               break;
         }
@@ -1243,8 +1243,8 @@ public function setScaleTarget($_dose, $_weight) {
       $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
       log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
       if ($arr1 != null) {
-        $this->checkAndUpdateCmd('plumbedin',$arr1['plumbInSupported']?1:0);
-        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['plumbInSupported']);
+        $this->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
+        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']);
         foreach($arr1['actualFirmwares'] as $fw) {
           log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
           switch($fw['type']) {
