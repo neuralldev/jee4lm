@@ -1191,12 +1191,14 @@ public function setScaleTarget($_dose, $_weight) {
 //            $this->checkAndUpdateCmd('machinestatus',$w['output']['mode'] == 'BrewingMode');
             $cmd = $this->getCmd(null, 'jee4lm_on');
             if ($cmd != null) {
+              log::add(__CLASS__, 'debug', 'getinformation jee4lm_on cmd found');
               $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?1:0);
               $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?0:1);
               $cmd->save();
             }
             $this->checkAndUpdateCmd('machinemode',$w['output']['mode'] == 'BrewingMode');
             if ($cmd != null) {
+              log::add(__CLASS__, 'debug', 'getinformation jee4lm_off cmd found');
               $cmd = $this->getCmd(null, 'jee4lm_off');
               $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?1:0);
               $cmd->save();
