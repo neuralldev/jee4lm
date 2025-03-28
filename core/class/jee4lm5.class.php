@@ -1183,8 +1183,7 @@ public function setScaleTarget($_dose, $_weight) {
     if ($arr != null) {
       // lire le constenu json équivalent à lineamin_dashboard.json
       $this->checkAndUpdateCmd('tankStatus', 0);
-      $widgets = $arr['widgets'];
-      foreach($widgets as $w) {
+      foreach($arr['widgets'] as $w) {
         log::add(__CLASS__, 'debug', 'getinformation iteration on widget=' . $w['code']);
         switch ($w["code"]) {
           case "CMMachineStatus":
@@ -1243,7 +1242,7 @@ public function setScaleTarget($_dose, $_weight) {
         $arr = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
         log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr));
         if ($arr != null) {
-          $this->checkAndUpdateCmd('plumbedin',$arr['actualFirmwares']?1:0);
+          $this->checkAndUpdateCmd('plumbedin',$arr['plumbInSupported']?1:0);
           foreach($arr['actualFirmwares'] as $fw) 
             switch($fw['type']) {
               case 'Gateway':
