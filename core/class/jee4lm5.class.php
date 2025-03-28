@@ -209,16 +209,16 @@ class jee4lm5 extends eqLogic
   /**
    * getToken retrieve the current token stored in the cache. of the value has expired it calls
    * the refresh routine to renew it 
-   * @param $_local jee4lm
+   * @param $_force boolean to force the token refresh
    * @return mixed
    */
-  public static function getToken()
+  public static function getToken($_force=false)
   {
     $mc = cache::byKey('jee4lm5::access_token');
     $access_token = $mc->getValue();
-    if (config::byKey('accessToken', 'jee4lm5') == '') // no login performed yet
-      return '';
-    if ($access_token == '')
+ //   if (config::byKey('accessToken', 'jee4lm5') == '') // no login performed yet
+ //     return '';
+    if ($access_token == '' || $access_token == null || $_force) {
       $access_token = self::refreshToken();
     return $access_token;
   }
@@ -274,7 +274,7 @@ class jee4lm5 extends eqLogic
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
               return;
             }
-          $t = self::getToken();
+          $t = self::getToken(true);
           if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
             log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           else  
