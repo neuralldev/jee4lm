@@ -274,6 +274,7 @@ class jee4lm5 extends eqLogic
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
               return;
             }
+          $t = self::getToken();
           if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
             log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           else  
