@@ -223,6 +223,16 @@ class jee4lm5 extends eqLogic
     return $access_token;
   }
 
+  public static function executeCommand($_serial, $_command, , $_data) {
+    log::add(__CLASS__, 'debug', 'execute command serial='.$_serial.' command='.$_command.' data='.$_data);
+    $data = self::request(
+      self::getpath($_serial).'command/'.$_command,
+        $_data, 
+        'POST'
+    );
+    log::add(__CLASS__, 'debug', 'execute command returned =' . json_encode($data, true));
+  }
+
   /**
    * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
    * @return void
@@ -807,9 +817,9 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
     $serial = $this->getConfiguration('serialNumber');
-//    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-    self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"]);
+    self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled",
+    data = {"boilerIndex": 1,"enabled": $_toggle} );
+//    self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"]);
  //   log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
