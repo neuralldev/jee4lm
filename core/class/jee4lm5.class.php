@@ -1168,6 +1168,18 @@ public function setScaleTarget($_dose, $_weight) {
   }
 
   /**
+   * updateDisplay is used to update the display of a command
+   */
+  public function updateDisplay($_cmd, $_key, $_value) {
+//    log::add(__CLASS__, 'debug', 'update display for '.$_cmd.'='.$_value);
+    $cmd = $this->getCmd(null, $_cmd);
+    if ($cmd != null) {
+      $cmd->setDisplay($_key, $_value);
+      $cmd->save();
+    }
+  }
+
+  /**
    * Refreshes the main counters and not all the information, this is mostly used when there is no
    * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
    * @return bool
@@ -1224,13 +1236,13 @@ public function setScaleTarget($_dose, $_weight) {
               $this->checkAndUpdateCmd('tankStatus',$$w['output']['status'] == 'On'?1:0);
               break;
           case "CMBrewByWeightDoses":
-              log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. "bbw dose B=".$w['output']['doses']['Dose2']['dose']. "scale connected=".$w['output']['scaleConnected']);
+              log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
               $this->checkAndUpdateCmd('isScaleConnected',$w['output']['scaleConnected']?1:0);
-              $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm5::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
-              $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm5::bbw dose ").$w['output']['mode']=="Dose1"?"active":"inactive");
-              $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm5::bbw dose "). $w['output']['mode']=="Dose2"?"active":"inactive");     
               $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
               $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
+              $this->updatedisplay('bbwfree', 'template', "jee4lm5::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
+              $this->updatedisplay('bbwdoseA', 'template', "jee4lm5::bbw dose ".$w['output']['mode']=="Dose1"?"active":"inactive");
+              $this->updatedisplay('bbwdoseB', 'template', "jee4lm5::bbw dose ".$w['output']['mode']=="Dose2"?"active":"inactive");
               break; 
           case "CMPreExtraction":
               $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
