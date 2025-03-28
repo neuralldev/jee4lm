@@ -831,7 +831,6 @@ class jee4lm5 extends eqLogic
     // preinfusion = TypeB, prebrew=Enabled/Disabled
     log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $data = self::request($this->getPath($serial). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
@@ -1236,7 +1235,8 @@ public function setScaleTarget($_dose, $_weight) {
           case "CMPreExtraction":
               $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
               $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['Out']['seconds']);
-              $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']);
+              $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion");
+              $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing");
               break;
         }
       } //for each
