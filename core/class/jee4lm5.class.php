@@ -1185,6 +1185,7 @@ public function setScaleTarget($_dose, $_weight) {
       $this->checkAndUpdateCmd('tankStatus', 0);
       $widgets = $arr['widgets'];
       foreach($widgets as $w) {
+        log::add(__CLASS__, 'debug', 'getinformation iteration on widget=' . $w['code']);
         switch ($w["code"]) {
           case "CMMachineStatus":
             log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['mode']);
