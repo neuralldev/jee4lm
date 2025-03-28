@@ -274,11 +274,10 @@ class jee4lm5 extends eqLogic
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
               return;
             }
-          $token = self::getToken(); // send query for token and refresh it if necessary
-          if ($token != '') {
-            if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           }
-              log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
-          }
+          if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
+            log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
+          else  
+            log::add(__CLASS__, 'debug', 'cron read/getconfiguration ok');
         } else
           log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
       }
