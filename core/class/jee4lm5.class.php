@@ -1188,7 +1188,7 @@ public function setScaleTarget($_dose, $_weight) {
         switch ($w["code"]) {
           case "CMMachineStatus":
             log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['mode']);
-            $this->checkAndUpdateCmd('machinestatus',$w['output']['mode'] == 'BrewingMode');
+//            $this->checkAndUpdateCmd('machinestatus',$w['output']['mode'] == 'BrewingMode');
             $cmd = $this->getCmd(null, 'jee4lm_on');
             if ($cmd != null) {
               $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?1:0);
