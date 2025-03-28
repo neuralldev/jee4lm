@@ -192,7 +192,7 @@ class jee4lm5 extends eqLogic
     
     $data = self::request(
       LMCLOUD."auth/refreshtoken",
-        '{"username": "'.$username.'", "refresh_token": "'.$refresh.'"}',
+        '{"username": "'.$username.'", "refreshToken": "'.$refresh.'"}',
       'POST'
     );
     log::add(__CLASS__, 'debug', 'tokenrequest returned =' . json_encode($data, true));
