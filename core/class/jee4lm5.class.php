@@ -453,7 +453,10 @@ class jee4lm5 extends eqLogic
           $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm5::bbw", null, null, 1);
           $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 1);
           $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 1);
-
+          $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
+          $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($data["output"]["mode"] == "Dose1" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($data["output"]["mode"] == "Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
         }
         if ($w["code"] == "ThingScale") {
           log::add(__CLASS__, 'debug', 'scale');
@@ -481,20 +484,16 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'debug', 'preinfusion');
           $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
           $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
-        }
+          $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+          $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
+          $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+          $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+            }
       }
       $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
       $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm5::backflush", null, null, 0);
       $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm5::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-      $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-      $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-      $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($data["output"]["mode"] == "Dose1" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-      $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($data["output"]["mode"] == "Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
       $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm5::main", null, 'THERMOSTAT_STATE', 0);
-      $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-      $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
