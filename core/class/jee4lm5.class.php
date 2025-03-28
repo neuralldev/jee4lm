@@ -448,15 +448,15 @@ class jee4lm5 extends eqLogic
       foreach ($data['widgets'] as $w) {
         if ($w["code"] == "CMBrewByWeightDoses") {
           log::add(__CLASS__, 'debug', 'brewbyweight');
-          $free = !$data["output"]["mode"] == "Continuous";
+          //$free = !$data["output"]["mode"] == "Continuous";
           $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
           $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm5::bbw", null, null, 1);
           $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 1);
           $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 1);
           $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
           $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', ($data["output"]["mode"] == "Dose1" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', ($data["output"]["mode"] == "Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive"), "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', $w["output"]["mode"] == "Dose1" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive", "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', $w["output"]["mode"] == "Dose2" ? "jee4lm5::bbw dose" : "jee4lm5::bbw dose inactive", "g", null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
         }
         if ($w["code"] == "ThingScale") {
           log::add(__CLASS__, 'debug', 'scale');
