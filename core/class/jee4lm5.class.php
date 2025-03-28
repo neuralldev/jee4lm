@@ -1235,7 +1235,7 @@ public function setScaleTarget($_dose, $_weight) {
               break; 
           case "CMPreExtraction":
               $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
-              $this->checkAndUpdateCmd('prewetholdtime',['Out']['seconds']);
+              $this->checkAndUpdateCmd('prewetholdtime',$w['Out']['seconds']);
               $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']);
               break;
         }
