@@ -599,44 +599,62 @@ class jee4lm5 extends eqLogic
     }
 
     $Command->setIsVisible($_IsVisible);
+    log::add(__CLASS__, 'debug', 'add command set visible ' . $_Name);
     if ($_IsHistorized != null)
       $Command->setIsHistorized(strval($_IsHistorized));
+    log::add(__CLASS__, 'debug', 'add command set historized ' . $_Name);
     if ($_Template != null) {
       $Command->setTemplate('dashboard', $_Template);
       $Command->setTemplate('mobile', $_Template);
     }
+    log::add(__CLASS__, 'debug', 'add command set template ' . $_Name);
     if ($_unite != null && $_SubType == 'numeric')
       $Command->setUnite($_unite);
-    if ($_icon != 'default')
+    log::add(__CLASS__, 'debug', 'add command set unite ' . $_Name);
+      if ($_icon != 'default')
       $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
-    if ($_forceLineB != 'default')
+    log::add(__CLASS__, 'debug', 'add command set icon ' . $_Name);
+      if ($_forceLineB != 'default')
       $Command->setdisplay('forceReturnLineBefore', 1);
+    log::add(__CLASS__, 'debug', 'add command set forceLineB ' . $_Name);
     if ($_iconname != 'default')
       $Command->setdisplay('showIconAndNamedashboard', 1);
+    log::add(__CLASS__, 'debug', 'add command set iconname ' . $_Name);
     if ($_noiconname != null) {
       $Command->setdisplay('showIconAndNamedashboard', 0);
       $Command->setdisplay('showNameOndashboard', 0);
     }
+    log::add(__CLASS__, 'debug', 'add command set noiconname ' . $_Name);
     if ($_calculValueOffset != null)
       $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+    log::add(__CLASS__, 'debug', 'add command set calculValueOffset ' . $_Name);
     if ($_historizeRound != null)
       $Command->setConfiguration('historizeRound', $_historizeRound);
+    log::add(__CLASS__, 'debug', 'add command set historizeRound ' . $_Name);
     if ($_generic_type != null)
       $Command->setGeneric_type($_generic_type);
+    log::add(__CLASS__, 'debug', 'add command set generic_type ' . $_Name);
     if ($_repeatevent == true && $_Type == 'info')
       $Command->setConfiguration('repeatEventManagement', 'never');
+    log::add(__CLASS__, 'debug', 'add command set repeatevent ' . $_Name);
     if ($_valuemin != 'default')
       $Command->setConfiguration('minValue', $_valuemin);
+    log::add(__CLASS__, 'debug', 'add command set valuemin ' . $_Name);
     if ($_valuemax != 'default')
       $Command->setConfiguration('maxValue', $_valuemax);
+    log::add(__CLASS__, 'debug', 'add command set valuemax ' . $_Name);
     if ($_warning != null)
       $Command->setDisplay("warningif", $_warning);
+    log::add(__CLASS__, 'debug', 'add command set warning ' . $_Name);
     if ($_order != null)
       $Command->setOrder($_order);
+    log::add(__CLASS__, 'debug', 'add command set order ' . $_Name);
     if ($_danger != null)
       $Command->setDisplay("dangerif", $_danger);
+    log::add(__CLASS__, 'debug', 'add command set danger ' . $_Name);
     if ($_invert != null)
       $Command->setDisplay('invertBinary', $_invert);
+    log::add(__CLASS__, 'debug', 'add command set invert ' . $_Name);
     $Command->save();
     log::add(__CLASS__, 'debug', 'command saved');
     
