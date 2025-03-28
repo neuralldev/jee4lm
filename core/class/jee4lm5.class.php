@@ -1218,18 +1218,18 @@ public function setScaleTarget($_dose, $_weight) {
             break;
           case "CMNoWater":
             log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
-            $this->checkAndUpdateCmd('tankStatus',$arr['output']['allarm']?1:0);
+            $this->checkAndUpdateCmd('tankStatus',$$w['output']['allarm']?1:0);
             break;
           case "CMBackFlush":
               log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-              $this->checkAndUpdateCmd('tankStatus',$arr['output']['status'] == 'On'?1:0);
+              $this->checkAndUpdateCmd('tankStatus',$$w['output']['status'] == 'On'?1:0);
               break;
           case "CMBrewByWeightDoses":
               log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. "bbw dose B=".$w['output']['doses']['Dose2']['dose']. "scale connected=".$w['output']['scaleConnected']);
-              $this->checkAndUpdateCmd('isScaleConnected',$arr['output']['scaleConnected']?1:0);
-              $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm5::bbw nodose ".$arr['output']['mode']=="Continuous"?"active":"inactive");
-              $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm5::bbw dose ").$arr['output']['mode']=="Dose1"?"active":"inactive");
-              $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm5::bbw dose "). $arr['output']['mode']=="Dose2"?"active":"inactive");     
+              $this->checkAndUpdateCmd('isScaleConnected',$w['output']['scaleConnected']?1:0);
+              $this->getCmd(null, 'bbwfree')->setDisplay('template', "jee4lm5::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
+              $this->getCmd(null, 'bbwdoseA')->setDisplay('template', ("jee4lm5::bbw dose ").$w['output']['mode']=="Dose1"?"active":"inactive");
+              $this->getCmd(null, 'bbwdoseB')->setDisplay('template', ("jee4lm5::bbw dose "). $w['output']['mode']=="Dose2"?"active":"inactive");     
               $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
               $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
               break; 
@@ -1239,25 +1239,26 @@ public function setScaleTarget($_dose, $_weight) {
               $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']);
               break;
         }
-        $arr = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
-        log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr));
-        if ($arr != null) {
-          $this->checkAndUpdateCmd('plumbedin',$arr['plumbInSupported']?1:0);
-          log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr['plumbInSupported']);
-          foreach($arr['actualFirmwares'] as $fw) {
-            log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
-            switch($fw['type']) {
-              case 'Gateway':
-                $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
-                break;
-              case 'Machine':
-                $this->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
-                break;
-            }
-          }
-            return true;
-        }
       } //for each
+      $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
+      log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
+      if ($arr1 != null) {
+        $this->checkAndUpdateCmd('plumbedin',$arr1['plumbInSupported']?1:0);
+        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['plumbInSupported']);
+        foreach($arr1['actualFirmwares'] as $fw) {
+          log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
+          switch($fw['type']) {
+            case 'Gateway':
+              $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
+              break;
+            case 'Machine':
+              $this->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
+              break;
+          }
+        }
+      }
+
+      return true;
     } //if
     return false;
   }
