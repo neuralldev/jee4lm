@@ -83,7 +83,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_ip
    * @return mixed
    */
-  public function getPath($_serial) {
+  public static function getPath($_serial) {
     return LMCLOUD. 'things/' . $_serial;
   }
 
@@ -223,14 +223,17 @@ class jee4lm5 extends eqLogic
     return $access_token;
   }
 
-  public static function executeCommand($_serial, $_command, , $_data) {
+  public static function executeCommand($_serial, $_command, $_data='') {
     log::add(__CLASS__, 'debug', 'execute command serial='.$_serial.' command='.$_command.' data='.$_data);
-    $data = self::request(
-      self::getpath($_serial).'command/'.$_command,
-        $_data, 
-        'POST'
-    );
-    log::add(__CLASS__, 'debug', 'execute command returned =' . json_encode($data, true));
+    if ($_command!='') {
+        $data = self::request(
+          jee4lm5::getpath($_serial).'command/'.$_command,
+            $_data, 
+            'POST');
+    }
+    else 
+      log::add(__CLASS__, 'debug', 'execute command cancelled, command empty');
+    
   }
 
   /**
@@ -785,14 +788,8 @@ class jee4lm5 extends eqLogic
     $ip = $this->getConfiguration('host');
     $token = self::getToken();
     $data = self::request($this->getPath($serial) . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
 
-/**
- * Start of stop the Daemon to call the callback every 5 seconds 
- * @param mixed $_rate 0=switch off, > 0 start calling callback every 5 seconds
- * @return void
- */
 
   /**
    * Switch machine ON/OFF accoding to a boolean value
@@ -801,10 +798,10 @@ class jee4lm5 extends eqLogic
    */
   public function switchCoffeeBoilerONOFF($_toggle)
   {
-    log::add(__CLASS__, 'debug', 'switch coffee boiler to '.($_toggle ? 'ON' : 'OFF'));
+    log::add(__CLASS__, 'debug', 'switch coffee boiler to '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    self::request($this->getPath($serial) . '/status', 'status=' . ($_toggle ? "BrewingMode" : "StandBy"), 'POST', ["Authorization: Bearer $token"]);
+    self::executeCommand($serial, "CoffeeMachineChangeMode",
+    '{ "mode": '.$_toggle ? '"BrewingMode"' : '"Standby"'.' } ');
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
 
@@ -818,7 +815,7 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
     $serial = $this->getConfiguration('serialNumber');
     self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled",
-    data = {"boilerIndex": 1,"enabled": $_toggle} );
+    '{"boilerIndex": 1,"enabled": '.$_toggle.'}' );
 //    self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"]);
  //   log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
   }
@@ -843,17 +840,15 @@ class jee4lm5 extends eqLogic
   /**
    * set the LM boiler target temperature for coffee or steam boiler according to $type value
    * @param mixed $_value value in celsius
-   * @param mixed $_identifier by default this is coffee boiler temperature for group 1
+   * @param mixed $_identifier by default this is coffee boiler temperature 
    * @return void
    */
-  public function setBoilerTarget($_value, $_identifier = COFFEE_BOILER_1)
+  public function setBoilerTarget($_value, $_identifier = "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
   {
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-    $data = self::request($this->getPath($serial). '/target-boiler', 'identifier=' . $_identifier . '&value=' . $_value, 'POST', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'config='.json_encode($data, true));
+    self::executeCommand($serial, $_identifier,
+    '{"boilerIndex": 1,'.$_identifier=="CoffeeMachineSettingCoffeeBoilerTargetTemperature"? '"targetTemperature"':'"targetLevel"'.': '.$_value.'}' );
   }
 
   /**
@@ -869,10 +864,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-    $data = self::request($this->getPath($serial). '/enable-plumbin', 'enable=' . ($_toggle ? 'true' : 'false'), 'POST', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeMode",
+    '{"mode": '.$_toggle?'"PreInfusion"':'"PreBrewing"'.'}');
   }
 
   /**
@@ -883,10 +876,10 @@ class jee4lm5 extends eqLogic
   public function getMachineUses()
   {
     log::add(__CLASS__, 'debug', 'get number of uses');
-    $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial). '/machine_uses', '', 'POST', ["Authorization: Bearer $token"]);
+    $serial = $this->getConfiguration('serialNumber');
+
+    $data = self::request($this->getPath($serial). 'stats', '', 'GET', ["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
   }
 
@@ -992,17 +985,9 @@ public function setScaleTarget($_dose, $_weight) {
    */
   public function setPreinfusionSettings($_time, $_hold) {
     log::add(__CLASS__, 'debug', "set preinfusion start t=$_time h=$_hold");
-    $_time *=1000;
-    $_hold *=1000;
     $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    $data = self::request(
-      $this->getPath($serial) . '/setting-preinfusion',
-      "group=Group1&button=DoseA&wetTimeMs=$_time&holdTimeMs=$_hold",
-      'POST',
-      ["Authorization: Bearer $token"]
-    );
-    log::add(__CLASS__, 'debug', 'preinfusion=' . json_encode($data, true));
+    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeTimes",
+    '{{"In": {"seconds": '.$_time.'}},{"Out": {"seconds": '.$_hold.'}}}');
   }
 
   /**
@@ -1014,15 +999,8 @@ public function setScaleTarget($_dose, $_weight) {
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-    $data = self::request(
-      $this->getPath($serial) . '/enable-backflush',
-      'enable=true',
-      'POST',
-      ["Authorization: Bearer $token"]
-    );
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+    self::executeCommand($serial, "CoffeeMachineBackFlushStartCleaning",
+    '{"enabled": True}' );
   }
 
   /**
