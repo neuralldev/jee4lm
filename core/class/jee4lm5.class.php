@@ -1243,7 +1243,9 @@ public function setScaleTarget($_dose, $_weight) {
         log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr));
         if ($arr != null) {
           $this->checkAndUpdateCmd('plumbedin',$arr['plumbInSupported']?1:0);
-          foreach($arr['actualFirmwares'] as $fw) 
+          log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr['plumbInSupported']);
+          foreach($arr['actualFirmwares'] as $fw) {
+            log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
             switch($fw['type']) {
               case 'Gateway':
                 $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
@@ -1252,6 +1254,7 @@ public function setScaleTarget($_dose, $_weight) {
                 $this->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
                 break;
             }
+          }
             return true;
         }
       } //for each
