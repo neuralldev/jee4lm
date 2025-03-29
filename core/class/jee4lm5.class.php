@@ -238,7 +238,7 @@ class jee4lm5 extends eqLogic
           jee4lm5::getpath($_serial).'/command/'.$_command,
             $_data, 
             'POST',
-            ["Authorization: Bearer $token"]);
+            ["Authorization: Bearer $token", "Content-Type: application/json"]);
         log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
     }
     else 
