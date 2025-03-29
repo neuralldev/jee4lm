@@ -1226,7 +1226,15 @@ public function setScaleTarget($_dose, $_weight) {
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
 //            $this->checkAndUpdateCmd('coffeereadyin',$w['output']['readyStartTime']);
             if ($onoff && $w['output']['readyStartTime']!=null) {
-              $this->checkAndUpdateCmd('displaycoffee', "<span style='color:green'>".$w['output']['readyStartTime']."</span>");
+              $d = DateTime::createFromFormat(DateTime::ATOM, $w['output']['readyStartTime']);
+                if ($d instanceof DateTime) {
+                $now = new DateTime();
+                $interval = $now->diff($d);
+                $difference = $interval->format('prêt dans %i minutes');
+                $this->checkAndUpdateCmd('displaycoffee', "<span style='color:".($interval->format('%i')==0?'green':'yellow')."'>".$difference."</span>");
+              } else {
+                log::add(__CLASS__, 'error', 'Invalid date format for readyStartTime');
+              }
             } else {
               $this->checkAndUpdateCmd('displaycoffee','');
             }
