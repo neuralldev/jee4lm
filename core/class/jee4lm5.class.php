@@ -185,11 +185,18 @@ class jee4lm5 extends eqLogic
   {
     $refresh = config::byKey('refreshToken', 'jee4lm5');
     $username = config::byKey('userId', 'jee4lm5');
+    $password = config::byKey('userPwd', 'jee4lm5');
     config::save('refreshToken', '', 'jee4lm5');
     config::save('accessToken', '', 'jee4lm5');
     // try to detect the machines only if token succeeded
-    log::add(__CLASS__, 'debug', 'refresh token');
-    
+    log::add(__CLASS__, 'debug', 'refresh token=' . $refresh);
+
+    if ($refresh == '') {
+      log::add(__CLASS__, 'debug', 'refresh token empty, do login');
+      self::login($username, $password);
+      $refresh = config::byKey('refreshToken', 'jee4lm5');
+      return $refresh;
+    }
     $data = self::request(
       LMCLOUD."auth/refreshtoken",
         '{"username": "'.$username.'", "refreshToken": "'.$refresh.'"}',
@@ -199,8 +206,8 @@ class jee4lm5 extends eqLogic
     cache::delete('jee4lm::access_token');
     if ($data['access_token'] != '') {
       cache::set('jee4lm5::access_token', $data['access_token'], 300);
-      config::save('refreshToken', $data['refresh_token'], 'jee4lm');
-      config::save('accessToken', $data['access_token'], 'jee4lm');
+      config::save('refreshToken', $data['refresh_token'], 'jee4lm5');
+      config::save('accessToken', $data['access_token'], 'jee4lm5');
       return $data['access_token'];
     }
     return '';
