@@ -235,7 +235,7 @@ class jee4lm5 extends eqLogic
     $token = self::getToken();
     if ($_command!='') {
         $data = self::request(
-          jee4lm5::getpath($_serial).'command/'.$_command,
+          jee4lm5::getpath($_serial).'/command/'.$_command,
             $_data, 
             'POST',
             ["Authorization: Bearer $token"]);
