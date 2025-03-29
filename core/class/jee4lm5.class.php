@@ -252,7 +252,7 @@ class jee4lm5 extends eqLogic
 
     // Tester si l'heure est entre 22h et 6h
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
-    //      log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
+          log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
       return;
     } else {
     //      log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
@@ -263,12 +263,11 @@ class jee4lm5 extends eqLogic
       $ls = $mc==null?0:$mc->getValue();
       if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
         /* lire les infos de l'équipement ici */
-        $slug = $jee4lm->getConfiguration('type');
         $id = $jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
-        $state = 0 + ($m!=null?($m->execCmd()?1:0):0);
-        log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial slug=$slug state=$state");
-        if ($slug != '') { // if there is a type of machine defined 
+        log::add(__CLASS__, 'debug', 'machine state='.$s=$m->execCmd());
+        $state = 0 + $s;
+        log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial state=$state");
           if ($ls ==1) // if daemon is running no need to refresh, exit
             {
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
@@ -281,8 +280,7 @@ class jee4lm5 extends eqLogic
             log::add(__CLASS__, 'debug', 'cron read/getconfiguration ok');
         } else
           log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
-      }
-   }
+   } //foreach
   }
 
   /**
@@ -401,7 +399,7 @@ class jee4lm5 extends eqLogic
     $ret = $_eq->getInformations(); // refresh
 
     $ns = $_eq->getCmd(null, 'machinemode')->execCmd();
-    $_eq->checkAndUpdateCmd('hbmode',$ns ? 'off' : 'heat');
+    $_eq->checkAndUpdateCmd('hbmode',$ns ? 'heat' : 'off');
 
     switch ($_poll) { // select action based on source of call
       case 0: // called direct
@@ -1200,7 +1198,7 @@ public function setScaleTarget($_dose, $_weight) {
         log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
           case "CMMachineStatus":
-            log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['status']);
+    //        log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['status']);
             $this->checkAndUpdateCmd('machinemode',$onoff = $w['output']['status'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn' ? 1 : 0);
             $cmd = $this->getCmd(null, 'jee4lm_on');
             $cmd->setIsVisible($onoff?0:1);
@@ -1211,7 +1209,7 @@ public function setScaleTarget($_dose, $_weight) {
             // now update display of temperature readdiness
             break;
           case "CMCoffeeBoiler":
-            log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts in ". $w['output']['readyStartTime']);
+    //        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts in ". $w['output']['readyStartTime']);
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
 //            $this->checkAndUpdateCmd('coffeereadyin',$w['output']['readyStartTime']);
             if ($onoff && $w['output']['readyStartTime']!=null) {
@@ -1222,21 +1220,21 @@ public function setScaleTarget($_dose, $_weight) {
 
             break;
           case "CMSteamBoilerTemperature":
-            log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
+        //   log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
             $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? 'OFF' : "<span style='color:green'>ON</span>");
             break;
           case "CMNoWater":
-            log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
+        //    log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
             $this->checkAndUpdateCmd('tankStatus',$$w['output']['allarm']?1:0);
             break;
           case "CMBackFlush":
-              log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
+           //   log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
               $this->checkAndUpdateCmd('tankStatus',$$w['output']['status'] == 'On'?1:0);
               break;
           case "CMBrewByWeightDoses":
-              log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
+            //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
               $this->checkAndUpdateCmd('isScaleConnected',$w['output']['scaleConnected']?1:0);
               $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
               $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
@@ -1256,9 +1254,9 @@ public function setScaleTarget($_dose, $_weight) {
       log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
       if ($arr1 != null) {
         $this->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
-        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
+//        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
         foreach($arr1['actualFirmwares'] as $fw) {
-          log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
+  //        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
           switch($fw['type']) {
             case 'Gateway':
               $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
