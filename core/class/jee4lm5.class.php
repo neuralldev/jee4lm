@@ -232,11 +232,13 @@ class jee4lm5 extends eqLogic
 
   public static function executeCommand($_serial, $_command, $_data='') {
     log::add(__CLASS__, 'debug', 'execute command serial='.$_serial.' command='.$_command.' data='.$_data);
+    $token = self::getToken();
     if ($_command!='') {
         $data = self::request(
           jee4lm5::getpath($_serial).'command/'.$_command,
             $_data, 
-            'POST');
+            'POST',
+            ["Authorization: Bearer $token"]);
         log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
     }
     else 
@@ -855,7 +857,7 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
     self::executeCommand($serial, $_identifier,
-    '{"boilerIndex": 1,'.$_identifier=="CoffeeMachineSettingCoffeeBoilerTargetTemperature"? '"targetTemperature"':'"targetLevel"'.': '.$_value.'}' );
+    '{"boilerIndex": 1,'.$_identifier=="CoffeeMachineSettingCoffeeBoilerTargetTemperature"? '"targetTemperature"':'"targetLevel"'.': '.$_value.'}',  );
   }
 
   /**
