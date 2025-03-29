@@ -237,6 +237,7 @@ class jee4lm5 extends eqLogic
           jee4lm5::getpath($_serial).'command/'.$_command,
             $_data, 
             'POST');
+        log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
     }
     else 
       log::add(__CLASS__, 'debug', 'execute command cancelled, command empty');
@@ -805,7 +806,7 @@ class jee4lm5 extends eqLogic
    */
   public function switchCoffeeBoilerONOFF($_toggle)
   {
-    log::add(__CLASS__, 'debug', 'switch coffee boiler to '.$_toggle ? 'ON' : 'OFF');
+    log::add(__CLASS__, 'debug', $_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
     self::executeCommand($serial, "CoffeeMachineChangeMode",
     '{ "mode": '.$_toggle ? '"BrewingMode"' : '"Standby"'.' } ');
