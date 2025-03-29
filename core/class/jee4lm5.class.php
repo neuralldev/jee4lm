@@ -1212,7 +1212,7 @@ public function setScaleTarget($_dose, $_weight) {
           case "CMCoffeeBoiler":
             log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts in ". $w['output']['readyStartTime']);
             $this->checkAndUpdateCmd('machinemode',$w['output']['status'] == 'BrewingMode');
-           // $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
+            $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('coffeereadyin',$w['output']['readyStartTime']);
             break;
           case "CMSteamBoilerTemperature":
