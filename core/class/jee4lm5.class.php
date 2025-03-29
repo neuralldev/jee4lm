@@ -810,8 +810,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', $_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    self::executeCommand($serial, "CoffeeMachineChangeMode",
-    '{ "mode": '.$_toggle ? '"BrewingMode"' : '"Standby"'.' } ');
+    $data = ["mode" => $_toggle ? "BrewingMode" : "Standby"];
+    self::executeCommand($serial, "CoffeeMachineChangeMode",json_encode($data));
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
 
@@ -824,10 +824,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
     $serial = $this->getConfiguration('serialNumber');
-    self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled",
-    '{"boilerIndex": 1,"enabled": '.$_toggle.'}' );
-//    self::request($this->getPath($serial)  . '/enable-boiler', 'identifier=SteamBoiler&state=' . ($_toggle ? "enabled" : "disabled"), 'POST', ["Authorization: Bearer $token"]);
- //   log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+    $data = ["boilerIndex" => 1, "enabled" => $_toggle ? "BrewingMode" : "Standby"];
+    self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled", json_encode($data));
   }
 
   /**
@@ -842,8 +840,9 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
     $serial = $this->getConfiguration('serialNumber');
     $token = self::getToken();
-    $data = self::request($this->getPath($serial). '/enable-preinfusion', 'mode=' . $_mode, 'POST', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
+    $data= ["mode" => $_mode];
+    $ret = self::request($this->getPath($serial). '/enable-preinfusion', json_encode($data), 'POST', ["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', 'config=' . json_encode($ret, true));
   }
 
   /**
@@ -856,8 +855,12 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
-    self::executeCommand($serial, $_identifier,
-    '{"boilerIndex": 1,'.$_identifier=="CoffeeMachineSettingCoffeeBoilerTargetTemperature"? '"targetTemperature"':'"targetLevel"'.': '.$_value.'}',  );
+    if ($_identifier == "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
+      $data = ["boilerIndex" => 0, "targetTemperature" => $_value];
+    else
+      $data = ["boilerIndex" => 1, "targetLevel" => $_value]; // steam boiler
+      // steam boiler
+    self::executeCommand($serial, $_identifier, json_encode($data)); 
   }
 
   /**
@@ -873,8 +876,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
-    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeMode",
-    '{"mode": '.$_toggle?'"PreInfusion"':'"PreBrewing"'.'}');
+    $data= ["mode" => $_toggle ? "PreInfusion" : "PreBrewing"];
+    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeMode", json_encode($data));
   }
 
   /**
@@ -995,8 +998,8 @@ public function setScaleTarget($_dose, $_weight) {
   public function setPreinfusionSettings($_time, $_hold) {
     log::add(__CLASS__, 'debug', "set preinfusion start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
-    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeTimes",
-    '{{"In": {"seconds": '.$_time.'}},{"Out": {"seconds": '.$_hold.'}}}');
+    $data=  ["In" => ["seconds" => $_time], "Out" => ["seconds" => $_hold]];
+    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeTimes",json_encode($data));
   }
 
   /**
@@ -1008,8 +1011,8 @@ public function setScaleTarget($_dose, $_weight) {
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
-    self::executeCommand($serial, "CoffeeMachineBackFlushStartCleaning",
-    '{"enabled": True}' );
+    $data = ["enabled" => true];
+    self::executeCommand($serial, "CoffeeMachineBackFlushStartCleaning", json_encode($data));
   }
 
   /**
