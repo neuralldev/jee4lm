@@ -1200,22 +1200,14 @@ public function setScaleTarget($_dose, $_weight) {
         log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
           case "CMMachineStatus":
-            log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['mode']);
-//            $this->checkAndUpdateCmd('machinestatus',$w['output']['mode'] == 'BrewingMode');
+            log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['status']);
+            $this->checkAndUpdateCmd('machinemode',$w['output']['status'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn' ? 1 : 0);
             $cmd = $this->getCmd(null, 'jee4lm_on');
-            if ($cmd != null) {
-              log::add(__CLASS__, 'debug', 'getinformation jee4lm_on cmd found');
-              $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?1:0);
-              $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?0:1);
-              $cmd->save();
-            }
-            $this->checkAndUpdateCmd('machinemode',$w['output']['mode'] == 'BrewingMode');
-            if ($cmd != null) {
-              log::add(__CLASS__, 'debug', 'getinformation jee4lm_off cmd found');
-              $cmd = $this->getCmd(null, 'jee4lm_off');
-              $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode'?1:0);
-              $cmd->save();
-            }
+            $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn'?0:1);
+            $cmd->save();
+            $cmd = $this->getCmd(null, 'jee4lm_off');
+            $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn'?1:0);
+            $cmd->save();
             break;
           case "CMCoffeeBoiler":
             log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts in ". $w['output']['readyStartTime']);
