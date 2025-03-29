@@ -1201,19 +1201,25 @@ public function setScaleTarget($_dose, $_weight) {
         switch ($w["code"]) {
           case "CMMachineStatus":
             log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['status']);
-            $this->checkAndUpdateCmd('machinemode',$w['output']['status'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn' ? 1 : 0);
+            $this->checkAndUpdateCmd('machinemode',$onoff = $w['output']['status'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn' ? 1 : 0);
             $cmd = $this->getCmd(null, 'jee4lm_on');
-            $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn'?0:1);
+            $cmd->setIsVisible($onoff?0:1);
             $cmd->save();
             $cmd = $this->getCmd(null, 'jee4lm_off');
-            $cmd->setIsVisible($w['output']['mode'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn'?1:0);
+            $cmd->setIsVisible($onoff?1:0);
             $cmd->save();
+            // now update display of temperature readdiness
             break;
           case "CMCoffeeBoiler":
             log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts in ". $w['output']['readyStartTime']);
-            $this->checkAndUpdateCmd('machinemode',$w['output']['status'] == 'BrewingMode');
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
-            $this->checkAndUpdateCmd('coffeereadyin',$w['output']['readyStartTime']);
+//            $this->checkAndUpdateCmd('coffeereadyin',$w['output']['readyStartTime']);
+            if ($onoff && $w['output']['readyStartTime']!=null) {
+              $this->checkAndUpdateCmd('displaycoffee', "<span style='color:green'>".$w['output']['readyStartTime']."</span>");
+            } else {
+              $this->checkAndUpdateCmd('displaycoffee','');
+            }
+
             break;
           case "CMSteamBoilerTemperature":
             log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
@@ -1250,7 +1256,7 @@ public function setScaleTarget($_dose, $_weight) {
       log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
       if ($arr1 != null) {
         $this->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
-        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']);
+        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
         foreach($arr1['actualFirmwares'] as $fw) {
           log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
           switch($fw['type']) {
