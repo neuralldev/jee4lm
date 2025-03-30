@@ -253,12 +253,6 @@ class jee4lm5 extends eqLogic
   public static function cron()
   {
     log::add(__CLASS__, 'debug', 'cron start');
-    $d = 1743329511158;
-    $readableDate = date('Y-m-d H:i:s', $d / 1000);
-    log::add(__CLASS__, 'debug', 'Readable date: ' . $readableDate);
-    $currentTimestamp = time();
-    $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
-    log::add(__CLASS__, 'debug', 'Difference in minutes: ' . $differenceInMinutes);
 
     // suspension des tests pendant une tranche horaire où la machine à café ne sera jamais utilisée.
     // cette section devra évoluer pour saisie de la tranche dans le plugin
@@ -1165,23 +1159,20 @@ class jee4lm5 extends eqLogic
             // now update display of temperature readdiness
             break;
           case "CMCoffeeBoiler":
-    //        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts in ". $w['output']['readyStartTime']);
+    //        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts at ". $w['output']['readyStartTime']);
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
-//            $this->checkAndUpdateCmd('coffeereadyin',$w['output']['readyStartTime']);
             if ($onoff && $w['output']['readyStartTime']!=null) {
-              $d = DateTime::createFromFormat(DateTime::ATOM, $w['output']['readyStartTime']);
-                if ($d instanceof DateTime) {
-                $now = new DateTime();
-                $interval = $now->diff($d);
-                $difference = $interval->format('prêt dans %i minutes');
-                $this->checkAndUpdateCmd('displaycoffee', "<span style='color:".($interval->format('%i')==0?'green':'yellow')."'>".$difference."</span>");
-              } else {
-                log::add(__CLASS__, 'error', 'Invalid date format for readyStartTime');
-              }
+              $d = $w['output']['readyStartTime'];
+              $readableDate = date('Y-m-d H:i:s', $d / 1000);
+//              log::add(__CLASS__, 'debug', 'Readable date: ' . $readableDate);
+              $currentTimestamp = time();
+              $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
+//              log::add(__CLASS__, 'debug', 'Difference in minutes: ' . $differenceInMinutes);
+              $readableDifference = $differenceInMinutes > 0 ? "prêt dans ".$differenceInMinutes."min" : "peresque prêt";
+              $this->checkAndUpdateCmd('displaycoffee', "<span style='color:".$differenceInMinutes<=0?"green":"yellow"."'></span>");
             } else {
               $this->checkAndUpdateCmd('displaycoffee','');
             }
-
             break;
           case "CMSteamBoilerTemperature":
         //   log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
