@@ -256,6 +256,9 @@ class jee4lm5 extends eqLogic
     $d = 1743329511158;
     $readableDate = date('Y-m-d H:i:s', $d / 1000);
     log::add(__CLASS__, 'debug', 'Readable date: ' . $readableDate);
+    $currentTimestamp = time();
+    $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
+    log::add(__CLASS__, 'debug', 'Difference in minutes: ' . $differenceInMinutes);
 
     // suspension des tests pendant une tranche horaire où la machine à café ne sera jamais utilisée.
     // cette section devra évoluer pour saisie de la tranche dans le plugin
