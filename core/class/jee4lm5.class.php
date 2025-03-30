@@ -1060,11 +1060,12 @@ class jee4lm5 extends eqLogic
           "layout::dashboard::table::parameters" =>
             [
               "center" => "0",
-              "styletable" => "background-image: url(".$machines['imageUrl'].");background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletable" => "background-image: url(/plugins/jee4lm5/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
               "styletd" => "",
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
               "text::td::1::3" => "<br>Balance connectée<br>",
+              "style::td::1::2" => "background-image: url(".$machines['imageUrl'].");background-repeat: no-repeat; background-size: 100% 100%;",
               //              "text::td::3::1"=>"Chaudière à café",
 //              "text::td::3::3"=>"Chaudière à vapeur",
               "style::td::3::1" => "font-size:1.5em;height:3em;vertical-align:top;",
