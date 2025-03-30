@@ -514,7 +514,7 @@ class jee4lm5 extends eqLogic
       }
       $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
       $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm5::backflush", null, null, 0);
-      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm5::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm5::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
       $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm5::main", null, 'THERMOSTAT_STATE', 0);
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
@@ -592,7 +592,7 @@ class jee4lm5 extends eqLogic
     $_iconname = null,
     $_calculValueOffset = null,
     $_historizeRound = null,
-    $_noiconname = null,
+    $_noiconname = 0,
     $_warning = null,
     $_danger = null,
     $_invert = 0
@@ -640,8 +640,8 @@ class jee4lm5 extends eqLogic
       $Command->setdisplay('showIconAndNamedashboard', 1);
     log::add(__CLASS__, 'debug', 'add command set iconname ' . $_Name);
     if ($_noiconname != null) {
-      $Command->setdisplay('showIconAndNamedashboard', 0);
-      $Command->setdisplay('showNameOndashboard', 0);
+      $Command->setdisplay('showIconAndNamedashboard', $_noiconname);
+      $Command->setdisplay('showNameOndashboard', $_noiconname);
     }
     log::add(__CLASS__, 'debug', 'add command set noiconname ' . $_Name);
     if ($_calculValueOffset != null)
