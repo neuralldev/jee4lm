@@ -905,89 +905,25 @@ class jee4lm5 extends eqLogic
    */
   public function setRecipeDose($_weight, $_dose)
   {
-    // $dose = 'A' or 'B'
-    //"groupNumber":"Group1","doseIndex":"DoseA","doseType":"MassType","value":32
-
-    if ($_dose == 'A') {
-      $doseA = 0 + $_weight;
-      $doseB = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseB')->execCmd();
-    } else {
-      $doseB = 0 + $_weight;
-      $doseA = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwDoseA')->execCmd();
-    }
-    //  log::add(__CLASS__, 'debug', 'set doses for BBW Dose A='.$doseA.'g B='.$doseB.'g');
+    log::add(__CLASS__, 'debug', "select active Dose");
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-
-    // update recipe
-    //"recipeAssignment":[{"dose_index":"DoseA","recipe_id":"Recipe1","recipe_dose":"B","group":"Group1"}]
-    //                    t={group:e.group,doseIndex:e.dose_index,recipeId:e.recipe_id,recipeDose:e.recipe_dose},
-//  $d = ["group"=>"Group1", "doseIndex" => "Dose$_dose", "recipeId" => "Recipe1", "recipeDose" => $_dose];
-    // log::add(__CLASS__, 'debug', "active recipe POST with d=".json_encode($d));
-    // self::request(LMCLOUD_GW_MACHINE_BASE_URL.'/'.$serial.'/recipes/active-recipe',
-    //   $d,
-    //   'POST',["Authorization: Bearer $token"],$serial);
-
-    // update list of doses
-    $recipedoses = [['id' => 'A', 'target' => $doseA], ['id' => 'B', 'target' => $doseB]];
-    $d = ["recipeId" => "Recipe1", "doseMode" => "Mass", "recipeDoses" => $recipedoses];
-//      log::add(__CLASS__, 'debug', "send PUT ".$this->getPath($serial, $ip). '/recipes/ with d='.json_encode($d));
-// force by web site
-    $req = self::request(
-      $this->getPath($serial).'/recipes/',
-      $d,
-      'PUT',
-      ["cache-control: no-cache", "content-type: application/json", "Authorization: Bearer $token"]
-    );
-      log::add(__CLASS__, 'debug', "set target dose returned=".json_encode($req));
+    $data=  ["DoseIndex" => ($_dose=="A"?"Dose1":"Dose2"), "dose" => $_weight];
+    self::executeCommand($serial, "CoffeeMachineBrewByWeightChangeDose",json_encode($data));
   } 
 
+  /**
+   * Summary of setActiveBBWRecipe
+   * @param mixed $_dose
+   * @return void
+   */
   public function setActiveBBWRecipe($_dose)
   {
     log::add(__CLASS__, 'debug', "set bbw active dose to $_dose");
-
-    // $dose = 'A' or 'B'
-    $d = ["group"=> "Group1",
-            "doseIndex"=> "DoseA",
-            "recipeId"=> "Recipe1",
-            "recipeDose"=> "Dose".$_dose];
-    
+    log::add(__CLASS__, 'debug', "select active Dose");
     $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-
-    $req = self::request(
-      $this->getPath($serial).'/recipes/active-recipe',
-      $d,
-      'POST',
-      ["Authorization: Bearer $token"]
-    );
-      log::add(__CLASS__, 'debug', "set bbw active dose returned=".json_encode($req));
-  }
-
-/**
- * select which brew by weight dose is used, either A or B
- * @param mixed $_dose
- * @param integer $_weight
- * @return void
- */
-public function setScaleTarget($_dose, $_weight) {
-  log::add(__CLASS__, 'debug', "set dose $_dose to $_weight");
-  if ($this->getCmd(null, 'isbbw')->execCmd()) {
-    $_weight=  $this->getCmd(null, 'bbwDose'.$_dose)->execCmd();
-    $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    $data = self::request(
-      $this->getPath($serial) . '/scale/target-dose',
-      "group=Group1&dose_index=Dose$_dose&dose_type=MassType&value=$_weight",
-      'POST',
-      ["Authorization: Bearer $token"]
-    );
-    log::add(__CLASS__, 'debug', 'scaletarget=' . json_encode($data, true));
-
-  }
-}
+    $data=  ["mode" => ($_dose=="A"?"Dose1":"Dose2")];
+    self::executeCommand($serial, "CoffeeMachineBrewByWeightSetDose",json_encode($data));
+  }  
 
   /**
    * Summary of setPreinfusionSettings
@@ -1260,8 +1196,8 @@ public function setScaleTarget($_dose, $_weight) {
               $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
               $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
               $this->updatedisplay('bbwfree', 'template', "jee4lm5::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
-              $this->updatedisplay('bbwdoseA', 'template', "jee4lm5::bbw dose ".$w['output']['mode']=="Dose1"?"active":"inactive");
-              $this->updatedisplay('bbwdoseB', 'template', "jee4lm5::bbw dose ".$w['output']['mode']=="Dose2"?"active":"inactive");
+              $this->updatedisplay('bbwdoseA', 'template', "jee4lm5::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
+              $this->updatedisplay('bbwdoseB', 'template', "jee4lm5::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
               break; 
           case "CMPreExtraction":
               $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
