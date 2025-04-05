@@ -761,7 +761,7 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'switch coffee or steam on or off ('.$_identifier.')');
     $serial = $this->getConfiguration('serialNumber');
     $_identifier == "CoffeeMachineSettingCoffeeBoilerTargetTemperature" ?
-      $data = ["boilerIndex" => 0, "targetTemperature" => $_value] : // coffee boiler
+      $data = ["boilerIndex" => 1, "targetTemperature" => $_value] : // coffee boiler
       $data = ["boilerIndex" => 1, "targetLevel" => $_value]; // steam boiler
     self::executeCommand($serial, $_identifier, json_encode($data)); 
   }
