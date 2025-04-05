@@ -670,7 +670,7 @@ class jee4lm5 extends eqLogic
   {
      log::add(__CLASS__, 'debug', 'set setpoint start');
     $v = $_options["slider"];
-    log::add(__CLASS__, 'debug', 'slider value='.$v. for .' logicalID='.$_logicalID.' type='.$_type);
+    log::add(__CLASS__, 'debug', 'slider value='.$v.' for '.' logicalID='.$_logicalID.' type='.$_type);
     //find setpoint value and store it on stove as it after slider move
     if ($v > 0)
       switch($_type) {
