@@ -185,7 +185,7 @@ class jee4lm5 extends eqLogic
             'POST',
             ["Authorization: Bearer $token", "Content-Type: application/json"]);
         log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
-        return jee4lm5::waitCommmandExecution($_serial, $data);
+        return jee4lm5::waitCommmandExecution($_serial, $data[0]);
     }
     else 
       log::add(__CLASS__, 'debug', 'execute command cancelled, command empty');
