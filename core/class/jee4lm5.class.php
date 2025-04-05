@@ -185,10 +185,31 @@ class jee4lm5 extends eqLogic
             'POST',
             ["Authorization: Bearer $token", "Content-Type: application/json"]);
         log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
+        return jee4lm5::waitCommmandExecution($data);
     }
     else 
       log::add(__CLASS__, 'debug', 'execute command cancelled, command empty');
-    
+  return '';    
+  }
+
+
+ public static  function waitCommmandExecution($data) {
+    if ($data=='') return true;
+    $id = $data['id'];
+    if ($data['status'] == 'Pending') {
+      $start = time();
+      while (time() - $start < PENDING_COMMAND_TIMEOUT) {
+        $data = self::request(jee4lm5::getpath($id).'/command/'.$id);
+        if ($data['status'] != 'Pending') {
+          log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' status='.$data['status']);
+          return $data;
+        }
+        sleep(1);
+      }
+      log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' timeout');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -736,7 +757,7 @@ class jee4lm5 extends eqLogic
    */
   public function setBoilerTargetTemperature($_value, $_identifier = "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
   {
-    log::add(__CLASS__, 'debug', 'switch steam on or off');
+    log::add(__CLASS__, 'debug', 'switch coffee or steam on or off ('.$_identifier.')');
     $serial = $this->getConfiguration('serialNumber');
     $_identifier == "CoffeeMachineSettingCoffeeBoilerTargetTemperature" ?
       $data = ["boilerIndex" => 0, "targetTemperature" => $_value] : // coffee boiler
