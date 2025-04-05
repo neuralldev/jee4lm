@@ -195,7 +195,7 @@ class jee4lm5 extends eqLogic
 
  public static  function waitCommmandExecution($_serial, $_data) {
     log::add(__CLASS__, 'debug', 'waitCommmandExecution serial='.$_serial. 'data='.json_encode($_data, true));
-    if ($_data==null) return true;
+//    if ($_data==null) return true;
     $id = $_data['id'];
     if ($_data['status'] == 'Pending') {
       log::add(__CLASS__, 'debug', 'waitCommmandExecution command waiting for '.$id.' current status='.$_data['status']);
