@@ -185,7 +185,7 @@ class jee4lm5 extends eqLogic
             'POST',
             ["Authorization: Bearer $token", "Content-Type: application/json"]);
         log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
-        return jee4lm5::waitCommmandExecution($data);
+        return jee4lm5::waitCommmandExecution($_serial, $data);
     }
     else 
       log::add(__CLASS__, 'debug', 'execute command cancelled, command empty');
@@ -193,18 +193,18 @@ class jee4lm5 extends eqLogic
   }
 
 
- public static  function waitCommmandExecution($data) {
-    if ($data=='') return true;
-    $id = $data['id'];
-    if ($data['status'] == 'Pending') {
+ public static  function waitCommmandExecution($_serial, $_data) {
+    if ($_data=='') return true;
+    $id = $_data['id'];
+    if ($_data['status'] == 'Pending') {
       $start = time();
       while (time() - $start < PENDING_COMMAND_TIMEOUT) {
-        $data = self::request(jee4lm5::getpath($id).'/command/'.$id);
+        $data = self::request(jee4lm5::getpath($_serial).'/runningCommands/'.$id);
         if ($data['status'] != 'Pending') {
           log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' status='.$data['status']);
           return $data;
         }
-        sleep(1);
+        sleep(2);
       }
       log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' timeout');
       return false;
