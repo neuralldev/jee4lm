@@ -25,59 +25,6 @@ class jee4lm5 extends eqLogic
 {
 
   /**
-   * check that request is executed when it it a GET with commandID command
-   * check if request has a commandId, then check if there is a PENDING/COMPLETED answer or not
-   * if there is none, the request is done and was nt requiring a delay
-   * @param mixed $_response
-   * @param mixed $_serial
-   * @param mixed $_header  
-   * @return bool
-   */
-  public static function legacy_checkrequest($_response, $_serial = null, $_header = null)
-  {
- //   log::add(__CLASS__, 'debug', 'check request');
-    if ($_response == '') return true;
-  //  log::add(__CLASS__, 'debug', 'check request not empty');
-    $r = json_decode($_response, true);
-    if ($r==null) return true;
-    if (!array_key_exists('data', $r)) return true;    
-    $arr = $r['data'];
-    if (!array_key_exists('commandId', $arr)) return true;
-    $commandID = $arr["commandId"];
-    //    log::add(__CLASS__, 'debug', 'check request commandId='.$commandID);
-    if ($commandID == '') return true;
-    //      log::add(__CLASS__, 'debug', 'check request serial');
-    // add serial
-    if ($_serial == null) return true;
-    //      log::add(__CLASS__, 'debug', 'loop');
-
-    // if there is a commandID then wait for command to succeed   
-    for ($i = 0; $i < 5; $i++) {
-  //    log::add(__CLASS__, 'debug', 'check request attempt '.($i+1));
-      $ch = curl_init();
-//      curl_setopt($ch, CURLOPT_URL, LMCLOUD_AWS_PROXY . "/" . $_serial . "/commands/" . $commandID);
-//      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//      curl_setopt($ch, CURLOPT_HTTPHEADER, $_header == null ? ["Content-Type: application/x-www-form-urlencoded"] : $_header);
-      $response = curl_exec($ch);
-      curl_close($ch);
-
-      if ($response != '') {
-        $arr = json_decode($response, true);
-        switch ($arr['data']['status']) {
-          case "COMPLETED":
-            return true;
-          case "PENDING":
-            break;
-          default:
-            break;
-        }
-      }
-      sleep(3);
-    }
-    return false;
-  }
-
-  /**
    * build path to rest api to local machine or remote web site depending on prensence of ip address
    * @param mixed $_serial
    * @param mixed $_ip
@@ -130,11 +77,8 @@ class jee4lm5 extends eqLogic
         curl_close($ch);
         return null;
       }
-    } // else
- //     log::add(__CLASS__, 'debug', "request response ok with ".$response); //.$response);
+    } 
     curl_close($ch);
- //   log::add(__CLASS__, 'debug', 'request stop');
- //   if ($_serial !='') jee4lm::checkrequest($response, $_serial, $_header);
     return json_decode($response, true);
   }
 
@@ -203,7 +147,7 @@ class jee4lm5 extends eqLogic
       'POST'
     );
     log::add(__CLASS__, 'debug', 'tokenrequest returned =' . json_encode($data, true));
-    cache::delete('jee4lm::access_token');
+    cache::delete('jee4lm5::access_token');
     if ($data['access_token'] != '') {
       cache::set('jee4lm5::access_token', $data['access_token'], 300);
       config::save('refreshToken', $data['refresh_token'], 'jee4lm5');
@@ -269,27 +213,20 @@ class jee4lm5 extends eqLogic
     }
 
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      $mc = cache::byKey('jee4lm5::laststate_'.$jee4lm->getId());
-      $ls = $mc==null?0:$mc->getValue();
+      // for each serial found, check the machine state
       if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
-        /* lire les infos de l'équipement ici */
-        $id = $jee4lm->getId();
+        $mc = cache::byKey('jee4lm5::daemon_'.$id=$jee4lm->getId());
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
-        log::add(__CLASS__, 'debug', 'machine state='.$s=$m->execCmd());
-        $state = 0 + $s;
-        log::add(__CLASS__, 'debug', "cron ID=$id serial=$serial state=$state");
-          if ($ls ==1) // if daemon is running no need to refresh, exit
+        log::add(__CLASS__, 'debug', "cron eqID=$id lmserial=$serial state=$m");
+          if ($mc==null?0:$mc->getValue() ==1) // if daemon is running no need to refresh, exit
             {
               log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
               return;
             }
-          $t = self::getToken(true);
           if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
             log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
-          else  
-            log::add(__CLASS__, 'debug', 'cron read/getconfiguration ok');
-        } else
-          log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
+      } else
+        log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
    } //foreach
   }
 
@@ -402,49 +339,26 @@ class jee4lm5 extends eqLogic
     $id = $_eq->getId();
     $uid = uniqid();
 
-    $mc = cache::byKey('jee4lm::laststate_'.$id);
-    $ls = $mc==null ? 0: $mc->getValue(); //previous state
-
-    log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' ls='.$ls.' poll='.$_poll);
+    $actual_state = $_eq->getCmd(null, 'machinemode')->execCmd();
+    log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' poll='.$_poll);
     $ret = $_eq->getInformations(); // refresh
+    $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
+    $_eq->checkAndUpdateCmd('hbmode',$$new_state ? 'heat' : 'off');
 
-    $ns = $_eq->getCmd(null, 'machinemode')->execCmd();
-    $_eq->checkAndUpdateCmd('hbmode',$ns ? 'heat' : 'off');
-
-    switch ($_poll) { // select action based on source of call
-      case 0: // called direct
-        log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from direct call");
-        if ($ls != $ns)  // if there is a state change, this is switch off as demon is running when on
-          cache::set('jee4lm5::laststate_'.$id,$ns);
-        break; // called from refresh all info 
-      case 1: // on manual action toggle daemon
-        log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from switch on/off action");
-        // if ($ls != $ns) // if there is a state change, supprimé car souci si le cache est planté
-          cache::set('jee4lm5::laststate_'.$id,$ns);
-        if (self::deamon_info()['state'] == 'ok') 
-            self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
-        if ($ns == 1) // if switched on, exit as demon will refresh all info
-          return true;
-        break;
-      case 2 : // called from callback as refreshing value
-        log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from callback call");
-        if ($ls != $ns || $ns==1) { // if there is a state change, this is switch off as demon is running when on
-          cache::set('jee4lm5::laststate_'.$id,0);
-          if (self::deamon_info()['state'] == 'ok') 
-            self::deamon_send(['id' => $id, 'lm'=> 'stop']);
-        }
-        break; // refresh all info 
-      case 3 : // called from cron
-        log::add(__CLASS__, 'debug', "refresh $uid ls=$ls ns=$ns from cron");
-        if ($ls != $ns) { // if there is a state change, this is switch off as demon is running when on
-          cache::set('jee4lm5::laststate_'.$id,$ns);
-          if (self::deamon_info()['state'] == 'ok') 
-            self::deamon_send(['id' => $id, 'lm'=> $ns ?'poll':'stop']);
-          if ($ns==1) // on switch on, cancel read as demon will take over, else refresh
-            return true;
-        }
-        break; // refresh all info 
-    }    // as machine is not reachable, hide on/off button
+    if ($actual_state == $new_state) { // no change of state, let stay in this loop mode
+      log::add(__CLASS__, 'debug', 'refresh all information no change in state');
+    } 
+    else
+    if ($actual_state ==0) { // going from off to on, run daaemon
+      log::add(__CLASS__, 'debug', 'refresh all information machine is now on');
+      if (self::deamon_info()['state'] == 'ok') 
+        self::deamon_send(['id' => $id, 'lm'=> 'poll']);
+    } else
+    if ($actual_state ==1) { // going from on to off, stop daemon 
+      log::add(__CLASS__, 'debug', 'refresh all information machine is now off');
+      if (self::deamon_info()['state'] == 'ok') 
+        self::deamon_send(['id' => $id, 'lm'=> 'stop']);
+    }
     return $ret;
   }
 
@@ -496,7 +410,7 @@ class jee4lm5 extends eqLogic
         }
         if ($w["code"] == "CMSteamBoilerTemperature") {
           log::add(__CLASS__, 'debug', 'steam');
-          $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm::steam", null, 'THERMOSTAT_STATE', 0);
+          $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm5::steam", null, 'THERMOSTAT_STATE', 0);
           $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
           $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
           $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
@@ -766,38 +680,24 @@ class jee4lm5 extends eqLogic
       switch($_type) {
         case "BbwDose":
           // set dose for Brew by Weight doses A and B
-          $this->setRecipeDose($v, $_logicalID);
+          $this->setBrewByWeightChangeDose($v, $_logicalID);
           break;
         case "CoffeeBoiler":
         case "SteamBoiler":
           // set coffee boiler temperature targer (does not work on steam boiler of linea mini)
-          $this->setBoilerTarget($v, $_type);
+          $this->setBoilerTargetTemperature($v, $_type);
           break;
         case "PrewetIn":
           // read actual value for the other slider as both have to be sent together
           $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewetholdtime')->execCmd();
-          $this->setPreinfusionSettings($v,$d);
+          $this->setPreBrewingChangeTimes($v,$d);
           break;
         case "PrewetOut":
           // read actual value for the other slider as both have to be sent together
           $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewettime')->execCmd();
-          $this->setPreinfusionSettings($d, $v);
+          $this->setPreBrewingChangeTimes($d, $v);
           break;
         }
-  }
-
-  /**
-   * retrieve miscelleanous statistics from LM
-   * not used yet
-   * @return void
-   */
-  public function getStatistics()
-  {
-    log::add(__CLASS__, 'debug', 'get basic counters');
-    $serial = $this->getConfiguration('serialNumber');
-    $ip = $this->getConfiguration('host');
-    $token = self::getToken();
-    $data = self::request($this->getPath($serial) . '/statistics/counters', "", 'GET', ["Authorization: Bearer $token"]);
   }
 
 
@@ -808,7 +708,7 @@ class jee4lm5 extends eqLogic
    */
   public function switchCoffeeBoilerONOFF($_toggle)
   {
-    log::add(__CLASS__, 'debug', $_toggle ? 'ON' : 'OFF');
+    log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
     $data = ["mode" => $_toggle ? "BrewingMode" : "Standby"];
     self::executeCommand($serial, "CoffeeMachineChangeMode",json_encode($data));
@@ -822,28 +722,13 @@ class jee4lm5 extends eqLogic
    */
   public function switchSteamBoilerONOFF($_toggle)
   {
-    log::add(__CLASS__, 'debug', 'enable/disable steam boiler');
+    log::add(__CLASS__, 'debug', 'switch steam boiler '. $_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
     $data = ["boilerIndex" => 1, "enabled" => $_toggle ? "BrewingMode" : "Standby"];
     self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled", json_encode($data));
   }
 
-  /**
-   * Select mode for Preinfusion/Prebew.
-   * set to Disabled if prebrew, set to enabled if prebrew
-   * @param mixed $_mode values accepted : Enabled,Disabled,TypeB
-   * @return void
-   */
-  public function setPreinfusionStatus($_mode)
-  {
-    // preinfusion = TypeB, prebrew=Enabled/Disabled
-    log::add(__CLASS__, 'debug', 'select prebrew or preinfusion');
-    $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    $data= ["mode" => $_mode];
-    $ret = self::request($this->getPath($serial). '/enable-preinfusion', json_encode($data), 'POST', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($ret, true));
-  }
+  
 
   /**
    * set the LM boiler target temperature for coffee or steam boiler according to $type value
@@ -851,15 +736,13 @@ class jee4lm5 extends eqLogic
    * @param mixed $_identifier by default this is coffee boiler temperature 
    * @return void
    */
-  public function setBoilerTarget($_value, $_identifier = "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
+  public function setBoilerTargetTemperature($_value, $_identifier = "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
   {
     log::add(__CLASS__, 'debug', 'switch steam on or off');
     $serial = $this->getConfiguration('serialNumber');
-    if ($_identifier == "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
-      $data = ["boilerIndex" => 0, "targetTemperature" => $_value];
-    else
+    $_identifier == "CoffeeMachineSettingCoffeeBoilerTargetTemperature" ?
+      $data = ["boilerIndex" => 0, "targetTemperature" => $_value] : // coffee boiler
       $data = ["boilerIndex" => 1, "targetLevel" => $_value]; // steam boiler
-      // steam boiler
     self::executeCommand($serial, $_identifier, json_encode($data)); 
   }
 
@@ -872,7 +755,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_toggle true or false
    * @return void
    */
-  public function setPlumbinStatus($_toggle)
+  public function setPreBrewingChangeMode($_toggle)
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
@@ -903,7 +786,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $dose
    * @return void
    */
-  public function setRecipeDose($_weight, $_dose)
+  public function setBrewByWeightChangeDose($_weight, $_dose)
   {
     log::add(__CLASS__, 'debug', "select active Dose");
     $serial = $this->getConfiguration('serialNumber');
@@ -926,12 +809,12 @@ class jee4lm5 extends eqLogic
   }  
 
   /**
-   * Summary of setPreinfusionSettings
+   * Summary of setPreBrewingChangeTimes
    * @param int $_time 
    * @param int $_hold
    * @return void
    */
-  public function setPreinfusionSettings($_time, $_hold) {
+  public function setPreBrewingChangeTimes($_time, $_hold) {
     log::add(__CLASS__, 'debug', "set preinfusion start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
     $data=  ["In" => ["seconds" => $_time], "Out" => ["seconds" => $_hold]];
@@ -943,7 +826,7 @@ class jee4lm5 extends eqLogic
    * as it monitors the backflush and this is not.
    * @return void
    */
-  public function startBackflush()
+  public function setBackFlushStartCleaning()
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
@@ -1570,7 +1453,7 @@ class jee4lm5Cmd extends cmd
       case 'refresh':
         return jee4lm5::RefreshAllInformation($eq);
       case 'start_backflush':
-        $eq->startBackflush();
+        $eq->setBackFlushStartCleaning();
         return true;
       case 'getStatus':
         return $eq->getInformations();
