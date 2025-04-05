@@ -678,9 +678,11 @@ class jee4lm5 extends eqLogic
           $this->setBrewByWeightChangeDose($v, $_logicalID);
           break;
         case "CoffeeBoiler":
+          $this->setBoilerTargetTemperature($v, "CoffeeMachineSettingCoffeeBoilerTargetTemperature");
+          break;
         case "SteamBoiler":
           // set coffee boiler temperature targer (does not work on steam boiler of linea mini)
-          $this->setBoilerTargetTemperature($v, $_type);
+          $this->setBoilerTargetTemperature($v, "CoffeeMachineSettingSteamBoilerTargetTemperature");
           break;
         case "PrewetIn":
           // read actual value for the other slider as both have to be sent together
