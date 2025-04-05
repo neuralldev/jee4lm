@@ -1169,8 +1169,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>",
-        '#_icon_off_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
+        '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>",
+        '#_icon_off_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1178,10 +1178,10 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
-        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
-        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
-        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins5/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
+        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins5/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1189,10 +1189,10 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
-        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_on.png' width='64' height='64'>",
-        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
-        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/steam_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_off.png' width='64' height='64'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1200,10 +1200,10 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
-        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1212,7 +1212,7 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<span style='color:red';font-size:1,5em;font-style:bold;'><br>Remplir<br><br></span><img class='img-responsive' src='/plugins/jee4lm/core/config/img/reservoir.png' width='64' height='64'>",
+        '#_icon_on_#' => "<span style='color:red';font-size:1,5em;font-style:bold;'><br>Remplir<br><br></span><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/reservoir.png' width='64' height='64'>",
         '#_icon_off_#' => "<span style='font-size:1,5em;font-style:bold;'><br>OK</span>",
         "#_time_widget_#" => "0"
       )
@@ -1221,8 +1221,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/bbw_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/bbw_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/bbw_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1230,8 +1230,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/main_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1239,8 +1239,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1255,8 +1255,8 @@ class jee4lm5 extends eqLogic
       'test' => array(
         array(
           'operation' => "#value# !=''",
-          'state_light' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>",
-          'state_dark' => "<img class='img-responsive' src='/plugins/jee4lm/core/config/img/#value#.png' width='256' height='256'>"
+          'state_light' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/#value#.png' width='256' height='256'>",
+          'state_dark' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/#value#.png' width='256' height='256'>"
         )
       )
     );
