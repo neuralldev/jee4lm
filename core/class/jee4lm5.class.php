@@ -202,7 +202,7 @@ class jee4lm5 extends eqLogic
     // cette section devra évoluer pour saisie de la tranche dans le plugin
 
     $heureActuelle = date('H');
-    $minuteActuelle = date('i');
+//    $minuteActuelle = date('i');
 
     // Tester si l'heure est entre 22h et 6h
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
@@ -215,14 +215,9 @@ class jee4lm5 extends eqLogic
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
       // for each serial found, check the machine state
       if (($serial = $jee4lm->getConfiguration('serialNumber')) != '') {
-        $mc = cache::byKey('jee4lm5::daemon_'.$id=$jee4lm->getId());
+        $id=$jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
         log::add(__CLASS__, 'debug', "cron eqID=$id lmserial=$serial state=$m");
-          if ($mc==null?0:$mc->getValue() ==1) // if daemon is running no need to refresh, exit
-            {
-              log::add(__CLASS__, 'debug', 'cron exit as daemon has taken over');
-              return;
-            }
           if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
             log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
       } else
