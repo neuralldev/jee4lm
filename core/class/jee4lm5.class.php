@@ -4,6 +4,7 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 //require_once dirname(__FILE__) . '/mdns.class.php';
 
 const
+  PLUGINNAME = 'jee4lm5',
   LMMODELCODE = ['LINEAMINI'],
   LMCLOUD = 'https://lion.lamarzocco.io/api/customer-app/',
  
@@ -19,7 +20,7 @@ https://github.com/zweckj/pylamarzocco/tree/v5
 */
 
 /**
- * jee4lm est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
+ * jee4lm5 est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
  */
 class jee4lm5 extends eqLogic
 {
@@ -105,15 +106,15 @@ class jee4lm5 extends eqLogic
       'POST'
     );
     log::add(__CLASS__, 'debug', 'login ' . json_encode($data, true));
-    cache::delete('jee4lm5::accessToken'); // for any login attempt, reset cache with token, as it will change
-    config::save('refreshToken', '', 'jee4lm5');
-    config::save('accessToken', '', 'jee4lm5');
+    cache::delete(PLUGINNAME.'::accessToken'); // for any login attempt, reset cache with token, as it will change
+    config::save('refreshToken', '', PLUGINNAME);
+    config::save('accessToken', '', PLUGINNAME);
     if ($data['accessToken'] != '') {
-      config::save('refreshToken', $data['refreshToken'], 'jee4lm5');
-      config::save('accessToken', $data['accessToken'], 'jee4lm5');
-      config::save('userId', $_username, 'jee4lm5');
-      config::save('userPwd', $_password, 'jee4lm5');
-      cache::set('jee4lm5::access_token', $data['accessToken'], TOKEN_TIME_TO_REFRESH);
+      config::save('refreshToken', $data['refreshToken'], PLUGINNAME);
+      config::save('accessToken', $data['accessToken'], PLUGINNAME);
+      config::save('userId', $_username, PLUGINNAME);
+      config::save('userPwd', $_password, PLUGINNAME);
+      cache::set(''.PLUGINNAME.'::access_token', $data['accessToken'], TOKEN_TIME_TO_REFRESH);
       log::add(__CLASS__, 'debug', 'login valid');
       return $data['accessToken'];
     }
@@ -127,18 +128,18 @@ class jee4lm5 extends eqLogic
    */
   public static function refreshToken()
   {
-    $refresh = config::byKey('refreshToken', 'jee4lm5');
-    $username = config::byKey('userId', 'jee4lm5');
-    $password = config::byKey('userPwd', 'jee4lm5');
-    config::save('refreshToken', '', 'jee4lm5');
-    config::save('accessToken', '', 'jee4lm5');
+    $refresh = config::byKey('refreshToken', PLUGINNAME);
+    $username = config::byKey('userId', PLUGINNAME);
+    $password = config::byKey('userPwd', PLUGINNAME);
+    config::save('refreshToken', '', PLUGINNAME);
+    config::save('accessToken', '', PLUGINNAME);
     // try to detect the machines only if token succeeded
     log::add(__CLASS__, 'debug', 'refresh token=' . $refresh);
 
     if ($refresh == '') {
       log::add(__CLASS__, 'debug', 'refresh token empty, do login');
       self::login($username, $password);
-      $refresh = config::byKey('refreshToken', 'jee4lm5');
+      $refresh = config::byKey('refreshToken', PLUGINNAME);
       return $refresh;
     }
     $data = self::request(
@@ -147,11 +148,11 @@ class jee4lm5 extends eqLogic
       'POST'
     );
     log::add(__CLASS__, 'debug', 'tokenrequest returned =' . json_encode($data, true));
-    cache::delete('jee4lm5::access_token');
+    cache::delete(''.PLUGINNAME.'::access_token');
     if ($data['access_token'] != '') {
-      cache::set('jee4lm5::access_token', $data['access_token'], 300);
-      config::save('refreshToken', $data['refresh_token'], 'jee4lm5');
-      config::save('accessToken', $data['access_token'], 'jee4lm5');
+      cache::set(''.PLUGINNAME.'::access_token', $data['access_token'], 300);
+      config::save('refreshToken', $data['refresh_token'], PLUGINNAME);
+      config::save('accessToken', $data['access_token'], PLUGINNAME);
       return $data['access_token'];
     }
     return '';
@@ -165,9 +166,9 @@ class jee4lm5 extends eqLogic
    */
   public static function getToken($_force=false)
   {
-    $mc = cache::byKey('jee4lm5::access_token');
+    $mc = cache::byKey(''.PLUGINNAME.'::access_token');
     $access_token = $mc->getValue();
- //   if (config::byKey('accessToken', 'jee4lm5') == '') // no login performed yet
+ //   if (config::byKey('accessToken', PLUGINNAME) == '') // no login performed yet
  //     return '';
     if ($access_token == '' || $access_token == null || $_force) 
       $access_token = self::refreshToken();
@@ -377,11 +378,11 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'debug', 'brewbyweight');
           //$free = !$data["output"]["mode"] == "Continuous";
           $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
-          $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', "jee4lm5::bbw", null, null, 1);
+          $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME."::bbw", null, null, 1);
           $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-          $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', "jee4lm5::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g",0);
-          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', "jee4lm5::bbw dose inactive", "g",0);
+          $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', PLUGINNAME."::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
+          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
           $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 0);
           $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 0);
           $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
@@ -405,7 +406,7 @@ class jee4lm5 extends eqLogic
         }
         if ($w["code"] == "CMSteamBoilerTemperature") {
           log::add(__CLASS__, 'debug', 'steam');
-          $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', "jee4lm5::steam", null, 'THERMOSTAT_STATE', 0);
+          $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', PLUGINNAME."::steam", null, 'THERMOSTAT_STATE', 0);
           $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
           $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
           $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
@@ -422,22 +423,22 @@ class jee4lm5 extends eqLogic
             }
       }
       $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', "jee4lm5::backflush", null, null, 0);
-      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', "jee4lm5::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
-      $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', "jee4lm5::main", null, 'THERMOSTAT_STATE', 0);
+      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', PLUGINNAME."::backflush", null, null, 0);
+      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', PLUGINNAME."::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
+      $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', PLUGINNAME."::main", null, 'THERMOSTAT_STATE', 0);
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
       $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
-      $_eq->AddAction("jee4lm_on", "heat", "jee4lm5::main on off", "THERMOSTAT_MODE", 1);
-      $_eq->AddAction("jee4lm_off", "off", "jee4lm5::main on off", "THERMOSTAT_MODE", 1);
-      $_eq->AddAction("jee4lm_auto", "Auto", "jee4lm5::main on off", "THERMOSTAT_MODE", 0);
-      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", "jee4lm5::steam on off", "", 1);
-      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", "jee4lm5::steam on off", "", 1);
+      $_eq->AddAction("jee4lm_on", "heat", PLUGINNAME."::main on off", "THERMOSTAT_MODE", 1);
+      $_eq->AddAction("jee4lm_off", "off", PLUGINNAME."::main on off", "THERMOSTAT_MODE", 1);
+      $_eq->AddAction("jee4lm_auto", "Auto", PLUGINNAME."::main on off", "THERMOSTAT_MODE", 0);
+      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", PLUGINNAME."::steam on off", "", 1);
+      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME."::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
-      $_eq->AddAction("start_backflush", "Démarrer backflush", "jee4lm5::backflush on off");
+      $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME."::backflush on off");
       // add machine slug to display machine by type
-      $_eq->AddCommand("Machine", 'machine', 'info', 'string', "jee4lm5::machine", null, null, 1);
+      $_eq->AddCommand("Machine", 'machine', 'info', 'string', PLUGINNAME."::machine", null, null, 1);
       $_eq->save();
       $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget");
       $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget");
@@ -856,10 +857,10 @@ class jee4lm5 extends eqLogic
         $d = DateTime::createFromFormat(DateTime::ATOM, $machines['connectionDate']);
         //log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
         // now check if machine is already created as an eqlogic
-        $eqLogic = eqLogic::byLogicalId($uuid, 'jee4lm5');
+        $eqLogic = eqLogic::byLogicalId($uuid, PLUGINNAME);
         if (!is_object($eqLogic)) {
           $eqLogic = new jee4lm5();
-          $eqLogic->setEqType_name('jee4lm5');
+          $eqLogic->setEqType_name(PLUGINNAME);
           $eqLogic->setIsEnable(1);
           $eqLogic->setName($machines['name']);
           $eqLogic->setCategory('heating', 1);
@@ -940,7 +941,7 @@ class jee4lm5 extends eqLogic
           "layout::dashboard::table::parameters" =>
             [
               "center" => "0",
-              "styletable" => "background-image: url(/plugins/jee4lm5/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletable" => "background-image: url(/plugins/".PLUGINNAME."/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
               "styletd" => "",
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
@@ -1073,9 +1074,9 @@ class jee4lm5 extends eqLogic
               $this->checkAndUpdateCmd('isScaleConnected',$w['output']['scaleConnected']?1:0);
               $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
               $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
-              $this->updatedisplay('bbwfree', 'template', "jee4lm5::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
-              $this->updatedisplay('bbwdoseA', 'template', "jee4lm5::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
-              $this->updatedisplay('bbwdoseB', 'template', "jee4lm5::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
+              $this->updatedisplay('bbwfree', 'template', PLUGINNAME."::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
+              $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
+              $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
               break; 
           case "CMPreExtraction":
               $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
@@ -1169,8 +1170,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>",
-        '#_icon_off_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
+        '#_icon_on_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:red; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/nodose_on.png' width='58px' height='57px' ></span></span>",
+        '#_icon_off_#' => "<span style='display:inline-block;line-height:0px;border-radius:50%;font-size: 8px;background-color: gray;color:white;border-width:thick;border-color:lightgray; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/nodose_off.png' width='58px' height='57px' ></span></span>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1178,9 +1179,9 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
+        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
         '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins5/jee4lm/core/config/img/main_on.png' width='100px' height='100px' ></span></span>",
-        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
         '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins5/jee4lm/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
         "#_time_widget_#" => "0"
       )
@@ -1189,10 +1190,10 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_on.png' width='64' height='64'>",
-        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_on.png' width='64' height='64'>",
-        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_off.png' width='64' height='64'>",
-        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/steam_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/steam_on.png' width='64' height='64'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/steam_off.png' width='64' height='64'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/steam_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1200,10 +1201,10 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_off.png' width='64' height='64'>",
-        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_img_light_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_img_dark_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_img_light_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_img_dark_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/backflush_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1212,7 +1213,7 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<span style='color:red';font-size:1,5em;font-style:bold;'><br>Remplir<br><br></span><img class='img-responsive' src='/plugins/jee4lm5/core/config/img/reservoir.png' width='64' height='64'>",
+        '#_icon_on_#' => "<span style='color:red';font-size:1,5em;font-style:bold;'><br>Remplir<br><br></span><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/reservoir.png' width='64' height='64'>",
         '#_icon_off_#' => "<span style='font-size:1,5em;font-style:bold;'><br>OK</span>",
         "#_time_widget_#" => "0"
       )
@@ -1221,8 +1222,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/bbw_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/bbw_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/bbw_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/bbw_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1230,8 +1231,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/main_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/main_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/main_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1239,8 +1240,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/backflush_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/backflush_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/backflush_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1255,8 +1256,8 @@ class jee4lm5 extends eqLogic
       'test' => array(
         array(
           'operation' => "#value# !=''",
-          'state_light' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/#value#.png' width='256' height='256'>",
-          'state_dark' => "<img class='img-responsive' src='/plugins/jee4lm5/core/config/img/#value#.png' width='256' height='256'>"
+          'state_light' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/#value#.png' width='256' height='256'>",
+          'state_dark' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/#value#.png' width='256' height='256'>"
         )
       )
     );
@@ -1299,7 +1300,7 @@ class jee4lm5 extends eqLogic
       'launchable' => 'ok',
       'state' => 'nok'
     ];
-    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid';
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/'.PLUGINNAME.'d.pid';
     if (file_exists($pid_file)) {
       //log::add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file); 
       $pid = trim(file_get_contents($pid_file));
@@ -1334,20 +1335,20 @@ class jee4lm5 extends eqLogic
 
     // before running daemon, check if all cache values are cleared
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      cache::set('jee4lm5::laststate_'.$jee4lm->getId(),0);
+      cache::set(''.PLUGINNAME.'::laststate_'.$jee4lm->getId(),0);
     }
     log::add(__CLASS__, 'debug', 'network='.network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') );
-    $path = realpath(dirname(__FILE__) . '/../../resources/jee4lm5d'); // répertoire du démon à modifier
-    $cmd = self::getPython3() . " {$path}/jee4lm5d.py"; // nom du démon à modifier
+    $path = realpath(dirname(__FILE__) . '/../../resources/'.PLUGINNAME.'d'); // répertoire du démon à modifier
+    $cmd = self::getPython3() . " {$path}/".PLUGINNAME."d.py"; // nom du démon à modifier
     $cmd .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
 //    $cmd .= ' --sockethost ' . config::byKey('sockethost', __CLASS__, JEEDOM_DAEMON_HOST); // host par défaut à modifier
     $cmd .= ' --socketport ' . config::byKey('socketport', __CLASS__, JEEDOM_DAEMON_PORT); // port par défaut à modifier
-    $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/jee4lm5/core/php/jee4lm5d.php'; // chemin de la callback url à modifier (voir ci-dessous)
+    $cmd .= ' --callback ' . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/'.PLUGINNAME.'/core/php/'.PLUGINNAME.'d.php'; // chemin de la callback url à modifier (voir ci-dessous)
     $cmd .= ' --cycle ' . config::byKey('cycle', __CLASS__, 2);
     $cmd .= ' --apikey ' . jeedom::getApiKey(__CLASS__); // l'apikey pour authentifier les échanges suivants
-    $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
-    log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/jee4lm5d.py");
-    $result = exec($cmd . ' >> ' . log::getPathToLog('jee4lm5d') . ' 2>&1 &');     
+    $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/'.PLUGINNAME.'d.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
+    log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/".PLUGINNAME."d.py");
+    $result = exec($cmd . ' >> ' . log::getPathToLog(''.PLUGINNAME.'d') . ' 2>&1 &');     
     while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') 
@@ -1368,18 +1369,18 @@ class jee4lm5 extends eqLogic
    * @return void
    */
   public static function deamon_stop() {
-    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/jee4lm5d.pid'; // ne pas modifier
+    $pid_file = jeedom::getTmpFolder(__CLASS__) . '/'.PLUGINNAME.'d.pid'; // ne pas modifier
   //  log::add(__CLASS__, 'debug', 'deamon_stop pid_file=' . $pid_file);
     if (file_exists($pid_file)) {
         $pid = intval(trim(file_get_contents($pid_file)));
         system::kill($pid);
       //  log::add(__CLASS__, 'debug', 'deamon_stop pid=' . $pid);
     }
-    system::kill('jee4lm5d.py'); // nom du démon à modifier
+    system::kill(''.PLUGINNAME.'d.py'); // nom du démon à modifier
     sleep(1);
     // before running daemon, check if all cache values are cleared
     foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
-      cache::set('jee4lm5::laststate_'.$jee4lm->getId(),0);
+      cache::set(''.PLUGINNAME.'::laststate_'.$jee4lm->getId(),0);
     }
     
   }
