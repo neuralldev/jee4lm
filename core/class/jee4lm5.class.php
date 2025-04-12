@@ -1059,13 +1059,13 @@ class jee4lm5 extends eqLogic
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
             if ($onoff && $w['output']['readyStartTime']!=null) {
               $d = $w['output']['readyStartTime'];
-              $readableDate = date('Y-m-d H:i:s', $d / 1000);
+              //$readableDate = date('Y-m-d H:i:s', $d / 1000);
 //              log::add(__CLASS__, 'debug', 'Readable date: ' . $readableDate);
               $currentTimestamp = time();
               $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
 //              log::add(__CLASS__, 'debug', 'Difference in minutes: ' . $differenceInMinutes);
               $readableDifference = $differenceInMinutes > 0 ? "prêt dans ".$differenceInMinutes."min" : "peresque prêt";
-              $this->checkAndUpdateCmd('displaycoffee', "<span style='color:".$differenceInMinutes<=0?"green":"yellow"."'></span>");
+              $this->checkAndUpdateCmd('displaycoffee', $readableDifference);
             } else {
               $this->checkAndUpdateCmd('displaycoffee','');
             }
@@ -1086,7 +1086,6 @@ class jee4lm5 extends eqLogic
               break;
           case "CMBrewByWeightDoses":
             //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
-              $this->checkAndUpdateCmd('isScaleConnected',$w['output']['scaleConnected']?1:0);
               $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
               $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
               $this->updatedisplay('bbwfree', 'template', PLUGINNAME."::bbw nodose ".$w['output']['mode']=="Continuous"?"active":"inactive");
@@ -1099,6 +1098,11 @@ class jee4lm5 extends eqLogic
               $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion");
               $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing");
               break;
+              case "ThingScale":
+                //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
+                $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
+                $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
+                break;
         }
       } //for each
       $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
