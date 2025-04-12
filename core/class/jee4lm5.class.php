@@ -405,11 +405,11 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'debug', 'brewbyweight');
           //$free = !$data["output"]["mode"] == "Continuous";
           $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
-          $_eq->AddCommand("BBW balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME."::bbw", null, null, 1);
+          $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME."::bbw", null, null, 0);
           $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-          $_eq->AddCommand("BBW Libre", 'bbwfree', 'info', 'binary', PLUGINNAME."::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("BBW Dose A", 'bbwdoseA', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
-          $_eq->AddCommand("BBW Dose B", 'bbwdoseB', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
+          $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME."::bbw nodose", null, null, 0, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+          $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
+          $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
           $_eq->AddAction("jee4lm_bbwA", "BBW Dose A", "button", "", 0);
           $_eq->AddAction("jee4lm_bbwB", "BBW Dose B", "button", "", 0);
           $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose A", "button", "", 1, "slider", 5, 100, 0.5);
@@ -420,7 +420,7 @@ class jee4lm5 extends eqLogic
         if ($w["code"] == "ThingScale") {
           log::add(__CLASS__, 'debug', 'scale');
           $_eq->setConfiguration("scalename", $w["output"]["name"]);
-          $_eq->AddCommand("BBW batterie", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
+          $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
         }
         if ($w["code"] == "CMCoffeeBoiler") {
           log::add(__CLASS__, 'debug', 'coffee');
