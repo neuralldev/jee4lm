@@ -703,7 +703,7 @@ class jee4lm5 extends eqLogic
       switch($_type) {
         case "BbwDose":
           // set dose for Brew by Weight doses A and B
-          $this->setBrewByWeightChangeDose($v, $_logicalID);
+          $this->BrewByWeighDoseCommand($v, $_logicalID);
           break;
         case "CoffeeBoiler":
           $this->setBoilerTargetTemperature($v, "CoffeeMachineSettingCoffeeBoilerTargetTemperature");
@@ -804,33 +804,36 @@ class jee4lm5 extends eqLogic
   }
 
   /**
-   * Set the Dose to use with Group on GB3 or Brew By Weight on Linea Mini. On Mini, 
-   * Dose A and B hold the two possible values offered by BBW. 
+   * Set the Dose to use with Group on Brew By Weight on Linea Mini. On Mini, 
+   * Dose 1 and 2 hold the two possible values offered by BBW. 
    * this API is not used on Micra.
    * @param mixed $weight
    * @param mixed $dose
    * @return void
    */
-  public function setBrewByWeightChangeDose($_weight, $_dose)
+  public function BrewByWeighDoseCommand($_weight, $_dose)
   {
     log::add(__CLASS__, 'debug', "select active Dose");
+    // fetch actual doses 
+    $dose1= $_dose=="A" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
+    $dose2= $_dose=="B" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
+
     $serial = $this->getConfiguration('serialNumber');
-    $data=  ["DoseIndex" => ($_dose=="A"?"Dose1":"Dose2"), "dose" => $_weight];
-    self::executeCommand($serial, "CoffeeMachineBrewByWeightChangeDose",json_encode($data));
+    $data=  ["doses" => ["Dose1" => $dose1, "Dose2" => $dose2]];
+    self::executeCommand($serial, "CoffeeMachineBrewByWeightSettingDoses",json_encode($data));
   } 
 
   /**
-   * Summary of setActiveBBWRecipe
+   * Summary of BrewByWeightModeCommand
    * @param mixed $_dose
    * @return void
    */
-  public function setActiveBBWRecipe($_dose)
+  public function BrewByWeightModeCommand($_dose)
   {
-    log::add(__CLASS__, 'debug', "set bbw active dose to $_dose");
-    log::add(__CLASS__, 'debug', "select active Dose");
+    log::add(__CLASS__, 'debug', "set bbw mode to $_dose");
     $serial = $this->getConfiguration('serialNumber');
     $data=  ["mode" => ($_dose=="A"?"Dose1":"Dose2")];
-    self::executeCommand($serial, "CoffeeMachineBrewByWeightSetDose",json_encode($data));
+    self::executeCommand($serial, "CoffeeMachineBrewByWeightChangeMode",json_encode($data));
   }  
 
   /**
@@ -1512,7 +1515,7 @@ class jee4lm5Cmd extends cmd
         return jee4lm5::RefreshAllInformation($eq);
         case 'jee4lm_bbwA':
         case 'jee4lm_bbwB':
-            $eq->setActiveBBWRecipe($_options=='jee4lm_bbwA'?'A':'B');
+            $eq->BrewByWeightModeCommand($_options=='jee4lm_bbwA'?'A':'B');
             return jee4lm5::RefreshAllInformation($eq);          
       default:
         return true;
