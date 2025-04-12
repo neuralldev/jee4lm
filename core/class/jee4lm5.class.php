@@ -789,21 +789,6 @@ class jee4lm5 extends eqLogic
   }
 
   /**
-   * Returns the total number of flushes of the coffee group done since the machine has been setup
-   * the information is not displayed by the plugin at the moment but will be used later
-   * @return void
-   */
-  public function getMachineUses()
-  {
-    log::add(__CLASS__, 'debug', 'get number of uses');
-    $token = self::getToken();
-    $serial = $this->getConfiguration('serialNumber');
-
-    $data = self::request($this->getPath($serial). 'stats', '', 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'uses=' . json_encode($data, true));
-  }
-
-  /**
    * Set the Dose to use with Group on Brew By Weight on Linea Mini. On Mini, 
    * Dose 1 and 2 hold the two possible values offered by BBW. 
    * this API is not used on Micra.
@@ -815,8 +800,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', "select active Dose");
     // fetch actual doses 
-    $dose1= $_dose=="A" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
-    $dose2= $_dose=="B" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
+    $dose1= 0+$_dose=="A" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
+    $dose2= 0+$_dose=="B" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
 
     $serial = $this->getConfiguration('serialNumber');
     $data=  ["doses" => ["Dose1" => $dose1, "Dose2" => $dose2]];
