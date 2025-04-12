@@ -1100,8 +1100,9 @@ class jee4lm5 extends eqLogic
               break;
               case "ThingScale":
                 //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
-                $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
                 $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
+                if($w['output']['connected']) // fetch battery only if scale is connected else display last value
+                 $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
                 break;
         }
       } //for each
