@@ -619,14 +619,14 @@ class jee4lm5 extends eqLogic
    */
   public function AddAction($_actionName, $_actionTitle, $_template = null, $_generic_type = null, $_visible = 1, $_SubType = 'other', $_min = null, $_max = null, $_step = null)
   {
-    // log::add(__CLASS__, 'debug', ' add action ' . $actionName);
+    log::add(__CLASS__, 'debug', ' add action ' . $actionName);
     $createCmd = true;
     $command = $this->getCmd('action', $_actionName);
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $_actionTitle);
       if (is_object($command)) $createCmd = false;
     } else $createCmd = false;
-    
+
     if ($createCmd)  // only if action is not yet defined
       {
         $command = new jee4lm5Cmd();
@@ -635,6 +635,7 @@ class jee4lm5 extends eqLogic
         $command->setType('action');
         $command->setSubType($_SubType);
         $command->setEqLogic_id($this->getId());
+        $command->save();
       }
     $command->setIsVisible($_visible);
     if ($_template != null) {
