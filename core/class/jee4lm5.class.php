@@ -230,7 +230,7 @@ class jee4lm5 extends eqLogic
     // cette section devra évoluer pour saisie de la tranche dans le plugin
 
     $heureActuelle = date('H');
-//    $minuteActuelle = date('i');
+    $minuteActuelle = date('i');
 
     // Tester si l'heure est entre 22h et 6h
     if ($heureActuelle >= 20 || $heureActuelle < 6) {
@@ -246,8 +246,11 @@ class jee4lm5 extends eqLogic
         $id=$jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
         log::add(__CLASS__, 'debug', "cron eqID=$id state=".$m->execCmd());
-          if(!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
-            log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
+        if (!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
+          log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
+          if ($minuteActuelle % 5 == 0) { // every 10 minutes max
+            $jee4lm->getSettings();
+          } 
       } else
         log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
    } //foreach
@@ -366,8 +369,6 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' poll='.$_poll);
     $ret = $_eq->getInformations(); // refresh
     $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
-    $_eq->checkAndUpdateCmd('hbmode',$$new_state ? 'heat' : 'off');
-
     if ($actual_state == $new_state) { // no change of state, let stay in this loop mode
       log::add(__CLASS__, 'debug', 'refresh all information no change in state');
     } 
@@ -1025,6 +1026,29 @@ class jee4lm5 extends eqLogic
     }
   }
 
+
+  public function getSettings()
+  {
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
+    if ($arr1 != null) {
+      $this->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
+//        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
+      foreach($arr1['actualFirmwares'] as $fw) {
+//        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
+        switch($fw['type']) {
+          case 'Gateway':
+            $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
+            break;
+          case 'Machine':
+            $this->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
+            break;
+        }
+      }
+    }
+  }
   /**
    * Refreshes the main counters and not all the information, this is mostly used when there is no
    * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
@@ -1134,24 +1158,7 @@ class jee4lm5 extends eqLogic
             break;
         }
       } //for each
-      $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
-      log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
-      if ($arr1 != null) {
-        $this->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
-//        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
-        foreach($arr1['actualFirmwares'] as $fw) {
-  //        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
-          switch($fw['type']) {
-            case 'Gateway':
-              $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
-              break;
-            case 'Machine':
-              $this->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
-              break;
-          }
-        }
-      }
-
+      
       return true;
     } //if
     return false;
