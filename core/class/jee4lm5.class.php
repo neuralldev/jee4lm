@@ -1048,7 +1048,10 @@ class jee4lm5 extends eqLogic
             $cmdOff = $this->getCmd(null, 'jee4lm_off');
             switch($w['output']['status']) {
               case "PoweredOn":
-                $this->checkAndUpdateCmd('bbwfree',0);
+                $this->checkAndUpdateCmd('hbmode', 'heat');
+                $cmdOn->setIsVisible(0);
+                $cmdOff->setIsVisible(1);
+                break;
               case "Brewing":
                 $this->checkAndUpdateCmd('machinemode', 1);
                 $cmdOn->setIsVisible(0);
@@ -1057,6 +1060,10 @@ class jee4lm5 extends eqLogic
               case "Standby":
                 $this->checkAndUpdateCmd('bbwfree',1);
                 $this->checkAndUpdateCmd('machinemode', 0);
+                $this->checkAndUpdateCmd('hbmode', 'off');
+                $cmdOn->setIsVisible(1);
+                $cmdOff->setIsVisible(0);
+                break;
               default:
                 $this->checkAndUpdateCmd('machinemode', 0);
                 $cmdOn->setIsVisible(1);
@@ -1100,28 +1107,31 @@ class jee4lm5 extends eqLogic
             break;
           case "CMBackFlush":
            //   log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-              $this->checkAndUpdateCmd('tankStatus',$$w['output']['status'] == 'On'?1:0);
-              break;
+            $this->checkAndUpdateCmd('tankStatus',$$w['output']['status'] == 'On'?1:0);
+            break;
           case "CMBrewByWeightDoses":
             //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
-              $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
-              $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
-//              $this->updatedisplay('bbwfree', 'template', PLUGINNAME."::bbw nodose");
-              $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
-              $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
-              break; 
+            $this->checkAndUpdateCmd('bbwmode',$w['output']['doses']['Dose2']['mode']);
+            $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
+            $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
+            if ($w['output']['mode']=="Continuous")
+              $this->checkAndUpdateCmd('bbwfree',1);
+            $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
+            $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
+            $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
+            break; 
           case "CMPreExtraction":
-              $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
-              $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['Out']['seconds']);
-              $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion");
-              $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing");
-              break;
+            $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
+            $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['Out']['seconds']);
+            $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion");
+            $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing");
+            break;
           case "ThingScale":
-              //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
-              $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
-              if($w['output']['connected'] && $w['output']['batteryLevel']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
-                $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
-              break;
+            //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
+            $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
+            if($w['output']['connected'] && $w['output']['batteryLevel']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
+              $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
+            break;
         }
       } //for each
       $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
