@@ -402,71 +402,71 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
     if ($data != '') {
       foreach ($data['widgets'] as $w) {
-        if ($w["code"] == "CMBrewByWeightDoses") {
-          log::add(__CLASS__, 'debug', 'brewbyweight');
-          //$free = !$data["output"]["mode"] == "Continuous";
-          $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
-          $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME."::bbw", null, null, 0);
-          $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-          $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME."::bbw nodose", null, null, 0, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
-          $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME."::bbw dose inactive", "g",0);
-          $_eq->AddAction("jee4lm_bbwA", "BBW Dose 1", "button", "", 1);
-          $_eq->AddAction("jee4lm_bbwB", "BBW Dose 2", "button", "", 2);
-          $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose 1", "button", "", 1, "slider", 5, 100, 0.5);
-          $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose 2", "button", "", 1, "slider", 5, 100, 0.5);
-          $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
-          $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
+        switch ($w["code"]) {
+          case "CMBrewByWeightDoses":
+            log::add(__CLASS__, 'debug', 'brewbyweight');
+            $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
+            $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME . "::bbw", null, null, 0);
+            $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
+            $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME . "::bbw nodose", null, null, 0, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+            $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
+            $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
+            $_eq->AddAction("jee4lm_bbwA", "BBW Dose 1", "button", "", 1);
+            $_eq->AddAction("jee4lm_bbwB", "BBW Dose 2", "button", "", 2);
+            $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose 1", "button", "", 1, "slider", 5, 100, 0.5);
+            $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose 2", "button", "", 1, "slider", 5, 100, 0.5);
+            $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
+            $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
+            break;
+          case "ThingScale":
+            log::add(__CLASS__, 'debug', 'scale');
+            $_eq->setConfiguration("scalename", $w["output"]["name"]);
+            $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
+            break;
+          case "CMCoffeeBoiler":
+            log::add(__CLASS__, 'debug', 'coffee');
+            $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
+            $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+            $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+            $_eq->AddCommand("Chaudière café", 'displaycoffee', 'info', 'string', null, null, null, 1);
+            $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
+            break;
+          case "CMSteamBoilerTemperature":
+            log::add(__CLASS__, 'debug', 'steam');
+            $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', PLUGINNAME . "::steam", null, 'THERMOSTAT_STATE', 0);
+            $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
+            $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+            $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
+            $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
+            break;
+          case "CMPreExtraction":
+            log::add(__CLASS__, 'debug', 'preinfusion');
+            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+            $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
+            $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+            $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+            break;
         }
-        if ($w["code"] == "ThingScale") {
-          log::add(__CLASS__, 'debug', 'scale');
-          $_eq->setConfiguration("scalename", $w["output"]["name"]);
-          $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
-        }
-        if ($w["code"] == "CMCoffeeBoiler") {
-          log::add(__CLASS__, 'debug', 'coffee');
-          $_eq->AddCommand("Cafetière activée", 'coffeeenabled', 'info', 'binary', null, null, 'THERMOSTAT_STATE', 0);
-          $_eq->AddCommand("Cafetière temperature cible", 'coffeetarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
-          $_eq->AddCommand("Cafetière temperature actuelle", 'coffeecurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
-          $_eq->AddCommand("Chaudière café", 'displaycoffee', 'info', 'string', null, null, null, 1);
-          $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
-          // calcule affichage
-        }
-        if ($w["code"] == "CMSteamBoilerTemperature") {
-          log::add(__CLASS__, 'debug', 'steam');
-          $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', PLUGINNAME."::steam", null, 'THERMOSTAT_STATE', 0);
-          $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
-          $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
-          $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
-          $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
-        }
-        if ($w["code"] == "CMPreExtraction") {
-          log::add(__CLASS__, 'debug', 'preinfusion');
-          $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
-          $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
-          $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
-          $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
-          $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-          $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-            }
-      }
+      } // foreach
       $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', PLUGINNAME."::backflush", null, null, 0);
-      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', PLUGINNAME."::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
-      $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', PLUGINNAME."::main", null, 'THERMOSTAT_STATE', 0);
+      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', PLUGINNAME . "::backflush", null, null, 0);
+      $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', PLUGINNAME . "::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
+      $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', PLUGINNAME . "::main", null, 'THERMOSTAT_STATE', 0);
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
       $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
-      $_eq->AddAction("jee4lm_on", "heat", PLUGINNAME."::main on off", "THERMOSTAT_MODE", 1);
-      $_eq->AddAction("jee4lm_off", "off", PLUGINNAME."::main on off", "THERMOSTAT_MODE", 1);
-      $_eq->AddAction("jee4lm_auto", "Auto", PLUGINNAME."::main on off", "THERMOSTAT_MODE", 0);
-      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", PLUGINNAME."::steam on off", "", 1);
-      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME."::steam on off", "", 1);
+      $_eq->AddAction("jee4lm_on", "heat", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
+      $_eq->AddAction("jee4lm_off", "off", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
+      $_eq->AddAction("jee4lm_auto", "Auto", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 0);
+      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", PLUGINNAME . "::steam on off", "", 1);
+      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME . "::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
-      $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME."::backflush on off");
+      $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
       // add machine slug to display machine by type
-      $_eq->AddCommand("Machine", 'machine', 'info', 'string', PLUGINNAME."::machine", null, null, 1);
+      $_eq->AddCommand("Machine", 'machine', 'info', 'string', PLUGINNAME . "::machine", null, null, 1);
       $_eq->save();
       $_eq->linksetpoint("jee4lm_coffee_slider", "coffeetarget");
       $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget");
@@ -476,8 +476,7 @@ class jee4lm5 extends eqLogic
       $_eq->linksetpoint("jee4lm_off", "machinemode");
       $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
       $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
-
-    }
+    } //if
 
     return true;
   }
@@ -541,7 +540,7 @@ class jee4lm5 extends eqLogic
     if (!is_object($Command)) { // check if info is already defined, if yes avoid duplicating
       $Command = cmd::byEqLogicIdCmdName($this->getId(), $_logicalId);
       if (is_object($Command)) $createCmd = false;
-       }
+       } else $createCmd=false;
 
     if ($createCmd) {
       // basic settings
@@ -552,65 +551,51 @@ class jee4lm5 extends eqLogic
       $Command->setName($_Name);
       $Command->setType($_Type);
       $Command->setSubType($_SubType);
+      $Command->save();
       log::add(__CLASS__, 'debug', 'add command create object ' . $_Name);
     }
 
     $Command->setIsVisible($_IsVisible);
     log::add(__CLASS__, 'debug', 'add command set visible ' . $_Name);
-    if ($_IsHistorized != null)
-      $Command->setIsHistorized(strval($_IsHistorized));
+    if ($_IsHistorized != null)      $Command->setIsHistorized(strval($_IsHistorized));
     log::add(__CLASS__, 'debug', 'add command set historized ' . $_IsHistorized);
     if ($_Template != null) {
       $Command->setTemplate('dashboard', $_Template);
       $Command->setTemplate('mobile', $_Template);
+      log::add(__CLASS__, 'debug', 'add command set template ' . $_Template);
     }
-    log::add(__CLASS__, 'debug', 'add command set template ' . $_Template);
-    if ($_unite != null && $_SubType == 'numeric')
-      $Command->setUnite($_unite);
+    if ($_unite != null && $_SubType == 'numeric')      $Command->setUnite($_unite);
     log::add(__CLASS__, 'debug', 'add command set unite ' . $_unite);
-      if ($_icon != 'default')
-      $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
+    if ($_icon != 'default')  $Command->setdisplay('icon', '<i class="' . $_icon . '"></i>');
     log::add(__CLASS__, 'debug', 'add command set icon ' . $_Name);
-      if ($_forceLineB != 'default')
-      $Command->setdisplay('forceReturnLineBefore', 1);
+      if ($_forceLineB != 'default')      $Command->setdisplay('forceReturnLineBefore', 1);
     log::add(__CLASS__, 'debug', 'add command set forceLineB ' . $_icon);
-    if ($_iconname != 'default')
-      $Command->setdisplay('showIconAndNamedashboard', 1);
+    if ($_iconname != 'default')      $Command->setdisplay('showIconAndNamedashboard', 1);
     log::add(__CLASS__, 'debug', 'add command set iconname ' . $_Name);
     if ($_noiconname != null) {
       $Command->setdisplay('showIconAndNamedashboard', $_noiconname);
       $Command->setdisplay('showNameOndashboard', $_noiconname);
     }
     log::add(__CLASS__, 'debug', 'add command set noiconname ' . $_Name);
-    if ($_calculValueOffset != null)
-      $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
+    if ($_calculValueOffset != null)      $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
     log::add(__CLASS__, 'debug', 'add command set calculValueOffset ' . $_calculValueOffset);
-    if ($_historizeRound != null)
-      $Command->setConfiguration('historizeRound', $_historizeRound);
+    if ($_historizeRound != null)      $Command->setConfiguration('historizeRound', $_historizeRound);
     log::add(__CLASS__, 'debug', 'add command set historizeRound ' . $_historizeRound);
-    if ($_generic_type != null)
-      $Command->setGeneric_type($_generic_type);
+    if ($_generic_type != null)      $Command->setGeneric_type($_generic_type);
     log::add(__CLASS__, 'debug', 'add command set generic_type ' . $_generic_type);
-    if ($_repeatevent == true && $_Type == 'info')
-      $Command->setConfiguration('repeatEventManagement', 'never');
+    if ($_repeatevent == true && $_Type == 'info')      $Command->setConfiguration('repeatEventManagement', 'never');
     log::add(__CLASS__, 'debug', 'add command set repeatevent ' . $_Name);
-    if ($_valuemin != 'default')
-      $Command->setConfiguration('minValue', $_valuemin);
+    if ($_valuemin != 'default')      $Command->setConfiguration('minValue', $_valuemin);
     log::add(__CLASS__, 'debug', 'add command set valuemin ' . $_valuemin);
-    if ($_valuemax != 'default')
-      $Command->setConfiguration('maxValue', $_valuemax);
+    if ($_valuemax != 'default')      $Command->setConfiguration('maxValue', $_valuemax);
     log::add(__CLASS__, 'debug', 'add command set valuemax ' . $_valuemax);
-    if ($_warning != null)
-      $Command->setDisplay("warningif", $_warning);
+    if ($_warning != null)      $Command->setDisplay("warningif", $_warning);
     log::add(__CLASS__, 'debug', 'add command set warning ' . $_warning);
-    if ($_order != null)
-      $Command->setOrder($_order);
+    if ($_order != null)      $Command->setOrder($_order);
     log::add(__CLASS__, 'debug', 'add command set order ' . $_order);
-    if ($_danger != null)
-      $Command->setDisplay("dangerif", $_danger);
+    if ($_danger != null)      $Command->setDisplay("dangerif", $_danger);
     log::add(__CLASS__, 'debug', 'add command set danger ' . $_danger);
-    if ($_invert != null)
-      $Command->setDisplay('invertBinary', $_invert);
+    if ($_invert != null)      $Command->setDisplay('invertBinary', $_invert);
     log::add(__CLASS__, 'debug', 'add command set invert ' . $_invert);
     $Command->save();
     log::add(__CLASS__, 'debug', 'command saved');
