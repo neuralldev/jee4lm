@@ -1114,12 +1114,12 @@ class jee4lm5 extends eqLogic
               $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion");
               $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing");
               break;
-              case "ThingScale":
-                //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
-                $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
-                if($w['output']['connected']) // fetch battery only if scale is connected else display last value
-                  $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
-                break;
+          case "ThingScale":
+              //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
+              $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
+              if($w['output']['connected'] && $w['output']['batteryLevel']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
+                $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
+              break;
         }
       } //for each
       $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
