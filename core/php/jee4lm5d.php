@@ -46,5 +46,5 @@ if ($eq==null) {
 }
 log::add('jee4lm5', 'debug', 'daemon callback, refreshing...');
 
-jee4lm5::RefreshAllInformation($eq, 2);
+jee4lm5::RefreshAllInformation($eq, _poll: "daemon");
 log::add('jee4lm5', 'debug', 'daemon callbach, refreshed');

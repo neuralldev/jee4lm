@@ -246,7 +246,7 @@ class jee4lm5 extends eqLogic
         $id=$jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
         log::add(__CLASS__, 'debug', "cron eqID=$id state=".$m->execCmd());
-        if (!self::RefreshAllInformation($jee4lm, 3)) // translate registers to jeedom values,           
+        if (!self::RefreshAllInformation($jee4lm, "cron")) // translate registers to jeedom values,           
           log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           if ($minuteActuelle % 5 == 0) { // every 10 minutes max
             $jee4lm->getSettings();
@@ -355,10 +355,10 @@ class jee4lm5 extends eqLogic
    * Reads and refresh all the values of an equipment previously created by detection routine
    * the function takes only the target equipment to refresh as argument
    * @param eqLogic $_eq
-   * @param numeric $_poll 0 = regular call, 1 = switch on/off, 2 = called from callback, 3 = cron
+   * @param mixed $_poll 0 = regular call, 1 = switch on/off, 2 = called from callback, 3 = cron
    * @return bool
    */
-  public static function RefreshAllInformation($_eq, $_poll = 0)
+  public static function RefreshAllInformation($_eq, $_poll = '')
   {
 //    log::add(__CLASS__, 'debug', 'refresh all information');
     $serial = $_eq->getConfiguration('serialNumber');
@@ -366,7 +366,7 @@ class jee4lm5 extends eqLogic
     $uid = uniqid();
 
     $actual_state = $_eq->getCmd(null, 'machinemode')->execCmd();
-    log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' poll='.$_poll);
+    log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' source='.$_poll);
     $ret = $_eq->getInformations(); // refresh
     $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
     if ($actual_state == $new_state) { // no change of state, let stay in this loop mode
@@ -1000,7 +1000,7 @@ class jee4lm5 extends eqLogic
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // read information for the first time
-        jee4lm5::RefreshAllInformation($eqLogic);
+        jee4lm5::RefreshAllInformation($eqLogic, "detect");
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     }
@@ -1514,34 +1514,34 @@ class jee4lm5Cmd extends cmd
       case 'jee4lm_off':
         $b = $action == 'jee4lm_on';
         $eq->switchCoffeeBoilerONOFF($b);
-        return jee4lm5::RefreshAllInformation($eq, 1);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = $action == 'jee4lm_steam_on';
         $eq->switchSteamBoilerONOFF($b);
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget', "CoffeeBoiler");
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget', "SteamBoiler");
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_doseA_slider':
         $eq->set_setpoint($_options, 'A', "BbwDose");
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_doseB_slider':
         $eq->set_setpoint($_options, 'B', "BbwDose");
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_prewet_slider':
         $eq->set_setpoint($_options, '', "PrewetIn");
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
       case 'jee4lm_prewet_time_slider':
         $eq->set_setpoint($_options, '', "PrewetOut");
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshAllInformation($eq, "post command");
         case 'jee4lm_bbwA':
         case 'jee4lm_bbwB':
             $eq->BrewByWeightModeCommand($_options=='jee4lm_bbwA'?'A':'B');
-            return jee4lm5::RefreshAllInformation($eq);          
+            return jee4lm5::RefreshAllInformation($eq, "post command");          
       default:
         return true;
     }
