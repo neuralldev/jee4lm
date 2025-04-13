@@ -1044,30 +1044,46 @@ class jee4lm5 extends eqLogic
 //        log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
           case "CMMachineStatus":
-    //        log::add(__CLASS__, 'debug', 'getinformation machine status=' . $w['output']['status']);
-            $this->checkAndUpdateCmd('machinemode',$onoff = $w['output']['status'] == 'BrewingMode' || $w['output']['status'] == 'PoweredOn' ? 1 : 0);
-            $cmd = $this->getCmd(null, 'jee4lm_on');
-            $cmd->setIsVisible($onoff?0:1);
-            $cmd->save();
-            $cmd = $this->getCmd(null, 'jee4lm_off');
-            $cmd->setIsVisible($onoff?1:0);
-            $cmd->save();
+            $cmdOn = $this->getCmd(null, 'jee4lm_on');
+            $cmdOff = $this->getCmd(null, 'jee4lm_off');
+            switch($w['output']['status']) {
+              case "PoweredOn":
+              case "Brewing":
+                $this->checkAndUpdateCmd('machinemode', 1);
+                $cmdOn->setIsVisible(0);
+                $cmdOff->setIsVisible(1);
+                break;
+              case "Standby":
+                $this->checkAndUpdateCmd('machinemode', 0);
+              default:
+                $this->checkAndUpdateCmd('machinemode', 0);
+                $cmdOn->setIsVisible(1);
+                $cmdOff->setIsVisible(0);
+            }
+            $cmdOn->save();
+            $cmdOff->save();
             // now update display of temperature readdiness
             break;
           case "CMCoffeeBoiler":
-    //        log::add(__CLASS__, 'debug', 'getinformation coffee boiler temp=' . $w['output']['temperature']. " starts at ". $w['output']['readyStartTime']);
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
-            if ($onoff && $w['output']['readyStartTime']!=null) {
-              $d = $w['output']['readyStartTime'];
-              //$readableDate = date('Y-m-d H:i:s', $d / 1000);
-//              log::add(__CLASS__, 'debug', 'Readable date: ' . $readableDate);
-              $currentTimestamp = time();
-              $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
-//              log::add(__CLASS__, 'debug', 'Difference in minutes: ' . $differenceInMinutes);
-              $readableDifference = $differenceInMinutes > 0 ? "prêt dans ".$differenceInMinutes."min" : "peresque prêt";
-              $this->checkAndUpdateCmd('displaycoffee', $readableDifference);
-            } else {
-              $this->checkAndUpdateCmd('displaycoffee','');
+            switch($w['output']['readyStartTime']) {
+              case "HeatingUp":
+                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
+                $this->checkAndUpdateCmd('coffeeenabled',1);
+                $d = $w['output']['readyStartTime'];
+                $currentTimestamp = time();
+                $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
+                  $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">Prêt dans '.$differenceInMinutes.' min</span>');
+                break;
+              case "Ready":
+                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
+                $this->checkAndUpdateCmd('coffeeenabled',1);
+                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">On</span>');
+                break;
+              default:
+                $this->checkAndUpdateCmd('coffeecurrent',0);
+                $this->checkAndUpdateCmd('coffeeenabled',0);
+                $this->checkAndUpdateCmd('displaycoffee','<span style="color:red">Off</span>');
             }
             break;
           case "CMSteamBoilerTemperature":
@@ -1102,7 +1118,7 @@ class jee4lm5 extends eqLogic
                 //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
                 $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
                 if($w['output']['connected']) // fetch battery only if scale is connected else display last value
-                 $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
+                  $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
                 break;
         }
       } //for each
@@ -1152,9 +1168,9 @@ class jee4lm5 extends eqLogic
     $r['info']['numeric']['batterie'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# <= 10', 'state_light' => '<span style="font-size: 24px;color:red">#value# %</span>', 'state_dark' => '<span style="font-size: 24px;color:red">#value# %</span>'),
-        array('operation' => '#value# > 10 && #value# <=70', 'state_light' => '<span style="font-size: 24px;color:orange">#value# %</span>', 'state_dark' => '<span style="font-size: 24px;color:orange">#value# %</span>'),
-        array('operation' => '#value# > 70', 'state_light' => '<span style="font-size: 20px;color:green">#value# %</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value# %</span>')
+        array('operation' => '#value# <= 10', 'state_light' => '<span style="font-size: 24px;color:red">#value#</span>', 'state_dark' => '<span style="font-size: 24px;color:red">#value#</span>'),
+        array('operation' => '#value# > 10 && #value# <=70', 'state_light' => '<span style="font-size: 24px;color:orange">#value#</span>', 'state_dark' => '<span style="font-size: 24px;color:orange">#value#</span>'),
+        array('operation' => '#value# > 70', 'state_light' => '<span style="font-size: 20px;color:green">#value#</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value#</span>')
       )
     );
     $r['info']['numeric']['temperature'] = array(
