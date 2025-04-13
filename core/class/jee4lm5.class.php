@@ -625,7 +625,8 @@ class jee4lm5 extends eqLogic
     if (!is_object($command)) { // check if action is already defined, if yes avoid duplicating
       $command = cmd::byEqLogicIdCmdName($this->getId(), $_actionTitle);
       if (is_object($command)) $createCmd = false;
-    }
+    } else $createCmd = false;
+    
     if ($createCmd)  // only if action is not yet defined
       {
         $command = new jee4lm5Cmd();
