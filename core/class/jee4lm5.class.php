@@ -1175,9 +1175,10 @@ class jee4lm5 extends eqLogic
     $r['info']['numeric']['batterie'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
-        array('operation' => '#value# <= 10', 'state_light' => '<span style="font-size: 24px;color:red">#value#</span>', 'state_dark' => '<span style="font-size: 24px;color:red">#value#</span>'),
-        array('operation' => '#value# > 10 && #value# <=70', 'state_light' => '<span style="font-size: 24px;color:orange">#value#</span>', 'state_dark' => '<span style="font-size: 24px;color:orange">#value#</span>'),
-        array('operation' => '#value# > 70', 'state_light' => '<span style="font-size: 20px;color:green">#value#</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value#</span>')
+        array('operation' => '#value# ==0',                 'state_light' => '<span style="font-size: 24px;color:red">-</span>', 'state_dark' => '<span style="font-size: 24px;color:red">-</span>'),
+        array('operation' => '#value# > 0 && #value# <=10', 'state_light' => '<span style="font-size: 24px;color:red">#value#</span>', 'state_dark' => '<span style="font-size: 24px;color:red">#value#</span>'),
+        array('operation' => '#value# > 10 && #value# <=70','state_light' => '<span style="font-size: 24px;color:orange">#value#</span>', 'state_dark' => '<span style="font-size: 24px;color:orange">#value#</span>'),
+        array('operation' => '#value# > 70',                'state_light' => '<span style="font-size: 20px;color:green">#value#</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value#</span>')
       )
     );
     $r['info']['numeric']['temperature'] = array(
