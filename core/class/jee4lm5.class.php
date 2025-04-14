@@ -527,7 +527,7 @@ class jee4lm5 extends eqLogic
     $_order = null,
     $_IsHistorized = 0,
     $_repeatevent = false,
-    $_iconname = null,
+    $_iconname = 0,
     $_calculValueOffset = null,
     $_historizeRound = null,
     $_noiconname = 0,
