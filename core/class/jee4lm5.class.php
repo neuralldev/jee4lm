@@ -1124,12 +1124,12 @@ class jee4lm5 extends eqLogic
             break;
           case "CMBrewByWeightDoses":
             //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
-            $this->checkAndUpdateCmd('bbwmode',$w['output']['doses']['Dose2']['mode']);
+            $this->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
             $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
             $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
             if ($w['output']['mode']=="Continuous")
               $this->checkAndUpdateCmd('bbwfree',1);
-            $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
+//            $this->updatedisplay('bbwfree', 'template', PLUGINNAME."::bbw nodose".$w['output']['mode']=="Dose1"?"":" inactive");
             $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
             $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
             break; 
