@@ -1065,6 +1065,7 @@ class jee4lm5 extends eqLogic
                 $cmdOff->setIsVisible(1);
                 break;
               case "Brewing":
+                $this->checkAndUpdateCmd('hbmode', 'heat');
                 $this->checkAndUpdateCmd('machinemode', 1);
                 $cmdOn->setIsVisible(0);
                 $cmdOff->setIsVisible(1);
@@ -1087,7 +1088,7 @@ class jee4lm5 extends eqLogic
             break;
           case "CMCoffeeBoiler":
             $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
-            switch($w['output']['readyStartTime']) {
+            switch($w['output']['status']) {
               case "HeatingUp":
                 $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
                 $this->checkAndUpdateCmd('coffeeenabled',1);
