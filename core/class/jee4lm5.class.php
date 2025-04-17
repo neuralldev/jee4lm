@@ -203,7 +203,7 @@ class jee4lm5 extends eqLogic
       while (time() - $start < PENDING_COMMAND_TIMEOUT) {
         $data = self::request(jee4lm5::getpath($_serial).'/dashboard/');
         if ($data['runningCommand'] == null) {
-          log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' no running command');
+          log::add(__CLASS__, 'debug', "waitCommmandExecution command $id no running command");
           return true;
         }
         if ($data['runningCommands'][$id]['status'] != 'Pending') {
@@ -212,7 +212,7 @@ class jee4lm5 extends eqLogic
         }
         sleep(2);
       }
-      log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' timeout');
+      log::add(__CLASS__, 'debug', "waitCommmandExecution command $id timeout");
       return false;
     }
     return true;
@@ -246,10 +246,10 @@ class jee4lm5 extends eqLogic
         $id=$jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
         log::add(__CLASS__, 'debug', "cron eqID=$id state=".$m->execCmd());
-        if (!self::RefreshAllInformation($jee4lm, "cron")) // translate registers to jeedom values,           
+        if (!self::RefreshLMDashboard($jee4lm, "cron")) // translate registers to jeedom values,           
           log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           if ($minuteActuelle % 5 == 0) { // every 10 minutes max
-            $jee4lm->getSettings();
+            $jee4lm->getThingSettings();
           } 
       } else
         log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
@@ -358,7 +358,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_poll 0 = regular call, 1 = switch on/off, 2 = called from callback, 3 = cron
    * @return bool
    */
-  public static function RefreshAllInformation($_eq, $_poll = '')
+  public static function RefreshLMDashboard($_eq, $_poll = '')
   {
 //    log::add(__CLASS__, 'debug', 'refresh all information');
     $serial = $_eq->getConfiguration('serialNumber');
@@ -367,21 +367,29 @@ class jee4lm5 extends eqLogic
 
     $actual_state = $_eq->getCmd(null, 'machinemode')->execCmd();
     log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' source='.$_poll);
-    $ret = $_eq->getInformations(); // refresh
+    $ret = $_eq->getThingDashboardInformation(); // refresh
     $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
-    if ($actual_state == $new_state) { // no change of state, let stay in this loop mode
-      log::add(__CLASS__, 'debug', 'refresh all information no change in state');
-    } 
-    else
-    if ($actual_state ==0) { // going from off to on, run daaemon
-      log::add(__CLASS__, 'debug', 'refresh all information machine is now on');
-      if (self::deamon_info()['state'] == 'ok') 
-        self::deamon_send(['id' => $id, 'lm'=> 'poll']);
-    } else
-    if ($actual_state ==1) { // going from on to off, stop daemon 
-      log::add(__CLASS__, 'debug', 'refresh all information machine is now off');
-      if (self::deamon_info()['state'] == 'ok') 
-        self::deamon_send(['id' => $id, 'lm'=> 'stop']);
+    switch (true) {
+      case $actual_state == $new_state:
+        // no change of state, let stay in this loop mode
+        log::add(__CLASS__, 'debug', 'refresh all information no change in state');
+        break;
+
+      case $actual_state == 0:
+        // going from off to on, run daemon
+        log::add(__CLASS__, 'debug', 'refresh all information machine is now on');
+        if (self::deamon_info()['state'] == 'ok') {
+          self::deamon_send(['id' => $id, 'lm' => 'poll']);
+        }
+        break;
+
+      case $actual_state == 1:
+        // going from on to off, stop daemon
+        log::add(__CLASS__, 'debug', 'refresh all information machine is now off');
+        if (self::deamon_info()['state'] == 'ok') {
+          self::deamon_send(['id' => $id, 'lm' => 'stop']);
+        }
+        break;
     }
     return $ret;
   }
@@ -392,7 +400,7 @@ class jee4lm5 extends eqLogic
    * @param eqLogic $_eq
    * @return bool
    */
-  public static function CreateConfiguration($_eq)
+  public static function CreateThing($_eq)
   {
     log::add(__CLASS__, 'debug', 'create configuration');
     $serial = $_eq->getConfiguration('serialNumber');
@@ -692,7 +700,7 @@ class jee4lm5 extends eqLogic
       switch($_type) {
         case "BbwDose":
           // set dose for Brew by Weight doses A and B
-          $this->BrewByWeighDoseCommand($v, $_logicalID);
+          $this->CoffeeMachineBrewByWeightSettingDoses($v, $_logicalID);
           break;
         case "CoffeeBoiler":
           $this->setBoilerTargetTemperature($v, "CoffeeMachineSettingCoffeeBoilerTargetTemperature");
@@ -704,12 +712,12 @@ class jee4lm5 extends eqLogic
         case "PrewetIn":
           // read actual value for the other slider as both have to be sent together
           $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewetholdtime')->execCmd();
-          $this->setPreBrewingChangeTimes($v,$d);
+          $this->CoffeeMachinePreBrewingChangeTimes($v,$d);
           break;
         case "PrewetOut":
           // read actual value for the other slider as both have to be sent together
           $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewettime')->execCmd();
-          $this->setPreBrewingChangeTimes($d, $v);
+          $this->CoffeeMachinePreBrewingChangeTimes($d, $v);
           break;
         }
   }
@@ -720,7 +728,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_toggle
    * @return void
    */
-  public function switchCoffeeBoilerONOFF($_toggle)
+  public function CoffeeMachineChangeMode($_toggle)
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
@@ -734,7 +742,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_toggle
    * @return void
    */
-  public function switchSteamBoilerONOFF($_toggle)
+  public function CoffeeMachineSettingSteamBoilerEnabled($_toggle)
   {
     log::add(__CLASS__, 'debug', 'switch steam boiler '. $_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
@@ -769,7 +777,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $_toggle true or false
    * @return void
    */
-  public function setPreBrewingChangeMode($_toggle)
+  public function CoffeeMachinePreBrewingChangeMode($_toggle)
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
@@ -785,7 +793,7 @@ class jee4lm5 extends eqLogic
    * @param mixed $dose
    * @return void
    */
-  public function BrewByWeighDoseCommand($_weight, $_dose)
+  public function CoffeeMachineBrewByWeightSettingDoses($_weight, $_dose)
   {
     log::add(__CLASS__, 'debug', "select active Dose");
     // fetch actual doses 
@@ -811,12 +819,12 @@ class jee4lm5 extends eqLogic
   }  
 
   /**
-   * Summary of setPreBrewingChangeTimes
+   * Summary of CoffeeMachinePreBrewingChangeTimes
    * @param int $_time 
    * @param int $_hold
    * @return void
    */
-  public function setPreBrewingChangeTimes($_time, $_hold) {
+  public function CoffeeMachinePreBrewingChangeTimes($_time, $_hold) {
     log::add(__CLASS__, 'debug', "set preinfusion start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
     $data=  ["In" => ["seconds" => $_time], "Out" => ["seconds" => $_hold]];
@@ -828,7 +836,7 @@ class jee4lm5 extends eqLogic
    * as it monitors the backflush and this is not.
    * @return void
    */
-  public function setBackFlushStartCleaning()
+  public function CoffeeMachineBackFlushStartCleaning()
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
@@ -894,7 +902,7 @@ class jee4lm5 extends eqLogic
         $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);
         $eqLogic->save();
         // create commands before setting display
-        jee4lm5::CreateConfiguration($eqLogic);
+        jee4lm5::CreateThing($eqLogic);
         // set display
         $display_map = [
           'scalebattery' => [1, 3],
@@ -988,7 +996,7 @@ class jee4lm5 extends eqLogic
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // read information for the first time
-        jee4lm5::RefreshAllInformation($eqLogic, "detect");
+        jee4lm5::RefreshLMDashboard($eqLogic, "detect");
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     }
@@ -1015,7 +1023,7 @@ class jee4lm5 extends eqLogic
   }
 
 
-  public function getSettings()
+  public function getThingSettings()
   {
     $serial = $this->getConfiguration('serialNumber');
     $token = self::getToken();
@@ -1042,7 +1050,7 @@ class jee4lm5 extends eqLogic
    * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
    * @return bool
    */
-  public function getinformations()
+  public function getThingDashboardInformation()
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
     $serial = $this->getConfiguration('serialNumber');
@@ -1494,44 +1502,44 @@ class jee4lm5Cmd extends cmd
     log::add(__CLASS__, 'debug', 'execute action ' . $action . ' with options=' . json_encode($_options));
     switch ($action) {
       case 'refresh':
-        return jee4lm5::RefreshAllInformation($eq);
+        return jee4lm5::RefreshLMDashboard($eq);
       case 'start_backflush':
-        $eq->setBackFlushStartCleaning();
+        $eq->CoffeeMachineBackFlushStartCleaning();
         return true;
       case 'getStatus':
-        return $eq->getInformations();
+        return $eq->getThingDashboardInformation();
       case 'jee4lm_on':
       case 'jee4lm_off':
         $b = $action == 'jee4lm_on';
-        $eq->switchCoffeeBoilerONOFF($b);
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        $eq->CoffeeMachineChangeMode($b);
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = $action == 'jee4lm_steam_on';
-        $eq->switchSteamBoilerONOFF($b);
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        $eq->CoffeeMachineSettingSteamBoilerEnabled($b);
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget', "CoffeeBoiler");
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget', "SteamBoiler");
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_doseA_slider':
         $eq->set_setpoint($_options, 'A', "BbwDose");
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_doseB_slider':
         $eq->set_setpoint($_options, 'B', "BbwDose");
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_prewet_slider':
         $eq->set_setpoint($_options, '', "PrewetIn");
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_prewet_time_slider':
         $eq->set_setpoint($_options, '', "PrewetOut");
-        return jee4lm5::RefreshAllInformation($eq, "post command");
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
         case 'jee4lm_bbwA':
         case 'jee4lm_bbwB':
             $eq->BrewByWeightModeCommand($_options=='jee4lm_bbwA'?'A':'B');
-            return jee4lm5::RefreshAllInformation($eq, "post command");          
+            return jee4lm5::RefreshLMDashboard($eq, "post command");          
       default:
         return true;
     }
