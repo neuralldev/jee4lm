@@ -250,6 +250,7 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
           if ($minuteActuelle % 5 == 0) { // every 10 minutes max
             $jee4lm->getThingSettings();
+            $jee4lm->getThingSchedule(); 
           } 
       } else
         log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
@@ -466,6 +467,16 @@ class jee4lm5 extends eqLogic
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
+      $_eq->AddCommand("SmartWakeup", 'smartwakeup', 'info', 'binary',null, null, null, 1);
+      $_eq->AddCommand("SmartWakeup durée", 'smartwakeupstandbyminutes', 'info', 'numeric',null, null, null, 1);
+      $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',null, null, null, 1);
+
+      /*
+             $this->checkAndUpdateCmd('smartwakeup', 1);
+        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartStandByMinutes"]);
+        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartStandByAfter"]);
+ */
+
       $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
       $_eq->AddAction("jee4lm_on", "heat", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
       $_eq->AddAction("jee4lm_off", "off", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
@@ -474,6 +485,10 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME . "::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
+      $_eq->AddAction("jee4lm_smartwakeup_on", "on");
+      $_eq->AddAction("jee4lm_smartwakeup_off", "off");
+      $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
+      $_eq->AddAction("jee4lm_smartwakeupstandbyafter_slider", "Régler depuis quand", "button", null, 1, "slider", 1, 2, 1);
       // add machine slug to display machine by type
       $_eq->AddCommand("Machine", 'machine', 'info', 'string', PLUGINNAME . "::machine", null, null, 1);
       $_eq->save();
@@ -481,10 +496,14 @@ class jee4lm5 extends eqLogic
       $_eq->linksetpoint("jee4lm_steam_slider", "steamtarget");
       $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime");
       $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime");
+      $_eq->linksetpoint("jee4lm_smartwakeupstandbyminutes_slider", "smartwakeupstandbyminutes");
+      $_eq->linksetpoint("jee4lm_smartwakeupstandbyafter_slider", "smartwakeupstandbyafter");
       $_eq->linksetpoint("jee4lm_on", "machinemode");
       $_eq->linksetpoint("jee4lm_off", "machinemode");
       $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
       $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
+      $_eq->linksetpoint("jee4lm_smartwakeup_on", "smartwakeup");
+      $_eq->linksetpoint("jee4lm_smartwakeup_off", "smartwakeup");
     } //if
 
     return true;
@@ -844,6 +863,21 @@ class jee4lm5 extends eqLogic
     self::executeCommand($serial, "CoffeeMachineBackFlushStartCleaning", json_encode($data));
   }
 
+
+  /**
+   * set the auto-standby mode of the machine.
+   * @param bool $_enable   true or false
+   * @param int $_miutes    number of minutes before standby
+   * @param mixed $_after   event after what time starts LAST_BREW = "LastBrewing", POWER_ON = "PowerOn";
+   * @return void
+   */
+  public function CoffeeMachineSettingSmartStandBy($_enable, $_minutes, $_after)
+  {
+    $serial = $this->getConfiguration('serialNumber');
+    $data = ["enabled" => $_enable, "minutes" => $_minutes, "after"=> $_after];
+    self::executeCommand($serial, "CoffeeMachineSettingSmartStandBy", json_encode($data));
+  }
+
   /**
    * Detect is the function used by the plugin configuration button to detect and create the equipments.
    * this function shall be used only when new equipments are available. it is not necessary to ru it at regular.
@@ -1022,6 +1056,22 @@ class jee4lm5 extends eqLogic
     }
   }
 
+  public function getThingSchedule() {
+    $serial = $this->getConfiguration('serialNumber');
+    $token = self::getToken();
+    $arr1 = self::request($this->getPath($serial) . '/scheduling', '', 'GET', ["Authorization: Bearer $token"]);
+    log::add(__CLASS__, 'debug', 'getinformation got feedback from schedule '.json_encode($arr1));
+    if ($arr1 != null)
+      if ($arr1["smartWakeUpSleepSupported"] == true) {
+        $this->checkAndUpdateCmd('smartwakeup', 1);
+        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartStandByMinutes"]);
+        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartStandByAfter"]);
+      } else {
+        $this->checkAndUpdateCmd('smartwakeup', 0);
+        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', 0);
+        $this->checkAndUpdateCmd('smartwakeupstandbyafter', "");
+      }   
+  }
 
   public function getThingSettings()
   {
@@ -1518,6 +1568,17 @@ class jee4lm5Cmd extends cmd
         $b = $action == 'jee4lm_steam_on';
         $eq->CoffeeMachineSettingSteamBoilerEnabled($b);
         return jee4lm5::RefreshLMDashboard($eq, "post command");
+      case 'jee4lm_smartwakeup_on':
+      case 'jee4lm_smartwakeup_off':
+        $b = $action == 'jee4lm_smartstandby_on';
+        $eq->CoffeeMachineSettingSmartStandBy($b, 
+        cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd(),
+        cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd());
+        return true;
+      case 'jee4lm_smartwakeupstandbyminutes_slider':
+          return true;
+      case 'jee4lm_smartwakeupstandbyafter_slider':
+          return true;
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget', "CoffeeBoiler");
         return jee4lm5::RefreshLMDashboard($eq, "post command");
