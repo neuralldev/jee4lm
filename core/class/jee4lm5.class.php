@@ -1571,9 +1571,10 @@ class jee4lm5Cmd extends cmd
       case 'jee4lm_smartwakeup_on':
       case 'jee4lm_smartwakeup_off':
         $b = $action == 'jee4lm_smartstandby_on';
+        $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd()?"LastBrew":"PowerOn";
         $eq->CoffeeMachineSettingSmartStandBy($b, 
         cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd(),
-        cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd());
+        $from);
         return true;
       case 'jee4lm_smartwakeupstandbyminutes_slider':
           return true;
