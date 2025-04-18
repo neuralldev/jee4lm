@@ -485,8 +485,8 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME . "::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
-      $_eq->AddAction("jee4lm_smartwakeup_on", "on");
-      $_eq->AddAction("jee4lm_smartwakeup_off", "off");
+      $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on");
+      $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off");
       $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
       $_eq->AddAction("jee4lm_smartwakeupstandbyafter_slider", "Régler depuis quand", "button", null, 1, "slider", 1, 2, 1);
       // add machine slug to display machine by type
