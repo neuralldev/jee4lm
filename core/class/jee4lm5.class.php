@@ -1062,10 +1062,13 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'debug', 'getinformation got feedback from schedule '.json_encode($arr1));
     if ($arr1 != null)
       if ($arr1["smartWakeUpSleepSupported"] == true) {
+        log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
         $this->checkAndUpdateCmd('smartwakeup', 1);
-        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartStandByMinutes"]);
-        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartStandByAfter"]);
+        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartWakeUpSleep"]["smartStandByMinutes"]);
+        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartWakeUpSleep"]["smartStandByAfter"]);
       } else {
+        log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
+        // if not supported, set the command to 0
         $this->checkAndUpdateCmd('smartwakeup', 0);
         $this->checkAndUpdateCmd('smartwakeupstandbyminutes', 0);
         $this->checkAndUpdateCmd('smartwakeupstandbyafter', "");
