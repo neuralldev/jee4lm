@@ -488,7 +488,8 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on");
       $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off");
       $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
-      $_eq->AddAction("jee4lm_smartwakeupstandbyafter_slider", "Régler depuis quand", "button", null, 1, "slider", 1, 2, 1);
+      $_eq->AddAction("jee4lm_smartwakeup_after_lastbrew", "Dernier café");
+      $_eq->AddAction("jee4lm_smartwakeup_after_poweron", "Allumage");
       // add machine slug to display machine by type
       $_eq->AddCommand("Machine", 'machine', 'info', 'string', PLUGINNAME . "::machine", null, null, 1);
       $_eq->save();
@@ -497,7 +498,6 @@ class jee4lm5 extends eqLogic
       $_eq->linksetpoint("jee4lm_prewet_slider", "prewettime");
       $_eq->linksetpoint("jee4lm_prewet_time_slider", "preWetHoldTime");
       $_eq->linksetpoint("jee4lm_smartwakeupstandbyminutes_slider", "smartwakeupstandbyminutes");
-      $_eq->linksetpoint("jee4lm_smartwakeupstandbyafter_slider", "smartwakeupstandbyafter");
       $_eq->linksetpoint("jee4lm_on", "machinemode");
       $_eq->linksetpoint("jee4lm_off", "machinemode");
       $_eq->linksetpoint("jee4lm_steam_on", "steamenabled");
@@ -741,6 +741,7 @@ class jee4lm5 extends eqLogic
         }
   }
 
+  
 
   /**
    * Switch machine ON/OFF accoding to a boolean value
@@ -1065,7 +1066,7 @@ class jee4lm5 extends eqLogic
         log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
         $this->checkAndUpdateCmd('smartwakeup', 1);
         $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartWakeUpSleep"]["smartStandByMinutes"]);
-        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartWakeUpSleep"]["smartStandByAfter"]=="LastBrew"?1:2);
+        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartWakeUpSleep"]["smartStandByAfter"]);
       } else {
         log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
         // if not supported, set the command to 0
@@ -1075,6 +1076,7 @@ class jee4lm5 extends eqLogic
       }   
   }
 
+  
   public function getThingSettings()
   {
     $serial = $this->getConfiguration('serialNumber');
@@ -1240,13 +1242,6 @@ class jee4lm5 extends eqLogic
         array('operation' => '#value# > 0 && #value# <=10', 'state_light' => '<span style="font-size: 20px;color:red">#value#%</span>', 'state_dark' => '<span style="font-size: 20px;color:red">#value#%</span>'),
         array('operation' => '#value# > 10 && #value# <=70','state_light' => '<span style="font-size: 20px;color:orange">#value#%</span>', 'state_dark' => '<span style="font-size: 20px;color:orange">#value#%</span>'),
         array('operation' => '#value# > 70',                'state_light' => '<span style="font-size: 20px;color:green">#value#%</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value#%</span>')
-      )
-    );
-    $r['info']['numeric']['smartstandby'] = array(
-      'template' => 'tmplmultistate',
-      'test' => array(
-        array('operation' => '#value# == 1', 'state_light' => '<span style="font-size: 24px;color:gray">Dernier café</span><span style="font-size: 20px;color:black"></span>', 'state_dark' => '<span style="font-size: 24px;color:gray">Dernier Café</span><span style="font-size: 20px;color:white"> °C</span>'),
-        array('operation' => '#value# == 2', 'state_light' => '<span style="font-size: 20px;color:gray">Allumage</span>', 'state_dark' => '<span style="font-size: 20px;color:lightgray">Allumage</span>')
       )
     );
     $r['info']['numeric']['temperature'] = array(
@@ -1531,6 +1526,21 @@ class jee4lm5 extends eqLogic
         'resources/venv'
     ];
   }
+
+  public function CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options) {
+    $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
+    $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd();
+    $after = $_options;
+    return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
+  }
+  public function CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options) {
+    $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
+    $after = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd();
+    $from = $_options;
+    return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
+  }
+
+
 }
 
 /**
@@ -1577,17 +1587,21 @@ class jee4lm5Cmd extends cmd
         $b = $action == 'jee4lm_steam_on';
         $eq->CoffeeMachineSettingSteamBoilerEnabled($b);
         return jee4lm5::RefreshLMDashboard($eq, "post command");
+      case 'jee4lm_smartwakeup_after_lastbrew':
+        $eq->CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options);
+        return true;
+      case 'jee4lm_smartwakeup__after_poweron':
+        $eq->CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options);
+        return true;
       case 'jee4lm_smartwakeup_on':
       case 'jee4lm_smartwakeup_off':
         $b = $action == 'jee4lm_smartstandby_on';
-        $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd()?"LastBrew":"PowerOn";
+        $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd();
         $eq->CoffeeMachineSettingSmartStandBy($b, 
         cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd(),
         $from);
         return true;
       case 'jee4lm_smartwakeupstandbyminutes_slider':
-          return true;
-      case 'jee4lm_smartwakeupstandbyafter_slider':
           return true;
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget', "CoffeeBoiler");
