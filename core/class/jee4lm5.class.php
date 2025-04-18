@@ -421,7 +421,7 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
             $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
             $_eq->AddAction("jee4lm_bbwA", "BBW Dose 1", "button", "", 1);
-            $_eq->AddAction("jee4lm_bbwB", "BBW Dose 2", "button", "", 2);
+            $_eq->AddAction("jee4lm_bbwB", "BBW Dose 2", "button", "", 1);
             $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose 1", "button", "", 1, "slider", 5, 100, 0.5);
             $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose 2", "button", "", 1, "slider", 5, 100, 0.5);
             $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
@@ -931,7 +931,6 @@ class jee4lm5 extends eqLogic
             $eqLogic->setConfiguration('scaleName', $accessory['name']);
           }
         }
-        $eqLogic->setConfiguration('imageUrl', $machines['imageUrl']);        
         // now get configuration of machine
         $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);
         $eqLogic->save();
