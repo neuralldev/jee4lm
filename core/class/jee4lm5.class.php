@@ -469,7 +469,7 @@ class jee4lm5 extends eqLogic
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
       $_eq->AddCommand("SmartWakeup", 'smartwakeup', 'info', 'binary',null, null, null, 1);
       $_eq->AddCommand("SmartWakeup durée", 'smartwakeupstandbyminutes', 'info', 'numeric',null, null, null, 1);
-      $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',null, null, null, 1);
+      $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',PLUGINNAME . "::smartstandby", null, null, 1);
 
       /*
              $this->checkAndUpdateCmd('smartwakeup', 1);
@@ -1065,7 +1065,7 @@ class jee4lm5 extends eqLogic
         log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
         $this->checkAndUpdateCmd('smartwakeup', 1);
         $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartWakeUpSleep"]["smartStandByMinutes"]);
-        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartWakeUpSleep"]["smartStandByAfter"]);
+        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartWakeUpSleep"]["smartStandByAfter"]=="LastBrew"?1:2);
       } else {
         log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
         // if not supported, set the command to 0
@@ -1240,6 +1240,13 @@ class jee4lm5 extends eqLogic
         array('operation' => '#value# > 0 && #value# <=10', 'state_light' => '<span style="font-size: 20px;color:red">#value#%</span>', 'state_dark' => '<span style="font-size: 20px;color:red">#value#%</span>'),
         array('operation' => '#value# > 10 && #value# <=70','state_light' => '<span style="font-size: 20px;color:orange">#value#%</span>', 'state_dark' => '<span style="font-size: 20px;color:orange">#value#%</span>'),
         array('operation' => '#value# > 70',                'state_light' => '<span style="font-size: 20px;color:green">#value#%</span>', 'state_dark' => '<span style="font-size: 20px;color:green">#value#%</span>')
+      )
+    );
+    $r['info']['numeric']['smartstandby'] = array(
+      'template' => 'tmplmultistate',
+      'test' => array(
+        array('operation' => '#value# == 1', 'state_light' => '<span style="font-size: 24px;color:gray">Dernier café</span><span style="font-size: 20px;color:black"></span>', 'state_dark' => '<span style="font-size: 24px;color:gray">Dernier Café</span><span style="font-size: 20px;color:white"> °C</span>'),
+        array('operation' => '#value# == 2', 'state_light' => '<span style="font-size: 20px;color:gray">Allumage</span>', 'state_dark' => '<span style="font-size: 20px;color:lightgray">Allumage</span>')
       )
     );
     $r['info']['numeric']['temperature'] = array(
