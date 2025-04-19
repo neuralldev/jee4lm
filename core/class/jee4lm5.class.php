@@ -1112,6 +1112,12 @@ class jee4lm5 extends eqLogic
     $arr = self::request($this->getPath($serial) . '/dashboard', '', 'GET', ["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'getinformation got feedback from dashboard '.json_encode($arr));
     if ($arr != null) {
+      if ($arr["error"] == "Unauthorized") { // if credential is not set, try to login or abort
+        $username = config::byKey('userId', PLUGINNAME);
+        $password = config::byKey('userPwd', PLUGINNAME);    
+        if (!$this->login($username, $password)) return false;
+      } else
+        log::add(__CLASS__, 'info', 'credential is over, please login again');
       // lire le constenu json équivalent à lineamin_dashboard.json
       $this->checkAndUpdateCmd('tankStatus', 0);
       foreach($arr['widgets'] as $w) { 
@@ -1126,13 +1132,13 @@ class jee4lm5 extends eqLogic
                 $cmdOn->setIsVisible(0);
                 $cmdOff->setIsVisible(1);
                 break;
-              case "Brewing":
+              case "BrewingMode":
                 $this->checkAndUpdateCmd('hbmode', 'heat');
                 $this->checkAndUpdateCmd('machinemode', 1);
                 $cmdOn->setIsVisible(0);
                 $cmdOff->setIsVisible(1);
                 break;
-              case "Standby":
+              case "StandBy":
                 $this->checkAndUpdateCmd('bbwfree',1);
                 $this->checkAndUpdateCmd('machinemode', 0);
                 $this->checkAndUpdateCmd('hbmode', 'off');
@@ -1158,12 +1164,16 @@ class jee4lm5 extends eqLogic
                 $currentTimestamp = time();
                 $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
                 $differenceInSeconds = 0;
-                if( $differenceInMinutes <= 1.5) {
-                  $differenceInMinutes = 0;
-                  $differenceInSeconds = $differenceInMinutes * 60;
+                if ($differenceInMinutes ==0 && $differenceInSeconds == 0) {
+                  $displayDifference = '<span style="color:green"><br\>Prêt < 30s </span>';
+                } else {
+                  if($differenceInMinutes <= 1.5) {
+                    $differenceInMinutes = 0;
+                    $differenceInSeconds = $differenceInMinutes * 60;
+                  }
+                  $displayDifference = '<span style="color:green"><br\>Prêt dans '.($differenceInSeconds > 0 ? $differenceInSeconds.'s' : $differenceInMinutes.'min').'</span>';
                 }
-                $displayDifference = $differenceInSeconds > 0 ? $differenceInSeconds.'sec' : $differenceInMinutes.'min';
-                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">Prêt dans '.$displayDifference.'</span>');
+                $this->checkAndUpdateCmd('displaycoffee',$displayDifference);
                 break;
               case "Ready":
                 $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
