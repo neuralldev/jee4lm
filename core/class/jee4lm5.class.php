@@ -1117,7 +1117,6 @@ class jee4lm5 extends eqLogic
         $password = config::byKey('userPwd', PLUGINNAME);    
         if (!$this->login($username, $password)) return false;
       } else
-        log::add(__CLASS__, 'info', 'credential is over, please login again');
       // lire le constenu json équivalent à lineamin_dashboard.json
       $this->checkAndUpdateCmd('tankStatus', 0);
       foreach($arr['widgets'] as $w) { 
@@ -1128,6 +1127,7 @@ class jee4lm5 extends eqLogic
             $cmdOff = $this->getCmd(null, 'jee4lm_off');
             switch($w['output']['status']) {
               case "PoweredOn":
+                $this->checkAndUpdateCmd('machinemode', 1);
                 $this->checkAndUpdateCmd('hbmode', 'heat');
                 $cmdOn->setIsVisible(0);
                 $cmdOff->setIsVisible(1);
@@ -1146,6 +1146,7 @@ class jee4lm5 extends eqLogic
                 $cmdOff->setIsVisible(0);
                 break;
               default:
+              log::add(__CLASS__, 'debug', 'getinformation machine status unknown');
                 $this->checkAndUpdateCmd('machinemode', 0);
                 $cmdOn->setIsVisible(1);
                 $cmdOff->setIsVisible(0);
@@ -1164,7 +1165,8 @@ class jee4lm5 extends eqLogic
                 $currentTimestamp = time();
                 $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
                 $differenceInSeconds = 0;
-                if ($differenceInMinutes ==0 && $differenceInSeconds == 0) {
+                log::add(__CLASS__, 'debug', 'getinformation coffee ready in '.$differenceInMinutes.' minutes'. 'difference in seconds ='.$differenceInSeconds);
+                if ($differenceInMinutes==0 && $differenceInSeconds==0) {
                   $displayDifference = '<span style="color:green"><br\>Prêt < 30s </span>';
                 } else {
                   if($differenceInMinutes <= 1.5) {
