@@ -1156,13 +1156,19 @@ class jee4lm5 extends eqLogic
                 $this->checkAndUpdateCmd('coffeeenabled',1);
                 $d = $w['output']['readyStartTime'];
                 $currentTimestamp = time();
-                $differenceInMinutes = ($d / 1000 - $currentTimestamp) / 60;
-                  $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">Prêt dans '.$differenceInMinutes.' min</span>');
+                $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
+                $differenceInSeconds = 0;
+                if( $differenceInMinutes <= 1.5) {
+                  $differenceInMinutes = 0;
+                  $differenceInSeconds = $differenceInMinutes * 60;
+                }
+                $displayDifference = $differenceInSeconds > 0 ? $differenceInSeconds.'sec' : $differenceInMinutes.'min';
+                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">Prêt dans '.$displayDifference.'</span>');
                 break;
               case "Ready":
                 $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
                 $this->checkAndUpdateCmd('coffeeenabled',1);
-                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">On</span>');
+                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">Prêt</span>');
                 break;
               default:
                 $this->checkAndUpdateCmd('coffeecurrent',0);
