@@ -48,7 +48,8 @@ if ($eq==null) {
 log::add('jee4lm5', 'debug', 'daemon callback, refreshing...');
 if (isset($result['run'])) {
 	$eq->setConfiguration("daemon", $result['run']);
-	log::add('jee4lm5', 'error', 'daemon callback check');
+	log::add('jee4lm5', 'error', 'daemon callback check as run' . $result['run']);
+	$eq->save();
 } else
 	jee4lm5::RefreshLMDashboard($eq, _poll: "daemon");
 log::add('jee4lm5', 'debug', 'daemon callbach, refreshed');

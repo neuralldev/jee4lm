@@ -1436,15 +1436,6 @@ class jee4lm5 extends eqLogic
     return $pluginVersion;
   }
 
-  public static function handleFeedback($message) {
-    log::add(__CLASS__, 'debug', 'new feedback:' . json_encode($message));
-
-    foreach ($message as $key => $value) {
-      log::add(__CLASS__, 'debug', 'feedback key=' . $key . ' value=' . $value);
-    }
-}
-
-
   /**
    * Summary of deamon_info
    * @return array
