@@ -388,6 +388,7 @@ class jee4lm5 extends eqLogic
         if (self::deamon_info()['state'] == 'ok') {
           self::deamon_send(['id' => $id, 'lm' => 'stop']);
           $_eq->setConfiguration('daemon', 0);
+          $_eq->save();
         }
         break;
     }
