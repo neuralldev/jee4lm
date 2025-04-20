@@ -419,7 +419,7 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
             $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME . "::bbw", null, null, 0);
             $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-            $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME . "::bbw nodose", null, null, 0, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+            $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME . "::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
             $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
             $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
             $_eq->AddAction("jee4lm_bbwA", "BBW Dose 1", "button", "", 1);
@@ -968,8 +968,8 @@ class jee4lm5 extends eqLogic
           'coffeetarget' => [3, 1],
           'start_backflush' => [2, 1],
           'machinemode' => [1, 1],
-          'backflush' => [1, 1],
-          'last_backflush' => [1, 1],
+          'backflush' => [2, 1],
+          'last_backflush' => [2, 1],
           'jee4lm_off' => [2, 2],
           'jee4lm_on' => [2, 2],
           'groupDoseMode' => [1, 1],
