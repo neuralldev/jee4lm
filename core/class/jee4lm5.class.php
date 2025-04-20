@@ -463,14 +463,15 @@ class jee4lm5 extends eqLogic
         }
       } // foreach
       $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', PLUGINNAME . "::backflush", null, null, 0);
+      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', null, null, null, 1);
+      $_eq->AddCommand("Dernier Backflush", 'last_backflush', 'info', 'string', PLUGINNAME . "::backflush", null, null, 0);
       $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', PLUGINNAME . "::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
       $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', PLUGINNAME . "::main", null, 'THERMOSTAT_STATE', 0);
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Version Gateway", 'gwversion', 'info', 'string', null, null, null, 1);
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
-      $_eq->AddCommand("SmartWakeup", 'smartwakeup', 'info', 'binary',null, null, null, 1);
-      $_eq->AddCommand("SmartWakeup durée", 'smartwakeupstandbyminutes', 'info', 'numeric',null, null, null, 1);
+      $_eq->AddCommand("SmartWakeup", 'smartwakeup', 'info', 'binary',null, null, "ENERGY_STATE", 0);
+      $_eq->AddCommand("SmartWakeup durée", 'smartwakeupstandbyminutes', 'info', 'numeric',null, null, null, 0);
       $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',PLUGINNAME . "::smartstandby", null, null, 1);
 
       /*
@@ -487,8 +488,8 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME . "::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
-      $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on");
-      $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off");
+      $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on","binarySwitch", "ENERGY_ON", 1);
+      $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off", "binarySwitch", "ENERGY_OFF", 1);
       $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
       $_eq->AddAction("jee4lm_smartwakeup_after_lastbrew", "Dernier café");
       $_eq->AddAction("jee4lm_smartwakeup_after_poweron", "Allumage");
@@ -968,6 +969,7 @@ class jee4lm5 extends eqLogic
           'start_backflush' => [2, 1],
           'machinemode' => [1, 1],
           'backflush' => [1, 1],
+          'last_backflush' => [1, 1],
           'jee4lm_off' => [2, 2],
           'jee4lm_on' => [2, 2],
           'groupDoseMode' => [1, 1],
@@ -999,11 +1001,11 @@ class jee4lm5 extends eqLogic
           'smartwakeup' => [8, 1],
           'jee4lm_smartwakeup_on' => [8, 1],
           'jee4lm_smartwakeup_off' => [8, 1],
-          'smartwakeupstandbyafter' => [8, 2],
+          'smartwakeupstandbyafter' => [8, 1],
           'smartwakeupstandbyafter_lastbrew' => [8, 2],
           'smartwakeupstandbyafter_poweron' => [8, 2],
-          'smartwakeupstandbyminutes' => [8, 3],
-          'smartwakeupstandbyminutes_slider' => [8, 3]
+          'smartwakeupstandbyminutes' => [8, 1],
+          'smartwakeupstandbyminutes_slider' => [8, 1]
         ];
 
         $displayStuff = [
@@ -1141,7 +1143,6 @@ class jee4lm5 extends eqLogic
         if (!$this->login($username, $password)) return false;
       } else
       // lire le constenu json équivalent à lineamin_dashboard.json
-      $this->checkAndUpdateCmd('tankStatus', 0);
       foreach($arr['widgets'] as $w) { 
 //        log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
@@ -1223,16 +1224,15 @@ class jee4lm5 extends eqLogic
             break;
           case "CMBackFlush":
            //   log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-            $this->checkAndUpdateCmd('tankStatus',$$w['output']['status'] == 'On'?1:0);
+            $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
+            $this->checkAndUpdateCmd('last_backflush',$w['output']['lastCleaningStartTime'] == 'On' ? 1 : 0);
             break;
           case "CMBrewByWeightDoses":
             //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
             $this->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
             $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
             $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
-            if ($w['output']['mode']=="Continuous")
-              $this->checkAndUpdateCmd('bbwfree',1);
-//            $this->updatedisplay('bbwfree', 'template', PLUGINNAME."::bbw nodose".$w['output']['mode']=="Dose1"?"":" inactive");
+            $this->checkAndUpdateCmd('bbwfree',$w['output']['mode']=="Continuous");
             $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
             $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
             break; 

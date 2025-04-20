@@ -6,10 +6,10 @@
   "modelCode": "LINEAMINI",
   "modelName": "LINEA MINI",
   "connected": true,
-  "connectionDate": 1742683649814,
+  "connectionDate": 1744942796185,
   "offlineMode": false,
   "requireFirmwareUpdate": false,
-  "availableFirmwareUpdate": true,
+  "availableFirmwareUpdate": false,
   "coffeeStation": {
     "id": "e04ac102-2f69-4455-9eb5-c434c8b34754",
     "name": "My coffee station",
@@ -21,11 +21,11 @@
       "modelCode": "LINEAMINI",
       "modelName": "LINEA MINI",
       "connected": true,
-      "connectionDate": 1742683649814,
+      "connectionDate": 1744942796185,
       "offlineMode": false,
       "requireFirmwareUpdate": false,
-      "availableFirmwareUpdate": true,
-      "imageUrl": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+      "availableFirmwareUpdate": false,
+      "imageUrl": "https:\/\/lion.lamarzocco.io\/img\/thing-model\/list\/lineamini\/lineamini-1-c-nero_op.png",
       "bleAuthToken": null
     },
     "grinders": [],
@@ -39,7 +39,7 @@
       }
     ]
   },
-  "imageUrl": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+  "imageUrl": "https:\/\/lion.lamarzocco.io\/img\/thing-model\/detail\/lineamini\/lineamini-1-c-nero_op.png",
   "bleAuthToken": null,
   "widgets": [
     {
@@ -53,7 +53,16 @@
         ],
         "mode": "StandBy",
         "nextStatus": null,
-        "brewingStartTime": null
+        "brewingStartTime": null,
+        "lastCoffee": null,
+        "lastFlush": {
+          "time": 1745038597792,
+          "extractionSeconds": 2.3559999465942383,
+          "doseMode": "MassType",
+          "doseIndex": "DoseA",
+          "doseValue": 0,
+          "doseValueNumerator": null
+        }
       },
       "tutorialUrl": null
     },
@@ -64,7 +73,7 @@
         "status": "StandBy",
         "enabled": true,
         "enabledSupported": false,
-        "targetTemperature": 90.00,
+        "targetTemperature": 88.5,
         "targetTemperatureMin": 80,
         "targetTemperatureMax": 100,
         "targetTemperatureStep": 0.1,
@@ -79,7 +88,7 @@
         "status": "Off",
         "enabled": false,
         "enabledSupported": true,
-        "targetTemperature": 0.00,
+        "targetTemperature": 0,
         "targetTemperatureSupported": false,
         "targetTemperatureMin": 95,
         "targetTemperatureMax": 140,
@@ -99,7 +108,7 @@
         "mode": "PreBrewing",
         "times": {
           "In": {
-            "seconds": 2.00,
+            "seconds": 2.5,
             "secondsMin": {
               "PreBrewing": 2,
               "PreInfusion": 2
@@ -114,7 +123,7 @@
             }
           },
           "Out": {
-            "seconds": 3.00,
+            "seconds": 7.5,
             "secondsMin": {
               "PreBrewing": 1,
               "PreInfusion": 1
@@ -146,27 +155,27 @@
             {
               "doseIndex": "ByGroup",
               "seconds": {
-                "Out": 3.00,
-                "In": 2.00
+                "In": 2.5,
+                "Out": 7.5
               },
               "secondsMin": {
-                "Out": 1,
-                "In": 1
+                "In": 1,
+                "Out": 1
               },
               "secondsMax": {
-                "Out": 9,
-                "In": 9
+                "In": 9,
+                "Out": 9
               },
               "secondsStep": {
-                "Out": 0.1,
-                "In": 0.1
+                "In": 0.1,
+                "Out": 0.1
               }
             }
           ]
         },
         "doseIndexSupported": false
       },
-      "tutorialUrl": "https://www.lamarzocco.com/it/en/app/support/brewing-features/#gs3-av-linea-micra-linea-mini-home"
+      "tutorialUrl": "https:\/\/www.lamarzocco.com\/it\/en\/app\/support\/brewing-features\/#gs3-av-linea-micra-linea-mini-home"
     },
     {
       "code": "CMBrewByWeightDoses",
@@ -179,29 +188,29 @@
         "mode": "Continuous",
         "doses": {
           "Dose1": {
-            "dose": 34.50,
+            "dose": 30,
             "doseMin": 5,
             "doseMax": 100,
             "doseStep": 0.1
           },
           "Dose2": {
-            "dose": 17.50,
+            "dose": 28,
             "doseMin": 5,
             "doseMax": 100,
             "doseStep": 0.1
           }
         }
       },
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/brew-by-weight"
+      "tutorialUrl": "http:\/\/lamarzocco.com\/it\/en\/app\/support\/brew-by-weight"
     },
     {
       "code": "CMBackFlush",
       "index": 1,
       "output": {
-        "lastCleaningStartTime": 1742731776135,
+        "lastCleaningStartTime": 1744558913295,
         "status": "Off"
       },
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/cleaning-and-backflush/#linea-mini"
+      "tutorialUrl": "http:\/\/lamarzocco.com\/it\/en\/app\/support\/cleaning-and-backflush\/#linea-mini"
     },
     {
       "code": "ThingScale",
@@ -209,10 +218,11 @@
       "output": {
         "name": "LMZ-745F90",
         "connected": false,
-        "batteryLevel": 0.00,
-        "calibrationRequired": false
+        "batteryLevel": 0,
+        "calibrationRequired": false,
+        "forceConnectSupported": false
       },
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/training-scale-location/#linea-mini"
+      "tutorialUrl": "http:\/\/lamarzocco.com\/it\/en\/app\/support\/training-scale-location\/#linea-mini"
     }
   ],
   "invalidWidgets": [
@@ -244,7 +254,7 @@
       "code": "CMPreInfusion",
       "index": 1,
       "output": null,
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/brewing-features/#commercial"
+      "tutorialUrl": "http:\/\/lamarzocco.com\/it\/en\/app\/support\/brewing-features\/#commercial"
     },
     {
       "code": "CMCupWarmer",
@@ -288,7 +298,7 @@
       "code": "ThingScale",
       "index": 1,
       "output": null,
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/training-scale-location/#linea-mini"
+      "tutorialUrl": "http:\/\/lamarzocco.com\/it\/en\/app\/support\/training-scale-location\/#linea-mini"
     }
   ],
   "runningCommands": []
