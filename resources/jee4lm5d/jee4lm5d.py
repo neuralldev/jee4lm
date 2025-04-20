@@ -48,6 +48,12 @@ class Jee4LM(BaseDaemon):
     async def on_message(self, message: dict):
         logging.debug(f'on_message - daemon received command: {message["lm"]} for id {message["id"]}')
         match message['lm']:
+            case 'check':
+                logging.debug(f'Check polling for id {message["id"]} already running')
+                if self.istasks_from_id(message['id']):
+                     await self.send_to_jeedom({'run':1})
+                else:
+                    await self.send_to_jeedom({'run':0})
             case 'poll':
                 if not self.istasks_from_id(message['id']):
                     logging.debug(f'Start refreshing eqlogic id {message["id"]}')

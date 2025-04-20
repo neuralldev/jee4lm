@@ -371,20 +371,14 @@ class jee4lm5 extends eqLogic
     $ret = $_eq->getThingDashboardInformation(); // refresh
     $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
     switch (true) {
-      case $actual_state == $new_state:
-        // no change of state, let stay in this loop mode
-        log::add(__CLASS__, 'debug', 'refresh all information no change in state');
-        break;
-
-      case $actual_state == 0:
+      case $new_state == 1:
         // going from off to on, run daemon
         log::add(__CLASS__, 'debug', 'refresh all information machine is now on');
         if (self::deamon_info()['state'] == 'ok') {
           self::deamon_send(['id' => $id, 'lm' => 'poll']);
         }
         break;
-
-      case $actual_state == 1:
+      case $new_state == 0:
         // going from on to off, stop daemon
         log::add(__CLASS__, 'debug', 'refresh all information machine is now off');
         if (self::deamon_info()['state'] == 'ok') {
@@ -722,11 +716,11 @@ class jee4lm5 extends eqLogic
           $this->CoffeeMachineBrewByWeightSettingDoses($v, $_logicalID);
           break;
         case "CoffeeBoiler":
-          $this->setBoilerTargetTemperature($v, "CoffeeMachineSettingCoffeeBoilerTargetTemperature");
+          $this->CoffeeMachineSettingCoffeeBoilerTargetTemperature($v);
           break;
         case "SteamBoiler":
           // set coffee boiler temperature targer (does not work on steam boiler of linea mini)
-          $this->setBoilerTargetTemperature($v, "CoffeeMachineSettingSteamBoilerTargetTemperature");
+          $this->CoffeeMachineSettingSteamBoilerTargetTemperature($v);
           break;
         case "PrewetIn":
           // read actual value for the other slider as both have to be sent together
@@ -752,7 +746,7 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["mode" => $_toggle ? "BrewingMode" : "Standby"];
+    $data = ["mode" => $_toggle ? "BrewingMode" : "StandBy"];
     self::executeCommand($serial, "CoffeeMachineChangeMode",json_encode($data));
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
@@ -766,11 +760,10 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'switch steam boiler '. $_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["boilerIndex" => 1, "enabled" => $_toggle ? "BrewingMode" : "Standby"];
+    $data = ["boilerIndex" => 1, "enabled" => $_toggle ? "BrewingMode" : "StandBy"];
     self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled", json_encode($data));
   }
 
-  
 
   /**
    * set the LM boiler target temperature for coffee or steam boiler according to $type value
@@ -778,15 +771,28 @@ class jee4lm5 extends eqLogic
    * @param mixed $_identifier by default this is coffee boiler temperature 
    * @return void
    */
-  public function setBoilerTargetTemperature($_value, $_identifier = "CoffeeMachineSettingCoffeeBoilerTargetTemperature")
+  public function CoffeeMachineSettingCoffeeBoilerTargetTemperature($_value)
   {
-    log::add(__CLASS__, 'debug', 'switch coffee or steam on or off ('.$_identifier.')');
+    log::add(__CLASS__, 'debug', 'set coffee boiler target temperature to '.$_value);
     $serial = $this->getConfiguration('serialNumber');
-    $_identifier == "CoffeeMachineSettingCoffeeBoilerTargetTemperature" ?
-      $data = ["boilerIndex" => 1, "targetTemperature" => $_value] : // coffee boiler
-      $data = ["boilerIndex" => 1, "targetLevel" => $_value]; // steam boiler
-    self::executeCommand($serial, $_identifier, json_encode($data)); 
-  }
+    $data = ["boilerIndex" => 1, "targetTemperature" => $_value]; // coffee boiler
+    self::executeCommand($serial, "CoffeeMachineSettingCoffeeBoilerTargetTemperature", json_encode($data)); 
+  }  
+
+    /**
+   * set the LM boiler target temperature for coffee or steam boiler according to $type value
+   * @param mixed $_value value in celsius
+   * @param mixed $_identifier by default this is coffee boiler temperature 
+   * @return void
+   */
+  public function CoffeeMachineSettingSteamBoilerTargetTemperature($_value)
+  {
+    log::add(__CLASS__, 'debug', 'set steam boiler target temperature to '.$_value);
+    $serial = $this->getConfiguration('serialNumber');
+    $data = ["boilerIndex" => 1, "targetLevel" => $_value]; // coffee boiler
+    self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerTargetTemperature", json_encode($data)); 
+  }  
+
 
   /**
    * This API allow to select if the LM is plumbed In or not. If not, the by default if preinfusion
@@ -817,8 +823,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', "select active Dose");
     // fetch actual doses 
-    $dose1= 0+$_dose=="A" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
-    $dose2= 0+$_dose=="B" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
+    $dose1= 0+$_dose=="Dose1" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
+    $dose2= 0+$_dose=="Dose2" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
 
     $serial = $this->getConfiguration('serialNumber');
     $data=  ["doses" => ["Dose1" => $dose1, "Dose2" => $dose2]];
@@ -826,15 +832,15 @@ class jee4lm5 extends eqLogic
   } 
 
   /**
-   * Summary of BrewByWeightModeCommand
+   * Summary of CoffeeMachineBrewByWeightChangeMode
    * @param mixed $_dose
    * @return void
    */
-  public function BrewByWeightModeCommand($_dose)
+  public function CoffeeMachineBrewByWeightChangeMode($_dose)
   {
     log::add(__CLASS__, 'debug', "set bbw mode to $_dose");
     $serial = $this->getConfiguration('serialNumber');
-    $data=  ["mode" => ($_dose=="A"?"Dose1":"Dose2")];
+    $data=  ["mode" => $_dose];
     self::executeCommand($serial, "CoffeeMachineBrewByWeightChangeMode",json_encode($data));
   }  
 
@@ -901,7 +907,8 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffeeStation']['id']) . " " . $machines['name'] . '(' . $machines['modelcode'] . ') SN=' . $machines['serialNumber']);
       log::add(__CLASS__, 'debug', 'type=' . $machines['type']);
       if ($machines['type'] == 'CoffeeMachine') {
-        $d = DateTime::createFromFormat(DateTime::ATOM, $machines['connectionDate']);
+        $d = new DateTime;
+        $d->createFromFormat('U.u', $machines['connectionDate']);
         //log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
         // now check if machine is already created as an eqlogic
         $eqLogic = eqLogic::byLogicalId($uuid, PLUGINNAME);
@@ -917,7 +924,7 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'debug', $uuid.' uuid already exists, update only');
         $eqLogic->setConfiguration('type', $machines['type']);
         if ($d instanceof DateTime) {
-            $eqLogic->setConfiguration('pairingDate', $d->format("d/m/y"));
+            $eqLogic->setConfiguration('pairingDate', $d->format("d/m/Y H:i:s.v"));
         } else {
             log::add(__CLASS__, 'error', 'Invalid date format for pairingDate');
         }
@@ -980,7 +987,15 @@ class jee4lm5 extends eqLogic
           'displaycoffee' => [3, 1],
           'displaysteam' => [3, 3],
           'jee4lm_bbwA' => [7, 2],
-          'jee4lm_bbwB' => [7, 2]
+          'jee4lm_bbwB' => [7, 2],
+          'smartwakeup' => [8, 1],
+          'jee4lm_smartwakeup_on' => [8, 1],
+          'jee4lm_smartwakeup_off' => [8, 1],
+          'smartwakeupstandbyafter' => [8, 2],
+          'smartwakeupstandbyafter_lastbrew' => [8, 2],
+          'smartwakeupstandbyafter_poweron' => [8, 2],
+          'smartwakeupstandbyminutes' => [8, 3],
+          'smartwakeupstandbyminutes_slider' => [8, 3]
         ];
 
         $displayStuff = [
@@ -1009,7 +1024,7 @@ class jee4lm5 extends eqLogic
               "style::td::6::3" => "border-top:solid;border-bottom:solid;"
             ],
           "layout::dashboard" => "table",
-          'layout::dashboard::table::nbLine' => '7',
+          'layout::dashboard::table::nbLine' => '8',
           'layout::dashboard::table::nbColumn' => '3'
         ];
 
@@ -1415,6 +1430,16 @@ class jee4lm5 extends eqLogic
     log::add(__CLASS__, 'info', '[VERSION] PluginVersion :: ' . $pluginVersion);
     return $pluginVersion;
   }
+
+  public static function handleFeedback($message) {
+    log::add(__CLASS__, 'debug', 'new feedback:' . json_encode($message));
+
+    foreach ($message as $key => $value) {
+      log::add(__CLASS__, 'debug', 'feedback key=' . $key . ' value=' . $value);
+    }
+}
+
+
   /**
    * Summary of deamon_info
    * @return array
@@ -1628,10 +1653,10 @@ class jee4lm5Cmd extends cmd
         $eq->set_setpoint($_options, 'steamtarget', "SteamBoiler");
         return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_doseA_slider':
-        $eq->set_setpoint($_options, 'A', "BbwDose");
+        $eq->set_setpoint($_options, 'Dose1', "BbwDose");
         return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_doseB_slider':
-        $eq->set_setpoint($_options, 'B', "BbwDose");
+        $eq->set_setpoint($_options, 'Dose2', "BbwDose");
         return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_prewet_slider':
         $eq->set_setpoint($_options, '', "PrewetIn");
@@ -1641,7 +1666,7 @@ class jee4lm5Cmd extends cmd
         return jee4lm5::RefreshLMDashboard($eq, "post command");
         case 'jee4lm_bbwA':
         case 'jee4lm_bbwB':
-            $eq->BrewByWeightModeCommand($_options=='jee4lm_bbwA'?'A':'B');
+            $eq->CoffeeMachineBrewByWeightChangeMode($_options=='jee4lm_bbwA'?'Dose1':'Dose2');
             return jee4lm5::RefreshLMDashboard($eq, "post command");          
       default:
         return true;
