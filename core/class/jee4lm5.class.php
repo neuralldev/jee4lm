@@ -371,16 +371,16 @@ class jee4lm5 extends eqLogic
     $ret = $_eq->getThingDashboardInformation(); // refresh
     $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
     switch (true) {
-      case $new_state == 1:
+      case $new_state == 0:
         // going from off to on, run daemon
-        log::add(__CLASS__, 'debug', 'refresh all information machine is now on');
+        log::add(__CLASS__, 'debug', 'daemon start as machine is now on');
         if (self::deamon_info()['state'] == 'ok') {
           self::deamon_send(['id' => $id, 'lm' => 'poll']);
         }
         break;
-      case $new_state == 0:
+      case $new_state == 1:
         // going from on to off, stop daemon
-        log::add(__CLASS__, 'debug', 'refresh all information machine is now off');
+        log::add(__CLASS__, 'debug', 'daemon stop as macine is now off');
         if (self::deamon_info()['state'] == 'ok') {
           self::deamon_send(['id' => $id, 'lm' => 'stop']);
         }
