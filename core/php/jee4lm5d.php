@@ -35,6 +35,7 @@ if (!is_array($result)) {
 	log::add('jee4lm5', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
 	die();
 }
+
 if (!isset($result['id'])) {
 	log::add('jee4lm5', 'error', 'daemon callback id not set');
 	die();
@@ -45,6 +46,9 @@ if ($eq==null) {
 	die();
 }
 log::add('jee4lm5', 'debug', 'daemon callback, refreshing...');
-
-jee4lm5::RefreshLMDashboard($eq, _poll: "daemon");
+if (isset($result['run'])) {
+	$eq->setConfiguration("daemon", $result['run']);
+	log::add('jee4lm5', 'error', 'daemon callback check');
+} else
+	jee4lm5::RefreshLMDashboard($eq, _poll: "daemon");
 log::add('jee4lm5', 'debug', 'daemon callbach, refreshed');

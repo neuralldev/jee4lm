@@ -373,10 +373,13 @@ class jee4lm5 extends eqLogic
     switch (true) {
       case $new_state == 0:
         // going from off to on, run daemon
-        log::add(__CLASS__, 'debug', 'daemon start as machine is now on');
         if (self::deamon_info()['state'] == 'ok') {
-          self::deamon_send(['id' => $id, 'lm' => 'check']);
-//          self::deamon_send(['id' => $id, 'lm' => 'poll']);
+          self::deamon_send(['id' => $id, 'lm' => 'check']); sleep(0.5);
+          if($_eq->getConfiguration('daemon') != 1) {
+            log::add(__CLASS__, 'debug', 'daemon start as machine is now on');
+            self::deamon_send(['id' => $id, 'lm' => 'poll']);
+          } else
+            log::add(__CLASS__, 'debug', 'daemon already running');
         }
         break;
       case $new_state == 1:
@@ -384,6 +387,7 @@ class jee4lm5 extends eqLogic
         log::add(__CLASS__, 'debug', 'daemon stop as machine is now off');
         if (self::deamon_info()['state'] == 'ok') {
           self::deamon_send(['id' => $id, 'lm' => 'stop']);
+          $_eq->setConfiguration('daemon', 0);
         }
         break;
     }

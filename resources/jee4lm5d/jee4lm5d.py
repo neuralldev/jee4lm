@@ -51,9 +51,9 @@ class Jee4LM(BaseDaemon):
             case 'check':
                 logging.debug(f'Check polling for id {message["id"]} already running')
                 if self.istasks_from_id(message['id']):
-                     await self.send_to_jeedom({'run':1})
+                     await self.send_to_jeedom({'id':message["id"], 'run':1})
                 else:
-                    await self.send_to_jeedom({'run':0})
+                    await self.send_to_jeedom({'id':message["id"], 'run':0})
             case 'poll':
                 if not self.istasks_from_id(message['id']):
                     logging.debug(f'Start refreshing eqlogic id {message["id"]}')
