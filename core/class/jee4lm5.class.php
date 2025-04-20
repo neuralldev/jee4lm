@@ -1225,7 +1225,9 @@ class jee4lm5 extends eqLogic
           case "CMBackFlush":
            //   log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
             $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
-            $this->checkAndUpdateCmd('last_backflush',$w['output']['lastCleaningStartTime'] == 'On' ? 1 : 0);
+            $d = new DateTime;
+            $d->createFromFormat('U.u', $$w['output']['lastCleaningStartTime']);
+            $this->checkAndUpdateCmd('last_backflush', $d->format("d/m/Y H:i:s.v"));
             break;
           case "CMBrewByWeightDoses":
             //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
