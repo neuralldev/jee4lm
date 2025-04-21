@@ -1231,7 +1231,7 @@ class jee4lm5 extends eqLogic
             $no = date("d");
             $daysDifference = $no-$b;
             $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
-            log::add(__CLASS__, 'debug', 'getinformation backflush last cleaning date=' . $d->format("d/m/y H:i:s") . " days difference=" . $daysDifference);
+            log::add(__CLASS__, 'debug', 'getinformation .  days difference='. $daysDifference);
             $this->checkAndUpdateCmd('last_backflush', $szDays);
             break;
           case "CMBrewByWeightDoses":
