@@ -933,7 +933,7 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'debug', $uuid.' uuid already exists, update only');
         $eqLogic->setConfiguration('type', $machines['type']);
         if ($d instanceof DateTime) {
-            $eqLogic->setConfiguration('pairingDate', $d->format("d/m/Y H:i:s.v"));
+            $eqLogic->setConfiguration('pairingDate', $d->format("d/m/Y H:i:s"));
         } else {
             log::add(__CLASS__, 'error', 'Invalid date format for pairingDate');
         }
@@ -1225,11 +1225,16 @@ class jee4lm5 extends eqLogic
             $this->checkAndUpdateCmd('tankStatus',$$w['output']['allarm']?1:0);
             break;
           case "CMBackFlush":
-           //   log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
             $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
+            log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
             $d = new DateTime;
             $d->createFromFormat('U.u', $w['output']['lastCleaningStartTime']);
-            $this->checkAndUpdateCmd('last_backflush', $d->format("d/m/Y H:i"));
+            $currentDate = new DateTime();
+            $interval = $currentDate->diff($d);
+            $daysDifference = $interval->days;
+            $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
+            log::add(__CLASS__, 'debug', 'getinformation backflush last cleaning date=' . $d->format("d/m/y H:i:s") . " days difference=" . $daysDifference);
+            $this->checkAndUpdateCmd('last_backflush', $szDays);
             break;
           case "CMBrewByWeightDoses":
             //  log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
