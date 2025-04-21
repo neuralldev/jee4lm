@@ -1227,11 +1227,9 @@ class jee4lm5 extends eqLogic
           case "CMBackFlush":
             $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
             log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-            $d = new DateTime;
-            $d->createFromFormat('U.u', $w['output']['lastCleaningStartTime']);
-            $currentDate = new DateTime();
-            $interval = $currentDate->diff($d);
-            $daysDifference = $interval->days;
+            $b = date("d", $w['output']['lastCleaningStartTime']);
+            $no = date("d");
+            $daysDifference = $no-$b;
             $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
             log::add(__CLASS__, 'debug', 'getinformation backflush last cleaning date=' . $d->format("d/m/y H:i:s") . " days difference=" . $daysDifference);
             $this->checkAndUpdateCmd('last_backflush', $szDays);
