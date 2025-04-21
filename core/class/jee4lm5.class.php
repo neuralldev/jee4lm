@@ -490,7 +490,7 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
       $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on","binarySwitch", "ENERGY_ON", 1);
       $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off", "binarySwitch", "ENERGY_OFF", 1);
-      $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
+      $_eq->AddAction("jee4lm_smartwakeupstandbyminut                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   es_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
       $_eq->AddAction("jee4lm_smartwakeup_after_lastbrew", "Dernier café");
       $_eq->AddAction("jee4lm_smartwakeup_after_poweron", "Allumage");
       // add machine slug to display machine by type
@@ -1400,6 +1400,19 @@ class jee4lm5 extends eqLogic
         "#_time_widget_#" => "0"
       )
     );
+    $r['info']['string']['smartwakeup'] = array(
+      'template' => 'tmplmultistateline',
+      'display' => array('icon' => 'null'),
+      'replace' => array(
+        "#_time_widget_#" => "0"
+      ),
+      'test' => array(
+              "operation"   => "#value#=='LastBrewing'",
+              "state_light" => "<span>Dernier Café</span>",
+             "state_dark"  => "<span>Dernier Café</span>"
+      )
+    );
+
     $r['info']['string']['machine'] = array(
       'template' => 'tmplmultistate',
       'display' => array('icon' => 'null'),
