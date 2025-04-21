@@ -1407,9 +1407,14 @@ class jee4lm5 extends eqLogic
         "#_time_widget_#" => "0"
       ),
       'test' => array(
+        array(
               "operation"   => "#value#=='LastBrewing'",
               "state_light" => "<span>Dernier Café</span>",
-             "state_dark"  => "<span>Dernier Café</span>"
+             "state_dark"  => "<span>Dernier Café</span>"),
+        array(
+              "operation"   => "#value#=='PoserOn'",
+              "state_light" => "<span>Allumage/span>",
+             "state_dark"  => "<span>Allumage</span>")
       )
     );
 
