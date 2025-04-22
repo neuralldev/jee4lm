@@ -451,14 +451,16 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
             $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
             break;
-          case "CMPreExtraction":
-            log::add(__CLASS__, 'debug', 'preinfusion');
-            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
-            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
-            $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+          case "CMPreBrewing":
+            log::add(__CLASS__, 'debug', 'pretrempage');
             $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
             $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
+            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
+          case "CMPreExtraction":
+            log::add(__CLASS__, 'debug', 'preinfusdion');
+            $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
             break;
         }
       } // foreach
@@ -1243,11 +1245,13 @@ class jee4lm5 extends eqLogic
             $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
             $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
             break; 
-          case "CMPreExtraction":
-            $this->checkAndUpdateCmd('prewettime',$w['output']['times']['In']['seconds']);
-            $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['Out']['seconds']);
-            $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion");
-            $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing");
+          case "CMPreBrewing": //premouillage
+            $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
+            $this->checkAndUpdateCmd('prewettime',$w['output']['times']['PreBrewing'][0]['In']['seconds']);
+            $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['Out']['seconds']);
+            break;
+          case "CMPreExtraction": //preinfudion
+            $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion"); // or disabled;
             break;
           case "ThingScale":
             //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
