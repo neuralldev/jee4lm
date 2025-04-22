@@ -1247,13 +1247,10 @@ class jee4lm5 extends eqLogic
             break; 
           case "CMPreBrewing": //premouillage
             $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
-            if ($w['output']['mode']=="PreBrewing")
+            if ($w['output']['mode']=="PreBrewing") // if prebrew disable preinfusion
               $this->checkAndUpdateCmd('preinfusionmode',0);
-            $this->checkAndUpdateCmd('prewettime',$w['output']['times']['PreBrewing'][0]['In']['seconds']);
-            $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['Out']['seconds']);
-            break;
-          case "CMPreExtraction": //preinfudion
-            $this->checkAndUpdateCmd('preinfusionmode',$w['output']['mode']=="Preinfusion"); // or disabled;
+            $this->checkAndUpdateCmd('prewettime',$w['output']['times']['PreBrewing'][0]['seconds']['In']);
+            $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['seconds']['Out']);
             break;
           case "ThingScale":
             //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
@@ -1262,8 +1259,26 @@ class jee4lm5 extends eqLogic
               $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
             break;
         }
+
       } //for each
-      
+      foreach($arr['invalidWidgets'] as $w) {
+        switch ($w["code"]) {
+          case "CMPreInfusionEnable":
+            $this->checkAndUpdateCmd('preinfusionmode', 0);
+            break;
+            case "CMPreInfusion":
+              break;
+              case "CMNoWater":
+                $this->checkAndUpdateCmd('tankStatus', 0);
+                break;
+              case "CMBrewByWeightDoses":
+                $this->checkAndUpdateCmd('bbwmode',"Continuous");
+                $this->checkAndUpdateCmd('bbwdoseA', 0);
+                $this->checkAndUpdateCmd('bbwdoseB', 0);
+                $this->checkAndUpdateCmd('bbwfree', 1);
+                break;
+              }
+      }
       return true;
     } //if
     return false;
