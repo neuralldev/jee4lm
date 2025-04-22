@@ -1247,6 +1247,8 @@ class jee4lm5 extends eqLogic
             break; 
           case "CMPreBrewing": //premouillage
             $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
+            if ($w['output']['mode']=="PreBrewing")
+              $this->checkAndUpdateCmd('preinfusionmode',0);
             $this->checkAndUpdateCmd('prewettime',$w['output']['times']['PreBrewing'][0]['In']['seconds']);
             $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['Out']['seconds']);
             break;
