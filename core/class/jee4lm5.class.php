@@ -450,7 +450,9 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
             $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
             $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["targetTemperatureMin"], $w["output"]["targetTemperatureMax"], $w["output"]["targetTemperatureStep"]);
-            break;
+            $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", PLUGINNAME . "::steam on off", "", 1);
+            $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME . "::steam on off", "", 1);
+                  break;
           case "CMPreBrewing":
             log::add(__CLASS__, 'debug', 'pretrempage');
             $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', "ENERGY_STATE", null, null, 0);
@@ -461,8 +463,10 @@ class jee4lm5 extends eqLogic
             $_eq->AddAction("jee4lm_prewet_on", "Prémouillage on","binarySwitch", "ENERGY_ON", 1);
             $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
           case "CMPreExtraction":
-            log::add(__CLASS__, 'debug', 'preinfusdion');
-            $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
+            log::add(__CLASS__, 'debug', 'preinfusion');
+            $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 0);
+            $_eq->AddAction("jee4lm_preextraction_on", "Prémouillage on","binarySwitch", "ENERGY_ON", 1);
+            $_eq->AddAction("jee4lm_preextraction_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
             break;
         }
       } // foreach
@@ -488,8 +492,6 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("jee4lm_on", "heat", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
       $_eq->AddAction("jee4lm_off", "off", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
       $_eq->AddAction("jee4lm_auto", "Auto", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 0);
-      $_eq->AddAction("jee4lm_steam_on", "Vapeur ON", PLUGINNAME . "::steam on off", "", 1);
-      $_eq->AddAction("jee4lm_steam_off", "Vapeur OFF", PLUGINNAME . "::steam on off", "", 1);
       $_eq->AddAction("refresh", __('Rafraichir', __FILE__));
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
       $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on","binarySwitch", "ENERGY_ON", 1);
@@ -511,6 +513,10 @@ class jee4lm5 extends eqLogic
       $_eq->linksetpoint("jee4lm_steam_off", "steamenabled");
       $_eq->linksetpoint("jee4lm_smartwakeup_on", "smartwakeup");
       $_eq->linksetpoint("jee4lm_smartwakeup_off", "smartwakeup");
+      $_eq->linksetpoint("jee4lm_prewet_on", "prewet");
+      $_eq->linksetpoint("jee4lm_prewet_off", "prewet");
+      $_eq->linksetpoint("jee4lm_preextraction_on", "preinfusionmode");
+      $_eq->linksetpoint("jee4lm_preextraction_off", "preinfusionmode");
     } //if
 
     return true;
@@ -806,13 +812,19 @@ class jee4lm5 extends eqLogic
     self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerTargetTemperature", json_encode($data)); 
   }  
 
+  /**
+   * @param mixed $_toggle true or false
+   * @return void
+   */
+  public function CoffeeMachinePreInfusionChangeMode($_toggle)
+  {
+    log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
+    $serial = $this->getConfiguration('serialNumber');
+    $data= ["mode" => $_toggle ? "Disabled" : "PreInfusion"];
+    self::executeCommand($serial, "CoffeeMachinePreInfusionChangeMode", json_encode($data));
+  }
 
   /**
-   * This API allow to select if the LM is plumbed In or not. If not, the by default if preinfusion
-   * is enabled it is Prebrew that is performed with the parameters set (time/hold). If enabled
-   * then a preinfusion using the water pressure line is used (in general 1 to 3 bars). 
-   * the samle (time/hold) parameters apply. 
-   * Do not activate this feature if no plumbed in line is installed!
    * @param mixed $_toggle true or false
    * @return void
    */
@@ -820,7 +832,7 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
-    $data= ["mode" => $_toggle ? "PreInfusion" : "PreBrewing"];
+    $data= ["mode" => $_toggle ? "Disabled" : "PreBrewing"];
     self::executeCommand($serial, "CoffeeMachinePreBrewingChangeMode", json_encode($data));
   }
 
@@ -864,7 +876,7 @@ class jee4lm5 extends eqLogic
    * @return void
    */
   public function CoffeeMachinePreBrewingChangeTimes($_time, $_hold) {
-    log::add(__CLASS__, 'debug', "set preinfusion start t=$_time h=$_hold");
+    log::add(__CLASS__, 'debug', "set prebrew start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
     $data=  ["In" => ["seconds" => $_time], "Out" => ["seconds" => $_hold]];
     self::executeCommand($serial, "CoffeeMachinePreBrewingChangeTimes",json_encode($data));
@@ -979,6 +991,8 @@ class jee4lm5 extends eqLogic
           'jee4lm_on' => [2, 2],
           'groupDoseMode' => [1, 1],
           'preinfusionmode' => [5, 1],
+          'jee4lm_preextraction_on' => [5, 1],
+          'jee4lm_preextraction_off' => [5, 1],
           'prewet' => [5, 1],
           'jee4lm_prewet_on' => [5, 1],
           'jee4lm_prewet_off' => [5, 1],
@@ -1632,7 +1646,15 @@ class jee4lm5 extends eqLogic
     return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
   }
 
+  public function CoffeeMachineSettingPreInfusionEnabled($eq, $b) {
+    $this->checkAndUpdateCmd('preinfusionmode', $b);
+    return true;
+  }
 
+public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
+    $this->checkAndUpdateCmd('prewet', $b);
+    return $eq->CoffeeMachinePreBrewingChangeMode($b);
+  }
 }
 
 /**
@@ -1685,6 +1707,16 @@ class jee4lm5Cmd extends cmd
       case 'jee4lm_smartwakeup__after_poweron':
         $eq->CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options);
         return true;
+      case  'jee4lm_prewet_on':
+      case  'jee4lm_prewet_off':
+        $b = $action == 'jee4lm_prewet_on';
+        $eq->CoffeeMachineSettingPreWetEnabled($eq, $b);
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
+      case 'jee4lm_preextraction_on':
+      case 'jee4lm_preextraction_off':
+        $b = $action == 'jee4lm_preextraction_on';
+        $eq->CoffeeMachineSettingPreInfusionEnabled($eq, $b);
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_smartwakeup_on':
       case 'jee4lm_smartwakeup_off':
         $b = $action == 'jee4lm_smartstandby_on';
