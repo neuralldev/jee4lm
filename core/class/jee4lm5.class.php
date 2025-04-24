@@ -458,8 +458,8 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
             $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
-            $_eq->AddAction("jee4lm_prewet_on", "Prewet on","binarySwitch", "ENERGY_ON", 1);
-            $_eq->AddAction("jee4lm_prewet_off", "Prewet off", "binarySwitch", "ENERGY_OFF", 1);
+            $_eq->AddAction("jee4lm_prewet_on", "Prémouillage on","binarySwitch", "ENERGY_ON", 1);
+            $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
           case "CMPreExtraction":
             log::add(__CLASS__, 'debug', 'preinfusdion');
             $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
@@ -966,6 +966,7 @@ class jee4lm5 extends eqLogic
           'bbwdoseB' => [4, 2],
           'bbwfree' => [4, 3],
           'bbwmode' => [4, 3],
+          'groupDoseType' => [1, 1],
           'coffeeenabled' => [1, 1],
           'isbbw' => [1, 3],
           'coffeecurrent' => [3, 1],
@@ -978,8 +979,9 @@ class jee4lm5 extends eqLogic
           'jee4lm_on' => [2, 2],
           'groupDoseMode' => [1, 1],
           'preinfusionmode' => [5, 1],
-          'groupDoseType' => [1, 1],
           'prewet' => [5, 1],
+          'jee4lm_prewet_on' => [5, 1],
+          'jee4lm_prewet_off' => [5, 1],
           'plumbedin' => [5, 2],
           'prewettime' => [5, 3],
           'prewetholdtime' => [5, 3],
