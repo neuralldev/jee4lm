@@ -419,9 +419,9 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
             $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME . "::bbw", null, null, 0);
             $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
-            $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME . "::bbw nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-            $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
-            $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME . "::bbw dose inactive", "g", 0);
+            $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME . "::bbw_nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
+            $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive", "g", 0);
+            $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive", "g", 0);
             $_eq->AddAction("jee4lm_bbwA", "BBW Dose 1", "button", "", 1);
             $_eq->AddAction("jee4lm_bbwB", "BBW Dose 2", "button", "", 1);
             $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose 1", "button", "", 1, "slider", 5, 100, 0.5);
@@ -453,11 +453,13 @@ class jee4lm5 extends eqLogic
             break;
           case "CMPreBrewing":
             log::add(__CLASS__, 'debug', 'pretrempage');
-            $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', null, null, null, 1);
+            $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', "ENERGY_STATE", null, null, 0);
             $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
             $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddAction("jee4lm_prewet_on", "Prewet on","binarySwitch", "ENERGY_ON", 1);
+            $_eq->AddAction("jee4lm_prewet_off", "Prewet off", "binarySwitch", "ENERGY_OFF", 1);
           case "CMPreExtraction":
             log::add(__CLASS__, 'debug', 'preinfusdion');
             $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 1);
@@ -492,7 +494,7 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
       $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on","binarySwitch", "ENERGY_ON", 1);
       $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off", "binarySwitch", "ENERGY_OFF", 1);
-      $_eq->AddAction("jee4lm_smartwakeupstandbyminut                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   es_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
+      $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
       $_eq->AddAction("jee4lm_smartwakeup_after_lastbrew", "Dernier café");
       $_eq->AddAction("jee4lm_smartwakeup_after_poweron", "Allumage");
       // add machine slug to display machine by type
@@ -1242,8 +1244,8 @@ class jee4lm5 extends eqLogic
             $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
             $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
             $this->checkAndUpdateCmd('bbwfree',$w['output']['mode']=="Continuous");
-            $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose1"?"":" inactive");
-            $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw dose".$w['output']['mode']=="Dose2"?"":" inactive");
+            $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose1"?"":"_inactive");
+            $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose2"?"":"_inactive");
             break; 
           case "CMPreBrewing": //premouillage
             $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
@@ -1320,7 +1322,7 @@ class jee4lm5 extends eqLogic
         array('operation' => '#value# >= 0', 'state_light' => '<span style="font-size: 20px;color:gray">#value#</span>', 'state_dark' => '<span style="font-size: 20px;color:lightgray">#value#</span>')
       )
     );
-    $r['info']['numeric']['bbw dose'] = array(
+    $r['info']['numeric']['bbw_dose'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0', 'state_light' => 'N/A', 'state_dark' => 'N/A'),
@@ -1331,7 +1333,7 @@ class jee4lm5 extends eqLogic
         )
       )
     );
-    $r['info']['numeric']['bbw dose inactive'] = array(
+    $r['info']['numeric']['bbw_dose_inactive'] = array(
       'template' => 'tmplmultistate',
       'test' => array(
         array('operation' => '#value# == 0', 'state_light' => 'N/A', 'state_dark' => 'N/A'),
@@ -1342,7 +1344,7 @@ class jee4lm5 extends eqLogic
         )
       )
     );
-    $r['info']['binary']['bbw nodose'] = array(
+    $r['info']['binary']['bbw_nodose'] = array(
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
