@@ -1238,7 +1238,7 @@ class jee4lm5 extends eqLogic
         //   log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
             $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
-            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>OFF' : "<span style='color:green'><br\>ON</span>");
+            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>Off' : "<span style='color:green'><br\>Allumé</span>");
             break;
           case "CMNoWater":
         //    log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
