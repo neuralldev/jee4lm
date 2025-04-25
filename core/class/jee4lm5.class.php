@@ -417,7 +417,7 @@ class jee4lm5 extends eqLogic
           case "CMBrewByWeightDoses":
             log::add(__CLASS__, 'debug', 'brewbyweight');
             $_eq->AddCommand("BBW Présent", 'isbbw', 'info', 'binary', null, null, null, 0);
-            $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME . "::bbw", null, null, 0);
+            $_eq->AddCommand("Balance connectée", 'isscaleconnected', 'info', 'binary', PLUGINNAME . "::bbw", null, null, 1);
             $_eq->AddCommand("BBW Etat", 'bbwmode', 'info', 'string', null, null, null, 0);
             $_eq->AddCommand("Continu", 'bbwfree', 'info', 'binary', PLUGINNAME . "::bbw_nodose", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
             $_eq->AddCommand("Dose 1", 'bbwdoseA', 'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive", "g", 0);
@@ -1373,10 +1373,10 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplimg',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive'           src='/plugins/".PLUGINNAME."/core/config/img/main_on.png'  width='100px' height='100px' ></span></span>",
-        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive'  src='/plugins/".PLUGINNAME."/core/config/img/main_on.png'  width='100px' height='100px' ></span></span>",
-        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive'          src='/plugins/".PLUGINNAME."/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
-        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/main_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_light_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive'           src='/plugins/".PLUGINNAME."/core/config/img/ic_status_header_on.png'  width='100px' height='100px' ></span></span>",
+        '#_img_dark_on_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive'  src='/plugins/".PLUGINNAME."/core/config/img/ic_status_header_on.png'  width='100px' height='100px' ></span></span>",
+        '#_img_light_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:white; border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive'          src='/plugins/".PLUGINNAME."/core/config/img/ic_status_header_off.png' width='100px' height='100px' ></span></span>",
+        '#_img_dark_off_#' => "<span style='display: inline-block;margin-top:40px;line-height:0px;border-radius:50%;font-size: 8px;background-color: white;color:white;border-width:thick;border-color:rgb(25,25,25); border-style: solid;'><span style='display: inline-block;margin-left:-8px;margin-right:-8px;margin-top:-8px;margin-bottom:-8px'><img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/ic_status_header_off.png' width='100px' height='100px' ></span></span>",
         "#_time_widget_#" => "0"
       )
     );
@@ -1425,8 +1425,8 @@ class jee4lm5 extends eqLogic
       'template' => 'tmplicon',
       'display' => array('icon' => 'null'),
       'replace' => array(
-        '#_icon_on_#' => "<img class='img-responsive'  src='/plugins/".PLUGINNAME."/core/config/img/main_on.png' width='64' height='64'>",
-        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/main_off.png' width='64' height='64'>",
+        '#_icon_on_#' => "<img class='img-responsive'  src='/plugins/".PLUGINNAME."/core/config/img/ic_status_header_on.png' width='64' height='64'>",
+        '#_icon_off_#' => "<img class='img-responsive' src='/plugins/".PLUGINNAME."/core/config/img/ic_status_header_off.png' width='64' height='64'>",
         "#_time_widget_#" => "0"
       )
     );
