@@ -1226,19 +1226,19 @@ class jee4lm5 extends eqLogic
               case "Ready":
                 $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
                 $this->checkAndUpdateCmd('coffeeenabled',1);
-                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green">Prêt</span>');
+                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green"><br\>Prêt</span>');
                 break;
               default:
                 $this->checkAndUpdateCmd('coffeecurrent',0);
                 $this->checkAndUpdateCmd('coffeeenabled',0);
-                $this->checkAndUpdateCmd('displaycoffee','<span style="color:red">Off</span>');
+                $this->checkAndUpdateCmd('displaycoffee','<span style="color:red"><br\>Off</span>');
             }
             break;
           case "CMSteamBoilerTemperature":
         //   log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
             $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
-            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br>OFF' : "<span style='color:green'><br>ON</span>");
+            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>OFF' : "<span style='color:green'><br\>ON</span>");
             break;
           case "CMNoWater":
         //    log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
