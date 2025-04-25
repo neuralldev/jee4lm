@@ -445,7 +445,7 @@ class jee4lm5 extends eqLogic
             break;
           case "CMSteamBoilerTemperature":
             log::add(__CLASS__, 'debug', 'steam');
-            $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', PLUGINNAME . "::steam", null, 'THERMOSTAT_STATE', 0);
+            $_eq->AddCommand("Vapeur activée", 'steamenabled', 'info', 'binary', PLUGINNAME . "::steam", null, 'THERMOSTAT_STATE', 0, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
             $_eq->AddCommand("Vapeur temperature cible", 'steamtarget', 'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Vapeur température actuelle", 'steamcurrent', 'info', 'numeric', null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
             $_eq->AddCommand("Chaudière Vapeur", 'displaysteam', 'info', 'string', null, null, null, 1);
@@ -471,8 +471,8 @@ class jee4lm5 extends eqLogic
         }
       } // foreach
       $_eq->AddCommand("Sur réseau d'eau", 'plumbedin', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', null, null, null, 1);
-      $_eq->AddCommand("Dernier Backflush", 'last_backflush', 'info', 'string', PLUGINNAME . "::backflush", null, null, 0);
+      $_eq->AddCommand("Etat Backflush", 'backflush', 'info', 'binary', null, null, null, 0);
+      $_eq->AddCommand("Dernier Backflush", 'last_backflush', 'info', 'string', PLUGINNAME . "::backflush", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
       $_eq->AddCommand("Réservoir plein", 'tankStatus', 'info', 'binary', PLUGINNAME . "::tankStatus", null, null, 1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
       $_eq->AddCommand("Etat", 'machinemode', 'info', 'binary', PLUGINNAME . "::main", null, 'THERMOSTAT_STATE', 0);
       $_eq->AddCommand("Version Firmware", 'fwversion', 'info', 'string', null, null, null, 1);
@@ -480,7 +480,7 @@ class jee4lm5 extends eqLogic
       $_eq->AddCommand("Mode", 'hbmode', 'info', 'string', null, null, "THERMOSTAT_MODE", 0);
       $_eq->AddCommand("SmartWakeup", 'smartwakeup', 'info', 'binary',null, null, "ENERGY_STATE", 0);
       $_eq->AddCommand("SmartWakeup durée", 'smartwakeupstandbyminutes', 'info', 'numeric',null, null, null, 0);
-      $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',PLUGINNAME . "::smartstandby", null, null, 1);
+      $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',PLUGINNAME . "::smartwakeup", null, null, 1);
 
       /*
              $this->checkAndUpdateCmd('smartwakeup', 1);
@@ -1032,7 +1032,7 @@ class jee4lm5 extends eqLogic
           "layout::dashboard::table::parameters" =>
             [
               "center" => "0",
-              "styletable" => "background-image: url(/plugins/".PLUGINNAME."/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 36%;",
+              "styletable" => "background-image: url(/plugins/".PLUGINNAME."/core/config/img/bg_model_2.png);background-repeat: no-repeat; background-size: 100% 40%;",
               "styletd" => "",
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
@@ -1212,7 +1212,7 @@ class jee4lm5 extends eqLogic
                 $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
                 $differenceInSeconds = 0;
                 log::add(__CLASS__, 'debug', 'getinformation coffee ready in '.$differenceInMinutes.' minutes'. 'difference in seconds ='.$differenceInSeconds);
-                if ($differenceInMinutes==0 && $differenceInSeconds==0) {
+                if ($differenceInMinutes==0 && $differenceInSeconds<=30) {
                   $displayDifference = '<span style="color:green"><br\>Prêt < 30s </span>';
                 } else {
                   if($differenceInMinutes <= 1.5) {
@@ -1238,7 +1238,7 @@ class jee4lm5 extends eqLogic
         //   log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
             $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
-            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? 'OFF' : "<span style='color:green'>ON</span>");
+            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br>OFF' : "<span style='color:green'><br>ON</span>");
             break;
           case "CMNoWater":
         //    log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
@@ -1646,7 +1646,7 @@ class jee4lm5 extends eqLogic
     return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
   }
 
-  public function CoffeeMachineSettingPreInfusionEnabled($eq, $b) {
+  public function CoffeeMachineSettingPreInfusionEnabled($eq, $b) {// to be done
     $this->checkAndUpdateCmd('preinfusionmode', $b);
     return true;
   }
@@ -1703,10 +1703,10 @@ class jee4lm5Cmd extends cmd
         return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_smartwakeup_after_lastbrew':
         $eq->CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options);
-        return true;
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case 'jee4lm_smartwakeup__after_poweron':
         $eq->CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options);
-        return true;
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
       case  'jee4lm_prewet_on':
       case  'jee4lm_prewet_off':
         $b = $action == 'jee4lm_prewet_on';
@@ -1724,8 +1724,8 @@ class jee4lm5Cmd extends cmd
         $eq->CoffeeMachineSettingSmartStandBy($b, 
         cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd(),
         $from);
-        return true;
-      case 'jee4lm_smartwakeupstandbyminutes_slider':
+        return jee4lm5::RefreshLMDashboard($eq, "post command");
+      case 'jee4lm_smartwakeupstandbyminutes_slider': //to be done
           return true;
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget', "CoffeeBoiler");
