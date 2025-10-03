@@ -168,15 +168,15 @@ class jee4lm5 extends eqLogic
       ];
       $private_key_resource = openssl_pkey_new($config);
       if ($private_key_resource===false) {
-        log::add(__CLASS__, 'error', 'openssl_pkey_new failed to generate private key');
+        log::add(__CLASS__, 'error', 'openssl_pkey_new failed to generate private key l171');
         throw new Exception('Failed to get openssl resource');
       }
       log::add(__CLASS__, 'debug', 'openssl pknew done try to export with '.$private_key_resource);
       openssl_pkey_export($private_key_resource, $private_key_pem);
       log::add(__CLASS__, 'debug', 'openssl pkey export done');
       if ($private_key_resource === false) {
-        log::add(__CLASS__, 'error', 'openssl_pkey_new failed to generate private key');
-        throw new Exception('Failed to generate private key with openssl_pkey_new');
+        log::add(__CLASS__, 'error', 'openssl_pkey_export failed to generate private key');
+        throw new Exception('Failed to export private key');
       }
       $details = openssl_pkey_get_details($private_key_resource);
       log::add(__CLASS__, 'debug', 'openssl pkey get details done');
