@@ -320,7 +320,7 @@ class jee4lm5 extends eqLogic
 
     $data = self::request(
       LMCLOUD."auth/init",
-      '{"pk": "'.$installation_key->private_key_pem.'"}',
+      '{"pk": "'.$installation_key->getPublicKeyB64().'"}',
       'POST',
       $headers
     );
