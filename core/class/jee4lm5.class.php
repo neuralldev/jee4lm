@@ -146,6 +146,16 @@ class jee4lm5 extends eqLogic
       ];
   }
 
+  public static function  derive_secret_bytes(string $installation_id, string $pub_der_bytes) : string 
+  {
+          $pub_b64 = b64($pub_der_bytes);
+          $inst_hash = hash('sha256', $installation_id, true);
+          $inst_hash_b64 = b64($inst_hash);
+          $triple = "{$installation_id}.{$pub_b64}.{$inst_hash_b64}";
+          log::add(__CLASS__, 'debug', 'openssl generating hash and returning');
+          return hash('sha256', $triple, true);
+  }
+
   public static function generate_installation_key(string $installation_id): jee4lm_InstallationKey
   {
       /**
@@ -163,18 +173,8 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'openssl pkey get details done');
 
       $pub_bytes = $details['key'];
-      
-      // Fonction de dérivation de secret équivalente
-      $derive_secret_bytes = function (string $installation_id, string $pub_der_bytes) use ($pub_bytes): string {
-          $pub_b64 = b64($pub_bytes);
-          $inst_hash = hash('sha256', $installation_id, true);
-          $inst_hash_b64 = b64($inst_hash);
-          $triple = "{$installation_id}.{$pub_b64}.{$inst_hash_b64}";
-          log::add(__CLASS__, 'debug', 'openssl generating hash and returning');
-          return hash('sha256', $triple, true);
-      };
-
-      $secret_bytes = $derive_secret_bytes($installation_id, $pub_bytes);
+    
+      $secret_bytes = self::derive_secret_bytes($installation_id, $pub_bytes);
       log::add(__CLASS__, 'debug', 'openssl secret generated done');
   
       return new jee4lm_InstallationKey(
