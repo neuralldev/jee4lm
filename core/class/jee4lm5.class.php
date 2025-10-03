@@ -181,7 +181,7 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'error', 'openssl_pkey_new error ('. $msg .')');
         throw new Exception('Failed to get openssl resource');
       }
-      log::add(__CLASS__, 'debug', 'openssl pknew done try to export with '.$private_key_resource);
+      log::add(__CLASS__, 'debug', 'openssl pknew done try to export');
       openssl_pkey_export($private_key_resource, $private_key_pem);
       log::add(__CLASS__, 'debug', 'openssl pkey export done');
       if ($private_key_resource === false) {
