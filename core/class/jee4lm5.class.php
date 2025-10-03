@@ -19,6 +19,66 @@ const
 https://github.com/zweckj/pylamarzocco/tree/v5
 */
 
+  /**
+   * Fonctions utilitaires d'authentification.
+   */
+
+  // Utilisation des bibliothèques OpenSSL et sodium pour la cryptographie
+  // sodium_crypto_sign_keypair(), sodium_crypto_sign_detached(), etc.
+  // openssl_pkey_new(), openssl_pkey_export(), openssl_pkey_get_details(), etc.
+  // source for authentication from https://github.com/zweckj/pylamarzocco/blob/main/pylamarzocco/util/_authentication.py
+  // source for client call https://github.com/zweckj/pylamarzocco/blob/main/pylamarzocco/clients/_cloud.py 
+  function b64(string $data): string
+  {
+      /**
+       * Encode en Base64 des octets en chaîne ASCII.
+       */
+      return base64_encode($data);
+  }
+
+  class jee4lm_InstallationKey
+  {
+    public string $installation_id;
+    public string $secret; // Stocké en binaire
+    public string $private_key_pem; // Clé privée au format PEM
+
+    public function __construct(string $installation_id, string $secret, string $private_key_pem)
+    {
+        $this->installation_id = $installation_id;
+        $this->secret = $secret;
+        $this->private_key_pem = $private_key_pem;
+    }
+
+    public function getPublicKeyB64(): string
+    {
+        /**
+         * Retourne la clé publique au format DER encodé en Base64.
+         */
+        $details = openssl_pkey_get_details(openssl_pkey_get_private($this->private_key_pem));
+        $publicKey = $details['key'];
+        
+        $der_key = openssl_pkey_get_public($publicKey);
+        openssl_pkey_export($der_key, $pem_public);
+
+        // Convertir PEM en DER
+        $pem_public_lines = explode("\n", trim($pem_public));
+        unset($pem_public_lines[0], $pem_public_lines[count($pem_public_lines) - 1]);
+        $der_string = base64_decode(implode('', $pem_public_lines));
+
+        return b64($der_string);
+    }
+
+    public function getBaseString(): string
+    {
+        /**
+         * Retourne la chaîne de base : installation_id.sha256(public_key_der_bytes).
+         */
+        $pub_bytes = base64_decode($this->getPublicKeyB64());
+        $pub_hash_b64 = b64(hash('sha256', $pub_bytes, true));
+        return "{$this->installation_id}.{$pub_hash_b64}";
+    }
+  }
+
 /**
  * jee4lm5 est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
  */
@@ -33,6 +93,90 @@ class jee4lm5 extends eqLogic
    */
   public static function getPath($_serial) {
     return LMCLOUD. 'things/' . $_serial;
+  }
+
+  private static function generate_request_proof(string $base_string, string $secret32): string
+  {
+      /**
+       * Algorithme de génération de preuve personnalisé (équivalent Y5.e).
+       */
+      if (strlen($secret32) !== 32) {
+          throw new ValueError("Le secret doit être de 32 octets.");
+      }
+
+      $work = array_values(unpack('C*', $secret32));
+      $base_string_bytes = unpack('C*', $base_string);
+
+      foreach ($base_string_bytes as $byte_val) {
+          $idx = $byte_val % 32;
+          $shift_idx = ($idx + 1) % 32;
+          $shift_amount = $work[$shift_idx] & 7;
+
+          $xor_result = $byte_val ^ $work[$idx];
+          $rotated = (($xor_result << $shift_amount) | ($xor_result >> (8 - $shift_amount))) & 0xFF;
+          $work[$idx] = $rotated;
+      }
+
+      $final_work_string = call_user_func_array('pack', array_merge(['C*'], $work));
+      return b64(hash('sha256', $final_work_string, true));
+  }
+
+  public static function generate_extra_request_headers(jee4lm_InstallationKey $installation_key): array
+  {
+      /**
+       * Génère les en-têtes supplémentaires pour les appels API normaux.
+       */
+      $nonce = bin2hex(random_bytes(16));
+      $timestamp = (string) (int) (microtime(true) * 1000);
+
+      $proof_input = "{$installation_key->installation_id}.{$nonce}.{$timestamp}";
+      $proof = self::generate_request_proof($proof_input, $installation_key->secret);
+
+      $signature_data = "{$proof_input}.{$proof}";
+
+      $private_key_resource = openssl_pkey_get_private($installation_key->private_key_pem);
+      openssl_sign($signature_data, $signature, $private_key_resource, OPENSSL_ALGO_SHA256);
+      $signature_b64 = b64($signature);
+
+      return [
+          "X-App-Installation-Id" => $installation_key->installation_id,
+          "X-Timestamp" => $timestamp,
+          "X-Nonce" => $nonce,
+          "X-Request-Signature" => $signature_b64,
+      ];
+  }
+
+  public static function generate_installation_key(string $installation_id): jee4lm_InstallationKey
+  {
+      /**
+       * Génère le matériel de clé à partir de l'ID d'installation.
+       */
+      $config = [
+          'private_key_type' => OPENSSL_KEYTYPE_EC,
+          'curve_name' => 'secp256r1',
+      ];
+      $private_key_resource = openssl_pkey_new($config);
+      openssl_pkey_export($private_key_resource, $private_key_pem);
+      $details = openssl_pkey_get_details($private_key_resource);
+
+      $pub_bytes = $details['key'];
+      
+      // Fonction de dérivation de secret équivalente
+      $derive_secret_bytes = function (string $installation_id, string $pub_der_bytes) use ($pub_bytes): string {
+          $pub_b64 = b64($pub_bytes);
+          $inst_hash = hash('sha256', $installation_id, true);
+          $inst_hash_b64 = b64($inst_hash);
+          $triple = "{$installation_id}.{$pub_b64}.{$inst_hash_b64}";
+          return hash('sha256', $triple, true);
+      };
+
+      $secret_bytes = $derive_secret_bytes($installation_id, $pub_bytes);
+      
+      return new jee4lm_InstallationKey(
+          installation_id: $installation_id,
+          secret: $secret_bytes,
+          private_key_pem: $private_key_pem
+      );
   }
 
   /**
@@ -83,6 +227,7 @@ class jee4lm5 extends eqLogic
     return json_decode($response, true);
   }
 
+
   /**
    * Login is the login API to get the token based on the credential from the Web/App 
    * if the login succeeds, it sets the fields with both the access_token and the refresh token for renewal
@@ -99,6 +244,25 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'login empty username or password');
       return '';
     }
+
+    // now check new registration is done before login
+    $installationid = config::byKey('reg_installationid', PLUGINNAME);
+    if ($installationid == '') {
+      log::add(__CLASS__, 'debug', 'generating new installation id');
+      $uniquemachieneid = uniqid("AD");
+      $installkey = self::generate_installation_key($uniquemachieneid);
+      config::save('reg_installationid', json_encode($installkey), PLUGINNAME);
+      log::add(__CLASS__, 'debug', 'new installation id generated: ' . json_encode($installkey));
+    } else {
+      $installkey = json_decode($installationid);
+    } 
+
+    if (!self::async_register_client($installkey)) { # now try to register with this information
+        log::add(__CLASS__, 'debug', 'registration failed');
+        return '';
+      }
+    log::add(__CLASS__, 'debug', 'registration ok, now login');
+
     // login to LM cloud attempt to get the token 
     $data = self::request(
       LMCLOUD."auth/signin",
@@ -120,6 +284,73 @@ class jee4lm5 extends eqLogic
     }
     return '';
   }
+
+
+ public static function async_register_client(jee4lm_InstallationKey $installation_key): bool
+  {
+    $headers = [
+      "-App-Installation-Id:$installation_key->installation_id",
+      "X-Request-Proof:" . self::generate_request_proof(
+                $installation_key->getBaseString(), $installation_key->secret
+            )
+    ];
+
+    $data = self::request(
+      LMCLOUD."auth/init",
+      '{"pk": "'.$installation_key->private_key_pem.'"}',
+      'POST'
+    );
+
+    log::add(__CLASS__, 'debug', 'auth ' . json_encode($data, true));
+
+    if ($data["status"] == 'OK') {
+      log::add(__CLASS__, 'debug', 'Registration successful.');
+      return true;
+    }
+
+    log::add(__CLASS__, 'debug', 'Registration failed.');
+    return false;
+  }
+/*
+
+  async def async_register_client(self) -> None:
+        """Register a new client."""
+
+        headers = {
+            "X-App-Installation-Id": self._installation_key.installation_id,
+            "X-Request-Proof": generate_request_proof(
+                self._installation_key.base_string, self._installation_key.secret
+            ),
+        }
+        body = {
+            "pk": self._installation_key.public_key_b64,
+        }
+        try:
+            response = await self._client.post(
+                url=f"{CUSTOMER_APP_URL}/auth/init",
+                headers=headers,
+                json=body,
+            )
+        except ClientError as ex:
+            raise RequestNotSuccessful(
+                "Error during HTTP request."
+                + f"Request auth to endpoint failed with error: {ex}"
+            ) from ex
+
+        if is_success(response):
+            _LOGGER.info("Registration successful.")
+            return
+
+        if response.status == 401:
+            raise AuthFail("Invalid username or password")
+
+        raise RequestNotSuccessful(
+            f"Request to auth endpoint failed with status code {response.status}"
+            + f"response: {await response.text()}"
+        )
+
+*/
+
 
   /**
    * Refresh the token by checking if it is expired, then asks for its renewal if necessary.
@@ -458,8 +689,8 @@ class jee4lm5 extends eqLogic
             $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', "ENERGY_STATE", null, null, 0);
             $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
-            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
             $_eq->AddAction("jee4lm_prewet_on", "Prémouillage on","binarySwitch", "ENERGY_ON", 1);
             $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
           case "CMPreExtraction":
@@ -496,7 +727,7 @@ class jee4lm5 extends eqLogic
       $_eq->AddAction("start_backflush", "Démarrer backflush", PLUGINNAME . "::backflush on off");
       $_eq->AddAction("jee4lm_smartwakeup_on", "Réveil on","binarySwitch", "ENERGY_ON", 1);
       $_eq->AddAction("jee4lm_smartwakeup_off", "Réveil off", "binarySwitch", "ENERGY_OFF", 1);
-      $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "button", null, 1, "slider", 0, 240, 10);
+      $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider", "Régler durée", "slider", null, 1, "slider", 0, 240, 10);
       $_eq->AddAction("jee4lm_smartwakeup_after_lastbrew", "Dernier café");
       $_eq->AddAction("jee4lm_smartwakeup_after_poweron", "Allumage");
       // add machine slug to display machine by type
