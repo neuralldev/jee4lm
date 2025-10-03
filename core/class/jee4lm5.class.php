@@ -156,8 +156,11 @@ class jee4lm5 extends eqLogic
           'curve_name' => 'secp256r1',
       ];
       $private_key_resource = openssl_pkey_new($config);
+      log::add(__CLASS__, 'debug', 'openssl pknew done');
       openssl_pkey_export($private_key_resource, $private_key_pem);
+      log::add(__CLASS__, 'debug', 'openssl pkey export done');
       $details = openssl_pkey_get_details($private_key_resource);
+      log::add(__CLASS__, 'debug', 'openssl pkey get details done');
 
       $pub_bytes = $details['key'];
       
@@ -167,11 +170,13 @@ class jee4lm5 extends eqLogic
           $inst_hash = hash('sha256', $installation_id, true);
           $inst_hash_b64 = b64($inst_hash);
           $triple = "{$installation_id}.{$pub_b64}.{$inst_hash_b64}";
+          log::add(__CLASS__, 'debug', 'openssl generating hash and returning');
           return hash('sha256', $triple, true);
       };
 
       $secret_bytes = $derive_secret_bytes($installation_id, $pub_bytes);
-      
+      log::add(__CLASS__, 'debug', 'openssl secret generated done');
+  
       return new jee4lm_InstallationKey(
           installation_id: $installation_id,
           secret: $secret_bytes,
@@ -250,6 +255,7 @@ class jee4lm5 extends eqLogic
     if ($installationid == '') {
       log::add(__CLASS__, 'debug', 'generating new installation id');
       $uniquemachieneid = uniqid("AD");
+      log::add(__CLASS__, 'debug', 'unique machine id='.$uniquemachieneid);
       $installkey = self::generate_installation_key($uniquemachieneid);
       config::save('reg_installationid', json_encode($installkey), PLUGINNAME);
       log::add(__CLASS__, 'debug', 'new installation id generated: ' . json_encode($installkey));
