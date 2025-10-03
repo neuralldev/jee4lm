@@ -315,15 +315,14 @@ class jee4lm5 extends eqLogic
   {
     $headers = [
       "-App-Installation-Id:$installation_key->installation_id",
-      "X-Request-Proof:" . self::generate_request_proof(
-                $installation_key->getBaseString(), $installation_key->secret
-            )
+      "X-Request-Proof:" . self::generate_request_proof($installation_key->getBaseString(), $installation_key->secret)
     ];
 
     $data = self::request(
       LMCLOUD."auth/init",
       '{"pk": "'.$installation_key->private_key_pem.'"}',
-      'POST'
+      'POST',
+      $headers
     );
 
     log::add(__CLASS__, 'debug', 'auth ' . json_encode($data, true));
