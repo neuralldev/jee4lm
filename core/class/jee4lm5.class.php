@@ -163,8 +163,7 @@ class jee4lm5 extends eqLogic
        */
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => 'secp256r1',
-          'private_key_bits' => 256,
+          'ec_curve_name' => 'prime256v1',
       ];
       $private_key_resource = openssl_pkey_new($config);
       if ($private_key_resource===false) {
