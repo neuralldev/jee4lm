@@ -164,10 +164,10 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'reading curve list');
       $curve_names = openssl_get_curve_names();
       log::add(__CLASS__, 'debug', 'detecting curves');
-      if (!in_array('prime256v1', $curve_names, true)) {
-          log::add(__CLASS__, 'error', 'openssl does not support prime256v1 curve');
+      if (!in_array('secp256k1', $curve_names, true)) {
+          log::add(__CLASS__, 'error', 'openssl does not support secp256k1 curve');
           // dump supported curves
-          throw new Exception('OpenSSL does not support prime256v1 curve');
+          throw new Exception('OpenSSL does not support secp256k1 curve');
       }
       log::add(__CLASS__, 'debug', 'supported curves: ' . implode(', ', $curve_names));
       $config = [
@@ -176,7 +176,7 @@ class jee4lm5 extends eqLogic
       ];
       $private_key_resource = openssl_pkey_new($config);
       if ($private_key_resource===false) {
-        log::add(__CLASS__, 'error', 'openssl_pkey_new failed to generate private key l178');
+        log::add(__CLASS__, 'error', 'openssl_pkey_new failed : '. openssl_error_string());
         throw new Exception('Failed to get openssl resource');
       }
       log::add(__CLASS__, 'debug', 'openssl pknew done try to export with '.$private_key_resource);
