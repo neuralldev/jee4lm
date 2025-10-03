@@ -316,11 +316,13 @@ class jee4lm5 extends eqLogic
 
 
  public static function async_register_client(jee4lm_InstallationKey $installation_key): bool
-  {
-    $headers = [
-      "-App-Installation-Id:$installation_key->installation_id",
-      "X-Request-Proof:" . self::generate_request_proof($installation_key->getBaseString(), $installation_key->secret)
-    ];
+  { 
+    
+    $headers = self::generate_extra_request_headers($installation_key);
+//    $headers = [
+//      "-App-Installation-Id:$installation_key->installation_id",
+//      "X-Request-Proof:" . self::generate_request_proof($installation_key->getBaseString(), $installation_key->secret)
+//    ];
 
     $data = self::request(
       LMCLOUD."auth/init",
