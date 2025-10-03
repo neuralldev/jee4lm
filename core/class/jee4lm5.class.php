@@ -161,7 +161,9 @@ class jee4lm5 extends eqLogic
       /**
        * Génère le matériel de clé à partir de l'ID d'installation.
        */
+      log::add(__CLASS__, 'debug', 'reading curve list');
       $curve_names = openssl_get_curve_names();
+      log::add(__CLASS__, 'debug', 'detecting curves');
       if (!in_array('prime256v1', $curve_names, true)) {
           log::add(__CLASS__, 'error', 'openssl does not support prime256v1 curve');
           // dump supported curves
@@ -174,7 +176,7 @@ class jee4lm5 extends eqLogic
       ];
       $private_key_resource = openssl_pkey_new($config);
       if ($private_key_resource===false) {
-        log::add(__CLASS__, 'error', 'openssl_pkey_new failed to generate private key l171');
+        log::add(__CLASS__, 'error', 'openssl_pkey_new failed to generate private key l178');
         throw new Exception('Failed to get openssl resource');
       }
       log::add(__CLASS__, 'debug', 'openssl pknew done try to export with '.$private_key_resource);
