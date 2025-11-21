@@ -164,12 +164,6 @@ class jee4lm5 extends eqLogic
   {
       /**
        * Génère le matériel de clé à partir de l'ID d'installation.
-       * from cryptography.hazmat.primitives.asymmetric.ec import (
-            ECDSA,
-            SECP256R1,
-            EllipticCurvePrivateKey,
-            generate_private_key,
-        )
        */
       log::add(__CLASS__, 'debug', 'reading curve list');
       $curve_names = openssl_get_curve_names();
@@ -182,11 +176,7 @@ class jee4lm5 extends eqLogic
           throw new Exception('OpenSSL does not support secp256r1 / prime256v1 curve');
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => $curve_name,
-          'config' => '/usr/lib/ssl/openssl.cnf'   
-      ];
-          'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => 'secp256R1',
+          'curve_name' => "secp256r1",
           'config' => '/usr/lib/ssl/openssl.cnf'   
       ];
       $private_key_resource = openssl_pkey_new($config);
