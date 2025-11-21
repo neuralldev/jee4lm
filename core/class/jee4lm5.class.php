@@ -47,6 +47,7 @@ https://github.com/zweckj/pylamarzocco/tree/v5
         $this->installation_id = $installation_id;
         $this->secret = $secret;
         $this->private_key_pem = $private_key_pem;
+        log::add(__CLASS__, 'debug', 'jee4lm_InstallationKey created installation_id='.$installation_id.' secret='.$secret.' private=key_pem='.$private_key_pem);
     }
 
     public function getPublicKeyB64(): string
@@ -175,7 +176,7 @@ class jee4lm5 extends eqLogic
           // dump supported curves
           throw new Exception('OpenSSL does not support secp256r1 / prime256v1 curve');
       }
-      log::add(__CLASS__, 'error', 'building config');
+      log::add(__CLASS__, 'info', 'building config');
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
           'curve_name' => (in_array('secp256r1', $names, true) ? 'secp256r1' : 'prime256v1'),
@@ -278,9 +279,10 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'unique machine id='.$uniquemachieneid);
       $installkey = self::generate_installation_key($uniquemachieneid);
       config::save('reg_installationid', json_encode($installkey), PLUGINNAME);
-      log::add(__CLASS__, 'debug', 'new installation id generated: ' . json_encode($installkey));
+      log::add(__CLASS__, 'debug', 'new installation id generated: ');
     } else {
       $installkey = json_decode($installationid);
+      log::add(__CLASS__, 'debug', 'using existing installation id: ');
     } 
 
     if (!self::async_register_client($installkey)) { # now try to register with this information
