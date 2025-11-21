@@ -196,7 +196,7 @@ class jee4lm5 extends eqLogic
       $details = openssl_pkey_get_details($private_key_resource);
       $pub_bytes = $details['key'];
       $secret_bytes = self::derive_secret_bytes($installation_id, $pub_bytes);
-      log::add(__CLASS__, 'debug', 'openssl secret generated done');
+      log::add(__CLASS__, 'debug', 'openssl secret generated done id='.$installation_id. " secret=".$secret_bytes. "private_key_pem=".$private_key_pem);
   
       return new jee4lm_InstallationKey(
           installation_id: $installation_id,
