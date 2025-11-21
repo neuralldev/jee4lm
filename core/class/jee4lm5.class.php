@@ -155,12 +155,13 @@ class jee4lm5 extends eqLogic
       $private_key_resource = openssl_pkey_get_private($installation_key->private_key_pem);
       openssl_sign($signature_data, $signature, $private_key_resource, OPENSSL_ALGO_SHA256);
       $signature_b64 = b64($signature);
+      log::add(__CLASS__, 'debug', 'generate_extra_request_headers signature_b64 = ' . $signature_b64);
 
       return [
-          "X-App-Installation-Id" => $installation_key->installation_id,
-          "X-Timestamp" => $timestamp,
-          "X-Nonce" => $nonce,
-          "X-Request-Signature" => $signature_b64,
+          "X-App-Installation-Id: ". $installation_key->installation_id,
+          "X-Timestamp: ". $timestamp,
+          "X-Nonce: ". $nonce,
+          "X-Request-Signature: ". $signature_b64
       ];
   }
 
@@ -336,7 +337,9 @@ class jee4lm5 extends eqLogic
 //      "-App-Installation-Id:$installation_key->installation_id",
 //      "X-Request-Proof:" . self::generate_request_proof($installation_key->getBaseString(), $installation_key->secret)
 //    ];
-
+    foreach ($headers as $key => $value) {
+        log::add(__CLASS__, 'debug', 'async_register_client header ' . $key . ' = ' . $value);
+    }
     $data = self::request(
       LMCLOUD."auth/init",
       '{"pk": "'.$installation_key->getPublicKeyB64().'"}',
