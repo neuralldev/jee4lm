@@ -174,13 +174,17 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'reading curve list');
       $curve_names = openssl_get_curve_names();
       log::add(__CLASS__, 'debug', 'detecting curves');
-      if (!in_array('secp256R1', $curve_names, true)) {
-          log::add(__CLASS__, 'error', 'openssl does not support secp256R1 curve');
+      // Normalize names to lowercase and accept common OpenSSL alias 'prime256v1' or 'secp256r1'
+      $names = array_map('strtolower', $curve_names);
+      if (!in_array('secp256r1', $names, true) && !in_array('prime256v1', $names, true)) {
+          log::add(__CLASS__, 'error', 'openssl does not support secp256r1 / prime256v1 curve (supported: ' . implode(', ', $curve_names) . ')');
           // dump supported curves
-          throw new Exception('OpenSSL does not support secp256R1 curve');
-      }
-      log::add(__CLASS__, 'debug', 'supported curves: ' . implode(', ', $curve_names));
+          throw new Exception('OpenSSL does not support secp256r1 / prime256v1 curve');
       $config = [
+          'private_key_type' => OPENSSL_KEYTYPE_EC,
+          'curve_name' => $curve_name,
+          'config' => '/usr/lib/ssl/openssl.cnf'   
+      ];
           'private_key_type' => OPENSSL_KEYTYPE_EC,
           'curve_name' => 'secp256R1',
           'config' => '/usr/lib/ssl/openssl.cnf'   
