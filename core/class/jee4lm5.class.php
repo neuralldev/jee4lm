@@ -346,9 +346,12 @@ class jee4lm5 extends eqLogic
     foreach ($headers as $key => $value) {
         log::add(__CLASS__, 'debug', 'async_register_client header ' . $key . ' = ' . $value);
     }
+    log::add(__CLASS__, 'debug', 'async_register_client generating public key b64');
+    $pk = $installation_key->getPublicKeyB64();
+    log::add(__CLASS__, 'debug', 'async_register_client public key b64=' . $pk);
     $data = self::request(
       LMCLOUD."auth/init",
-      '{"pk": "'.$installation_key->getPublicKeyB64().'"}',
+      '{"pk": "'.$pk.'"}',
       'POST',
       $headers
     );
