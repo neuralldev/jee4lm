@@ -55,11 +55,16 @@ https://github.com/zweckj/pylamarzocco/tree/v5
         /**
          * Retourne la clé publique au format DER encodé en Base64.
          */
+        log::add(__CLASS__, 'debug', 'getPublicKeyB64 start');
         $details = openssl_pkey_get_details(openssl_pkey_get_private($this->private_key_pem));
-        if ($details === false) {
+        log::add(__CLASS__, 'debug', 'getPublicKeyB64 details fetched'); 
+        if (is_bool($details) && $details === false) {
             throw new Exception('Failed to get public key details');
-        } else
-            log::add(__CLASS__, 'debug', 'getPublicKeyB64 details fetched'); 
+        }
+        foreach ($details as $key => $value) 
+        {
+            log::add(__CLASS__, 'debug', 'getPublicKeyB64 details key='.$key.' value='.$value);
+        }
         $publicKey = $details['key'];
         log::add(__CLASS__, 'debug', 'getPublicKeyB64 public key='.$publicKey);
         $der_key = openssl_pkey_get_public($publicKey);
