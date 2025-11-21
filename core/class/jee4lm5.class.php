@@ -179,7 +179,7 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'error', 'building config');
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => 'secp256r1',
+          'curve_name' => 'prime256v1',
           'config' => '/usr/lib/ssl/openssl.cnf'   
       ];
       $private_key_resource = openssl_pkey_new($config);
