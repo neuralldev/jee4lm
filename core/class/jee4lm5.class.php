@@ -171,13 +171,15 @@ class jee4lm5 extends eqLogic
       // Normalize names to lowercase and accept common OpenSSL alias 'prime256v1' or 'secp256r1'
       $names = array_map('strtolower', $curve_names);
       if (!in_array('secp256r1', $names, true) && !in_array('prime256v1', $names, true)) {
-          log::add(__CLASS__, 'error', 'openssl does not support secp256r1 / prime256v1 curve (supported: ' . implode(', ', $curve_names) . ')');
+          log::add(__CLASS__, 'error', 'openssl does not support secp256r1 / prime256v1 curve');
+          log::add(__CLASS__, 'error', 'supported: ' . implode(', ', $curve_names) . ')');
           // dump supported curves
           throw new Exception('OpenSSL does not support secp256r1 / prime256v1 curve');
       }
+      log::add(__CLASS__, 'error', 'building config');
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => "secp256r1",
+          'curve_name' => 'secp256r1',
           'config' => '/usr/lib/ssl/openssl.cnf'   
       ];
       $private_key_resource = openssl_pkey_new($config);
