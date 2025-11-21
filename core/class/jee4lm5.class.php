@@ -91,6 +91,7 @@ https://github.com/zweckj/pylamarzocco/tree/v5
         /**
          * Retourne la chaîne de base : installation_id.sha256(public_key_der_bytes).
          */
+        log::add(__CLASS__, 'debug', 'getBaseString start');
         $pub_bytes = base64_decode($this->getPublicKeyB64());
         $pub_hash_b64 = b64(hash('sha256', $pub_bytes, true));
         return $this->installation_id.'.'.$pub_hash_b64;
