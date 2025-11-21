@@ -79,7 +79,7 @@ https://github.com/zweckj/pylamarzocco/tree/v5
          */
         $pub_bytes = base64_decode($this->getPublicKeyB64());
         $pub_hash_b64 = b64(hash('sha256', $pub_bytes, true));
-        return "{$this->installation_id}.{$pub_hash_b64}";
+        return $this->installation_id.'.'.$pub_hash_b64;
     }
   }
 
@@ -133,10 +133,10 @@ class jee4lm5 extends eqLogic
       $nonce = bin2hex(random_bytes(16));
       $timestamp = (string) (int) (microtime(true) * 1000);
 
-      $proof_input = "{$installation_key->installation_id}.{$nonce}.{$timestamp}";
+      $proof_input = $installation_key->installation_id.'.'.$nonce.'.'.$timestamp;
       $proof = self::generate_request_proof($proof_input, $installation_key->secret);
 
-      $signature_data = "{$proof_input}.{$proof}";
+      $signature_data = $proof_input.'.'.$proof;
 
       $private_key_resource = openssl_pkey_get_private($installation_key->private_key_pem);
       openssl_sign($signature_data, $signature, $private_key_resource, OPENSSL_ALGO_SHA256);
@@ -155,7 +155,7 @@ class jee4lm5 extends eqLogic
           $pub_b64 = b64($pub_der_bytes);
           $inst_hash = hash('sha256', $installation_id, true);
           $inst_hash_b64 = b64($inst_hash);
-          $triple = "{$installation_id}.{$pub_b64}.{$inst_hash_b64}";
+          $triple = $installation_id.".".$pub_b64.".".$inst_hash_b64;
           log::add(__CLASS__, 'debug', 'openssl generating hash and returning');
           return hash('sha256', $triple, true);
   }
@@ -167,7 +167,6 @@ class jee4lm5 extends eqLogic
        */
       log::add(__CLASS__, 'debug', 'reading curve list');
       $curve_names = openssl_get_curve_names();
-      log::add(__CLASS__, 'debug', 'detecting curves');
       // Normalize names to lowercase and accept common OpenSSL alias 'prime256v1' or 'secp256r1'
       $names = array_map('strtolower', $curve_names);
       if (!in_array('secp256r1', $names, true) && !in_array('prime256v1', $names, true)) {
@@ -179,7 +178,7 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'error', 'building config');
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => 'prime256v1',
+          'curve_name' => (in_array('secp256r1', $names, true) ? 'secp256r1' : 'prime256v1'),
           'config' => '/usr/lib/ssl/openssl.cnf'   
       ];
       $private_key_resource = openssl_pkey_new($config);
@@ -188,18 +187,13 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'error', 'openssl_pkey_new error ('. $msg .')');
         throw new Exception('Failed to get openssl resource');
       }
-      log::add(__CLASS__, 'debug', 'openssl pknew done try to export');
       openssl_pkey_export($private_key_resource, $private_key_pem);
-      log::add(__CLASS__, 'debug', 'openssl pkey export done');
       if ($private_key_resource === false) {
         log::add(__CLASS__, 'error', 'openssl_pkey_export failed to generate private key');
         throw new Exception('Failed to export private key');
       }
       $details = openssl_pkey_get_details($private_key_resource);
-      log::add(__CLASS__, 'debug', 'openssl pkey get details done');
-
       $pub_bytes = $details['key'];
-    
       $secret_bytes = self::derive_secret_bytes($installation_id, $pub_bytes);
       log::add(__CLASS__, 'debug', 'openssl secret generated done');
   
