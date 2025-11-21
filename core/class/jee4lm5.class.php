@@ -119,19 +119,21 @@ class jee4lm5 extends eqLogic
       }
 
       $work = array_values(unpack('C*', $secret32));
+      log::add(__CLASS__, 'debug', 'generate_request_proof work init = ' . json_encode($work, true));
       $base_string_bytes = unpack('C*', $base_string);
-
+      log::add(__CLASS__, 'debug', 'generate_request_proof base_string_bytes = ' . json_encode($base_string_bytes, true));
       foreach ($base_string_bytes as $byte_val) {
           $idx = $byte_val % 32;
           $shift_idx = ($idx + 1) % 32;
           $shift_amount = $work[$shift_idx] & 7;
 
           $xor_result = $byte_val ^ $work[$idx];
-          $rotated = (($xor_result << $shift_amount) | ($xor_result >> (8 - $shift_amount))) & 0xFF;
+          $rotated = ($xor_result << $shift_amount | $xor_result >> (8 - $shift_amount)) & 0xFF;
           $work[$idx] = $rotated;
       }
-
+      log::add(__CLASS__, 'debug', 'generate_request_proof work final = ' . json_encode($work, true));
       $final_work_string = call_user_func_array('pack', array_merge(['C*'], $work));
+      log::add(__CLASS__, 'debug', 'generate_request_proof final_work_string = ' . bin2hex($final_work_string));
       return b64(hash('sha256', $final_work_string, true));
   }
 
