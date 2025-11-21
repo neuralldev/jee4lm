@@ -147,10 +147,11 @@ class jee4lm5 extends eqLogic
       $timestamp = (string) (int) (microtime(true) * 1000);
 
       $proof_input = $installation_key->installation_id.'.'.$nonce.'.'.$timestamp;
+      log::add(__CLASS__, 'debug', 'generate_extra_request_headers proof_input = ' . $proof_input);
       $proof = self::generate_request_proof($proof_input, $installation_key->secret);
-
+      log::add(__CLASS__, 'debug', 'generate_extra_request_headers proof = ' . $proof);
       $signature_data = $proof_input.'.'.$proof;
-
+      log::add(__CLASS__, 'debug', 'generate_extra_request_headers signature_data = ' . $signature_data);
       $private_key_resource = openssl_pkey_get_private($installation_key->private_key_pem);
       openssl_sign($signature_data, $signature, $private_key_resource, OPENSSL_ALGO_SHA256);
       $signature_b64 = b64($signature);
