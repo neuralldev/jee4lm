@@ -174,6 +174,7 @@ class jee4lm5 extends eqLogic
           log::add(__CLASS__, 'error', 'openssl does not support secp256r1 / prime256v1 curve (supported: ' . implode(', ', $curve_names) . ')');
           // dump supported curves
           throw new Exception('OpenSSL does not support secp256r1 / prime256v1 curve');
+      }
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
           'curve_name' => "secp256r1",
