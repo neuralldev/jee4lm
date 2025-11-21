@@ -113,6 +113,7 @@ class jee4lm5 extends eqLogic
       /**
        * Algorithme de génération de preuve personnalisé (équivalent Y5.e).
        */
+      log::add(__CLASS__, 'debug', 'generate_request_proof start');
       if (strlen($secret32) !== 32) {
           throw new ValueError("Le secret doit être de 32 octets.");
       }
@@ -139,6 +140,7 @@ class jee4lm5 extends eqLogic
       /**
        * Génère les en-têtes supplémentaires pour les appels API normaux.
        */
+      log::add(__CLASS__, 'debug', 'generate_extra_request_headers start');
       $nonce = bin2hex(random_bytes(16));
       $timestamp = (string) (int) (microtime(true) * 1000);
 
@@ -325,6 +327,7 @@ class jee4lm5 extends eqLogic
  public static function async_register_client(jee4lm_InstallationKey $installation_key): bool
   { 
     
+    log::add(__CLASS__, 'debug', 'async_register_client start');
     $headers = self::generate_extra_request_headers($installation_key);
 //    $headers = [
 //      "-App-Installation-Id:$installation_key->installation_id",
