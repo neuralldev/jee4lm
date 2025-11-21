@@ -59,17 +59,25 @@ https://github.com/zweckj/pylamarzocco/tree/v5
         if ($details === false) {
             throw new Exception('Failed to get public key details');
         } else
-            log::add(__CLASS__, 'debug', 'getPublicKeyB64 details='.json_encode($details, true)); 
+            log::add(__CLASS__, 'debug', 'getPublicKeyB64 details fetched'); 
         $publicKey = $details['key'];
-        
+        log::add(__CLASS__, 'debug', 'getPublicKeyB64 public key='.$publicKey);
         $der_key = openssl_pkey_get_public($publicKey);
         openssl_pkey_export($der_key, $pem_public);
-
+        log::add(__CLASS__, 'debug', 'getPublicKeyB64 pem public done'); 
         // Convertir PEM en DER
         $pem_public_lines = explode("\n", trim($pem_public));
+        foreach ($pem_public_lines as $line) 
+        {
+            log::add(__CLASS__, 'debug', 'getPublicKeyB64 pem public line='.$line);
+        }
         unset($pem_public_lines[0], $pem_public_lines[count($pem_public_lines) - 1]);
+        foreach ($pem_public_lines as $line) 
+        {
+            log::add(__CLASS__, 'debug', 'getPublicKeyB64 pem public line without 0='.$line);
+        }
         $der_string = base64_decode(implode('', $pem_public_lines));
-
+        log::add(__CLASS__, 'debug', 'getPublicKeyB64 der string='.$der_string);
         return b64($der_string);
     }
 
@@ -279,10 +287,10 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', 'unique machine id='.$uniquemachieneid);
       $installkey = self::generate_installation_key($uniquemachieneid);
       config::save('reg_installationid', json_encode($installkey), PLUGINNAME);
-      log::add(__CLASS__, 'debug', 'new installation id generated: ');
+      log::add(__CLASS__, 'debug', 'new installation id generated');
     } else {
       $installkey = json_decode($installationid);
-      log::add(__CLASS__, 'debug', 'using existing installation id: ');
+      log::add(__CLASS__, 'debug', 'using existing installation id');
     } 
 
     if (!self::async_register_client($installkey)) { # now try to register with this information
