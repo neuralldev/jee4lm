@@ -298,11 +298,46 @@ class jee4lm5 extends eqLogic
       $uniquemachieneid = uniqid("AD");
       log::add(__CLASS__, 'debug', 'unique machine id='.$uniquemachieneid);
       $installkey = self::generate_installation_key($uniquemachieneid);
-      config::save('reg_installationid', json_encode($installkey), PLUGINNAME);
+      // Sauvegarder uniquement les champs nécessaires en encodant le secret en base64 pour stockage sûr
+      $toSave = json_encode([
+        'installation_id' => $installkey->installation_id,
+        'secret_b64' => base64_encode($installkey->secret),
+        'private_key_pem' => $installkey->private_key_pem
+      ]);
+      config::save('reg_installationid', $toSave, PLUGINNAME);
       log::add(__CLASS__, 'debug', 'new installation id generated');
     } else {
-      $installkey = json_decode($installationid);
-      log::add(__CLASS__, 'debug', 'using existing installation id');
+      // Reconstruire un objet jee4lm_InstallationKey depuis le JSON stocké
+      $decoded = json_decode($installationid, true);
+      if (is_array($decoded) && isset($decoded['installation_id'], $decoded['secret_b64'], $decoded['private_key_pem'])) {
+        $installkey = new jee4lm_InstallationKey(
+          $decoded['installation_id'],
+          base64_decode($decoded['secret_b64']),
+          $decoded['private_key_pem']
+        );
+        log::add(__CLASS__, 'debug', 'using existing installation id reconstructed');
+      } elseif ($installationid instanceof jee4lm_InstallationKey) {
+        // déjà un objet (au cas où)
+        $installkey = $installationid;
+        log::add(__CLASS__, 'debug', 'using existing installation id object');
+      } else {
+        // Tentative de fallback sur unserialize (si utilisé auparavant), sinon erreur contrôlée
+        $un = @unserialize($installationid);
+        if ($un instanceof jee4lm_InstallationKey) {
+          $installkey = $un;
+          log::add(__CLASS__, 'debug', 'using existing installation id from unserialize');
+        } else {
+          log::add(__CLASS__, 'error', 'Invalid installation key stored, generating new one');
+          $uniquemachieneid = uniqid("AD");
+          $installkey = self::generate_installation_key($uniquemachieneid);
+          $toSave = json_encode([
+            'installation_id' => $installkey->installation_id,
+            'secret_b64' => base64_encode($installkey->secret),
+            'private_key_pem' => $installkey->private_key_pem
+          ]);
+          config::save('reg_installationid', $toSave, PLUGINNAME);
+        }
+      }
     } 
 
     if (!self::async_register_client($installkey)) { # now try to register with this information
