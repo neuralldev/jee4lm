@@ -164,19 +164,25 @@ class jee4lm5 extends eqLogic
   {
       /**
        * Génère le matériel de clé à partir de l'ID d'installation.
+       * from cryptography.hazmat.primitives.asymmetric.ec import (
+            ECDSA,
+            SECP256R1,
+            EllipticCurvePrivateKey,
+            generate_private_key,
+        )
        */
       log::add(__CLASS__, 'debug', 'reading curve list');
       $curve_names = openssl_get_curve_names();
       log::add(__CLASS__, 'debug', 'detecting curves');
-      if (!in_array('secp256k1', $curve_names, true)) {
-          log::add(__CLASS__, 'error', 'openssl does not support secp256k1 curve');
+      if (!in_array('secp256R1', $curve_names, true)) {
+          log::add(__CLASS__, 'error', 'openssl does not support secp256R1 curve');
           // dump supported curves
-          throw new Exception('OpenSSL does not support secp256k1 curve');
+          throw new Exception('OpenSSL does not support secp256R1 curve');
       }
       log::add(__CLASS__, 'debug', 'supported curves: ' . implode(', ', $curve_names));
       $config = [
           'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => 'secp256k1',
+          'curve_name' => 'secp256R1',
           'config' => '/usr/lib/ssl/openssl.cnf'   
       ];
       $private_key_resource = openssl_pkey_new($config);
@@ -507,12 +513,17 @@ class jee4lm5 extends eqLogic
         $id=$jee4lm->getId();
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
         log::add(__CLASS__, 'debug', "cron eqID=$id state=".$m->execCmd());
-        if (!self::RefreshLMDashboard($jee4lm, "cron")) // translate registers to jeedom values,           
+        if (!self::RefreshLMDashboard($jee4lm, "cron")) { // translate registers to jeedom values
           log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
-          if ($minuteActuelle % 5 == 0) { // every 10 minutes max
+        }
+        if ($minuteActuelle % 5 == 0) { // every 5 minutes
+          if ($jee4lm instanceof jee4lm5) {
             $jee4lm->getThingSettings();
-            $jee4lm->getThingSchedule(); 
-          } 
+            $jee4lm->getThingSchedule();
+          } else {
+            log::add(__CLASS__, 'debug', 'cron: object is not instance of jee4lm5, skipping settings/schedule update');
+          }
+        } 
       } else
         log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
    } //foreach
@@ -629,7 +640,13 @@ class jee4lm5 extends eqLogic
 
     $actual_state = $_eq->getCmd(null, 'machinemode')->execCmd();
     log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' source='.$_poll);
-    $ret = $_eq->getThingDashboardInformation(); // refresh
+    if ($_eq instanceof jee4lm5) {
+      $ret = $_eq->getThingDashboardInformation(); // refresh
+    } else {
+      log::add(__CLASS__, 'debug', 'refresh all information object is not instance of jee4lm5');
+      return false;
+    }
+
     $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
     switch (true) {
       case $new_state == 1:
@@ -672,7 +689,7 @@ class jee4lm5 extends eqLogic
     $token = self::getToken();
     $data = self::request(LMCLOUD . 'things/' . $serial . '/dashboard', null, 'GET', ["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
-    if ($data != '') {
+    if (($data != '') && ($_eq instanceof jee4lm5)) {
       foreach ($data['widgets'] as $w) {
         switch ($w["code"]) {
           case "CMBrewByWeightDoses":
@@ -1778,7 +1795,18 @@ class jee4lm5 extends eqLogic
     if (file_exists($pid_file)) {
       //log::add(__CLASS__, 'debug', 'deamon_info pid_file=' . $pid_file); 
       $pid = trim(file_get_contents($pid_file));
-      if (@posix_getsid($pid)) {
+      $pid_int = intval($pid);
+      $is_running = false;
+      if ($pid_int > 0) {
+        if (function_exists('posix_getsid')) {
+          $is_running = @posix_getsid($pid_int) !== false;
+        } else {
+          // Fallback: try to detect process using ps (portable alternative)
+          $ps = trim(shell_exec('ps -p ' . $pid_int . ' -o pid= 2>/dev/null'));
+          $is_running = $ps == (string)$pid_int;
+        }
+      }
+      if ($is_running) {
         $return['state'] = 'ok';
       } else {
         shell_exec(system::getCmdSudo() . 'rm -rf ' . $pid_file . ' 2>&1 > /dev/null');
@@ -1944,6 +1972,10 @@ class jee4lm5Cmd extends cmd
     $action = $this->getLogicalId();
     $eq = $this->getEqLogic();
     log::add(__CLASS__, 'debug', 'execute action ' . $action . ' with options=' . json_encode($_options));
+    if (!($eq instanceof jee4lm5)) {
+      log::add(__CLASS__, 'error', 'execute command for unknown equipment id=' . $eq->getId());
+      return false;
+    }
     switch ($action) {
       case 'refresh':
         return jee4lm5::RefreshLMDashboard($eq);
