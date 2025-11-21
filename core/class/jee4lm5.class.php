@@ -334,7 +334,7 @@ class jee4lm5 extends eqLogic
   }
 
 
- public static function async_register_client(jee4lm_InstallationKey $installation_key): bool
+ public static function async_register_client(jee4lm_InstallationKey &$installation_key): bool
   { 
     
     log::add(__CLASS__, 'debug', 'async_register_client start');
