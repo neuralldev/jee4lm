@@ -10,7 +10,8 @@ const
   JEEDOM_DAEMON_HOST = '192.168.1.113',
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
   PENDING_COMMAND_TIMEOUT = 10;
-  PYTHON_PATH = __DIR__ . '/../../resources/venv/bin/python3';
+
+const  PYTHON_PATH = __DIR__ . '/../../resources/venv/bin/python3';
 
   /**
    * Fonctions utilitaires d'authentification.
