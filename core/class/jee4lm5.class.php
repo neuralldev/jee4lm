@@ -26,28 +26,63 @@ class jee4lm5 extends eqLogic
 
 {
 
-  private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
-		if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
-			return false;
-		}
-		exec("{$pythonPath} -m pip freeze", $packages_installed);
-		$packages = join("||", $packages_installed);
-		exec("cat {$requirementsPath}", $packages_needed);
-		foreach ($packages_needed as $line) {
-			if (preg_match('/([^\s]+)[\s]*([>=~]=)[\s]*([\d+\.?]+)$/', $line, $need) === 1) {
-				if (preg_match('/' . $need[1] . '==([\d+\.?]+)/i', $packages, $install) === 1) {
-					if ($need[2] == '==' && $need[3] != $install[1]) {
-						return false;
-					} elseif (version_compare($need[3], $install[1], '>')) {
-						return false;
-					}
-				} else {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+  private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath)
+{
+    // Helper function for safe version comparison
+    $safe_version_compare = function (string $a, string $b, string $operator): bool {
+        $splitVersion = function ($v) {
+            if (preg_match('/^([0-9.]+)(.*)$/', $v, $matches)) {
+                return [$matches[1], $matches[2]]; // [numeric, suffix]
+            }
+            return [$v, ''];
+        };
+
+        [$aNum, $aSuffix] = $splitVersion($a);
+        [$bNum, $bSuffix] = $splitVersion($b);
+
+        $len = max(substr_count($aNum, '.') + 1, substr_count($bNum, '.') + 1);
+
+        $normalize = function ($num, $length) {
+            $parts = explode('.', $num);
+            while (count($parts) < $length) {
+                $parts[] = '0';
+            }
+            return implode('.', $parts);
+        };
+
+        $aNorm = $normalize($aNum, $len) . $aSuffix;
+        $bNorm = $normalize($bNum, $len) . $bSuffix;
+
+        return version_compare($aNorm, $bNorm, $operator);
+    };
+
+    if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
+        return false;
+    }
+
+    exec("{$pythonPath} -m pip freeze", $packages_installed);
+    $packages = join("||", $packages_installed);
+    exec("cat {$requirementsPath}", $packages_needed);
+
+    foreach ($packages_needed as $line) {
+        if (preg_match('/([^\s]+)[\s]*([>=~]=)[\s]*([\d+\.?a-zA-Z-]+)/', $line, $need) === 1) {
+            if (preg_match('/' . $need[1] . '==([\d+\.?a-zA-Z-]+)/', $packages, $install) === 1) {
+                // Exact version required
+                if ($need[2] == '==' && $need[3] != $install[1]) {
+                    return false;
+                }
+                // Version must be greater or equal
+                elseif ($safe_version_compare($need[3], $install[1], '>')) {
+                    return false;
+                }
+            } else {
+                return false; // package not installed at all
+            }
+        }
+    }
+
+    return true;
+}
 
   public static function dependancy_info() {
         $return = array();
