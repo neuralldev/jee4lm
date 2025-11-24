@@ -6,98 +6,19 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 const
   PLUGINNAME = 'jee4lm5',
   LMMODELCODE = ['LINEAMINI'],
-  LMCLOUD = 'https://lion.lamarzocco.io/api/customer-app/',
- 
+
   JEEDOM_DAEMON_PORT = '50044',
   JEEDOM_DAEMON_HOST = '192.168.1.113',
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
   PENDING_COMMAND_TIMEOUT = 10;
-
-  //LMBT_ADVERTISING = "_marzocco._tcp.local";
-
-/* source api from HA
-https://github.com/zweckj/pylamarzocco/tree/v5
-*/
 
   /**
    * Fonctions utilitaires d'authentification.
    */
 
   // Utilisation des bibliothèques OpenSSL et sodium pour la cryptographie
-  // sodium_crypto_sign_keypair(), sodium_crypto_sign_detached(), etc.
-  // openssl_pkey_new(), openssl_pkey_export(), openssl_pkey_get_details(), etc.
-  // source for authentication from https://github.com/zweckj/pylamarzocco/blob/main/pylamarzocco/util/_authentication.py
   // source for client call https://github.com/zweckj/pylamarzocco/blob/main/pylamarzocco/clients/_cloud.py 
-  function b64(string $data): string
-  {
-      /**
-       * Encode en Base64 des octets en chaîne ASCII.
-       */
-      return base64_encode($data);
-  }
-
-  class jee4lm_InstallationKey
-  {
-    public string $installation_id;
-    public string $secret; // Stocké en binaire
-    public string $private_key_pem; // Clé privée au format PEM
-
-    public function __construct(string $installation_id, string $secret, string $private_key_pem)
-    {
-        $this->installation_id = $installation_id;
-        $this->secret = $secret;
-        $this->private_key_pem = $private_key_pem;
-        log::add(__CLASS__, 'debug', 'jee4lm_InstallationKey created installation_id='.$installation_id.' secret='.$secret.' private=key_pem='.$private_key_pem);
-    }
-
-    public function getPublicKeyB64(): string
-    {
-        /**
-         * Retourne la clé publique au format DER encodé en Base64.
-         */
-        log::add(__CLASS__, 'debug', 'getPublicKeyB64 start');
-        $details = openssl_pkey_get_details(openssl_pkey_get_private($this->private_key_pem));
-        log::add(__CLASS__, 'debug', 'getPublicKeyB64 details fetched'); 
-        if (is_bool($details) && $details === false) {
-            throw new Exception('Failed to get public key details');
-        }
-        foreach ($details as $key => $value) 
-        {
-            log::add(__CLASS__, 'debug', 'getPublicKeyB64 details key='.$key.' value='.$value);
-        }
-        $publicKey = $details['key'];
-        log::add(__CLASS__, 'debug', 'getPublicKeyB64 public key='.$publicKey);
-        $der_key = openssl_pkey_get_public($publicKey);
-        openssl_pkey_export($der_key, $pem_public);
-        log::add(__CLASS__, 'debug', 'getPublicKeyB64 pem public done'); 
-        // Convertir PEM en DER
-        $pem_public_lines = explode("\n", trim($pem_public));
-        foreach ($pem_public_lines as $line) 
-        {
-            log::add(__CLASS__, 'debug', 'getPublicKeyB64 pem public line='.$line);
-        }
-        unset($pem_public_lines[0], $pem_public_lines[count($pem_public_lines) - 1]);
-        foreach ($pem_public_lines as $line) 
-        {
-            log::add(__CLASS__, 'debug', 'getPublicKeyB64 pem public line without 0='.$line);
-        }
-        $der_string = base64_decode(implode('', $pem_public_lines));
-        log::add(__CLASS__, 'debug', 'getPublicKeyB64 der string='.$der_string);
-        return b64($der_string);
-    }
-
-    public function getBaseString(): string
-    {
-        /**
-         * Retourne la chaîne de base : installation_id.sha256(public_key_der_bytes).
-         */
-        log::add(__CLASS__, 'debug', 'getBaseString start');
-        $pub_bytes = base64_decode($this->getPublicKeyB64());
-        $pub_hash_b64 = b64(hash('sha256', $pub_bytes, true));
-        return $this->installation_id.'.'.$pub_hash_b64;
-    }
-  }
-
+    
 /**
  * jee4lm5 est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
  */
@@ -114,128 +35,6 @@ class jee4lm5 extends eqLogic
     return LMCLOUD. 'things/' . $_serial;
   }
 
-  private static function generate_request_proof(string $base_string, string $secret32): string
-  {
-      /**
-       * Algorithme de génération de preuve personnalisé (équivalent Y5.e).
-       */
-      log::add(__CLASS__, 'debug', 'generate_request_proof start');
-      if (strlen($secret32) !== 32) {
-          throw new ValueError("Le secret doit être de 32 octets.");
-      }
-
-      $work = array_values(unpack('C*', $secret32));
-      log::add(__CLASS__, 'debug', 'generate_request_proof work init = ' . json_encode($work, true));
-      $base_string_bytes = unpack('C*', $base_string);
-      log::add(__CLASS__, 'debug', 'generate_request_proof base_string_bytes = ' . json_encode($base_string_bytes, true));
-      foreach ($base_string_bytes as $byte_val) {
-          $idx = $byte_val % 32;
-          $shift_idx = ($idx + 1) % 32;
-          $shift_amount = $work[$shift_idx] & 7;
-
-          $xor_result = $byte_val ^ $work[$idx];
-          $rotated = ($xor_result << $shift_amount | $xor_result >> (8 - $shift_amount)) & 0xFF;
-          $work[$idx] = $rotated;
-      }
-      log::add(__CLASS__, 'debug', 'generate_request_proof work final = ' . json_encode($work, true));
-      $final_work_string = call_user_func_array('pack', array_merge(['C*'], $work));
-      log::add(__CLASS__, 'debug', 'generate_request_proof final_work_string = ' . bin2hex($final_work_string));
-      return b64(hash('sha256', $final_work_string, true));
-  }
-
-  public static function generate_extra_request_headers(jee4lm_InstallationKey $installation_key): array
-  {
-      /**
-       * Génère les en-têtes supplémentaires pour les appels API normaux.
-       */
-      log::add(__CLASS__, 'debug', 'generate_extra_request_headers start');
-      $nonce = bin2hex(random_bytes(16));
-      $timestamp = (string) (int) (microtime(true) * 1000);
-
-      $proof_input = $installation_key->installation_id.'.'.$nonce.'.'.$timestamp;
-      log::add(__CLASS__, 'debug', 'generate_extra_request_headers proof_input = ' . $proof_input);
-      $proof = self::generate_request_proof($proof_input, $installation_key->secret);
-      log::add(__CLASS__, 'debug', 'generate_extra_request_headers proof = ' . $proof);
-      $signature_data = $proof_input.'.'.$proof;
-      log::add(__CLASS__, 'debug', 'generate_extra_request_headers signature_data = ' . $signature_data);
-      $private_key_resource = openssl_pkey_get_private($installation_key->private_key_pem);
-      openssl_sign($signature_data, $signature, $private_key_resource, OPENSSL_ALGO_SHA256);
-      $signature_b64 = b64($signature);
-      log::add(__CLASS__, 'debug', 'generate_extra_request_headers signature_b64 = ' . $signature_b64);
-
-      return [
-          "X-App-Installation-Id: ". $installation_key->installation_id,
-          "X-Timestamp: ". $timestamp,
-          "X-Nonce: ". $nonce,
-          "X-Request-Signature: ". $signature_b64
-      ];
-  }
-
-  public static function  derive_secret_bytes(string $installation_id, string $pub_der_bytes) : string 
-  {
-          $pub_b64 = b64($pub_der_bytes);
-          $inst_hash = hash('sha256', $installation_id, true);
-          $inst_hash_b64 = b64($inst_hash);
-          $triple = $installation_id.".".$pub_b64.".".$inst_hash_b64;
-          log::add(__CLASS__, 'debug', 'openssl generating hash and returning');
-          return hash('sha256', $triple, true);
-  }
-
-  public static function generate_installation_key(string $installation_id): jee4lm_InstallationKey
-  {
-      /**
-       * Génère le matériel de clé à partir de l'ID d'installation.
-       */
-      log::add(__CLASS__, 'debug', 'reading curve list');
-      $curve_names = openssl_get_curve_names();
-      // Normalize names to lowercase and accept common OpenSSL alias 'prime256v1' or 'secp256r1'
-      $names = array_map('strtolower', $curve_names);
-      if (!in_array('secp256r1', $names, true) && !in_array('prime256v1', $names, true)) {
-          log::add(__CLASS__, 'error', 'openssl does not support secp256r1 / prime256v1 curve');
-          log::add(__CLASS__, 'error', 'supported: ' . implode(', ', $curve_names) . ')');
-          // dump supported curves
-          throw new Exception('OpenSSL does not support secp256r1 / prime256v1 curve');
-      }
-      log::add(__CLASS__, 'info', 'building config');
-      $config = [
-          'private_key_type' => OPENSSL_KEYTYPE_EC,
-          'curve_name' => (in_array('secp256r1', $names, true) ? 'secp256r1' : 'prime256v1'),
-          'config' => '/usr/lib/ssl/openssl.cnf'   
-      ];
-      $private_key_resource = openssl_pkey_new($config);
-      if ($private_key_resource===false) {
-        while ($msg = openssl_error_string())
-          log::add(__CLASS__, 'error', 'openssl_pkey_new error ('. $msg .')');
-        throw new Exception('Failed to get openssl resource');
-      }
-      openssl_pkey_export($private_key_resource, $private_key_pem);
-      if ($private_key_resource === false) {
-        log::add(__CLASS__, 'error', 'openssl_pkey_export failed to generate private key');
-        throw new Exception('Failed to export private key');
-      }
-      $details = openssl_pkey_get_details($private_key_resource);
-      $pub_bytes = $details['key'];
-      $secret_bytes = self::derive_secret_bytes($installation_id, $pub_bytes);
-      log::add(__CLASS__, 'debug', 'openssl secret generated done id='.$installation_id. " secret=".$secret_bytes. "private_key_pem=".$private_key_pem);
-  
-      return new jee4lm_InstallationKey(
-          installation_id: $installation_id,
-          secret: $secret_bytes,
-          private_key_pem: $private_key_pem
-      );
-  }
-
-  /**
-   * sends a request to the REST API formatting request for GET or POST as expected by La Marzocco
-   * data is used only for POST and must be URL encoded / formatted as a string parm1=val1&parm2=val2...
-   * an optional header can be sent as well, especially to set the OAuth2 token in the Bearer field
-   * @param mixed $_path
-   * @param mixed $_data
-   * @param mixed $_type
-   * @param mixed $_header
-   * @param mixed $_serial
-   * @return mixed
-   */
   public static function request($_path, $_data = null, $_type = 'GET', $_header = null)
   {
     // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
@@ -289,255 +88,13 @@ class jee4lm5 extends eqLogic
     if ($_username == '' || $_password == '') {
       log::add(__CLASS__, 'debug', 'login empty username or password');
       return '';
-    }
-
-    // now check new registration is done before login
-    $installationid = config::byKey('reg_installationid', PLUGINNAME);
-    if ($installationid == '') {
-      log::add(__CLASS__, 'debug', 'generating new installation id');
-      $uniquemachieneid = uniqid("AD");
-      log::add(__CLASS__, 'debug', 'unique machine id='.$uniquemachieneid);
-      $installkey = self::generate_installation_key($uniquemachieneid);
-      // Sauvegarder uniquement les champs nécessaires en encodant le secret en base64 pour stockage sûr
-      $toSave = json_encode([
-        'installation_id' => $installkey->installation_id,
-        'secret_b64' => base64_encode($installkey->secret),
-        'private_key_pem' => $installkey->private_key_pem
-      ]);
-      config::save('reg_installationid', $toSave, PLUGINNAME);
-      log::add(__CLASS__, 'debug', 'new installation id generated');
-    } else {
-      // Reconstruire un objet jee4lm_InstallationKey depuis le JSON stocké
-      $decoded = json_decode($installationid, true);
-      if (is_array($decoded) && isset($decoded['installation_id'], $decoded['secret_b64'], $decoded['private_key_pem'])) {
-        $installkey = new jee4lm_InstallationKey(
-          $decoded['installation_id'],
-          base64_decode($decoded['secret_b64']),
-          $decoded['private_key_pem']
-        );
-        log::add(__CLASS__, 'debug', 'using existing installation id reconstructed');
-      } elseif ($installationid instanceof jee4lm_InstallationKey) {
-        // déjà un objet (au cas où)
-        $installkey = $installationid;
-        log::add(__CLASS__, 'debug', 'using existing installation id object');
-      } else {
-        // Tentative de fallback sur unserialize (si utilisé auparavant), sinon erreur contrôlée
-        $un = @unserialize($installationid);
-        if ($un instanceof jee4lm_InstallationKey) {
-          $installkey = $un;
-          log::add(__CLASS__, 'debug', 'using existing installation id from unserialize');
-        } else {
-          log::add(__CLASS__, 'error', 'Invalid installation key stored, generating new one');
-          $uniquemachieneid = uniqid("AD");
-          $installkey = self::generate_installation_key($uniquemachieneid);
-          $toSave = json_encode([
-            'installation_id' => $installkey->installation_id,
-            'secret_b64' => base64_encode($installkey->secret),
-            'private_key_pem' => $installkey->private_key_pem
-          ]);
-          config::save('reg_installationid', $toSave, PLUGINNAME);
-        }
-      }
     } 
 
-    if (!self::async_register_client($installkey)) { # now try to register with this information
-        log::add(__CLASS__, 'debug', 'registration failed');
-        return '';
-      }
-    log::add(__CLASS__, 'debug', 'registration ok, now login');
-
-    // login to LM cloud attempt to get the token 
-    $data = self::request(
-      LMCLOUD."auth/signin",
-      '{"username": "'.$_username.'", "password": "'.$_password.'"}',
-      'POST'
-    );
-    log::add(__CLASS__, 'debug', 'login ' . json_encode($data, true));
-    cache::delete(PLUGINNAME.'::accessToken'); // for any login attempt, reset cache with token, as it will change
-    config::save('refreshToken', '', PLUGINNAME);
-    config::save('accessToken', '', PLUGINNAME);
-    if ($data['accessToken'] != '') {
-      config::save('refreshToken', $data['refreshToken'], PLUGINNAME);
-      config::save('accessToken', $data['accessToken'], PLUGINNAME);
-      config::save('userId', $_username, PLUGINNAME);
-      config::save('userPwd', $_password, PLUGINNAME);
-      cache::set(''.PLUGINNAME.'::access_token', $data['accessToken'], TOKEN_TIME_TO_REFRESH);
-      log::add(__CLASS__, 'debug', 'login valid');
-      return $data['accessToken'];
-    }
+    $payload = ["username" => $_username, "password" => $_password];
+    self::deamon_send($payload);
     return '';
   }
 
-
- public static function async_register_client(jee4lm_InstallationKey &$installation_key): bool
-  { 
-    
-    log::add(__CLASS__, 'debug', 'async_register_client start');
-    $headers = self::generate_extra_request_headers($installation_key);
-//    $headers = [
-//      "-App-Installation-Id:$installation_key->installation_id",
-//      "X-Request-Proof:" . self::generate_request_proof($installation_key->getBaseString(), $installation_key->secret)
-//    ];
-    foreach ($headers as $key => $value) {
-        log::add(__CLASS__, 'debug', 'async_register_client header ' . $key . ' = ' . $value);
-    }
-    log::add(__CLASS__, 'debug', 'async_register_client generating public key b64');
-    $pk = $installation_key->getPublicKeyB64();
-    log::add(__CLASS__, 'debug', 'async_register_client public key b64=' . $pk);
-    $data = self::request(
-      LMCLOUD."auth/init",
-      '{"pk": "'.$pk.'"}',
-      'POST',
-      $headers
-    );
-
-    log::add(__CLASS__, 'debug', 'auth ' . json_encode($data, true));
-
-    if ($data["status"] == 'OK') {
-      log::add(__CLASS__, 'debug', 'Registration successful.');
-      return true;
-    }
-
-    log::add(__CLASS__, 'debug', 'Registration failed.');
-    return false;
-  }
-/*
-
-  async def async_register_client(self) -> None:
-        """Register a new client."""
-
-        headers = {
-            "X-App-Installation-Id": self._installation_key.installation_id,
-            "X-Request-Proof": generate_request_proof(
-                self._installation_key.base_string, self._installation_key.secret
-            ),
-        }
-        body = {
-            "pk": self._installation_key.public_key_b64,
-        }
-        try:
-            response = await self._client.post(
-                url=f"{CUSTOMER_APP_URL}/auth/init",
-                headers=headers,
-                json=body,
-            )
-        except ClientError as ex:
-            raise RequestNotSuccessful(
-                "Error during HTTP request."
-                + f"Request auth to endpoint failed with error: {ex}"
-            ) from ex
-
-        if is_success(response):
-            _LOGGER.info("Registration successful.")
-            return
-
-        if response.status == 401:
-            raise AuthFail("Invalid username or password")
-
-        raise RequestNotSuccessful(
-            f"Request to auth endpoint failed with status code {response.status}"
-            + f"response: {await response.text()}"
-        )
-
-*/
-
-
-  /**
-   * Refresh the token by checking if it is expired, then asks for its renewal if necessary.
-   * the new token is stored in the cache with the expiricy set as well to 300
-   * @return mixed
-   */
-  public static function refreshToken()
-  {
-    $refresh = config::byKey('refreshToken', PLUGINNAME);
-    $username = config::byKey('userId', PLUGINNAME);
-    $password = config::byKey('userPwd', PLUGINNAME);
-    config::save('refreshToken', '', PLUGINNAME);
-    config::save('accessToken', '', PLUGINNAME);
-    // try to detect the machines only if token succeeded
-    log::add(__CLASS__, 'debug', 'refresh token=' . $refresh);
-
-    if ($refresh == '') {
-      log::add(__CLASS__, 'debug', 'refresh token empty, do login');
-      self::login($username, $password);
-      $refresh = config::byKey('refreshToken', PLUGINNAME);
-      return $refresh;
-    }
-    $data = self::request(
-      LMCLOUD."auth/refreshtoken",
-        '{"username": "'.$username.'", "refreshToken": "'.$refresh.'"}',
-      'POST'
-    );
-    log::add(__CLASS__, 'debug', 'tokenrequest returned =' . json_encode($data, true));
-    cache::delete(''.PLUGINNAME.'::access_token');
-    if ($data['access_token'] != '') {
-      cache::set(''.PLUGINNAME.'::access_token', $data['access_token'], 300);
-      config::save('refreshToken', $data['refresh_token'], PLUGINNAME);
-      config::save('accessToken', $data['access_token'], PLUGINNAME);
-      return $data['access_token'];
-    }
-    return '';
-  }
-
-  /**
-   * getToken retrieve the current token stored in the cache. of the value has expired it calls
-   * the refresh routine to renew it 
-   * @param $_force boolean to force the token refresh
-   * @return mixed
-   */
-  public static function getToken($_force=false)
-  {
-    $mc = cache::byKey(''.PLUGINNAME.'::access_token');
-    $access_token = $mc->getValue();
- //   if (config::byKey('accessToken', PLUGINNAME) == '') // no login performed yet
- //     return '';
-    if ($access_token == '' || $access_token == null || $_force) 
-      $access_token = self::refreshToken();
-    return $access_token;
-  }
-
-  public static function executeCommand($_serial, $_command, $_data='') {
-    log::add(__CLASS__, 'debug', 'execute command serial='.$_serial.' command='.$_command.' data='.$_data);
-    $token = self::getToken();
-    if ($_command!='') {
-        $data = self::request(
-          jee4lm5::getpath($_serial).'/command/'.$_command,
-            $_data, 
-            'POST',
-            ["Authorization: Bearer $token", "Content-Type: application/json"]);
-        log::add(__CLASS__, 'debug', 'execute command response='.json_encode($data, true));
-        return jee4lm5::waitCommmandExecution($_serial, $data[0]);
-    }
-    else 
-      log::add(__CLASS__, 'debug', 'execute command cancelled, command empty');
-  return '';    
-  }
-
-
- public static  function waitCommmandExecution($_serial, $_data) {
-    log::add(__CLASS__, 'debug', 'waitCommmandExecution serial='.$_serial. 'data='.json_encode($_data, true));
-//    if ($_data==null) return true;
-    $id = $_data['id'];
-    if ($_data['status'] == 'Pending') {
-      log::add(__CLASS__, 'debug', 'waitCommmandExecution command waiting for '.$id.' current status='.$_data['status']);
-      $start = time();
-      while (time() - $start < PENDING_COMMAND_TIMEOUT) {
-        $data = self::request(jee4lm5::getpath($_serial).'/dashboard/');
-        if ($data['runningCommand'] == null) {
-          log::add(__CLASS__, 'debug', "waitCommmandExecution command $id no running command");
-          return true;
-        }
-        if ($data['runningCommands'][$id]['status'] != 'Pending') {
-          log::add(__CLASS__, 'debug', 'waitCommmandExecution command '.$id.' status='.$data['status']);
-          return $data;
-        }
-        sleep(2);
-      }
-      log::add(__CLASS__, 'debug', "waitCommmandExecution command $id timeout");
-      return false;
-    }
-    return true;
-  }
 
   /**
    * la fonction CRON permet de mettre à jour les paramètres principaux toutes les minutes 
@@ -596,49 +153,7 @@ class jee4lm5 extends eqLogic
    * fonction nécessaire à jeedom pour nettoyer les commandes dans la fonction de remplacement 
    * @return array<mixed|string>[]
    */
-  public static function deadCmd()
-  {
-
-    log::add(__CLASS__, 'debug', 'deadcmd start');
-    $return = array();
-    foreach (eqLogic::byType(__CLASS__) as $eql) {
-      foreach ($eql->getCmd() as $cmd) {
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('serialNumber', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => "#" . $cmd_id . "#");
-          }
-        }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('refreshToken', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
-          }
-        }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('accessToken', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
-          }
-        }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('userId', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
-          }
-        }
-        preg_match_all("/#([0-9]*)#/", $cmd->getConfiguration('userPwd', ''), $matches);
-        foreach ($matches[1] as $cmd_id) {
-          if (!cmd::byId(str_replace('#', '', $cmd_id))) {
-            $return[] = array('detail' => __(__CLASS__, __FILE__) . ' ' . $eql->getHumanName() . ' ' . __('dans la commande', __FILE__) . ' ' . $cmd->getName(), 'help' => __('Modèle', __FILE__), 'who' => '#' . $cmd_id . '#');
-          }
-        }
-      }
-    }
-    log::add(__CLASS__, 'debug', 'deadcmd end');
-    return $return;
-  }
-
+  
   /**
    * used to set visible state (0=invisible/1=visible) of a jeedom equipment by logicalID
    * @param mixed $_logicalId
@@ -663,8 +178,6 @@ class jee4lm5 extends eqLogic
   public function refresh()
   {
     foreach ($this->getCmd() as $cmd) {
-      //      $s = print_r($cmd, 1);
-//      log::add(__CLASS__, 'debug', 'refresh  cmd: ' . $s);
       $cmd->execute();
     }
   }
@@ -729,21 +242,21 @@ class jee4lm5 extends eqLogic
     return $ret;
   }
 
-  /**
-   * Reads and create/refresh all the values from the internet web site of an equipment previously created by detection routine
-   * the function takes only the target equipment to refresh as argument
-   * @param eqLogic $_eq
-   * @return bool
-   */
-  public static function CreateThing($_eq)
+ 
+  public static function RequestCreateThing($_eq)
   {
     log::add(__CLASS__, 'debug', 'create configuration');
     $serial = $_eq->getConfiguration('serialNumber');
-    $slug = $_eq->getConfiguration('type');
-    $token = self::getToken();
-    $data = self::request(LMCLOUD . 'things/' . $serial . '/dashboard', null, 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'config=' . json_encode($data, true));
-    if (($data != '') && ($_eq instanceof jee4lm5)) {
+    $payload = ["command"=>"lm", "function" => "get", "what" =>"dashboard", "eq" =>$_eq->getId()];
+    self::deamon_send($payload);
+  }
+  public static function DoCreateThing($payload) 
+  {  
+    $id = $payload["eq"];
+    $_eq = eqLogic::byId($id); // get the eqLogic of machine
+    $data = $payload["data"];
+    // fetch information from feedback and create object
+    if ($data != '' && $_eq instanceof jee4lm5) {
       foreach ($data['widgets'] as $w) {
         switch ($w["code"]) {
           case "CMBrewByWeightDoses":
@@ -813,12 +326,6 @@ class jee4lm5 extends eqLogic
       $_eq->AddCommand("SmartWakeup", 'smartwakeup', 'info', 'binary',null, null, "ENERGY_STATE", 0);
       $_eq->AddCommand("SmartWakeup durée", 'smartwakeupstandbyminutes', 'info', 'numeric',null, null, null, 0);
       $_eq->AddCommand("SmartWakeup depuis", 'smartwakeupstandbyafter', 'info', 'string',PLUGINNAME . "::smartwakeup", null, null, 1);
-
-      /*
-             $this->checkAndUpdateCmd('smartwakeup', 1);
-        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartStandByMinutes"]);
-        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartStandByAfter"]);
- */
 
       $_eq->AddAction("jee4lm_test", "TEST", "", "button", 0);
       $_eq->AddAction("jee4lm_on", "heat", PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);

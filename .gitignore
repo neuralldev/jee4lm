@@ -1,1 +1,3 @@
 data/lm.java
+*.json
+/resources/*.json

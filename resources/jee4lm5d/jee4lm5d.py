@@ -28,8 +28,9 @@ class Jee4LM(BaseDaemon):
     serial:str =""
     credential:JeeCredential
     registration_required:bool         
-    #session:ClientSession 
+    session:ClientSession 
     installation_key:InstallationKey
+    machine:LaMarzoccoMachine
     
     def __init__(self) -> None:
     # Standard initialisation
@@ -147,8 +148,8 @@ class Jee4LM(BaseDaemon):
             logging.info('Loop cancelled')
 
     async def on_message(self, message: dict):
-        logging.debug(f'on_message - daemon received command: {message["lm"]} for id {message["id"]}')
-        match message['lm']:
+        logging.debug(f'on_message - daemon received command: {message["command"]} for id {message["id"]}')
+        match message['command']:
             case 'check':
                 logging.debug(f'Check polling for id {message["id"]} already running')
                 if self.istasks_from_id(message['id']):
@@ -169,38 +170,22 @@ class Jee4LM(BaseDaemon):
                 else:
                     logging.debug(f'No task running for id {message["id"]}')
                 globals.READY = True
-            case 'command':
-                logging.debug(f'on_message - PyLM command {message["lm"]} for ID {message["id"]}')
-                match message['lm']:
-                    case 'login':
-                        logging.debug(f'command lm=commmand u={message["username"]} t={message["password"]}')
-                        self.register()
-                        self.username = message["username"]
-                        self.password = message["password"]
-                        async with ClientSession() as self.session:
-                            self.client = LaMarzoccoCloudClient(
-                                username=message["username"],
-                                password=message["password"],
-                                installation_key=self.installation_key,
-                                client=self.session,
-                            )
-                            if self.registration_required:
-                                logging.info("Registering device...")
-                                await self.client.async_register_client()
-                                logging.info("registration ok")
+            case 'lm':
+                logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
+                match message['function']:
                     case 'detect':
-                        logging.debug(f'on_message - PyLM command {message["lm"]} for ID {message["id"]}')
+                        logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
 #                        async with ClientSession() as self.session:
-                    case 'select':
-                        logging.debug(f'on_message - PyLM command {message["lm"]} for ID {message["id"]}')
-                        logging.debug(f'command u={message["serial"]} ')
-                        self.serial = message["serial"]
-                        if self.registration_required:
-                            print("Registering device...")
-                            logging.info("registration ok")
-                            await client.async_register_client()
-                        machine = LaMarzoccoMachine(SERIAL, client)
- 
+                    case 'power':
+                        logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
+                        v = message["value"] # 0=OFF 1=ON
+                        m = message["serial"] # serial nb
+                        logging.debug(f'command s={m} c={v}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_power(True if v == 1 else False)
+#                            status = self.machine.get_dashboard()
+                            self.send_to_jeedom({'id':message["id"], 'power': v})                            
                     case 'switch':
                         logging.debug(f'BT command u={message["power"]} t={message["state"]}') # POXWER ON / OFF
                     case 'temp':
