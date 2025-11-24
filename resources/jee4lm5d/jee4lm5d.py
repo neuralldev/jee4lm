@@ -1,18 +1,119 @@
-import globals
 import logging
 import asyncio
+import globals
+import asyncio
+import uuid
+from pathlib import Path
+
+from aiohttp import ClientSession
+
+from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
+from pylamarzocco.models import ThingDashboardWebsocketConfig
+from pylamarzocco.util import InstallationKey, generate_installation_key
+from mashumaro import field_options
+from mashumaro.mixins.json import DataClassJSONMixin
 
 from jeedomdaemon.base_daemon import BaseDaemon
-from btlm import *
+
+class JeeCredential(DataClassJSONMixin):
+    username:str=""
+    password:str=""
+    
+    def isinit(self)->bool:
+        return self.username != "" and self.username != ""
 
 class Jee4LM(BaseDaemon):
+    
+    # set of variables to pass from jeedom interface
+    serial:str =""
+    credential:JeeCredential
+    registration_required:bool         
+    #session:ClientSession 
+    installation_key:InstallationKey
+    
     def __init__(self) -> None:
     # Standard initialisation
-        super().__init__(on_message_cb=self.on_message, on_stop_cb=self.on_stop)
+        # adapter to match BaseDaemon expected signature ((list) -> Awaitable[None])
+        async def _on_message_cb(payload):
+            """
+            Accept either a dict or a list/tuple where the first element is a dict,
+            then forward a dict to the real on_message handler.
+            """
+            msg = {}
+            if isinstance(payload, dict):
+                msg = payload
+            elif isinstance(payload, (list, tuple)) and payload:
+                first = payload[0]
+                if isinstance(first, dict):
+                    msg = first
+                else:
+                    try:
+                        msg = dict(first)
+                    except Exception:
+                        msg = {}
+            await self.on_message(msg)
 
+        super().__init__(on_message_cb=_on_message_cb, on_stop_cb=self.on_stop)
+        self.connected = False
+
+    async def on_start(self):
+        self.session  = ClientSession()
+        self.client = LaMarzoccoCloudClient(
+            username=self.credential.username,
+            password=self.credential.password,
+            installation_key=self.installation_key,
+            client=self.session,
+            )
+  
+        if not self.getInstallKey(): # first registration
+            self.generateInstallKey()
+            logging.info("registration going on")
+            self.client._installation_key = self.installation_key   #update client installation key for further calls
+            await self.client.async_register_client()
+        
+        if not self.getCredential() or self.credential.isinit(): 
+            logging.info("please enter credential (user password), then relaunch daemon")
+            await self.stop()
+        
+ 
+    #######################################################################################
+
+    def getInstallKey(self)->bool:
+        installkey_file = Path("installation_key.json")
+        if not installkey_file.exists():
+            return False
+        with open(installkey_file, "r", encoding="utf-8") as f:
+            self.installation_key = InstallationKey.from_json(f.read())
+            f.close()
+        return True    
+        
+    def getCredential(self)->bool:
+        credential_file = Path("credential.json")
+        if not credential_file.exists():
+            return False
+        with open(credential_file, "r", encoding="utf-8") as f:
+            self.credential = self.credential.from_json(f.read()) 
+            f.close()
+        return True
+    
+    def generateInstallKey(self):
+        logging.debug("Generating new key material...")
+        self.installation_key = generate_installation_key(str(uuid.uuid4()).lower())
+        logging.debug("Generated key material:")
+        installkey_file = Path("installation_key.json")
+        with open(installkey_file, "w", encoding="utf-8") as f:
+            ser = str(self.installation_key.to_json())
+            logging.debug("key material as ({ser})")
+            f.write(ser)
+            f.close()
+            
+            
+    #######################################################################################
+            
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
         logging.debug(f'Searching for task with id {id}')
+        i=''
         for t in tasks:
             n = t.get_name()
             i = 'lmtask' + str(id)
@@ -68,24 +169,46 @@ class Jee4LM(BaseDaemon):
                 else:
                     logging.debug(f'No task running for id {message["id"]}')
                 globals.READY = True
-            case 'bt':
-                logging.debug(f'on_message - BT command {message["bt"]} for ID {message["id"]}')
-                match message['bt']:
+            case 'command':
+                logging.debug(f'on_message - PyLM command {message["lm"]} for ID {message["id"]}')
+                match message['lm']:
                     case 'login':
-                        logging.debug(f'BT command u={message["username"]} t={message["token"]} s={message["serial"]} addr={message["dev"]}')
-                        global lm
-                        lm = LaMarzoccoBluetoothClient(message['username'], message['serial'], message['token'], '')
-                        logging.debug('lm object created')
-                        bledevices: list[BLEDevice] = await lm.discover_devices()
-                        logging.debug('Scan finished')
-                        for d in bledevices:
-                            logging.debug(f'Found device {d}')
-                    case 'scan':
-                        logging.debug(f'BT command u={message["sc"]} t={message["token"]} s={message["serial"]} addr={message["dev"]}')
+                        logging.debug(f'command lm=commmand u={message["username"]} t={message["password"]}')
+                        self.register()
+                        self.username = message["username"]
+                        self.password = message["password"]
+                        async with ClientSession() as self.session:
+                            self.client = LaMarzoccoCloudClient(
+                                username=message["username"],
+                                password=message["password"],
+                                installation_key=self.installation_key,
+                                client=self.session,
+                            )
+                            if self.registration_required:
+                                logging.info("Registering device...")
+                                await self.client.async_register_client()
+                                logging.info("registration ok")
+                    case 'detect':
+                        logging.debug(f'on_message - PyLM command {message["lm"]} for ID {message["id"]}')
+#                        async with ClientSession() as self.session:
+                    case 'select':
+                        logging.debug(f'on_message - PyLM command {message["lm"]} for ID {message["id"]}')
+                        logging.debug(f'command u={message["serial"]} ')
+                        self.serial = message["serial"]
+                        if self.registration_required:
+                            print("Registering device...")
+                            logging.info("registration ok")
+                            await client.async_register_client()
+                        machine = LaMarzoccoMachine(SERIAL, client)
+ 
                     case 'switch':
-                        logging.debug(f'BT command u={message["boiler"]} t={message["state"]}')
+                        logging.debug(f'BT command u={message["power"]} t={message["state"]}') # POXWER ON / OFF
                     case 'temp':
-                        logging.debug(f'BT command u={message["boiler"]} t={message["temp"]}')
+                        logging.debug(f'BT command u={message["boiler"]} t={message["temp"]}') # set brew boiler temperature
+                    case 'dosemode':
+                        logging.debug(f'BT command u={message["dose"]} t={message["mode"]}') # set dose mode 
+                    case 'doseweight':
+                        logging.debug(f'BT command u={message["dose"]} t={message["weight"]}') # set dose mode                         
             case _:
                 logging.error('on_message - command not found')
 
