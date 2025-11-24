@@ -6,11 +6,11 @@ require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
 const
   PLUGINNAME = 'jee4lm5',
   LMMODELCODE = ['LINEAMINI'],
-
   JEEDOM_DAEMON_PORT = '50044',
   JEEDOM_DAEMON_HOST = '192.168.1.113',
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
   PENDING_COMMAND_TIMEOUT = 10;
+  PYTHON_PATH = __DIR__ . '/../../resources/venv/bin/python3';
 
   /**
    * Fonctions utilitaires d'authentification.
@@ -24,6 +24,50 @@ const
  */
 class jee4lm5 extends eqLogic
 {
+
+  public static function backupExclude() {
+		return [
+			'resources/venv'
+		];
+	}
+
+  private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
+		if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
+			return false;
+		}
+		exec("{$pythonPath} -m pip freeze", $packages_installed);
+		$packages = join("||", $packages_installed);
+		exec("cat {$requirementsPath}", $packages_needed);
+		foreach ($packages_needed as $line) {
+			if (preg_match('/([^\s]+)[\s]*([>=~]=)[\s]*([\d+\.?]+)$/', $line, $need) === 1) {
+				if (preg_match('/' . $need[1] . '==([\d+\.?]+)/i', $packages, $install) === 1) {
+					if ($need[2] == '==' && $need[3] != $install[1]) {
+						return false;
+					} elseif (version_compare($need[3], $install[1], '>')) {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+  public static function dependancy_info() {
+        $return = array();
+        $return['log'] = log::getPathToLog(__CLASS__ . '_update');
+        $return['progress_file'] = jeedom::getTmpFolder(__CLASS__) . '/dependance';
+        $return['state'] = 'ok';
+        if (file_exists(jeedom::getTmpFolder(__CLASS__) . '/dependance')) {
+            $return['state'] = 'in_progress';
+        } elseif (!file_exists(self::PYTHON_PATH)) {
+            $return['state'] = 'nok';
+        } elseif (!self::pythonRequirementsInstalled(self::PYTHON_PATH, __DIR__ . '/../../resources/requirements.txt')) {
+            $return['state'] = 'nok';
+        }
+        return $return;
+    }
 
   /**
    * build path to rest api to local machine or remote web site depending on prensence of ip address
