@@ -26,12 +26,6 @@ class jee4lm5 extends eqLogic
 
 {
 
-  public static function backupExclude() {
-		return [
-			'resources/venv'
-		];
-	}
-
   private static function pythonRequirementsInstalled(string $pythonPath, string $requirementsPath) {
 		if (!file_exists($pythonPath) || !file_exists($requirementsPath)) {
 			return false;
@@ -62,7 +56,7 @@ class jee4lm5 extends eqLogic
         $return['state'] = 'ok';
         if (file_exists(jeedom::getTmpFolder(__CLASS__) . '/dependance')) {
             $return['state'] = 'in_progress';
-        } elseif (!file_exists(self::PYTHON_PATH)) {
+        } elseif (!file_exists('/../../resources/venv/bin/python3')) {
             $return['state'] = 'nok';
         } elseif (!self::pythonRequirementsInstalled(__DIR__ . '/../../resources/venv/bin/python3', __DIR__ . '/../../resources/requirements.txt')) {
             $return['state'] = 'nok';
@@ -77,7 +71,7 @@ class jee4lm5 extends eqLogic
    * @return mixed
    */
   public static function getPath($_serial) {
-    return LMCLOUD. 'things/' . $_serial;
+    return 'things/' . $_serial;
   }
 
   public static function request($_path, $_data = null, $_type = 'GET', $_header = null)
@@ -638,13 +632,15 @@ class jee4lm5 extends eqLogic
         }
   }
 
+  public static function getToken() {
+    return "sss";
+  }
   
+  public function executeCommand($serial, $command, $value)
+ {
 
-  /**
-   * Switch machine ON/OFF accoding to a boolean value
-   * @param mixed $_toggle
-   * @return void
-   */
+ }
+  
   public function CoffeeMachineChangeMode($_toggle)
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
@@ -808,7 +804,7 @@ class jee4lm5 extends eqLogic
       log::add(__CLASS__, 'debug', '[detect] login not done or token empty, exit');
       return false;
     }
-    $data = self::request(LMCLOUD."things", null, 'GET', ["Authorization: Bearer $token"]);
+    $data = self::request("things", null, 'GET', ["Authorization: Bearer $token"]);
     log::add(__CLASS__, 'debug', 'detect=' . json_encode($data, true));
     if ($data == '')
       return false;
@@ -852,7 +848,7 @@ class jee4lm5 extends eqLogic
         $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);
         $eqLogic->save();
         // create commands before setting display
-        jee4lm5::CreateThing($eqLogic);
+        jee4lm5::RequestCreateThing($eqLogic);
         // set display
         $display_map = [
           'scalebattery' => [1, 3],
