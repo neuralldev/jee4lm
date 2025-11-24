@@ -11,8 +11,6 @@ const
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
   PENDING_COMMAND_TIMEOUT = 10;
 
-const  PYTHON_PATH = __DIR__ . '/../../resources/venv/bin/python3';
-
   /**
    * Fonctions utilitaires d'authentification.
    */
@@ -24,6 +22,8 @@ const  PYTHON_PATH = __DIR__ . '/../../resources/venv/bin/python3';
  * jee4lm5 est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
  */
 class jee4lm5 extends eqLogic
+
+
 {
 
   public static function backupExclude() {
@@ -64,7 +64,7 @@ class jee4lm5 extends eqLogic
             $return['state'] = 'in_progress';
         } elseif (!file_exists(self::PYTHON_PATH)) {
             $return['state'] = 'nok';
-        } elseif (!self::pythonRequirementsInstalled(self::PYTHON_PATH, __DIR__ . '/../../resources/requirements.txt')) {
+        } elseif (!self::pythonRequirementsInstalled(__DIR__ . '/../../resources/venv/bin/python3', __DIR__ . '/../../resources/requirements.txt')) {
             $return['state'] = 'nok';
         }
         return $return;
