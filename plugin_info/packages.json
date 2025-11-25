@@ -2,11 +2,28 @@
     "pre-install": {
     },
     "apt": {
-        "python3-pip": {},
-        "bluez": {}
+        "python3-pip": {}
     },
     "pip3": {
         "jeedomdaemon": {},
-        "bleak": {}
+        "bleak": {},
+        "aiohappyeyeballs": {},
+        "aiohttp": {},
+        "aiosignal": {},
+        "attrs": {},
+        "cffi": {},
+        "cryptography": {},
+        "frozenlist": {},
+        "idna": {},
+        "multidict": {},
+        "propcache": {},
+        "pycparser": {},
+        "pyobjc-core": {},
+        "pyobjc-framework-Cocoa": {},
+        "pyobjc-framework-CoreBluetooth": {},
+        "pyobjc-framework-libdispatch": {},
+        "typing_extensions": {},
+        "yarl": {},
+        "mashumaro": {}
     }
   }
