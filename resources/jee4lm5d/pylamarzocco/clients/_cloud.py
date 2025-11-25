@@ -10,6 +10,7 @@ from asyncio import Future, wait_for
 from collections.abc import Callable
 from http import HTTPMethod
 from typing import Any
+from typing import TypeVar, ParamSpec
 
 from aiohttp import (
     ClientConnectionError,

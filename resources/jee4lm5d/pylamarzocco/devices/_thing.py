@@ -6,6 +6,7 @@ import logging
 from collections.abc import Callable, Coroutine
 from functools import wraps
 from typing import Any, Concatenate
+from typing import TypeVar, ParamSpec
 
 from pylamarzocco.clients import LaMarzoccoBluetoothClient, LaMarzoccoCloudClient
 from pylamarzocco.const import ModelCode
@@ -21,12 +22,17 @@ from pylamarzocco.models import (
 
 _LOGGER = logging.getLogger(__name__)
 
+T = TypeVar("T", bound="LaMarzoccoThing") 
+# _R: Type de retour de la fonction décorée.
+_R = TypeVar("_R")
+# P: Spécification des paramètres de la fonction décorée.
+P = ParamSpec("P")
 
-def cloud_only[T: "LaMarzoccoThing", _R, **P](
+def cloud_only(
     func: Callable[Concatenate[T, P], Coroutine[Any, Any, _R]],
 ) -> Callable[Concatenate[T, P], Coroutine[Any, Any, _R]]:
     """Decorator to mark functionality that is only available on the cloud."""
-
+    
     @wraps(func)
     async def wrapper(self: T, *args: P.args, **kwargs: P.kwargs):
         if self._cloud_client is None:  # pylint: disable=protected-access
@@ -36,8 +42,8 @@ def cloud_only[T: "LaMarzoccoThing", _R, **P](
     return wrapper
 
 
-def models_supported[T: "LaMarzoccoThing", _R, **P](
-    supported_models: tuple[ModelCode, ...],
+def models_supported(
+    supported_models: tuple["ModelCode", ...],
 ) -> Callable[
     [Callable[Concatenate[T, P], Coroutine[Any, Any, _R]]],
     Callable[Concatenate[T, P], Coroutine[Any, Any, _R]],

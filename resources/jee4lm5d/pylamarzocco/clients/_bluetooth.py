@@ -7,6 +7,7 @@ from functools import wraps
 import json
 import logging
 from typing import Any, Callable, Concatenate, Coroutine
+from typing import TypeVar, ParamSpec
 
 from bleak.backends.scanner import BaseBleakScanner
 from bleak import BleakClient, BleakScanner
@@ -38,14 +39,18 @@ AUTH_CHARACTERISTIC = "0d0b7847-e12b-09a8-b04b-8e0922a9abab"
 BT_MODEL_PREFIXES = ("MICRA", "MINI", "GS3")
 IDLE_TIMEOUT = 30  # seconds
 
+T = TypeVar("T", bound="LaMarzoccoBluetoothClient") 
+# _R: Type de retour de la fonction décorée.
+_R = TypeVar("_R")
+# P: Spécification des paramètres (arguments) de la fonction décorée.
+P = ParamSpec("P")
 
-def disconnect_on_exception[
-    T: "LaMarzoccoBluetoothClient", _R, **P
-](
+def disconnect_on_exception(
+    # La fonction prend une Callable où le premier argument est de type T, 
+    # suivi des paramètres spécifiés par P. Elle retourne une Coroutine retournant _R.
     func: Callable[Concatenate[T, P], Coroutine[Any, Any, _R]],
 ) -> Callable[Concatenate[T, P], Coroutine[Any, Any, _R]]:
     """Decorator to disconnect on exception."""
-
     @wraps(func)
     async def wrapper(
         self: T, *args: P.args, **kwargs: P.kwargs
