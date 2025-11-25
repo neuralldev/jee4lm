@@ -285,8 +285,11 @@ class PreBrewInfusionTime(DataClassJSONMixin):
     pre_brewing: float = field(metadata=field_options(alias="PreBrewing"))
 
 
-@dataclass(kw_only=True)
-class PreExtractionBaseTimes[T](DataClassJSONMixin):
+from typing import TypeVar, Generic 
+
+T = TypeVar("T")
+
+class PreExtractionBaseTimes(DataClassJSONMixin, Generic[T]):
     """Pre-extraction times configuration."""
 
     seconds_min: T = field(metadata=field_options(alias="secondsMin"))
