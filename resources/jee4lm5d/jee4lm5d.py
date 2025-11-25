@@ -174,10 +174,10 @@ class Jee4LM(BaseDaemon):
                 logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
                 match message['function']:
                     case 'detect':
-                        logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
 #                        async with ClientSession() as self.session:
-                    case 'power':
-                        logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
+                    case 'CoffeeMachineChangeMode':
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] # 0=OFF 1=ON
                         m = message["serial"] # serial nb
                         logging.debug(f'command s={m} c={v}')
@@ -186,14 +186,27 @@ class Jee4LM(BaseDaemon):
                             await self.machine.set_power(True if v == 1 else False)
 #                            status = self.machine.get_dashboard()
                             self.send_to_jeedom({'id':message["id"], 'power': v})                            
-                    case 'switch':
-                        logging.debug(f'BT command u={message["power"]} t={message["state"]}') # POXWER ON / OFF
-                    case 'temp':
-                        logging.debug(f'BT command u={message["boiler"]} t={message["temp"]}') # set brew boiler temperature
-                    case 'dosemode':
-                        logging.debug(f'BT command u={message["dose"]} t={message["mode"]}') # set dose mode 
-                    case 'doseweight':
-                        logging.debug(f'BT command u={message["dose"]} t={message["weight"]}') # set dose mode                         
+                    case 'CoffeeMachineSettingSteamBoilerEnabled': # steam boiler on/off
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                    case 'CoffeeMachineSettingCoffeeBoilerTargetTemperature': # coffee boiler temperature
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                    case 'CoffeeMachineSettingSteamBoilerTargetTemperature': # steam boiler temperature
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                    case 'CoffeeMachinePreInfusionChangeMode': # plumb in on off
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                    case 'CoffeeMachinePreBrewingChangeMode': # prebrew on off
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                    case 'CoffeeMachineBrewByWeightSettingDoses': # change dose from bbq
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
+                    case 'CoffeeMachineBrewByWeightChangeMode': # change active dose from bbw
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') #                         
+                    case 'CoffeeMachinePreBrewingChangeTimes': # change preinfusion/prebrewing times
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
+                    case 'CoffeeMachineBackFlushStartCleaning': # start backflush
+                        logging.debug(f'BT command u={message["function"]}') #        
+                    case 'CoffeeMachineSettingSmartStandBy': # change smartstandby settings and activation
+                        logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]} t2={message["value3"]}') # 
+
             case _:
                 logging.error('on_message - command not found')
 

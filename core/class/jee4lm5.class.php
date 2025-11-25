@@ -321,7 +321,7 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'create configuration');
     $serial = $_eq->getConfiguration('serialNumber');
-    $payload = ["command"=>"lm", "function" => "get", "what" =>"dashboard", "eq" =>$_eq->getId()];
+    $payload = ["command"=>"lm", "function" => "get", "value" =>"dashboard", "id" =>$_eq->getId()];
     self::deamon_send($payload);
   }
   public static function DoCreateThing($payload) 
@@ -680,8 +680,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["mode" => $_toggle ? "BrewingMode" : "StandBy"];
-    self::executeCommand($serial, "CoffeeMachineChangeMode",json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineChangeMode", "value" => ($_toggle ? 1 : 0), "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
 
@@ -692,10 +692,10 @@ class jee4lm5 extends eqLogic
    */
   public function CoffeeMachineSettingSteamBoilerEnabled($_toggle)
   {
-    log::add(__CLASS__, 'debug', 'switch steam boiler '. $_toggle ? 'ON' : 'OFF');
+    log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["boilerIndex" => 1, "enabled" => $_toggle ? "BrewingMode" : "StandBy"];
-    self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerEnabled", json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineSettingSteamBoilerEnabled", "value" => ($_toggle ? 1 : 0), "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }
 
 
@@ -709,8 +709,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler target temperature to '.$_value);
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["boilerIndex" => 1, "targetTemperature" => $_value]; // coffee boiler
-    self::executeCommand($serial, "CoffeeMachineSettingCoffeeBoilerTargetTemperature", json_encode($data)); 
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineSettingCoffeeBoilerTargetTemperature", "value" => $_value, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }  
 
     /**
@@ -723,8 +723,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'set steam boiler target temperature to '.$_value);
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["boilerIndex" => 1, "targetLevel" => $_value]; // coffee boiler
-    self::executeCommand($serial, "CoffeeMachineSettingSteamBoilerTargetTemperature", json_encode($data)); 
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineSettingSteamBoilerTargetTemperature", "value" => $_value, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }  
 
   /**
@@ -735,8 +735,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
-    $data= ["mode" => $_toggle ? "Disabled" : "PreInfusion"];
-    self::executeCommand($serial, "CoffeeMachinePreInfusionChangeMode", json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachinePreInfusionChangeMode", "value" => $_toggle, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }
 
   /**
@@ -747,8 +747,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'enable/disable plumbed in ');
     $serial = $this->getConfiguration('serialNumber');
-    $data= ["mode" => $_toggle ? "Disabled" : "PreBrewing"];
-    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeMode", json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachinePreBrewingChangeMode", "value" => $_toggle, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }
 
   /**
@@ -762,13 +762,12 @@ class jee4lm5 extends eqLogic
   public function CoffeeMachineBrewByWeightSettingDoses($_weight, $_dose)
   {
     log::add(__CLASS__, 'debug', "select active Dose");
+    $serial = $this->getConfiguration('serialNumber');
     // fetch actual doses 
     $dose1= 0+$_dose=="Dose1" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
     $dose2= 0+$_dose=="Dose2" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
-
-    $serial = $this->getConfiguration('serialNumber');
-    $data=  ["doses" => ["Dose1" => $dose1, "Dose2" => $dose2]];
-    self::executeCommand($serial, "CoffeeMachineBrewByWeightSettingDoses",json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineBrewByWeightSettingDoses", "value" => $$dose1, "value2"=>$dose2, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   } 
 
   /**
@@ -780,8 +779,8 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', "set bbw mode to $_dose");
     $serial = $this->getConfiguration('serialNumber');
-    $data=  ["mode" => $_dose];
-    self::executeCommand($serial, "CoffeeMachineBrewByWeightChangeMode",json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachinePreBrewingChangeMode", "value" => $_dose, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }  
 
   /**
@@ -793,8 +792,8 @@ class jee4lm5 extends eqLogic
   public function CoffeeMachinePreBrewingChangeTimes($_time, $_hold) {
     log::add(__CLASS__, 'debug', "set prebrew start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
-    $data=  ["In" => ["seconds" => $_time], "Out" => ["seconds" => $_hold]];
-    self::executeCommand($serial, "CoffeeMachinePreBrewingChangeTimes",json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachinePreBrewingChangeTimes", "value" => $_time, "value2" => $_hold, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }
 
   /**
@@ -806,9 +805,9 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', 'backflush start');
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["enabled" => true];
-    self::executeCommand($serial, "CoffeeMachineBackFlushStartCleaning", json_encode($data));
-  }
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineBackFlushStartCleaning", "value" => 1, "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
+ }
 
 
   /**
@@ -820,16 +819,37 @@ class jee4lm5 extends eqLogic
    */
   public function CoffeeMachineSettingSmartStandBy($_enable, $_minutes, $_after)
   {
+
+    log::add(__CLASS__, 'debug', 'change smartstandbytimes');
     $serial = $this->getConfiguration('serialNumber');
-    $data = ["enabled" => $_enable, "minutes" => $_minutes, "after"=> $_after];
-    self::executeCommand($serial, "CoffeeMachineSettingSmartStandBy", json_encode($data));
+    $payload = ["command"=>"lm", "function" => "CoffeeMachineSettingSmartStandBy", "value" => $$_enable ?1:0, "value2" => $_minutes, "value3" => $_after,  "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }
 
-  /**
-   * Detect is the function used by the plugin configuration button to detect and create the equipments.
-   * this function shall be used only when new equipments are available. it is not necessary to ru it at regular.
-   * @return bool
-   */
+
+  public function CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options) {
+    $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
+    $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd();
+    $after = $_options;
+    return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
+  }
+  public function CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options) {
+    $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
+    $after = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd();
+    $from = $_options;
+    return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
+  }
+
+  public function CoffeeMachineSettingPreInfusionEnabled($eq, $b) {// to be done
+    $this->checkAndUpdateCmd('preinfusionmode', $b);
+    return true;
+  }
+
+public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
+    $this->checkAndUpdateCmd('prewet', $b);
+    return $eq->CoffeeMachinePreBrewingChangeMode($b);
+  }
+
   public static function detect()
   {
     log::add(__CLASS__, 'debug', '[detect] start');
@@ -1557,29 +1577,6 @@ class jee4lm5 extends eqLogic
     return [
         'resources/venv'
     ];
-  }
-
-  public function CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options) {
-    $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
-    $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd();
-    $after = $_options;
-    return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
-  }
-  public function CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options) {
-    $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
-    $after = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd();
-    $from = $_options;
-    return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
-  }
-
-  public function CoffeeMachineSettingPreInfusionEnabled($eq, $b) {// to be done
-    $this->checkAndUpdateCmd('preinfusionmode', $b);
-    return true;
-  }
-
-public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
-    $this->checkAndUpdateCmd('prewet', $b);
-    return $eq->CoffeeMachinePreBrewingChangeMode($b);
   }
 }
 
