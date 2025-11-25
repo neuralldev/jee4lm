@@ -80,7 +80,7 @@ class Jee4LM(BaseDaemon):
     #######################################################################################
 
     def getInstallKey(self)->bool:
-        installkey_file = Path("installation_key.json")
+        installkey_file = Path("../data/installation_key.json")
         if not installkey_file.exists():
             return False
         with open(installkey_file, "r", encoding="utf-8") as f:
@@ -89,7 +89,7 @@ class Jee4LM(BaseDaemon):
         return True    
         
     def getCredential(self)->bool:
-        credential_file = Path("credential.json")
+        credential_file = Path("../data/credential.json")
         if not credential_file.exists():
             return False
         with open(credential_file, "r", encoding="utf-8") as f:
@@ -101,7 +101,7 @@ class Jee4LM(BaseDaemon):
         logging.debug("Generating new key material...")
         self.installation_key = generate_installation_key(str(uuid.uuid4()).lower())
         logging.debug("Generated key material:")
-        installkey_file = Path("installation_key.json")
+        installkey_file = Path("../data/installation_key.json")
         with open(installkey_file, "w", encoding="utf-8") as f:
             ser = str(self.installation_key.to_json())
             logging.debug("key material as ({ser})")

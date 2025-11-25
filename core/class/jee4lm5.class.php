@@ -1,7 +1,6 @@
 <?php
 
 require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-//require_once dirname(__FILE__) . '/mdns.class.php';
 
 const
   PLUGINNAME = 'jee4lm5',
@@ -11,17 +10,7 @@ const
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
   PENDING_COMMAND_TIMEOUT = 10;
 
-  /**
-   * Fonctions utilitaires d'authentification.
-   */
-
-  // Utilisation des bibliothèques OpenSSL et sodium pour la cryptographie
-  // source for client call https://github.com/zweckj/pylamarzocco/blob/main/pylamarzocco/clients/_cloud.py 
-    
-/**
- * jee4lm5 est la classe qui couvre les fonctions relatives au pilotage de la Linea Mini
- */
-class jee4lm5 extends eqLogic
+  class jee4lm5 extends eqLogic
 
 
 {
