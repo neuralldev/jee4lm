@@ -40,7 +40,9 @@ if (!isset($result['id'])) {
 	log::add('jee4lm5', 'error', 'daemon callback id not set');
 	die();
 }
-$eq = eqLogic::byId($result['id']);
+
+$eq = jee4lm5::byId($result['id']);
+
 if ($eq==null) {
 	log::add('jee4lm5', 'warning', 'daemon callback eqlogic not found');
 	die();
@@ -51,5 +53,11 @@ if (isset($result['run'])) {
 	log::add('jee4lm5', 'debug', 'daemon callback check as run' . $result['run']);
 	$eq->save();
 } else
-	jee4lm5::RefreshLMDashboard($eq, _poll: "daemon");
+if (isset($result['settings']))
+	jee4lm5::processthingSettings($eq, $result["settings"]);
+if (isset($result['dash']))
+	jee4lm5::doRefreshDashboard($eq, $result["dash"]);
+if (isset($result['schedule']))
+	jee4lm5::doRefreshDashboard($eq, $result["schedule"]);
+
 log::add('jee4lm5', 'debug', 'daemon callbach, refreshed');

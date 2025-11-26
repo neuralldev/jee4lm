@@ -7,6 +7,7 @@ from pathlib import Path
 
 from aiohttp import ClientSession
 
+from pylamarzocco.const import PreExtractionMode
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
 from pylamarzocco.models import ThingDashboardWebsocketConfig
 from pylamarzocco.util import InstallationKey, generate_installation_key
@@ -176,6 +177,33 @@ class Jee4LM(BaseDaemon):
                     case 'detect':
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
 #                        async with ClientSession() as self.session:
+                        async with self.seesion:
+                            l = self.client.list_things()
+                            self.send_to_jeedom({'id':message["id"], 'things': l})
+                    case 'dash':
+                        logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        m = message["serial"] # serial nb
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
+                    case 'settings':
+                        logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        m = message["serial"] # serial nb
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.get_settings()
+                            r = self.machine.settings.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'settings': r})                            
+                    case 'schedule':
+                        logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        m = message["serial"] # serial nb
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.get_schedule()
+                            r = self.machine.schedule.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'schedule': r})                            
                     case 'CoffeeMachineChangeMode':
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] # 0=OFF 1=ON
@@ -184,26 +212,108 @@ class Jee4LM(BaseDaemon):
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_power(True if v == 1 else False)
-#                            status = self.machine.get_dashboard()
-                            self.send_to_jeedom({'id':message["id"], 'power': v})                            
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineSettingSteamBoilerEnabled': # steam boiler on/off
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        v = message["value"] # 0=OFF 1=ON
+                        m = message["serial"] # serial nb
+                        logging.debug(f'command s={m} c={v}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_steam(True if v == 1 else False)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
+                            #self.send_to_jeedom({'id':message["id"], 'steam': v})                            
                     case 'CoffeeMachineSettingCoffeeBoilerTargetTemperature': # coffee boiler temperature
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        v = message["value"] #  float for temperature
+                        m = message["serial"] # serial
+                        logging.debug(f'command s={m} c={v}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_coffee_target_temperature(v)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
+                            #self.send_to_jeedom({'id':message["id"], 'cofeetarget': v})                            
                     case 'CoffeeMachineSettingSteamBoilerTargetTemperature': # steam boiler temperature
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        v = message["value"] #  float for temperature
+                        m = message["serial"] # serial
+                        logging.debug(f'command s={m} c={v}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_steam_target_temperature(v)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
+                            #self.send_to_jeedom({'id':message["id"], 'steamtarget': v})                            
                     case 'CoffeeMachinePreInfusionChangeMode': # plumb in on off
+                        v = message["value"] #  mode
+                        m = message["serial"] # serial
+                        logging.debug(f'command s={m} c={v}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_pre_extraction_mode(PreExtractionMode.DISABLED if v==0 else PreExtractionMode.PREINFUSION)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
+                            #self.send_to_jeedom({'id':message["id"], 'preinfusion': v})                            
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                     case 'CoffeeMachinePreBrewingChangeMode': # prebrew on off
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        v = message["value"] #  mode
+                        m = message["serial"] # serial
+                        logging.debug(f'command s={m} c={v}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_pre_extraction_mode(PreExtractionMode.DISABLED if v==0 else PreExtractionMode.PREBREWING)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
+                            #self.send_to_jeedom({'id':message["id"], 'prebrewing': v})                            
                     case 'CoffeeMachineBrewByWeightSettingDoses': # change dose from bbq
                         logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
+                        v = float(message["value"]) #  start
+                        v1 = float(message["value2"]) # stop
+                        m = message["serial"] # serial
+                        logging.debug(f'command s={m} c={v} c1={v1}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            #self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineBrewByWeightChangeMode': # change active dose from bbw
                         logging.debug(f'BT command u={message["function"]} t={message["value"]}') #                         
+                        m = message["serial"] # serial
+                        v = float(message["value"]) #  start
+                        v1 = float(message["value2"]) # stop
+                        m = message["serial"] # serial
                     case 'CoffeeMachinePreBrewingChangeTimes': # change preinfusion/prebrewing times
                         logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
+                        v = float(message["value"]) #  start
+                        v1 = float(message["value2"]) # stop
+                        m = message["serial"] # serial
+                        logging.debug(f'command s={m} c={v} c1={v1}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.set_pre_extraction_times(v,v1)
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineBackFlushStartCleaning': # start backflush
                         logging.debug(f'BT command u={message["function"]}') #        
+                        m = message["serial"] # serial nb
+                        logging.debug(f'command s={m}')
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            await self.machine.start_backflush()
+                            await self.machine.get_dashboard()
+                            r = self.machine.dashboard.to_dict()
+                            self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineSettingSmartStandBy': # change smartstandby settings and activation
                         logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]} t2={message["value3"]}') # 
 

@@ -105,16 +105,21 @@ const
       log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
     }
 
-    foreach (eqLogic::byType(__CLASS__, true) as $jee4lm) {
+    foreach (jee4lm5::byType(__CLASS__, true) as $jee4lm) {
       // for each serial found, check the machine state
       if ($jee4lm->getConfiguration('serialNumber') != '') {
         $id=$jee4lm->getId();
+
         $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
         log::add(__CLASS__, 'debug', "cron eqID=$id state=".$m->execCmd());
-        if (!self::RefreshLMDashboard($jee4lm, "cron")) { // translate registers to jeedom values
-          log::add(__CLASS__, 'debug', 'cron error on read/getconfiguration');
+        // ensure we call getThingDashboard only on jee4lm5 instances (avoid calling unknown method on base eqLogic)
+        if ($jee4lm instanceof jee4lm5) {
+          $jee4lm->getThingDashboard();
+        } else {
+          log::add(__CLASS__, 'debug', 'cron: object is not instance of jee4lm5, skipping dashboard update');
         }
-        if ($minuteActuelle % 5 == 0) { // every 5 minutes
+
+        if ($minuteActuelle % 2 == 0) { // every 2 minutes
           if ($jee4lm instanceof jee4lm5) {
             $jee4lm->getThingSettings();
             $jee4lm->getThingSchedule();
@@ -178,58 +183,7 @@ const
    
   }
 
-  /**
-   * Reads and refresh all the values of an equipment previously created by detection routine
-   * the function takes only the target equipment to refresh as argument
-   * @param eqLogic $_eq
-   * @param mixed $_poll 0 = regular call, 1 = switch on/off, 2 = called from callback, 3 = cron
-   * @return bool
-   */
-  public static function RefreshLMDashboard($_eq, $_poll = '')
-  {
-//    log::add(__CLASS__, 'debug', 'refresh all information');
-    $serial = $_eq->getConfiguration('serialNumber');
-    $id = $_eq->getId();
-    $uid = uniqid();
-
-    $actual_state = $_eq->getCmd(null, 'machinemode')->execCmd();
-    log::add(__CLASS__, 'debug', 'refresh all information id='.$id.' uid='.$uid.' dr='.$actual_state.' source='.$_poll);
-    if ($_eq instanceof jee4lm5) {
-      $ret = $_eq->getThingDashboardInformation(); // refresh
-    } else {
-      log::add(__CLASS__, 'debug', 'refresh all information object is not instance of jee4lm5');
-      return false;
-    }
-
-    $new_state = $_eq->getCmd(null, 'machinemode')->execCmd();
-    switch (true) {
-      case $new_state == 1:
-        // going from off to on, run daemon
-        if (self::deamon_info()['state'] == 'ok') {
-          self::deamon_send(['id' => $id, 'lm' => 'check']); sleep(0.5);
-          if($_eq->getConfiguration('daemon') != 1) {
-            log::add(__CLASS__, 'debug', 'daemon start as machine is now on');
-            self::deamon_send(['id' => $id, 'lm' => 'poll']);
-          } else
-            log::add(__CLASS__, 'debug', 'daemon already running');
-        }
-        break;
-      case $new_state == 0:
-        // going from on to off, stop daemon
-        if (self::deamon_info()['state'] == 'ok') {
-          if ($_eq->getConfiguration('daemon') != 0) {
-            log::add(__CLASS__, 'debug', 'daemon stop as machine is now off');
-            self::deamon_send(['id' => $id, 'lm' => 'stop']);
-            $_eq->setConfiguration('daemon', 0);
-            $_eq->save();
-          }
-        }
-        break;
-    }
-    return $ret;
-  }
-
- 
+  
   public static function RequestCreateThing($_eq)
   {
     log::add(__CLASS__, 'debug', 'create configuration');
@@ -580,14 +534,16 @@ const
         }
   }
 
-  public static function getToken() {
-    return "sss";
-  }
   
-  public function executeCommand($serial, $command, $value)
- {
+  public function getThingDashboard()
+  {
+    log::add(__CLASS__, 'debug', 'get dashboard');
+    $serial = $this->getConfiguration('serialNumber');
+    $payload = ["command"=>"lm", "function" => "dash", "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
+  }
 
- }
+
   
   public function CoffeeMachineChangeMode($_toggle)
   {
@@ -765,15 +721,13 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
 
   public static function detect()
   {
-    log::add(__CLASS__, 'debug', '[detect] start');
-    $token = self::getToken();
-    // try to detect the machines only if token succeeded
-    if ($token == '') {
-      log::add(__CLASS__, 'debug', '[detect] login not done or token empty, exit');
-      return false;
-    }
-    $data = self::request("things", null, 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'detect=' . json_encode($data, true));
+    log::add(__CLASS__, 'debug', 'detect request send');
+    $payload = ["command"=>"lm", "function" => "detect"];
+    self::deamon_send($payload);
+  }
+  public static function processdetect($data)
+  {
+    log::add(__CLASS__, 'debug', '[detect] receveived data');
     if ($data == '')
       return false;
     foreach ($data as $machines) {
@@ -919,11 +873,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
 
         foreach ($displayStuff as $key => $value)
           $eqLogic->setDisplay($key, $value);
-
         $eqLogic->save();
         log::add(__CLASS__, 'debug', 'eqlogic saved');
         // read information for the first time
-        jee4lm5::RefreshLMDashboard($eqLogic, "detect");
+        $eqLogic->getThingDashboard();
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     }
@@ -951,60 +904,49 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
 
   public function getThingSchedule() {
     $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    $arr1 = self::request($this->getPath($serial) . '/scheduling', '', 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'getinformation got feedback from schedule '.json_encode($arr1));
-    if ($arr1 != null)
-      if ($arr1["smartWakeUpSleepSupported"] == true) {
-        log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
-        $this->checkAndUpdateCmd('smartwakeup', 1);
-        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', $arr1["smartWakeUpSleep"]["smartStandByMinutes"]);
-        $this->checkAndUpdateCmd('smartwakeupstandbyafter', $arr1["smartWakeUpSleep"]["smartStandByAfter"]);
-      } else {
-        log::add(__CLASS__, 'debug', 'getinformation smartWakeUpSleepSupported='.$arr1["smartWakeUpSleepSupported"]);
-        // if not supported, set the command to 0
-        $this->checkAndUpdateCmd('smartwakeup', 0);
-        $this->checkAndUpdateCmd('smartwakeupstandbyminutes', 0);
-        $this->checkAndUpdateCmd('smartwakeupstandbyafter', "");
-      }   
+    $payload = ["command"=>"lm", "function" => "schedule", "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
   }
 
   
   public function getThingSettings()
   {
     $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    $arr1 = self::request($this->getPath($serial) . '/settings', '', 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'getinformation got feedback from settings '.json_encode($arr1));
+    $payload = ["command"=>"lm", "function" => "settings", "id" =>$this->getId(), "serial" => $serial];
+    self::deamon_send($payload);
+  }
+
+  public static function processthingSettings($eq, $arr1){
     if ($arr1 != null) {
-      $this->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
+      $eq->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
 //        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
       foreach($arr1['actualFirmwares'] as $fw) {
 //        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
         switch($fw['type']) {
           case 'Gateway':
-            $this->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
+            $eq->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
             break;
           case 'Machine':
-            $this->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
+            $eq->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
             break;
         }
       }
+      $eq->RefreshThingDashboardInformation($arr1);
     }
   }
+
+  public static function doRefreshDashboard($eq, $arr) {
+    $eq->RefreshThingDashboardInformation($arr);
+  }
+
   /**
    * Refreshes the main counters and not all the information, this is mostly used when there is no
    * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
    * @return bool
    */
-  public function getThingDashboardInformation()
+  public function RefreshThingDashboardInformation($arr)
   {
     log::add(__CLASS__, 'debug', 'getinformation start');
-    $serial = $this->getConfiguration('serialNumber');
-    $token = self::getToken();
-    $arr = self::request($this->getPath($serial) . '/dashboard', '', 'GET', ["Authorization: Bearer $token"]);
-    log::add(__CLASS__, 'debug', 'getinformation got feedback from dashboard '.json_encode($arr));
-    if ($arr != null) {
       if ($arr["error"] == "Unauthorized") { // if credential is not set, try to login or abort
         $username = config::byKey('userId', PLUGINNAME);
         $password = config::byKey('userPwd', PLUGINNAME);    
@@ -1146,8 +1088,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
               }
       }
       return true;
-    } //if
-    return false;
   }
 
   /**
@@ -1525,38 +1465,38 @@ class jee4lm5Cmd extends cmd
     }
     switch ($action) {
       case 'refresh':
-        return jee4lm5::RefreshLMDashboard($eq);
+        return $$eq->getThingDashboard();
       case 'start_backflush':
         $eq->CoffeeMachineBackFlushStartCleaning();
         return true;
       case 'getStatus':
-        return $eq->getThingDashboardInformation();
+        return $$eq->getThingDashboard();
       case 'jee4lm_on':
       case 'jee4lm_off':
         $b = $action == 'jee4lm_on';
         $eq->CoffeeMachineChangeMode($b);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = $action == 'jee4lm_steam_on';
         $eq->CoffeeMachineSettingSteamBoilerEnabled($b);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_smartwakeup_after_lastbrew':
         $eq->CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_smartwakeup__after_poweron':
         $eq->CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case  'jee4lm_prewet_on':
       case  'jee4lm_prewet_off':
         $b = $action == 'jee4lm_prewet_on';
         $eq->CoffeeMachineSettingPreWetEnabled($eq, $b);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_preextraction_on':
       case 'jee4lm_preextraction_off':
         $b = $action == 'jee4lm_preextraction_on';
         $eq->CoffeeMachineSettingPreInfusionEnabled($eq, $b);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_smartwakeup_on':
       case 'jee4lm_smartwakeup_off':
         $b = $action == 'jee4lm_smartstandby_on';
@@ -1564,31 +1504,31 @@ class jee4lm5Cmd extends cmd
         $eq->CoffeeMachineSettingSmartStandBy($b, 
         cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd(),
         $from);
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_smartwakeupstandbyminutes_slider': //to be done
           return true;
       case 'jee4lm_coffee_slider':
         $eq->set_setpoint($_options, 'coffeetarget', "CoffeeBoiler");
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_steam_slider':
         $eq->set_setpoint($_options, 'steamtarget', "SteamBoiler");
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_doseA_slider':
         $eq->set_setpoint($_options, 'Dose1', "BbwDose");
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_doseB_slider':
         $eq->set_setpoint($_options, 'Dose2', "BbwDose");
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_prewet_slider':
         $eq->set_setpoint($_options, '', "PrewetIn");
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
       case 'jee4lm_prewet_time_slider':
         $eq->set_setpoint($_options, '', "PrewetOut");
-        return jee4lm5::RefreshLMDashboard($eq, "post command");
+        return true;
         case 'jee4lm_bbwA':
         case 'jee4lm_bbwB':
             $eq->CoffeeMachineBrewByWeightChangeMode($_options=='jee4lm_bbwA'?'Dose1':'Dose2');
-            return jee4lm5::RefreshLMDashboard($eq, "post command");          
+        return true;
       default:
         return true;
     }
