@@ -121,7 +121,9 @@ const
 
         if ($minuteActuelle % 2 == 0) { // every 2 minutes
           if ($jee4lm instanceof jee4lm5) {
+            sleep(2);
             $jee4lm->getThingSettings();
+            sleep(2);
             $jee4lm->getThingSchedule();
           } else {
             log::add(__CLASS__, 'debug', 'cron: object is not instance of jee4lm5, skipping settings/schedule update');
@@ -925,6 +927,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     self::deamon_send($payload);
   }
 
+    public static function processthingSchedule($eq, $arr1){
+    l og::add(__CLASS__, 'debug', 'settings='.$arr1);
+    }
   
   public function getThingSettings()
   {
@@ -934,6 +939,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
   public static function processthingSettings($eq, $arr1){
+    log::add(__CLASS__, 'debug', 'settings='.$arr1);
     if ($arr1 != null) {
       $eq->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
 //        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);

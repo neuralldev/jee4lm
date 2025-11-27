@@ -186,20 +186,34 @@ class Jee4LM(BaseDaemon):
                         await self.send_to_jeedom({'id':message["id"], 'dash': r})
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        self._logger.debug('reading serial') # 
                         m = message["serial"] # serial nb
-                        if not self.machine:
+                        self._logger.debug('test if machine exists') # 
+                        if self.machine is None:
                             self.machine = LaMarzoccoMachine(m, self.client)
-                            await self.machine.get_settings()
-                            r = self.machine.settings.to_dict()
-                            await self.send_to_jeedom({'id':message["id"], 'settings': r})                            
+                            self._logger.debug('no machine object created yet') # 
+                        else:
+                            self._logger.debug('machine object already created') #                         
+                        await self.machine.get_settings()
+                        self._logger.debug('read machine settings done') # 
+                        r = self.machine.settings.to_json()
+                        self._logger.debug('read machine to json') # 
+                        await self.send_to_jeedom({'id':message["id"], 'settings': r})
                     case 'schedule':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        self._logger.debug('reading serial') # 
                         m = message["serial"] # serial nb
-                        if not self.machine:
+                        self._logger.debug('test if machine exists') # 
+                        if self.machine is None:
                             self.machine = LaMarzoccoMachine(m, self.client)
-                            await self.machine.get_schedule()
-                            r = self.machine.schedule.to_dict()
-                            await self.send_to_jeedom({'id':message["id"], 'schedule': r})                            
+                            self._logger.debug('no machine object created yet') # 
+                        else:
+                            self._logger.debug('machine object already created') #                         
+                        await self.machine.get_schedule()
+                        self._logger.debug('read machine settings done') # 
+                        r = self.machine.schedule.to_json()
+                        self._logger.debug('read machine to json') # 
+                        await self.send_to_jeedom({'id':message["id"], 'schedule': r})                            
                     case 'CoffeeMachineChangeMode':
                         self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] # 0=OFF 1=ON
