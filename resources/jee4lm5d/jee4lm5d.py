@@ -134,7 +134,8 @@ class Jee4LM(BaseDaemon):
 
     async def on_message(self, message:list):
         self._logger.debug('on_message - daemon received command')
-        self._logger.info(json.dumps(message, indent=4, ensure_ascii=False))
+        for key, value in message:  
+            self._logger.info(f"{key}: {value}")
         return
         match message['command']:
             case 'lm':
