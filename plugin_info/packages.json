@@ -7,6 +7,7 @@
     "pip3": {
         "jeedomdaemon": {},
         "bleak": {},
+        "bleak-retry-connector": {},
         "aiohappyeyeballs": {},
         "aiohttp": {},
         "aiosignal": {},
@@ -15,15 +16,11 @@
         "cryptography": {},
         "frozenlist": {},
         "idna": {},
+        "mashumaro": {},
         "multidict": {},
         "propcache": {},
         "pycparser": {},
-        "pyobjc-core": {},
-        "pyobjc-framework-Cocoa": {},
-        "pyobjc-framework-CoreBluetooth": {},
-        "pyobjc-framework-libdispatch": {},
         "typing_extensions": {},
-        "yarl": {},
-        "mashumaro": {}
+        "yarl": {}
     }
   }

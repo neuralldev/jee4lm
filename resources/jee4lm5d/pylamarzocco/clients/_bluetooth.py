@@ -9,11 +9,15 @@ import logging
 from typing import Any, Callable, Concatenate, Coroutine
 from typing import TypeVar, ParamSpec
 
-from bleak.backends.scanner import BaseBleakScanner
-from bleak import BleakClient, BleakScanner
-from bleak.exc import BleakError
+from bleak import BaseBleakScanner, BleakClient, BleakError, BleakScanner, BLEDevice
 from bleak.backends.characteristic import BleakGATTCharacteristic
-from bleak.backends.device import BLEDevice
+from bleak_retry_connector import BleakClientWithServiceCache, establish_connection
+
+#from bleak.backends.scanner import BaseBleakScanner
+#from bleak import BleakClient, BleakScanner
+#from bleak.exc import BleakError
+#from bleak.backends.characteristic import BleakGATTCharacteristic
+#from bleak.backends.device import BLEDevice
 
 from pylamarzocco.const import (
     BluetoothReadSetting,
