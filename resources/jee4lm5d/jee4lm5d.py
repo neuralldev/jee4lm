@@ -1,6 +1,6 @@
 import logging
 import asyncio
-import globals
+from globals import INSTALLKEYFILE, INSTALLCREDENTIALFILE, READY
 import asyncio
 import uuid
 from pathlib import Path
@@ -74,7 +74,7 @@ class Jee4LM(BaseDaemon):
     #######################################################################################
 
     def getInstallKey(self)->bool:
-        installkey_file = Path("../data/installation_key.json")
+        installkey_file = Path(INSTALLKEYFILE)
         if not installkey_file.exists():
             return False
         with open(installkey_file, "r", encoding="utf-8") as f:
@@ -83,7 +83,7 @@ class Jee4LM(BaseDaemon):
         return True    
         
     def getCredential(self)->bool:
-        credential_file = Path("../data/credential.json")
+        credential_file = Path(INSTALLCREDENTIALFILE)
         if not credential_file.exists():
             return False
         with open(credential_file, "r", encoding="utf-8") as f:
@@ -95,16 +95,19 @@ class Jee4LM(BaseDaemon):
         self._logger.debug("Generating new key material...")
         self.installation_key = generate_installation_key(str(uuid.uuid4()).lower())
         self._logger.debug("Generated key material:")
-        installkey_file = Path("../data/installation_key.json")
-        with open(installkey_file, "w", encoding="utf-8") as f:
-            ser = str(self.installation_key.to_json())
-            self._logger.debug(f"key material as ({ser})")
-            f.write(ser)
-            f.close()
+        installkey_file = Path(INSTALLKEYFILE)
+        try:
+            with open(installkey_file, "w", encoding="utf-8") as f:
+                ser = str(self.installation_key.to_json())
+                self._logger.debug(f"key material as ({ser})")
+                f.write(ser)
+                f.close()
+        except Exception as e:
+            self._logger.info(f"error saving installation key file : {e}")
     
     def saveCredential(self, u, p): 
         self._logger.debug("saving credential to file...")
-        credential_file = Path("../data/credential.json")
+        credential_file = Path(INSTALLCREDENTIALFILE)
         with open(credential_file, "w", encoding="utf-8") as f:
             c = "{" + f'"username" : {u}, "password" : {p}' + "}"
             self._logger.debug(f"credential material as ({c})")
@@ -140,7 +143,7 @@ class Jee4LM(BaseDaemon):
                     self._logger.debug(f'Task {i} successfully cancelled')
 
     async def stop_after(self, delay, what):
-        globals.READY = False
+        READY = False
         try:
             while True:
                 self._logger.info(f'Refreshing eqlogic {what} information every {delay} seconds')
@@ -171,7 +174,7 @@ class Jee4LM(BaseDaemon):
                     await self.cancel_all_tasks_from_id(message['id'])
                 else:
                     self._logger.debug(f'No task running for id {message["id"]}')
-                globals.READY = True
+                READY = True
             case 'lm':
                 self._logger.debug(f'on_message - PyLM command {message["function"]}')
                 match message['function']:
