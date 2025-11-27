@@ -928,7 +928,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
     public static function processthingSchedule($eq, $arr1){
-    l og::add(__CLASS__, 'debug', 'settings='.$arr1);
+    log::add(__CLASS__, 'debug', 'settings='.$arr1);
     }
   
   public function getThingSettings()
