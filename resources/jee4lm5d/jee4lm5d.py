@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 from aiohttp import ClientSession
+from dataclasses import dataclass
 
 from pylamarzocco.const import PreExtractionMode
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
@@ -18,15 +19,13 @@ from mashumaro.mixins.json import DataClassJSONMixin
 
 from jeedomdaemon.base_daemon import BaseDaemon
 
+@dataclass
 class JeeCredential(DataClassJSONMixin):
-    username:str
-    password:str
-    def __init__(self, u, p) -> None:
-        self.username = u
-        self.password = p
-        
-    def isinit(self)->bool:
-        return self.username != "" and self.username != ""
+    username: str = ""
+    password: str = ""
+
+    def isinit(self) -> bool:
+        return self.username != "" and self.password != ""
 
 class Jee4LM(BaseDaemon):
     
@@ -109,8 +108,7 @@ class Jee4LM(BaseDaemon):
         try:
             with open(credential_file, "r", encoding="utf-8") as f:
                 content = f.read()
-                data = json.loads(content)  
-                self.credential = self.credential.from_dict(data)
+                self.credential = JeeCredential.from_json(content)
                 f.close()
             return True
         except Exception as e:
