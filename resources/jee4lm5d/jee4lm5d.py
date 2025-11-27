@@ -155,7 +155,7 @@ class Jee4LM(BaseDaemon):
                 self._logger.debug(f'on_message - PyLM command {message["function"]}')
                 match message['function']:
                     case 'detect':
-                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]}') # 
                         async with self.session:
                             l = self.client.list_things()
                             await self.send_to_jeedom({'id':message["id"], 'things': l})
