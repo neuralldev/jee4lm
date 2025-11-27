@@ -1080,7 +1080,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         }
 
       } //for each
-      foreach($arr['invalidWidgets'] as $w) {
+      foreach($arr1['coffeeMachine']['invalidWidgets'] as $w) {
         switch ($w["code"]) {
           case "CMPreInfusionEnable":
             $this->checkAndUpdateCmd('preinfusionmode', 0);
