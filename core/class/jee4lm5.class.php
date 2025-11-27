@@ -184,11 +184,9 @@ const
   }
 
   
-  public static function DoCreateThing($payload) 
+  public static function DoCreateThing($_eq, $payload) 
   {  
-    $id = $payload["eq"];
-    $_eq = eqLogic::byId($id); // get the eqLogic of machine
-    $data = $payload["data"];
+    $data = $payload;
     // fetch information from feedback and create object
     if ($data != '' && $_eq instanceof jee4lm5) {
       foreach ($data['widgets'] as $w) {
@@ -723,13 +721,13 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     log::add(__CLASS__, 'debug', '[detect] receveived data');
     if ($data == '')
       return false;
-    foreach ($data["things"] as $machines) {
+    foreach ($data as $machines) {
       log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffeeStation']['id']) . " " . $machines['name'] . '(' . $machines['modelcode'] . ') SN=' . $machines['serialNumber']);
       log::add(__CLASS__, 'debug', 'type=' . $machines['type']);
       if ($machines['type'] == 'CoffeeMachine') {
         $d = new DateTime;
         $d->createFromFormat('U.u', $machines['connectionDate']);
-        //log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
+        log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
         // now check if machine is already created as an eqlogic
         $eqLogic = eqLogic::byLogicalId($uuid, PLUGINNAME);
         if (!is_object($eqLogic)) {
@@ -860,16 +858,22 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
           if ($r != null) {
             $displayStuff["layout::dashboard::table::cmd::" . $r->getId() . "::line"] = $map[0];
             $displayStuff["layout::dashboard::table::cmd::" . $r->getId() . "::column"] = $map[1];
-            //log::add(__CLASS__, 'debug', 'add '.$key."=".$r->getId());
+            log::add(__CLASS__, 'debug', 'add '.$key."=".$r->getId());
           }
         }
 
         foreach ($displayStuff as $key => $value)
           $eqLogic->setDisplay($key, $value);
+        
         $eqLogic->save();
+        
         log::add(__CLASS__, 'debug', 'eqlogic saved');
+        
+        jee4lm5::DoCreateThing($eqLogic, $data);
+        
         // read information for the first time
         $eqLogic->getThingDashboard();
+
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
     }
