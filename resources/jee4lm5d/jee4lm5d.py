@@ -79,6 +79,9 @@ class Jee4LM(BaseDaemon):
             #await self.stop()
         else:
             self._logger.info("credential found")
+            self.client._username = self.credential.username
+            self.client._password = self.credential.password
+            
         self._logger.info("python part correctly started")
             
  
