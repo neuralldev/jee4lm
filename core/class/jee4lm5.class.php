@@ -723,7 +723,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     log::add(__CLASS__, 'debug', '[detect] receveived data');
     if ($data == '')
       return false;
-    foreach ($data as $machines) {
+    foreach ($data["things"] as $machines) {
       log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffeeStation']['id']) . " " . $machines['name'] . '(' . $machines['modelcode'] . ') SN=' . $machines['serialNumber']);
       log::add(__CLASS__, 'debug', 'type=' . $machines['type']);
       if ($machines['type'] == 'CoffeeMachine') {
