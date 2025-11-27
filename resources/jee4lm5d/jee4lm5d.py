@@ -41,7 +41,7 @@ class Jee4LM(BaseDaemon):
         self.connected = False
 
     async def on_start(self):
-        logging.info("python code starting")
+        self._logger.info("python code starting")
         self.session  = ClientSession()
         self.client = LaMarzoccoCloudClient(
             username=self.credential.username,
@@ -51,19 +51,19 @@ class Jee4LM(BaseDaemon):
             )
   
         if not self.getInstallKey(): # first registration
-            logging.info("registration going on")
+            self._logger.info("registration going on")
             self.generateInstallKey()
             self.client._installation_key = self.installation_key   #update client installation key for further calls
             await self.client.async_register_client()
         else:
-            logging.info("installation key found")
+            self._logger.info("installation key found")
         
         if not self.getCredential() or self.credential.isinit(): 
-            logging.info("please enter credential (user password), then relaunch daemon")
+            self._logger.info("please enter credential (user password), then relaunch daemon")
             await self.stop()
         else:
-            logging.info("credential found")
-        logging.info("python part correctly started")
+            self._logger.info("credential found")
+        self._logger.info("python part correctly started")
             
  
     #######################################################################################
@@ -87,22 +87,22 @@ class Jee4LM(BaseDaemon):
         return True
     
     def generateInstallKey(self):
-        logging.debug("Generating new key material...")
+        self._logger.debug("Generating new key material...")
         self.installation_key = generate_installation_key(str(uuid.uuid4()).lower())
-        logging.debug("Generated key material:")
+        self._logger.debug("Generated key material:")
         installkey_file = Path("../data/installation_key.json")
         with open(installkey_file, "w", encoding="utf-8") as f:
             ser = str(self.installation_key.to_json())
-            logging.debug(f"key material as ({ser})")
+            self._logger.debug(f"key material as ({ser})")
             f.write(ser)
             f.close()
     
     def saveCredential(self, u, p): 
-        logging.debug("saving credential to file...")
+        self._logger.debug("saving credential to file...")
         credential_file = Path("../data/credential.json")
         with open(credential_file, "w", encoding="utf-8") as f:
             c = "{" + f'"username" : {u}, "password" : {p}' + "}"
-            logging.debug(f"credential material as ({c})")
+            self._logger.debug(f"credential material as ({c})")
             f.write(c)
             f.close()
             
@@ -110,15 +110,15 @@ class Jee4LM(BaseDaemon):
             
     def istasks_from_id(self, id):
         tasks = asyncio.all_tasks()
-        logging.debug(f'Searching for task with id {id}')
+        self._logger.debug(f'Searching for task with id {id}')
         i=''
         for t in tasks:
             n = t.get_name()
             i = 'lmtask' + str(id)
             if n == i or id == '*':
-                logging.debug(f'Found task {i}')
+                self._logger.debug(f'Found task {i}')
                 return True
-        logging.debug(f'Task {i} not found')
+        self._logger.debug(f'Task {i} not found')
         return False
 
     async def cancel_all_tasks_from_id(self, id):
@@ -128,60 +128,60 @@ class Jee4LM(BaseDaemon):
             i = 'lmtask' + str(id)
             if n == i or (id == '*' and n.startswith('lmtask')):
                 t.cancel()
-                logging.debug(f'Cancelled task {i}')
+                self._logger.debug(f'Cancelled task {i}')
                 try:
                     await t
                 except asyncio.CancelledError:
-                    logging.debug(f'Task {i} successfully cancelled')
+                    self._logger.debug(f'Task {i} successfully cancelled')
 
     async def stop_after(self, delay, what):
         globals.READY = False
         try:
             while True:
-                logging.info(f'Refreshing eqlogic {what} information every {delay} seconds')
-                await self.send_to_jeedom({'id': what})
+                self._logger.info(f'Refreshing eqlogic {what} information every {delay} seconds')
+                #await self.send_to_jeedom({'id': what})
                 await asyncio.sleep(delay)
         except asyncio.CancelledError:
-            logging.info('Loop cancelled')
+            self._logger.info('Loop cancelled')
 
     async def on_message(self, message: dict):
-        logging.debug(f'on_message - daemon received command: {message["command"]} for id {message["id"]}')
+        self._logger.debug(f'on_message - daemon received command: {message["command"]}')
         match message['command']:
             case 'check':
-                logging.debug(f'Check polling for id {message["id"]} already running')
+                self._logger.debug(f'Check polling for id {message["id"]} already running')
                 if self.istasks_from_id(message['id']):
                      await self.send_to_jeedom({'id':message["id"], 'run':1})
                 else:
                     await self.send_to_jeedom({'id':message["id"], 'run':0})
             case 'poll':
                 if not self.istasks_from_id(message['id']):
-                    logging.debug(f'Start refreshing eqlogic id {message["id"]}')
+                    self._logger.debug(f'Start refreshing eqlogic id {message["id"]}')
                     task1 = asyncio.create_task(self.stop_after(10, message['id']))
                     task1.set_name('lmtask' + str(message['id']))
                 else:
-                    logging.debug(f'Task already running for id {message["id"]}')
+                    self._logger.debug(f'Task already running for id {message["id"]}')
             case 'stop':
-                logging.info(f'Stop refreshing eqlogic id {message["id"]}')
+                self._logger.info(f'Stop refreshing eqlogic id {message["id"]}')
                 if self.istasks_from_id(message['id']):
                     await self.cancel_all_tasks_from_id(message['id'])
                 else:
-                    logging.debug(f'No task running for id {message["id"]}')
+                    self._logger.debug(f'No task running for id {message["id"]}')
                 globals.READY = True
             case 'lm':
-                logging.debug(f'on_message - PyLM command {message["function"]} for ID {message["id"]}')
+                self._logger.debug(f'on_message - PyLM command {message["function"]}')
                 match message['function']:
                     case 'detect':
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         async with self.session:
                             l = self.client.list_things()
                             await self.send_to_jeedom({'id':message["id"], 'things': l})
                     case 'login':
-                        logging.debug(f'BT command u={message["function"]} u={message["value"]} p={message["value2"]} ') # 
+                        self._logger.debug(f'BT command u={message["function"]} u={message["value"]} p={message["value2"]} ') # 
                         self.saveCredential(message["value"], message["value2"])
-                        logging.info("credential changed, daemon must restart")
+                        self._logger.info("credential changed, daemon must restart")
                         await self.stop()
                     case 'dash':
-                        logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         m = message["serial"] # serial nb
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
@@ -189,7 +189,7 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.dashboard.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'settings':
-                        logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         m = message["serial"] # serial nb
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
@@ -197,7 +197,7 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.settings.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'settings': r})                            
                     case 'schedule':
-                        logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         m = message["serial"] # serial nb
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
@@ -205,10 +205,10 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.schedule.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'schedule': r})                            
                     case 'CoffeeMachineChangeMode':
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] # 0=OFF 1=ON
                         m = message["serial"] # serial nb
-                        logging.debug(f'command s={m} c={v}')
+                        self._logger.debug(f'command s={m} c={v}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_power(True if v == 1 else False)
@@ -216,10 +216,10 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.dashboard.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineSettingSteamBoilerEnabled': # steam boiler on/off
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] # 0=OFF 1=ON
                         m = message["serial"] # serial nb
-                        logging.debug(f'command s={m} c={v}')
+                        self._logger.debug(f'command s={m} c={v}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_steam(True if v == 1 else False)
@@ -228,10 +228,10 @@ class Jee4LM(BaseDaemon):
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                             #self.send_to_jeedom({'id':message["id"], 'steam': v})                            
                     case 'CoffeeMachineSettingCoffeeBoilerTargetTemperature': # coffee boiler temperature
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] #  float for temperature
                         m = message["serial"] # serial
-                        logging.debug(f'command s={m} c={v}')
+                        self._logger.debug(f'command s={m} c={v}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_coffee_target_temperature(v)
@@ -240,10 +240,10 @@ class Jee4LM(BaseDaemon):
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                             #self.send_to_jeedom({'id':message["id"], 'cofeetarget': v})                            
                     case 'CoffeeMachineSettingSteamBoilerTargetTemperature': # steam boiler temperature
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] #  float for temperature
                         m = message["serial"] # serial
-                        logging.debug(f'command s={m} c={v}')
+                        self._logger.debug(f'command s={m} c={v}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_steam_target_temperature(v)
@@ -254,7 +254,7 @@ class Jee4LM(BaseDaemon):
                     case 'CoffeeMachinePreInfusionChangeMode': # plumb in on off
                         v = message["value"] #  mode
                         m = message["serial"] # serial
-                        logging.debug(f'command s={m} c={v}')
+                        self._logger.debug(f'command s={m} c={v}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_pre_extraction_mode(PreExtractionMode.DISABLED if v==0 else PreExtractionMode.PREINFUSION)
@@ -262,12 +262,12 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.dashboard.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                             #self.send_to_jeedom({'id':message["id"], 'preinfusion': v})                            
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                     case 'CoffeeMachinePreBrewingChangeMode': # prebrew on off
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') # 
                         v = message["value"] #  mode
                         m = message["serial"] # serial
-                        logging.debug(f'command s={m} c={v}')
+                        self._logger.debug(f'command s={m} c={v}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_pre_extraction_mode(PreExtractionMode.DISABLED if v==0 else PreExtractionMode.PREBREWING)
@@ -276,28 +276,28 @@ class Jee4LM(BaseDaemon):
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                             #self.send_to_jeedom({'id':message["id"], 'prebrewing': v})                            
                     case 'CoffeeMachineBrewByWeightSettingDoses': # change dose from bbq
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
                         v = float(message["value"]) #  start
                         v1 = float(message["value2"]) # stop
                         m = message["serial"] # serial
-                        logging.debug(f'command s={m} c={v} c1={v1}')
+                        self._logger.debug(f'command s={m} c={v} c1={v1}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.get_dashboard()
                             r = self.machine.dashboard.to_dict()
                             #self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineBrewByWeightChangeMode': # change active dose from bbw
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]}') #                         
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]}') #                         
                         m = message["serial"] # serial
                         v = float(message["value"]) #  start
                         v1 = float(message["value2"]) # stop
                         m = message["serial"] # serial
                     case 'CoffeeMachinePreBrewingChangeTimes': # change preinfusion/prebrewing times
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]}') # 
                         v = float(message["value"]) #  start
                         v1 = float(message["value2"]) # stop
                         m = message["serial"] # serial
-                        logging.debug(f'command s={m} c={v} c1={v1}')
+                        self._logger.debug(f'command s={m} c={v} c1={v1}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.set_pre_extraction_times(v,v1)
@@ -305,9 +305,9 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.dashboard.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineBackFlushStartCleaning': # start backflush
-                        logging.debug(f'BT command u={message["function"]}') #        
+                        self._logger.debug(f'BT command u={message["function"]}') #        
                         m = message["serial"] # serial nb
-                        logging.debug(f'command s={m}')
+                        self._logger.debug(f'command s={m}')
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.start_backflush()
@@ -315,13 +315,13 @@ class Jee4LM(BaseDaemon):
                             r = self.machine.dashboard.to_dict()
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'CoffeeMachineSettingSmartStandBy': # change smartstandby settings and activation
-                        logging.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]} t2={message["value3"]}') # 
+                        self._logger.debug(f'BT command u={message["function"]} t={message["value"]} t2={message["value2"]} t2={message["value3"]}') # 
             case _:
-                logging.error('on_message - command not found')
+                self._logger.error('on_message - command not found')
 
     async def on_stop(self):
-        logging.info('Received stop signal, cancelling tasks...')
+        self._logger.info('Received stop signal, cancelling tasks...')
         await self.cancel_all_tasks_from_id('*')
-        logging.info('Exiting daemon')
+        self._logger.info('Exiting daemon')
 
 Jee4LM().run()
