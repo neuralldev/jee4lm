@@ -37,6 +37,7 @@ class Jee4LM(BaseDaemon):
     session:ClientSession 
     installation_key:InstallationKey
     machine:Optional[LaMarzoccoMachine] = None 
+    genrationofkey:bool = False
     
     def __init__(self) -> None:
         
