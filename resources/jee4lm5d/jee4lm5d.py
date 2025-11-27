@@ -63,7 +63,7 @@ class Jee4LM(BaseDaemon):
         else:
             self._logger.info("installation key found")
         
-        if not self.getCredential() or self.credential.isinit(): 
+        if not self.getCredential() or not self.credential.isinit(): 
             self._logger.info("please enter credential (user password)")
             #await self.stop()
         else:
