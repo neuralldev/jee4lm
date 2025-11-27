@@ -17,9 +17,12 @@ from mashumaro.mixins.json import DataClassJSONMixin
 from jeedomdaemon.base_daemon import BaseDaemon
 
 class JeeCredential(DataClassJSONMixin):
-    username:str=""
-    password:str=""
-    
+    username:str
+    password:str
+    def __init__(self, u, p) -> None:
+        self.username = u
+        self.password = p
+        
     def isinit(self)->bool:
         return self.username != "" and self.username != ""
 
@@ -27,7 +30,7 @@ class Jee4LM(BaseDaemon):
     
     # set of variables to pass from jeedom interface
     serial:str =""
-    credential:JeeCredential
+    credential = JeeCredential("","")
     registration_required:bool         
     session:ClientSession 
     installation_key:InstallationKey
