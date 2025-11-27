@@ -3,6 +3,7 @@ import asyncio
 from globals import INSTALLKEYFILE, INSTALLCREDENTIALFILE, READY
 import asyncio
 import uuid
+import os
 from pathlib import Path
 
 from aiohttp import ClientSession
@@ -43,11 +44,15 @@ class Jee4LM(BaseDaemon):
 
     async def on_start(self):
         self._logger.info("python code starting")
+        o = os.get_exec_path()
+        self._logger.info(f"executing from {o}")
         self.session  = ClientSession()
         if not self.getInstallKey(): # first registration
             self._logger.info("registration going on")
             self.genrationofkey = True
-            self.generateInstallKey()
+            if not self.generateInstallKey():
+                self._logger.error("cannot create installation file, check rights and run daemon again")
+                await self.stop()
 
         self.client = LaMarzoccoCloudClient(
             username=self.credential.username,
@@ -104,6 +109,8 @@ class Jee4LM(BaseDaemon):
                 f.close()
         except Exception as e:
             self._logger.info(f"error saving installation key file : {e}")
+            return False
+        return True
     
     def saveCredential(self, u, p): 
         self._logger.debug("saving credential to file...")
