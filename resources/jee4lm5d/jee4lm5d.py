@@ -44,7 +44,7 @@ class Jee4LM(BaseDaemon):
 
     async def on_start(self):
         self._logger.info("python code starting")
-        o = os.get_exec_path()
+        o = os.getcwd() 
         self._logger.info(f"executing from {o}")
         self.session  = ClientSession()
         if not self.getInstallKey(): # first registration
