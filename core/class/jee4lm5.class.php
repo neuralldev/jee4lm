@@ -98,7 +98,7 @@ const
     $minuteActuelle = date('i');
 
     // Tester si l'heure est entre 22h et 6h
-    if ($heureActuelle >= 20 || $heureActuelle < 6) {
+    if ($heureActuelle >= 22 || $heureActuelle < 6) {
           log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
       return;
     } else {
