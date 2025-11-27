@@ -948,7 +948,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             break;
         }
       }
-      $eq->RefreshThingDashboardInformation($arr1);
     }
   }
 
@@ -972,13 +971,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $cmdOff = $this->getCmd(null, 'jee4lm_off');
             switch($w['output']['status']) {
               case "PoweredOn":
-                $this->checkAndUpdateCmd('machinemode', 1);
-                $this->checkAndUpdateCmd('hbmode', 'heat');
-                $cmdOn->setIsVisible(0);
-                $cmdOff->setIsVisible(1);
-                $cmdOn->save();
-                $cmdOff->save();
-                break;
               case "BrewingMode":
                 $this->checkAndUpdateCmd('hbmode', 'heat');
                 $this->checkAndUpdateCmd('machinemode', 1);
@@ -1025,10 +1017,11 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
                 $this->checkAndUpdateCmd('displaycoffee',$displayDifference);
                 break;
               case "Ready":
-                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
+                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['targetTemperature']);
                 $this->checkAndUpdateCmd('coffeeenabled',1);
                 $this->checkAndUpdateCmd('displaycoffee','<span style="color:green"><br\>Prêt</span>');
                 break;
+              case "StandBy":
               default:
                 $this->checkAndUpdateCmd('coffeecurrent',0);
                 $this->checkAndUpdateCmd('coffeeenabled',0);
@@ -1038,7 +1031,8 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
           case "CMSteamBoilerTemperature":
         //   log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
-            $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
+            if ($w['output']['targetTemperatureSupported'])
+              $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>Off' : "<span style='color:green'><br\>Allumé</span>");
             break;
           case "CMNoWater":
@@ -1078,26 +1072,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
               $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
             break;
         }
-
       } //for each
-      foreach($arr1['coffeeMachine']['invalidWidgets'] as $w) {
-        switch ($w["code"]) {
-          case "CMPreInfusionEnable":
-            $this->checkAndUpdateCmd('preinfusionmode', 0);
-            break;
-            case "CMPreInfusion":
-              break;
-              case "CMNoWater":
-                $this->checkAndUpdateCmd('tankStatus', 0);
-                break;
-              case "CMBrewByWeightDoses":
-                $this->checkAndUpdateCmd('bbwmode',"Continuous");
-                $this->checkAndUpdateCmd('bbwdoseA', 0);
-                $this->checkAndUpdateCmd('bbwdoseB', 0);
-                $this->checkAndUpdateCmd('bbwfree', 1);
-                break;
-              }
-      }
       return true;
   }
 

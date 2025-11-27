@@ -61,7 +61,7 @@ if (isset($result['settings']))
 if (isset($result['dash']))
 	jee4lm5::doRefreshDashboard($eq, $result["dash"]);
 if (isset($result['schedule']))
-	jee4lm5::doRefreshDashboard($eq, $result["schedule"]);
+	//jee4lm5::doRefreshDashboard($eq, $result["schedule"]);
 
 }
 
