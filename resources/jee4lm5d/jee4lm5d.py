@@ -33,19 +33,22 @@ class Jee4LM(BaseDaemon):
     credential = JeeCredential("","")
     registration_required:bool         
     session:ClientSession 
-    installation_key:InstallationKey
+    installation_key:InstallationKey 
     machine:LaMarzoccoMachine
+    genrationofkey:bool =False
     
     def __init__(self) -> None:
-    # Standard initialisation
-        # adapter to match BaseDaemon expected signature ((list) -> Awaitable[None])
-
         super().__init__(on_message_cb=self.on_message, on_stop_cb=self.on_stop, on_start_cb=self.on_start) 
         self.connected = False
 
     async def on_start(self):
         self._logger.info("python code starting")
         self.session  = ClientSession()
+        if not self.getInstallKey(): # first registration
+            self._logger.info("registration going on")
+            self.genrationofkey = True
+            self.generateInstallKey()
+
         self.client = LaMarzoccoCloudClient(
             username=self.credential.username,
             password=self.credential.password,
@@ -53,9 +56,8 @@ class Jee4LM(BaseDaemon):
             client=self.session,
             )
   
-        if not self.getInstallKey(): # first registration
-            self._logger.info("registration going on")
-            self.generateInstallKey()
+        if  self.genrationofkey: # first registration
+            self._logger.info("registration moving on")
             self.client._installation_key = self.installation_key   #update client installation key for further calls
             await self.client.async_register_client()
         else:
