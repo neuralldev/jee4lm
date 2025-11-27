@@ -170,7 +170,9 @@ class Jee4LM(BaseDaemon):
                         await self.stop()
                     case 'dash':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
+                        self._logger.debug('reading serial') # 
                         m = message["serial"] # serial nb
+                        self._logger.debug('test if machine exists') # 
                         if self.machine is None:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             self._logger.debug('no machine object created yet') # 
