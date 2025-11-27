@@ -126,8 +126,10 @@ class Jee4LM(BaseDaemon):
             
     #######################################################################################
 
-    async def on_message(self, message: dict):
-        self._logger.debug(f'on_message - daemon received command: {message["command"]}')
+    async def on_message(self, message:list):
+        self._logger.debug('on_message - daemon received command')
+        self._logger.info(json.dumps(message, indent=4, ensure_ascii=False))
+        return
         match message['command']:
             case 'lm':
                 self._logger.debug(f'on_message - PyLM command {message["function"]}')
