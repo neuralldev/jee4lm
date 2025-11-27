@@ -134,10 +134,8 @@ class Jee4LM(BaseDaemon):
 
     async def on_message(self, message):
         self._logger.debug('on_message - daemon received command')
-        m = message   # dict contenu dans la liste
-        for key, value in m.items():
+        for key, value in message.items():
             self._logger.info(f"key={key} value={value}")
-        return
         match message['command']:
             case 'lm':
                 self._logger.debug(f'on_message - PyLM command {message["function"]}')
