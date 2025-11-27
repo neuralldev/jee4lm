@@ -946,11 +946,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr)
   {
-    log::add(__CLASS__, 'debug', 'getinformation start');
+    log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr));
       if ($arr["error"] == "Unauthorized") { // if credential is not set, try to login or abort
-        $username = config::byKey('userId', PLUGINNAME);
-        $password = config::byKey('userPwd', PLUGINNAME);    
-        if (!$this->login($username, $password)) return false;
+         log::add(__CLASS__, 'debug', 'getinformation error returned');
       } else
       // lire le constenu json équivalent à lineamin_dashboard.json
       foreach($arr['widgets'] as $w) { 

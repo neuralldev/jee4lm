@@ -59,6 +59,7 @@ class Jee4LM(BaseDaemon):
         self.connected = False
 
     async def on_start(self):
+        logging.info("python code starting")
         self.session  = ClientSession()
         self.client = LaMarzoccoCloudClient(
             username=self.credential.username,
@@ -68,15 +69,20 @@ class Jee4LM(BaseDaemon):
             )
   
         if not self.getInstallKey(): # first registration
-            self.generateInstallKey()
             logging.info("registration going on")
+            self.generateInstallKey()
             self.client._installation_key = self.installation_key   #update client installation key for further calls
             await self.client.async_register_client()
+        else:
+            logging.info("installation key found")
         
         if not self.getCredential() or self.credential.isinit(): 
             logging.info("please enter credential (user password), then relaunch daemon")
             await self.stop()
-        
+        else:
+            logging.info("credential found")
+        logging.info("python part correctly started")
+            
  
     #######################################################################################
 
@@ -105,10 +111,18 @@ class Jee4LM(BaseDaemon):
         installkey_file = Path("../data/installation_key.json")
         with open(installkey_file, "w", encoding="utf-8") as f:
             ser = str(self.installation_key.to_json())
-            logging.debug("key material as ({ser})")
+            logging.debug(f"key material as ({ser})")
             f.write(ser)
             f.close()
-            
+    
+    def saveCredential(self, u, p): 
+        logging.debug("saving credential to file...")
+        credential_file = Path("../data/credential.json")
+        with open(credential_file, "w", encoding="utf-8") as f:
+            c = "{" + f'"username" : {u}, "password" : {p}' + "}"
+            logging.debug(f"credential material as ({c})")
+            f.write(c)
+            f.close()
             
     #######################################################################################
             
@@ -180,6 +194,11 @@ class Jee4LM(BaseDaemon):
                         async with self.seesion:
                             l = self.client.list_things()
                             self.send_to_jeedom({'id':message["id"], 'things': l})
+                    case 'login':
+                        logging.debug(f'BT command u={message["function"]} u={message["value"]} p={message["value2"]} ') # 
+                        self.saveCredential(message["value"], message["value2"])
+                        logging.info("credential changed, daemon must restart")
+                        self.stop()
                     case 'dash':
                         logging.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         m = message["serial"] # serial nb
