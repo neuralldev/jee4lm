@@ -108,11 +108,14 @@ class Jee4LM(BaseDaemon):
     def saveCredential(self, u, p): 
         self._logger.debug("saving credential to file...")
         credential_file = Path(INSTALLCREDENTIALFILE)
-        with open(credential_file, "w", encoding="utf-8") as f:
-            c = "{" + f'"username" : {u}, "password" : {p}' + "}"
-            self._logger.debug(f"credential material as ({c})")
-            f.write(c)
-            f.close()
+        try:
+            with open(credential_file, "w", encoding="utf-8") as f:
+                c = "{" + f'"username" : {u}, "password" : {p}' + "}"
+                self._logger.debug(f"credential material as ({c})")
+                f.write(c)
+                f.close()
+        except Exception as e:
+            self._logger.info(f"error saving credential file : {e}")
             
     #######################################################################################
             
