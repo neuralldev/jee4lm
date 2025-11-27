@@ -4,6 +4,7 @@ from globals import INSTALLKEYFILE, INSTALLCREDENTIALFILE, READY
 import asyncio
 import uuid
 import os
+import json
 from pathlib import Path
 
 from aiohttp import ClientSession
@@ -90,7 +91,9 @@ class Jee4LM(BaseDaemon):
             return False
         try:
             with open(installkey_file, "r", encoding="utf-8") as f:
-                self.installation_key = InstallationKey.from_json(f.read())
+                content = f.read()
+                data = json.loads(content)  # test JSON réel
+                self.installation_key = InstallationKey.from_json(data)
                 f.close()
             return True    
         except Exception as e:
@@ -105,7 +108,9 @@ class Jee4LM(BaseDaemon):
             return False
         try:
             with open(credential_file, "r", encoding="utf-8") as f:
-                self.credential = self.credential.from_json(f.read()) 
+                content = f.read()
+                data = json.loads(content)  # test JSON réel
+                self.credential = self.credential.from_json(data)
                 f.close()
             return True
         except Exception as e:
