@@ -961,14 +961,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
    * @return bool
    */
-  public function RefreshThingDashboardInformation($arr)
+  public function RefreshThingDashboardInformation($arr1)
   {
-    log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr));
-      if ($arr["error"] == "Unauthorized") { // if credential is not set, try to login or abort
-         log::add(__CLASS__, 'debug', 'getinformation error returned');
-      } else
-      // lire le constenu json équivalent à lineamin_dashboard.json
-      foreach($arr['widgets'] as $w) { 
+    log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
+        foreach($arr1["coffeeMachine"]['widgets'] as $w) { 
 //        log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
           case "CMMachineStatus":
