@@ -37,7 +37,7 @@ class Jee4LM(BaseDaemon):
     # Standard initialisation
         # adapter to match BaseDaemon expected signature ((list) -> Awaitable[None])
 
-        super().__init__(on_message_cb=self.on_message, on_stop_cb=self.on_stop) 
+        super().__init__(on_message_cb=self.on_message, on_stop_cb=self.on_stop, on_start_cb=self.on_start) 
         self.connected = False
 
     async def on_start(self):
