@@ -533,8 +533,6 @@ const
     $payload = ["command"=>"lm", "function" => "dash", "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
   }
-
-
   
   public function CoffeeMachineChangeMode($_toggle)
   {
@@ -716,17 +714,40 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $payload = ["command"=>"lm", "function" => "detect"];
     self::deamon_send($payload);
   }
+
+  /*
+   [{
+  'serial_number': 'LM049632', 
+  'type': 'CoffeeMachine', 
+  'name': 'LM049632', 
+  'location': 'HOME_OR_DWELLING_SPACE', 
+  'model_code': 'LINEAMINI', 
+  'model_name': 'Linea Mini', 
+  'connected': True, 'connection_date': '2025-11-23T12:36:03.908000+00:00',
+  'offline_mode': False, 'require_firmware_update': False, 'available_firmware_update': False, 
+  'coffee_station': {'id': 'e04ac102-2f69-4455-9eb5-c434c8b34754', 'name': 'My coffee station', 
+  'coffeeMachine': {'serialNumber': 'LM049632', 'type': 'CoffeeMachine', 'name': 'LM049632', 'location': 'HOME_OR_DWELLING_SPACE', 
+  'modelCode': 'LINEAMINI', 'modelName': 'LINEA MINI', 
+  'gatewayHw': 'Esp32', 'connected': True, 'connectionDate': 1763901363908, 
+  'offlineMode': False, 'requireFirmwareUpdate': False, 
+  'availableFirmwareUpdate': False, 
+  'imageUrl': 'https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png', 
+  'imageUrlList': 'https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png', 
+  'imageUrlDetail': 'https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png', 
+  'bleAuthToken': None}, 'grinders': [], 
+  'accessories': [{'type': 'ScaleAcaiaLunar', 'name': 'LMZ-745F90', 'connected': False, 'batteryLevel': None, 'imageUrl': None, 'imageUrlList': None, 'imageUrlDetail': None}]}, 'image_url': 'https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png', 'ble_auth_token': None}]}*/
+
   public static function processdetect($data)
   {
     log::add(__CLASS__, 'debug', '[detect] receveived data');
     if ($data == '')
       return false;
     foreach ($data as $machines) {
-      log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffeeStation']['id']) . " " . $machines['name'] . '(' . $machines['modelcode'] . ') SN=' . $machines['serialNumber']);
+      log::add(__CLASS__, 'debug', 'detect found ' . ($uuid = $machines['coffee_station']['id']) . " " . $machines['coffee_station']['name'] . '(' . $machines["coffeeMachine"]['modelcode'] . ') SN=' . $machines["coffeeMachine"]['serialNumber']);
       log::add(__CLASS__, 'debug', 'type=' . $machines['type']);
       if ($machines['type'] == 'CoffeeMachine') {
         $d = new DateTime;
-        $d->createFromFormat('U.u', $machines['connectionDate']);
+        $d->createFromFormat('U.u', $machines['connection_date']);
         log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/y"));
         // now check if machine is already created as an eqlogic
         $eqLogic = eqLogic::byLogicalId($uuid, PLUGINNAME);
@@ -746,22 +767,23 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         } else {
             log::add(__CLASS__, 'error', 'Invalid date format for pairingDate');
         }
-        $eqLogic->setConfiguration('modelName', $machines['modelName']);
-        $eqLogic->setConfiguration('modelCode', $machines['modelCode']);
+        $eqLogic->setConfiguration('modelName', $machines['model_name']);
+        $eqLogic->setConfiguration('modelCode', $machines['model_code']);
         $eqLogic->setLogicalId($uuid);
-        $eqLogic->setConfiguration('imageUrl', $machines['imageUrl']);
+        $eqLogic->setConfiguration('imageUrl', $machines['coffeeMachine']['imageUrl']);
         // now store BBW information
-        foreach($machines['coffeeStation']['accessories'] as $accessory) {
+        foreach($machines['coffee_station']['accessories'] as $accessory) {
           if ($accessory['type'] == 'ScaleAcaiaLunar') {
             $eqLogic->setConfiguration('bbw', true);
             $eqLogic->setConfiguration('scaleName', $accessory['name']);
           }
         }
         // now get configuration of machine
-        $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);
+        $eqLogic->setConfiguration('serialNumber', $machines['coffee_station']['coffeeMachine']['serialNumber']);
         $eqLogic->save();
         // create commands before setting display
-        $eqLogic->DoCreateThing($data);
+        jee4lm5::DoCreateThing($eqLogic, $data);
+        
         // set display
         $display_map = [
           'scalebattery' => [1, 3],
@@ -830,7 +852,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
               "text::td::1::3" => "<br>Balance connectée<br>",
-              "text::td::1::2" => '<img src="'.$machines['imageUrl'].'" height=85% width=85%>',
+              "text::td::1::2" => '<img src="'.$machines['coffee_station']['image_url'].'" height=85% width=85%>',
               //"text::td::1::2"=>"Chaudière à café",
 //              "text::td::3::3"=>"Chaudière à vapeur",
               "style::td::3::1" => "font-size:1.5em;height:3em;vertical-align:top;",
@@ -868,9 +890,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         $eqLogic->save();
         
         log::add(__CLASS__, 'debug', 'eqlogic saved');
-        
-        jee4lm5::DoCreateThing($eqLogic, $data);
-        
+         
         // read information for the first time
         $eqLogic->getThingDashboard();
 
