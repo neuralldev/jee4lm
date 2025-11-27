@@ -59,7 +59,7 @@ class Jee4LM(BaseDaemon):
             if not self.generateInstallKey():
                 self._logger.error("cannot create installation file, check rights and run daemon again")
                 await self.stop()
-
+        self._logger.debug(f"u={self.credential.username} p={self.credential.password}")
         self.client = LaMarzoccoCloudClient(
             username=self.credential.username,
             password=self.credential.password,
