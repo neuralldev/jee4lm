@@ -184,8 +184,8 @@ class Jee4LM(BaseDaemon):
                             l = self.client.list_things()
                             await self.send_to_jeedom({'id':message["id"], 'things': l})
                     case 'login':
-                        self._logger.debug(f'BT command u={message["function"]} u={message["value"]} p={message["value2"]} ') # 
-                        self.saveCredential(message["value"], message["value2"])
+                        self._logger.debug(f'BT command u={message["function"]} u={message["username"]} p={message["password"]} ') # 
+                        self.saveCredential(message["username"], message["password"])
                         self._logger.info("credential changed, daemon must restart")
                         await self.stop()
                     case 'dash':
