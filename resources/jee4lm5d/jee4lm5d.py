@@ -125,66 +125,10 @@ class Jee4LM(BaseDaemon):
             self._logger.info(f"error saving credential file : {e}")
             
     #######################################################################################
-            
-    def istasks_from_id(self, id):
-        tasks = asyncio.all_tasks()
-        self._logger.debug(f'Searching for task with id {id}')
-        i=''
-        for t in tasks:
-            n = t.get_name()
-            i = 'lmtask' + str(id)
-            if n == i or id == '*':
-                self._logger.debug(f'Found task {i}')
-                return True
-        self._logger.debug(f'Task {i} not found')
-        return False
-
-    async def cancel_all_tasks_from_id(self, id):
-        tasks = asyncio.all_tasks()
-        for t in tasks:
-            n = t.get_name()
-            i = 'lmtask' + str(id)
-            if n == i or (id == '*' and n.startswith('lmtask')):
-                t.cancel()
-                self._logger.debug(f'Cancelled task {i}')
-                try:
-                    await t
-                except asyncio.CancelledError:
-                    self._logger.debug(f'Task {i} successfully cancelled')
-
-    async def stop_after(self, delay, what):
-        READY = False
-        try:
-            while True:
-                self._logger.info(f'Refreshing eqlogic {what} information every {delay} seconds')
-                #await self.send_to_jeedom({'id': what})
-                await asyncio.sleep(delay)
-        except asyncio.CancelledError:
-            self._logger.info('Loop cancelled')
 
     async def on_message(self, message: dict):
         self._logger.debug(f'on_message - daemon received command: {message["command"]}')
         match message['command']:
-            case 'check':
-                self._logger.debug(f'Check polling for id {message["id"]} already running')
-                if self.istasks_from_id(message['id']):
-                     await self.send_to_jeedom({'id':message["id"], 'run':1})
-                else:
-                    await self.send_to_jeedom({'id':message["id"], 'run':0})
-            case 'poll':
-                if not self.istasks_from_id(message['id']):
-                    self._logger.debug(f'Start refreshing eqlogic id {message["id"]}')
-                    task1 = asyncio.create_task(self.stop_after(10, message['id']))
-                    task1.set_name('lmtask' + str(message['id']))
-                else:
-                    self._logger.debug(f'Task already running for id {message["id"]}')
-            case 'stop':
-                self._logger.info(f'Stop refreshing eqlogic id {message["id"]}')
-                if self.istasks_from_id(message['id']):
-                    await self.cancel_all_tasks_from_id(message['id'])
-                else:
-                    self._logger.debug(f'No task running for id {message["id"]}')
-                READY = True
             case 'lm':
                 self._logger.debug(f'on_message - PyLM command {message["function"]}')
                 match message['function']:
@@ -338,8 +282,6 @@ class Jee4LM(BaseDaemon):
                 self._logger.error('on_message - command not found')
 
     async def on_stop(self):
-        self._logger.info('Received stop signal, cancelling tasks...')
-        await self.cancel_all_tasks_from_id('*')
         self._logger.info('Exiting daemon')
 
 Jee4LM().run()

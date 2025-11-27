@@ -184,13 +184,6 @@ const
   }
 
   
-  public static function RequestCreateThing($_eq)
-  {
-    log::add(__CLASS__, 'debug', 'create configuration');
-    $serial = $_eq->getConfiguration('serialNumber');
-    $payload = ["command"=>"lm", "function" => "get", "value" =>"dashboard", "id" =>$_eq->getId()];
-    self::deamon_send($payload);
-  }
   public static function DoCreateThing($payload) 
   {  
     $id = $payload["eq"];
@@ -770,7 +763,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         $eqLogic->setConfiguration('serialNumber', $machines['serialNumber']);
         $eqLogic->save();
         // create commands before setting display
-        jee4lm5::RequestCreateThing($eqLogic);
+        $eqLogic->DoCreateThing($data);
         // set display
         $display_map = [
           'scalebattery' => [1, 3],
