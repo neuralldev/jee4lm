@@ -92,7 +92,7 @@ class Jee4LM(BaseDaemon):
         try:
             with open(installkey_file, "r", encoding="utf-8") as f:
                 content = f.read()
-                data = json.loads(content)  # test JSON réel
+                data = json.loads(content)  
                 self.installation_key = InstallationKey.from_dict(data)
                 f.close()
             return True    
@@ -109,7 +109,7 @@ class Jee4LM(BaseDaemon):
         try:
             with open(credential_file, "r", encoding="utf-8") as f:
                 content = f.read()
-                data = json.loads(content)  # test JSON réel
+                data = json.loads(content)  
                 self.credential = self.credential.from_dict(data)
                 f.close()
             return True
@@ -139,7 +139,7 @@ class Jee4LM(BaseDaemon):
         credential_file = self.data_dir / Path(INSTALLCREDENTIALFILE)
         try:
             with open(credential_file, "w", encoding="utf-8") as f:
-                c = "{" + f'"username" : {u}, "password" : {p}' + "}"
+                c = "{" + f'"username" : "{u}", "password" : "{p}"' + "}"
                 self._logger.debug(f"credential material as ({c})")
                 f.write(c)
                 f.close()
