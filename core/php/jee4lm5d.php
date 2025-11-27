@@ -36,6 +36,9 @@ if (!is_array($result)) {
 	die();
 }
 
+if (isset($result['cmd']) && $result["cmd"]=="detect")
+	jee4lm5::processdetect($result["things"]);
+else {
 if (!isset($result['id'])) {
 	log::add('jee4lm5', 'error', 'daemon callback id not set');
 	die();
@@ -60,4 +63,5 @@ if (isset($result['dash']))
 if (isset($result['schedule']))
 	jee4lm5::doRefreshDashboard($eq, $result["schedule"]);
 
-log::add('jee4lm5', 'debug', 'daemon callbach, refreshed');
+}
+
