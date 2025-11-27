@@ -174,7 +174,7 @@ class Jee4LM(BaseDaemon):
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             await self.machine.get_dashboard()
-                            r = self.machine.dashboard.to_dict()
+                            r = self.machine.dashboard.to_json()
                             await self.send_to_jeedom({'id':message["id"], 'dash': r})                            
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
