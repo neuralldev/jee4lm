@@ -93,7 +93,7 @@ class Jee4LM(BaseDaemon):
             with open(installkey_file, "r", encoding="utf-8") as f:
                 content = f.read()
                 data = json.loads(content)  # test JSON réel
-                self.installation_key = InstallationKey.from_json(data)
+                self.installation_key = InstallationKey.from_dict(data)
                 f.close()
             return True    
         except Exception as e:
@@ -110,7 +110,7 @@ class Jee4LM(BaseDaemon):
             with open(credential_file, "r", encoding="utf-8") as f:
                 content = f.read()
                 data = json.loads(content)  # test JSON réel
-                self.credential = self.credential.from_json(data)
+                self.credential = self.credential.from_dict(data)
                 f.close()
             return True
         except Exception as e:
