@@ -9,6 +9,7 @@ from pathlib import Path
 
 from aiohttp import ClientSession
 from dataclasses import dataclass
+from typing import Optional 
 
 from pylamarzocco.const import PreExtractionMode
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
@@ -34,9 +35,8 @@ class Jee4LM(BaseDaemon):
     credential = JeeCredential("","")
     registration_required:bool         
     session:ClientSession 
-    installation_key:InstallationKey 
-    machine:LaMarzoccoMachine
-    genrationofkey:bool =False
+    installation_key:InstallationKey
+    machine:Optional[LaMarzoccoMachine] = None 
     
     def __init__(self) -> None:
         
