@@ -64,8 +64,8 @@ class Jee4LM(BaseDaemon):
             self._logger.info("installation key found")
         
         if not self.getCredential() or self.credential.isinit(): 
-            self._logger.info("please enter credential (user password), then relaunch daemon")
-            await self.stop()
+            self._logger.info("please enter credential (user password)")
+            #await self.stop()
         else:
             self._logger.info("credential found")
         self._logger.info("python part correctly started")
