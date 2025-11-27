@@ -132,7 +132,7 @@ class Jee4LM(BaseDaemon):
             
     #######################################################################################
 
-    async def on_message(self, message:list):
+    async def on_message(self, message):
         self._logger.debug('on_message - daemon received command')
         m = message[0]   # dict contenu dans la liste
         for key, value in m.items():
