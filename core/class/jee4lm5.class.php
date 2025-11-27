@@ -77,7 +77,7 @@ const
       return '';
     } 
 
-    $payload = ["username" => $_username, "password" => $_password];
+    $payload = ["command"=>"lm", "function" => "login", "username" => $_username, "password" => $_password];
     self::deamon_send($payload);
     return '';
   }
@@ -1411,6 +1411,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         throw new Exception("send to daemon, daemon not started");    
     $_params['apikey'] = jeedom::getApiKey(__CLASS__);
     $payLoad = json_encode($_params);
+    log::add(__CLASS__, 'debug', 'senf payload to daemon  '.json_encode($payLoad));
     $socket = socket_create(AF_INET, SOCK_STREAM, 0);
     if (!$socket) {
       log::add(__CLASS__, 'error', 'send to daemon, error opening socket');
