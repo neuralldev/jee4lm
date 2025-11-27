@@ -88,18 +88,29 @@ class Jee4LM(BaseDaemon):
         installkey_file = self.data_dir / Path(INSTALLKEYFILE)
         if not installkey_file.exists():
             return False
-        with open(installkey_file, "r", encoding="utf-8") as f:
-            self.installation_key = InstallationKey.from_json(f.read())
-            f.close()
-        return True    
+        try:
+            with open(installkey_file, "r", encoding="utf-8") as f:
+                self.installation_key = InstallationKey.from_json(f.read())
+                f.close()
+            return True    
+        except Exception as e:
+            self._logger.info(f"error loading installation key file : {e}")
+            return False
+        return True
         
     def getCredential(self)->bool:
         credential_file = self.data_dir / Path(INSTALLCREDENTIALFILE)
         if not credential_file.exists():
+            self._logger.info("no credential file found")
             return False
-        with open(credential_file, "r", encoding="utf-8") as f:
-            self.credential = self.credential.from_json(f.read()) 
-            f.close()
+        try:
+            with open(credential_file, "r", encoding="utf-8") as f:
+                self.credential = self.credential.from_json(f.read()) 
+                f.close()
+            return True
+        except Exception as e:
+            self._logger.info(f"error loading credential file : {e}")
+            return False
         return True
     
     def generateInstallKey(self):
