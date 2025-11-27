@@ -39,6 +39,12 @@ class Jee4LM(BaseDaemon):
     genrationofkey:bool =False
     
     def __init__(self) -> None:
+        
+        # modification before initializing loop
+        script_path = Path(__file__).resolve()
+        script_dir = script_path.parent
+        self.data_dir = script_dir.parent.parent / "data"
+        
         super().__init__(on_message_cb=self.on_message, on_stop_cb=self.on_stop, on_start_cb=self.on_start) 
         self.connected = False
 
@@ -79,7 +85,7 @@ class Jee4LM(BaseDaemon):
     #######################################################################################
 
     def getInstallKey(self)->bool:
-        installkey_file = Path(INSTALLKEYFILE)
+        installkey_file = self.data_dir / Path(INSTALLKEYFILE)
         if not installkey_file.exists():
             return False
         with open(installkey_file, "r", encoding="utf-8") as f:
@@ -88,7 +94,7 @@ class Jee4LM(BaseDaemon):
         return True    
         
     def getCredential(self)->bool:
-        credential_file = Path(INSTALLCREDENTIALFILE)
+        credential_file = self.data_dir / Path(INSTALLCREDENTIALFILE)
         if not credential_file.exists():
             return False
         with open(credential_file, "r", encoding="utf-8") as f:
@@ -100,7 +106,7 @@ class Jee4LM(BaseDaemon):
         self._logger.debug("Generating new key material...")
         self.installation_key = generate_installation_key(str(uuid.uuid4()).lower())
         self._logger.debug("Generated key material:")
-        installkey_file = Path(INSTALLKEYFILE)
+        installkey_file = self.data_dir / Path(INSTALLKEYFILE)
         try:
             with open(installkey_file, "w", encoding="utf-8") as f:
                 ser = str(self.installation_key.to_json())
@@ -114,7 +120,7 @@ class Jee4LM(BaseDaemon):
     
     def saveCredential(self, u, p): 
         self._logger.debug("saving credential to file...")
-        credential_file = Path(INSTALLCREDENTIALFILE)
+        credential_file = self.data_dir / Path(INSTALLCREDENTIALFILE)
         try:
             with open(credential_file, "w", encoding="utf-8") as f:
                 c = "{" + f'"username" : {u}, "password" : {p}' + "}"
