@@ -161,7 +161,8 @@ class Jee4LM(BaseDaemon):
                         self._logger.debug(f'BT command u={message["function"]}') # 
                         async with self.session:
                             l = await self.client.list_things()
-                            await self.send_to_jeedom({'cmd': 'detect', 'things': l})
+                            things_list = [thing.to_dict() for thing in l]
+                            await self.send_to_jeedom({'cmd': 'detect', 'things': things_list})
                     case 'login':
                         self._logger.debug(f'BT command u={message["function"]} u={message["username"]} p={message["password"]} ') # 
                         self.saveCredential(message["username"], message["password"])
