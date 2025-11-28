@@ -49,7 +49,6 @@ class Thing(DataClassJSONMixin):
         ),
         default=ModelName.LINEA_MICRA,
     )
-    gatewayhw: str = field(metadata=field_options(alias="gatewayHw"))
     connected: bool = field(default=False)
     connection_date: datetime = field(
         metadata=field_options(
