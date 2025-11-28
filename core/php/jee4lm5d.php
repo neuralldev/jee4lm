@@ -30,15 +30,17 @@ if (init('test') != '') {
 	echo 'OK';
 	die();
 }
+
 $result = json_decode(file_get_contents("php://input"), true);
 if (!is_array($result)) {
 	log::add('jee4lm5', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
 	die();
 }
 
-if (isset($result['cmd']) && $result["cmd"]=="detect")
+if (isset($result['cmd']) && $result["cmd"]=="detect") {
+	log::add('jee4lm5', 'error', 'daemon callback received dectect request feedback');
 	jee4lm5::processdetect($result["things"]);
-else {
+} else {
 if (!isset($result['id'])) {
 	log::add('jee4lm5', 'error', 'daemon callback id not set');
 	die();
@@ -50,18 +52,24 @@ if ($eq==null) {
 	log::add('jee4lm5', 'warning', 'daemon callback eqlogic not found');
 	die();
 }
+
 log::add('jee4lm5', 'debug', 'daemon callback, refreshing...');
+
 if (isset($result['run'])) {
 	$eq->setConfiguration("daemon", $result['run']);
 	log::add('jee4lm5', 'debug', 'daemon callback check as run' . $result['run']);
 	$eq->save();
-} else
-if (isset($result['settings']))
-	jee4lm5::processthingSettings($eq, $result["settings"]);
-if (isset($result['dash']))
-	jee4lm5::doRefreshDashboard($eq, $result["dash"]);
-if (isset($result['schedule']))
-	jee4lm5::processthingSchedule($eq, $result["schedule"]);
+} else {
+	if (isset($result['settings']))
+		jee4lm5::processthingSettings($eq, $result["settings"]);
+	else
+		if (isset($result['dash']))
+			jee4lm5::doRefreshDashboard($eq, $result["dash"]);
+		else
+		if (isset($result['schedule']))
+			jee4lm5::processthingSchedule($eq, $result["schedule"]);
+}
+log::add('jee4lm5', 'debug', 'daemon callback run finished');
 
 }
 

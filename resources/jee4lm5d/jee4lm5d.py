@@ -173,19 +173,14 @@ class Jee4LM(BaseDaemon):
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         self._logger.debug('reading serial') # 
                         m = message["serial"] # serial nb
-                        self._logger.debug('test if machine exists') # 
                         if self.machine is None:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             self._logger.debug('no machine object created yet') # 
                         else:
                             self._logger.debug('machine object already created') #                         
                         await self.machine.get_dashboard()
-                        self._logger.debug('read machine dashboard done') # 
-                        l = self.machine.dashboard.widgets
-                        self._logger.debug(f"widgets in object are {l}")
-                        r = self.machine.dashboard.to_json()
-                        self._logger.debug('read machine to json done') # 
-                        await self.send_to_jeedom({'id':message["id"], 'dash': r})
+                        r = self.machine.dashboard
+                        await self.send_to_jeedom({'id':message["id"], 'cmd': 'dash', 'dash': r.to_json()})
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         self._logger.debug('reading serial') # 
