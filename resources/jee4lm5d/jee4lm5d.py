@@ -181,8 +181,10 @@ class Jee4LM(BaseDaemon):
                             self._logger.debug('machine object already created') #                         
                         await self.machine.get_dashboard()
                         self._logger.debug('read machine dashboard done') # 
+                        l = self.machine.dashboard.widgets
+                        self._logger.debug(f"widgets in object are {l}")
                         r = self.machine.dashboard.to_json()
-                        self._logger.debug('read macxhine to json') # 
+                        self._logger.debug('read machine to json done') # 
                         await self.send_to_jeedom({'id':message["id"], 'dash': r})
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 

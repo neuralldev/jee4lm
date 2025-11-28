@@ -941,16 +941,16 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   public static function processthingSettings($eq, $arr1){
     log::add(__CLASS__, 'debug', 'settings='.$arr1);
     if ($arr1 != null) {
-      $eq->checkAndUpdateCmd('plumbedin',$arr1['isPlumbedIn']?1:0);
+      $eq->checkAndUpdateCmd('plumbedin',$arr1['is_plumbed_in']?1:0);
 //        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
-      foreach($arr1['actualFirmwares'] as $fw) {
+      foreach($arr1['actual_firmwares'] as $fw) {
 //        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
         switch($fw['type']) {
           case 'Gateway':
-            $eq->checkAndUpdateCmd('gwversion',$fw['buildVersion']);
+            $eq->checkAndUpdateCmd('gwversion',$fw['build_version']);
             break;
           case 'Machine':
-            $eq->checkAndUpdateCmd('fwversion',$fw['buildVersion']);
+            $eq->checkAndUpdateCmd('fwversion',$fw['build_version']);
             break;
         }
       }
