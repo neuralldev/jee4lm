@@ -49,6 +49,7 @@ class Thing(DataClassJSONMixin):
         ),
         default=ModelName.LINEA_MICRA,
     )
+    gatewayhw: str = field(metadata=field_options(alias="gatewayHw"))
     connected: bool = field(default=False)
     connection_date: datetime = field(
         metadata=field_options(
@@ -70,6 +71,8 @@ class Thing(DataClassJSONMixin):
         metadata=field_options(alias="coffeeStation"), default=None
     )
     image_url: str = field(metadata=field_options(alias="imageUrl"), default="")
+    image_url_list: str = field(metadata=field_options(alias="imageUrlList"), default="")
+    image_url_detail: str = field(metadata=field_options(alias="imageUrlDetail"), default="")
     ble_auth_token: str | None = field(
         metadata=field_options(alias="bleAuthToken"), default=None
     )

@@ -179,7 +179,7 @@ class Jee4LM(BaseDaemon):
                         else:
                             self._logger.debug('machine object already created') #                         
                         await self.machine.get_dashboard()
-                        r = self.machine.dashboard
+                        
                         #await self.send_to_jeedom({'id':message["id"], 'cmd': 'dash', 'dash': r.to_json()})
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
