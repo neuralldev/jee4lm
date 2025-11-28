@@ -321,11 +321,16 @@ class PreExtractionPreBrewInfusionTimes(PreExtractionBaseTimes[PreBrewInfusionTi
 
 
 @dataclass(kw_only=True)
-class PreExtractionInOutTimes(PreExtractionBaseTimes[SecondsInOut]):
+class PreExtractionInOutTimes():
     """Pre-extraction times configuration."""
 
     dose_index: DoseIndex = field(metadata=field_options(alias="doseIndex"))
     seconds: SecondsInOut
+    
+    seconds_min: SecondsInOut = field(metadata=field_options(alias="secondsMin"))
+    seconds_max: SecondsInOut = field(metadata=field_options(alias="secondsMax"))
+    seconds_step: SecondsInOut = field(metadata=field_options(alias="secondsStep"))
+
 
 
 @dataclass(kw_only=True)

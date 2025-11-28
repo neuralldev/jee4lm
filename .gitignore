@@ -1,3 +1,5 @@
 data/lm.java
 resources/jee4lm5d/installation_key.json
 resources/jee4lm5d/credential.json
+*.pyc
+test.py

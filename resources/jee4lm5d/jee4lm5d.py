@@ -177,9 +177,11 @@ class Jee4LM(BaseDaemon):
                             self.machine = LaMarzoccoMachine(m, self.client)
                             self._logger.debug('no machine object created yet') # 
                         else:
-                            self._logger.debug('machine object already created') #                         
-                        await self.machine.get_dashboard()
-                        
+                            self._logger.debug('machine object already created') #       
+                        try:                  
+                            await self.machine.get_dashboard()
+                        except Exception as e:
+                            self._logger.debug('get dashboard had an error') # 
                         #await self.send_to_jeedom({'id':message["id"], 'cmd': 'dash', 'dash': r.to_json()})
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 

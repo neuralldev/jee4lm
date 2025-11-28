@@ -102,7 +102,7 @@ class StompMessageType(StrEnum):
     ERROR = "ERROR"
 
 
-class DeviceType(StrEnum):
+class   DeviceType(StrEnum):
     """Device types."""
 
     MACHINE = "CoffeeMachine"
