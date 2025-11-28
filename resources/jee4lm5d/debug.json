@@ -319,8 +319,12 @@ Response:
   "bleAuthToken": None, 
   "widgets": 
       [
-      {"code": "CMMachineStatus", "index": 1, "output": {"status": "StandBy", "availableModes": ["BrewingMode", "StandBy"], "mode": "StandBy", "nextStatus": None, "brewingStartTime": None, "lastCoffee": None, "lastFlush": {"time": 1764150604471, "extractionSeconds": 2.0309998989105225, "doseMode": "MassType", "doseIndex": "DoseA", "doseValue": 0, "doseValueNumerator": None}}, "tutorialUrl": None}, 
-      {"code": "CMCoffeeBoiler", "index": 1, "output": {"status": "StandBy", "enabled": True, "enabledSupported": False, "targetTemperature": 89.0, "targetTemperatureMin": 80, "targetTemperatureMax": 100, "targetTemperatureStep": 0.1, "readyStartTime": None}, "tutorialUrl": None}, 
+      {"code": "CMMachineStatus", "index": 1, "output": {"status": "StandBy", "availableModes": ["BrewingMode", "StandBy"], 
+      "mode": "StandBy", "nextStatus": None, "brewingStartTime": None, "lastCoffee": None, 
+        "lastFlush": {"time": 1764150604471, "extractionSeconds": 2.0309998989105225, 
+                "doseMode": "MassType", "doseIndex": "DoseA", "doseValue": 0, "doseValueNumerator": None}}, "tutorialUrl": None}, 
+      {"code": "CMCoffeeBoiler", "index": 1, 
+      "output": {"status": "StandBy", "enabled": True, "enabledSupported": False, "targetTemperature": 89.0, "targetTemperatureMin": 80, "targetTemperatureMax": 100, "targetTemperatureStep": 0.1, "readyStartTime": None}, "tutorialUrl": None}, 
       {"code": "CMSteamBoilerTemperature", "index": 1, "output": {"status": "Off", "enabled": False, "enabledSupported": True, "targetTemperature": 0.0, "targetTemperatureSupported": False, "targetTemperatureMin": 95, "targetTemperatureMax": 140, "targetTemperatureStep": 0.1, "readyStartTime": None}, "tutorialUrl": None}, 
       {"code": "CMPreBrewing", "index": 1, "output": {"availableModes": ["PreBrewing", "Disabled"], "mode": "PreBrewing", "times": {"PreBrewing": [{"doseIndex": "ByGroup", "seconds": {"Out": 7.0, "In": 2.0}, "secondsMin": {"Out": 1, "In": 1}, "secondsMax": {"Out": 9, "In": 9}, "secondsStep": {"Out": 0.1, "In": 0.1}}]}, "doseIndexSupported": False}, "tutorialUrl": "https://www.lamarzocco.com/it/en/app/support/brewing-features/#gs3-av-linea-micra-linea-mini-home"}, 
       {"code": "CMBrewByWeightDoses", "index": 1, "output": {"scaleConnected": False, "availableModes": ["Continuous"], "mode": "Continuous", "doses": {"Dose1": {"dose": 30.0, "doseMin": 5, "doseMax": 100, "doseStep": 0.1}, "Dose2": {"dose": 32.0, "doseMin": 5, "doseMax": 100, "doseStep": 0.1}}}, "tutorialUrl": "http://lamarzocco.com/it/en/app/support/brew-by-weight"}, 

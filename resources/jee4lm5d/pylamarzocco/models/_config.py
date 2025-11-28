@@ -150,8 +150,24 @@ class MachineStatus(BaseWidgetOutput):
         ),
         default=None,
     )
-
-
+    lastflush: LastFlush | None = field(metadata=field_options(alias="lastFlush"))
+    
+@dataclass(kw_only=True)
+class LastFlush(DataClassJSONMixin):
+    """Last flush of group"""
+    time:datetime | None = field(
+        metadata=field_options(
+            alias="time",
+            deserialize=lambda ts: datetime.fromtimestamp(ts / 1000, timezone.utc),
+        ),
+        default=None,
+    )
+    extractionseconds: float | None = field(metadata=field_options(alias="extractionSeconds"))
+    dosemode: DoseMode = field(metadata=field_options(alias='doseMode'))
+    doseindex: DoseIndex = field(metadata=field_options(alias='doseIndex'))
+    dosevalue: int = field(metadata=field_options(alias='doseValue'))
+    dosevaluenumerator: int | None  = field(metadata=field_options(alias='doseValueNumerator')) 
+        
 @dataclass(kw_only=True)
 class NextStatus(DataClassJSONMixin):
     """Next status configuration."""
