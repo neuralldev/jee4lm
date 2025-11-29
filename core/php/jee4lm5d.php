@@ -39,7 +39,7 @@ if (!is_array($result)) {
 }
 
 foreach($result as $key => $value )
-	log::add('jee4lm5', 'debug', 'daemon callback received='.$key."=".$value);
+	log::add('jee4lm5', 'debug', 'daemon callback received='.$key);
 
 if (isset($result['cmd']) && $result["cmd"]=="detect") {
 	log::add('jee4lm5', 'error', 'daemon callback received dectect request feedback');

@@ -958,7 +958,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
   public static function doRefreshDashboard($eq, $arr) {
-    log::add(__CLASS__, 'debug', 'rtefresh dashboard for eq ' . $eq->getId());
+    log::add(__CLASS__, 'debug', 'refresh dashboard for eq ' . $eq->getId());
     $eq->RefreshThingDashboardInformation($arr);
   }
 
@@ -969,7 +969,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr1)
   {
-    #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
+        log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
         foreach($arr1['widgets'] as $w) { 
         log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
