@@ -934,7 +934,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
       if ($arr1["smart_wake_up_sleep_supported"]) {
         log::add(__CLASS__, 'debug', 'msmartstandby update');
         $w= $arr1["smart_wake_up_sleep"];
-        $$eq->checkAndUpdateCmd('smartwakeup',($w["smart_stand_by_enabled"] ? 1 : 0));
+        $b = $w["smart_stand_by_enabled"]
+        log::add(__CLASS__, 'debug', 'b='.$b);
+        $$eq->checkAndUpdateCmd('smartwakeup',$b);
         $$eq->checkAndUpdateCmd('smartwakeupstandbyafter',$w["smart_stand_by_after"]);
         $$eq->checkAndUpdateCmd('smartwakeupstandbyminutes',$w["smart_stand_by_minutes"]);
       }
@@ -1068,7 +1070,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $no = date("d");
             $daysDifference = $no-$b;
             $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
-            log::add(__CLASS__, 'debug', 'getinformation .  days difference='. $daysDifference);
+            log::add(__CLASS__, 'debug', 'getinformation backflush last days='. $daysDifference);
             $this->checkAndUpdateCmd('last_backflush', $szDays);
             break;
           case "CMBrewByWeightDoses":
