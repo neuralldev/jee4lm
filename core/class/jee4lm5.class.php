@@ -934,7 +934,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
       if ($arr1["smart_wake_up_sleep_supported"]) {
         log::add(__CLASS__, 'debug', 'msmartstandby update');
         $w= $arr1["smart_wake_up_sleep"];
-        $b = $w["smart_stand_by_enabled"];
+        $b = ($w["smart_stand_by_enabled"] ? 1 : 0);
         log::add(__CLASS__, 'debug', 'b='.$b);
         $$eq->checkAndUpdateCmd('smartwakeup',$b);
         $$eq->checkAndUpdateCmd('smartwakeupstandbyafter',$w["smart_stand_by_after"]);
