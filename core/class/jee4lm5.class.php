@@ -927,8 +927,16 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     self::deamon_send($payload);
   }
 
-    public static function processthingSchedule($eq, $arr1){
-    log::add(__CLASS__, 'debug', 'settings='.$arr1);
+    public static function processthingSchedule($eq, $arr){
+    log::add(__CLASS__, 'debug', 'settings='.$arr);
+    $arr1 = json_decode($arr, true);
+    if ($arr1 != null) {
+      if ($arr1["smart_wake_up_sleep_supported"]) {
+        $$eq->checkAndUpdateCmd('smartwakeup',$arr1["smart_wake_up_sleep"]["smart_stand_by_enabled"]?1:0);
+        $$eq->checkAndUpdateCmd('smartwakeupstandbyafter',$arr1["smart_wake_up_sleep"]["smart_stand_by_after"]);
+        $$eq->checkAndUpdateCmd('smartwakeupstandbyminutes',$arr1["smart_wake_up_sleep"]["smart_stand_by_minutes"]);
+      }
+    }    
     }
   
   public function getThingSettings()
@@ -938,8 +946,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     self::deamon_send($payload);
   }
 
-  public static function processthingSettings($eq, $arr1){
-    log::add(__CLASS__, 'debug', 'settings='.$arr1);
+  public static function processthingSettings($eq, $arr){
+    log::add(__CLASS__, 'debug', 'settings='.$arr);
+    $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
       $eq->checkAndUpdateCmd('plumbedin',$arr1['is_plumbed_in']?1:0);
 //        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
