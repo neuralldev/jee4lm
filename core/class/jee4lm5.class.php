@@ -18,6 +18,7 @@ const
    * @param mixed $_ip
    * @return mixed
    */
+
   public static function getPath($_serial) {
     return 'things/' . $_serial;
   }
@@ -982,11 +983,12 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr1)
   {
-        if ($this->getConfiguration('init')==1) {
+        if ($first = $this->getConfiguration('init')==1) {
           $this->setConfiguration('init',0);
           jee4lm5::DoCreateThing($this, $arr1);
-        }
+        };
 
+        $_last_autorefresh=$this->getConfiguration('autorefresh');
         #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
         foreach($arr1['widgets'] as $w) { 
         log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
@@ -1004,6 +1006,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
                 $cmdOff->setIsVisible(1);
                 $cmdOn->save();
                 $cmdOff->save();
+                $autorefresh = true;
                 break;
               case "StandBy":
                 log::add(__CLASS__, 'debug', 'LM is off');
@@ -1014,6 +1017,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
                 $cmdOff->setIsVisible(0);
                 $cmdOn->save();
                 $cmdOff->save();
+                $autorefresh = false;
                 break;
               default:
               log::add(__CLASS__, 'debug', 'getinformation machine status unknown');
@@ -1103,6 +1107,11 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             break;
         }
       } //for each
+      if ($autorefresh != $_last_autorefresh or $first == 1) {
+        $payload = ["cmd" => "lm","function" => $autorefresh ? "on" : "off"];
+        jee4lm5::deamon_send(json_encode($payload));
+        $this->setConfiguration('autorefresh', $autorefresh);
+      }
       return true;
   }
 

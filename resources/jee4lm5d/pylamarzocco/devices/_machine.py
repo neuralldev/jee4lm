@@ -113,6 +113,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
                     available_modes=[MachineMode.BREWING_MODE, MachineMode.STANDBY],
                     mode=machine_mode,
                     next_status=None,
+                    lastflush=None
                 ),
             ),
         )

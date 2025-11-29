@@ -86,6 +86,26 @@ class Jee4LM(BaseDaemon):
         self._logger.info("python part correctly started")
             
  
+    async def _dash_loop(self):
+        self._logger.info("Starting 5-second dashboard loop...")
+        while True:
+            try:
+                if self.machine and self.machine.serial_number:
+                    self._logger.debug('Executing scheduled dash update.')
+                    try:                  
+                        await self.machine.get_dashboard()
+                        await self.send_to_jeedom({'cmd': 'dash_update', 'dash': self.machine.dashboard.to_json()})
+                    except Exception as e:
+                        self._logger.error(f'Error getting dashboard in loop: {e}')
+                else:
+                    self._logger.debug("Machine object not initialized for dash loop.")
+            except asyncio.CancelledError:
+                self._logger.info("Dashboard loop cancelled.")
+                raise  
+            except Exception as e:
+                self._logger.error(f"Error in dashboard loop: {e}")
+            await asyncio.sleep(5)
+
     #######################################################################################
 
     def getInstallKey(self)->bool:
@@ -158,6 +178,26 @@ class Jee4LM(BaseDaemon):
             case 'lm':
                 self._logger.debug(f'on_message - PyLM command {message["function"]}')
                 match message['function']:
+                    case 'on':
+                        self._logger.debug(f'BT command u={message["function"]}') # machine is on create a background loop to trigger 'dash' every 5 secondes until off is receveived
+                        m = message["serial"] # serial nb
+                        if not self.machine:
+                            self.machine = LaMarzoccoMachine(m, self.client)
+                            self._logger.debug('Machine object created for dash loop.')
+                        if self.dashboard_task is None or self.dashboard_task.done():
+                            self._logger.info("Creating new dashboard loop task.")
+                            self.dashboard_task = asyncio.create_task(self._dash_loop())
+                        else:
+                            self._logger.info("Dashboard loop task is already running.")
+                    case 'off':
+                        # machine is off, kill background loop
+                        self._logger.debug(f'BT command u={message["function"]}: Stopping dash loop.')
+                        if self.dashboard_task is not None and not self.dashboard_task.done():
+                            self._logger.info("Cancelling dashboard loop task.")
+                            self.dashboard_task.cancel()
+                            self.dashboard_task = None
+                        else:
+                            self._logger.info("No active dashboard loop task to stop.") 
                     case 'detect':
                         self._logger.debug(f'BT command u={message["function"]}') # 
                         async with self.session:
