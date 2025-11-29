@@ -932,6 +932,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
       if ($arr1["smart_wake_up_sleep_supported"]) {
+        log::add(__CLASS__, 'debug', 'msmartstandby update');
         $$eq->checkAndUpdateCmd('smartwakeup',$arr1["smart_wake_up_sleep"]["smart_stand_by_enabled"]?1:0);
         $$eq->checkAndUpdateCmd('smartwakeupstandbyafter',$arr1["smart_wake_up_sleep"]["smart_stand_by_after"]);
         $$eq->checkAndUpdateCmd('smartwakeupstandbyminutes',$arr1["smart_wake_up_sleep"]["smart_stand_by_minutes"]);
@@ -951,9 +952,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
       $eq->checkAndUpdateCmd('plumbedin',$arr1['is_plumbed_in']?1:0);
-//        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
+        log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
       foreach($arr1['actual_firmwares'] as $fw) {
-//        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['buildVersion']);
+        log::add(__CLASS__, 'debug', 'getinformation firmware type=' . $fw['type'] . " version=" . $fw['build_version']);
         switch($fw['type']) {
           case 'Gateway':
             $eq->checkAndUpdateCmd('gwversion',$fw['build_version']);
@@ -988,6 +989,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             switch($w['output']['status']) {
               case "PoweredOn":
               case "BrewingMode":
+                log::add(__CLASS__, 'debug', 'LM is on');
                 $this->checkAndUpdateCmd('hbmode', 'heat');
                 $this->checkAndUpdateCmd('machinemode', 1);
                 $cmdOn->setIsVisible(0);
@@ -996,6 +998,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
                 $cmdOff->save();
                 break;
               case "StandBy":
+                log::add(__CLASS__, 'debug', 'LM is off');
                 $this->checkAndUpdateCmd('bbwfree',1);
                 $this->checkAndUpdateCmd('machinemode', 0);
                 $this->checkAndUpdateCmd('hbmode', 'off');
@@ -1066,10 +1069,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $this->checkAndUpdateCmd('last_backflush', $szDays);
             break;
           case "CMBrewByWeightDoses":
-            log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
+            log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scale_connected']);
             $this->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
-            $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
-            $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
+            $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['dose_1']['dose']);
+            $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['dose_2']['dose']);
             $this->checkAndUpdateCmd('bbwfree',$w['output']['mode']=="Continuous");
             $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose1"?"":"_inactive");
             $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose2"?"":"_inactive");
@@ -1082,10 +1085,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['seconds']['Out']);
             break;
           case "ThingScale":
-            log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
+            log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['battery_level']);
             $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
-            if($w['output']['connected'] && $w['output']['batteryLevel']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
-              $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
+            if($w['output']['connected'] && $w['output']['battery_level']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
+              $this->checkAndUpdateCmd('scalebattery',$w['output']['battery_level']);
             break;
         }
       } //for each
