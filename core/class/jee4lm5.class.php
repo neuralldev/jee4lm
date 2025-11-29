@@ -958,6 +958,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
   public static function doRefreshDashboard($eq, $arr) {
+    log::add(__CLASS__, 'debug', 'rtefresh dashboard for eq ' . $eq->getId());
     $eq->RefreshThingDashboardInformation($arr);
   }
 
