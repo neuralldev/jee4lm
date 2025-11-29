@@ -32,10 +32,14 @@ if (init('test') != '') {
 }
 
 $result = json_decode(file_get_contents("php://input"), true);
+	
 if (!is_array($result)) {
 	log::add('jee4lm5', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
 	die();
 }
+
+foreach($result as $key => $value )
+	log::add('jee4lm5', 'error', 'daemon callback received='.$key."=".$value);
 
 if (isset($result['cmd']) && $result["cmd"]=="detect") {
 	log::add('jee4lm5', 'error', 'daemon callback received dectect request feedback');
