@@ -285,3 +285,17 @@
     }
   }
 }
+
+
+0101|[Sat Nov 29 09:11:03.578228 2025] [php:error] [pid 273928:tid 273928] [client 127.0.0.1:48712] PHP Fatal error: 
+ Uncaught TypeError: Cannot access offset of type string on string in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php:973
+ \nStack trace:\n#0 /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php(962): jee4lm5->RefreshThingDashboardInformation()\n#1 /var/www/html/plugins/jee4lm5/core/php/jee4lm5d.php(71): jee4lm5::doRefreshDashboard()\n#2 {main}\n  thrown in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php on line 973
+0102|[Sat Nov 29 09:12:03.086908 2025] [php:error] [pid 71319:tid 71319] [client 127.0.0.1:51584] 
+PHP Fatal error:  Uncaught TypeError: Cannot access offset of type string on string in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php:973
+\nStack trace:\n#0 /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php(962): jee4lm5->RefreshThingDashboardInformation()\n#1 /var/www/html/plugins/jee4lm5/core/php/jee4lm5d.php(71): jee4lm5::doRefreshDashboard()\n#2 {main}\n  thrown in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php on line 973
+0103|[Sat Nov 29 09:12:04.868685 2025] [php:error] [pid 273929:tid 273929] [client 127.0.0.1:51598] 
+PHP Fatal error:  Uncaught TypeError: Cannot access offset of type string on string in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php:944
+\nStack trace:\n#0 /var/www/html/plugins/jee4lm5/core/php/jee4lm5d.php(68): jee4lm5::processthingSettings()\n#1 {main}\n  thrown in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php on line 944
+0104|[Sat Nov 29 09:13:02.954105 2025] [php:error] [pid 273928:tid 273928] [client 127.0.0.1:36644] 
+PHP Fatal error:  Uncaught TypeError: Cannot access offset of type string on string in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php:973
+\nStack trace:\n#0 /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php(962): jee4lm5->RefreshThingDashboardInformation()\n#1 /var/www/html/plugins/jee4lm5/core/php/jee4lm5d.php(71): jee4lm5::doRefreshDashboard()\n#2 {main}\n  thrown in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php on line 973
