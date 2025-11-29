@@ -1061,7 +1061,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
           case "CMBackFlush":
             $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
             log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-            $b = date("d", $w['output']['lastCleaningStartTime']);
+            $b = date("d", $w['output']['last_cleaning_start_time']);
             $no = date("d");
             $daysDifference = $no-$b;
             $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
