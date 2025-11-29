@@ -953,10 +953,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   public static function processthingSettings($eq, $arr){
     #log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
-    if ($eq->getConfiguration('init')==1) {
-      $eq->setConfiguration('init',0);
-      jee4lm5::DoCreateThing($eq, $arr1);
-    }
     if ($arr1 != null) {
       $eq->checkAndUpdateCmd('plumbedin',$arr1['is_plumbed_in']?1:0);
         log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
@@ -986,6 +982,11 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr1)
   {
+        if ($$this->getConfiguration('init')==1) {
+          $$this->setConfiguration('init',0);
+          jee4lm5::DoCreateThing($$this, $arr1);
+        }
+
         #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
         foreach($arr1['widgets'] as $w) { 
         log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
