@@ -854,7 +854,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
               "text::td::1::3" => "<br>Balance connectée<br>",
-              "text::td::1::2" => '<img src="'.$machines['coffee_station']['image_url'].'" height=85% width=85%>',
+              "text::td::1::2" => '<img src="'.$machines['imageUrl'].'" height=85% width=85%>',
               //"text::td::1::2"=>"Chaudière à café",
 //              "text::td::3::3"=>"Chaudière à vapeur",
               "style::td::3::1" => "font-size:1.5em;height:3em;vertical-align:top;",
