@@ -1,17 +1,16 @@
 {
-  "serialNumber": "LM049632",
+  "serial_number": "LM049632",
   "type": "CoffeeMachine",
   "name": "LM049632",
   "location": "HOME_OR_DWELLING_SPACE",
-  "modelCode": "LINEAMINI",
-  "modelName": "LINEA MINI",
-  "gatewayHw": "Esp32",
-  "connected": True,
-  "connectionDate": 1763901363908,
-  "offlineMode": False,
-  "requireFirmwareUpdate": False,
-  "availableFirmwareUpdate": False,
-  "coffeeStation": {
+  "model_code": "LINEAMINI",
+  "model_name": "Linea Mini",
+  "connected": true,
+  "connection_date": "2025-11-23T12:36:03.908000+00:00",
+  "offline_mode": false,
+  "require_firmware_update": false,
+  "available_firmware_update": false,
+  "coffee_station": {
     "id": "e04ac102-2f69-4455-9eb5-c434c8b34754",
     "name": "My coffee station",
     "coffeeMachine": {
@@ -22,172 +21,267 @@
       "modelCode": "LINEAMINI",
       "modelName": "LINEA MINI",
       "gatewayHw": "Esp32",
-      "connected": True,
+      "connected": true,
       "connectionDate": 1763901363908,
-      "offlineMode": False,
-      "requireFirmwareUpdate": False,
-      "availableFirmwareUpdate": False,
+      "offlineMode": false,
+      "requireFirmwareUpdate": false,
+      "availableFirmwareUpdate": false,
       "imageUrl": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
       "imageUrlList": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
       "imageUrlDetail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
-      "bleAuthToken": None
+      "bleAuthToken": null
     },
     "grinders": [],
     "accessories": [
       {
         "type": "ScaleAcaiaLunar",
         "name": "LMZ-745F90",
-        "connected": False,
-        "batteryLevel": None,
-        "imageUrl": None,
-        "imageUrlList": None,
-        "imageUrlDetail": None
+        "connected": false,
+        "batteryLevel": null,
+        "imageUrl": null,
+        "imageUrlList": null,
+        "imageUrlDetail": null
       }
     ]
   },
-  "imageUrl": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
-  "imageUrlList": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
-  "imageUrlDetail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
-  "bleAuthToken": None,
+  "image_url": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+  "image_url_list": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+  "image_url_detail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+  "ble_auth_token": null,
   "widgets": [
     {
       "code": "CMMachineStatus",
       "index": 1,
       "output": {
         "status": "StandBy",
-        "availableModes": [
+        "available_modes": [
           "BrewingMode",
           "StandBy"
         ],
         "mode": "StandBy",
-        "nextStatus": None,
-        "brewingStartTime": None,
-        "lastCoffee": None,
-        "lastFlush": {
-          "time": 1764317215882,
-          "extractionSeconds": 2.5739998817443848,
-          "doseMode": "MassType",
-          "doseIndex": "DoseA",
-          "doseValue": 0,
-          "doseValueNumerator": None
+        "next_status": null,
+        "brewing_start_time": null,
+        "lastflush": {
+          "time": "2025-11-28T08:06:55.882000+00:00",
+          "extractionseconds": 2.5739998817443848,
+          "dosemode": "MassType",
+          "doseindex": "DoseA",
+          "dosevalue": 0,
+          "dosevaluenumerator": null
         }
-      },
-      "tutorialUrl": None
+      }
     },
     {
       "code": "CMCoffeeBoiler",
       "index": 1,
       "output": {
         "status": "StandBy",
-        "enabled": True,
-        "enabledSupported": False,
-        "targetTemperature": 90.0,
-        "targetTemperatureMin": 80,
-        "targetTemperatureMax": 100,
-        "targetTemperatureStep": 0.1,
-        "readyStartTime": None
-      },
-      "tutorialUrl": None
+        "enabled": true,
+        "enabled_supported": false,
+        "target_temperature": 90.0,
+        "target_temperature_min": 80,
+        "target_temperature_max": 100,
+        "target_temperature_step": 0.1,
+        "ready_start_time": null
+      }
     },
     {
       "code": "CMSteamBoilerTemperature",
       "index": 1,
       "output": {
         "status": "Off",
-        "enabled": False,
-        "enabledSupported": True,
-        "targetTemperature": 0.0,
-        "targetTemperatureSupported": False,
-        "targetTemperatureMin": 95,
-        "targetTemperatureMax": 140,
-        "targetTemperatureStep": 0.1,
-        "readyStartTime": None
-      },
-      "tutorialUrl": None
+        "enabled": false,
+        "enabled_supported": true,
+        "target_temperature": 0.0,
+        "target_temperature_min": 95,
+        "target_temperature_max": 140,
+        "target_temperature_step": 0.1,
+        "ready_start_time": null,
+        "target_temperature_supported": false
+      }
     },
     {
       "code": "CMPreBrewing",
       "index": 1,
       "output": {
-        "availableModes": [
+        "available_modes": [
           "PreBrewing",
           "Disabled"
         ],
         "mode": "PreBrewing",
         "times": {
-          "PreBrewing": [
+          "pre_infusion": [],
+          "pre_brewing": [
             {
-              "doseIndex": "ByGroup",
+              "dose_index": "ByGroup",
               "seconds": {
                 "In": 2.0,
                 "Out": 7.0
               },
-              "secondsMin": {
-                "In": 1,
-                "Out": 1
+              "seconds_min": {
+                "In": 1.0,
+                "Out": 1.0
               },
-              "secondsMax": {
-                "In": 9,
-                "Out": 9
+              "seconds_max": {
+                "In": 9.0,
+                "Out": 9.0
               },
-              "secondsStep": {
+              "seconds_step": {
                 "In": 0.1,
                 "Out": 0.1
               }
             }
           ]
         },
-        "doseIndexSupported": False
-      },
-      "tutorialUrl": "https://www.lamarzocco.com/it/en/app/support/brewing-features/#gs3-av-linea-micra-linea-mini-home"
+        "dose_index_supported": false
+      }
     },
     {
       "code": "CMBrewByWeightDoses",
       "index": 1,
       "output": {
-        "scaleConnected": False,
-        "availableModes": [
+        "scale_connected": false,
+        "available_modes": [
           "Continuous"
         ],
         "mode": "Continuous",
         "doses": {
-          "Dose1": {
+          "dose_1": {
             "dose": 30.0,
-            "doseMin": 5,
-            "doseMax": 100,
-            "doseStep": 0.1
+            "dose_min": 5.0,
+            "dose_max": 100.0,
+            "dose_step": 0
           },
-          "Dose2": {
+          "dose_2": {
             "dose": 32.0,
-            "doseMin": 5,
-            "doseMax": 100,
-            "doseStep": 0.1
+            "dose_min": 5.0,
+            "dose_max": 100.0,
+            "dose_step": 0
           }
         }
-      },
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/brew-by-weight"
+      }
     },
     {
       "code": "CMBackFlush",
       "index": 1,
       "output": {
-        "lastCleaningStartTime": 1763307264415,
-        "status": "Off"
-      },
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/cleaning-and-backflush/#linea-mini"
+        "status": "Off",
+        "last_cleaning_start_time": "2025-11-16T15:34:24.415000+00:00"
+      }
     },
     {
       "code": "ThingScale",
       "index": 1,
       "output": {
         "name": "LMZ-745F90",
-        "connected": False,
-        "batteryLevel": 86.0,
-        "calibrationRequired": False,
-        "forceConnectSupported": False
-      },
-      "tutorialUrl": "http://lamarzocco.com/it/en/app/support/training-scale-location/#linea-mini"
+        "connected": false,
+        "battery_level": 86.0,
+        "calibration_required": false
+      }
     }
   ],
-  "runningCommands": []
+  "config": {
+    "CMMachineStatus": {
+      "status": "StandBy",
+      "available_modes": [
+        "BrewingMode",
+        "StandBy"
+      ],
+      "mode": "StandBy",
+      "next_status": null,
+      "brewing_start_time": null,
+      "lastflush": {
+        "time": "2025-11-28T08:06:55.882000+00:00",
+        "extractionseconds": 2.5739998817443848,
+        "dosemode": "MassType",
+        "doseindex": "DoseA",
+        "dosevalue": 0,
+        "dosevaluenumerator": null
+      }
+    },
+    "CMCoffeeBoiler": {
+      "status": "StandBy",
+      "enabled": true,
+      "enabled_supported": false,
+      "target_temperature": 90.0,
+      "target_temperature_min": 80,
+      "target_temperature_max": 100,
+      "target_temperature_step": 0.1,
+      "ready_start_time": null
+    },
+    "CMSteamBoilerTemperature": {
+      "status": "Off",
+      "enabled": false,
+      "enabled_supported": true,
+      "target_temperature": 0.0,
+      "target_temperature_min": 95,
+      "target_temperature_max": 140,
+      "target_temperature_step": 0.1,
+      "ready_start_time": null,
+      "target_temperature_supported": false
+    },
+    "CMPreBrewing": {
+      "available_modes": [
+        "PreBrewing",
+        "Disabled"
+      ],
+      "mode": "PreBrewing",
+      "times": {
+        "pre_infusion": [],
+        "pre_brewing": [
+          {
+            "dose_index": "ByGroup",
+            "seconds": {
+              "In": 2.0,
+              "Out": 7.0
+            },
+            "seconds_min": {
+              "In": 1.0,
+              "Out": 1.0
+            },
+            "seconds_max": {
+              "In": 9.0,
+              "Out": 9.0
+            },
+            "seconds_step": {
+              "In": 0.1,
+              "Out": 0.1
+            }
+          }
+        ]
+      },
+      "dose_index_supported": false
+    },
+    "CMBrewByWeightDoses": {
+      "scale_connected": false,
+      "available_modes": [
+        "Continuous"
+      ],
+      "mode": "Continuous",
+      "doses": {
+        "dose_1": {
+          "dose": 30.0,
+          "dose_min": 5.0,
+          "dose_max": 100.0,
+          "dose_step": 0
+        },
+        "dose_2": {
+          "dose": 32.0,
+          "dose_min": 5.0,
+          "dose_max": 100.0,
+          "dose_step": 0
+        }
+      }
+    },
+    "CMBackFlush": {
+      "status": "Off",
+      "last_cleaning_start_time": "2025-11-16T15:34:24.415000+00:00"
+    },
+    "ThingScale": {
+      "name": "LMZ-745F90",
+      "connected": false,
+      "battery_level": 86.0,
+      "calibration_required": false
+    }
+  }
 }

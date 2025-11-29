@@ -968,8 +968,8 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr1)
   {
-    log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
-        foreach($arr1["coffeeMachine"]['widgets'] as $w) { 
+    #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
+        foreach($arr1['widgets'] as $w) { 
 //        log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
           case "CMMachineStatus":
