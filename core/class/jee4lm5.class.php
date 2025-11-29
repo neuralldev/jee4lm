@@ -928,7 +928,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
     public static function processthingSchedule($eq, $arr){
-    #log::add(__CLASS__, 'debug', 'settings='.$arr);
+    log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
       if ($arr1["smart_wake_up_sleep_supported"]) {

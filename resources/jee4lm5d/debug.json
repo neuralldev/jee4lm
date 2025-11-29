@@ -1,14 +1,5 @@
-[2025-11-29 13:00:04][DEBUG] getinformation iteration on {"code":"CMMachineStatus","index":1,"output":{"status":"StandBy","available_modes":["BrewingMode","StandBy"],"mode":"StandBy","next_status":null,"brewing_start_time":null,"lastflush":{"time":"2025-11-28T08:06:55.882000+00:00","extractionseconds":2.5739998817443848,"dosemode":"MassType","doseindex":"DoseA","dosevalue":0,"dosevaluenumerator":null}}}
-[2025-11-29 13:00:04][DEBUG] getinformation iteration on {"code":"CMCoffeeBoiler","index":1,"output":
-{"status":"StandBy","enabled":true,"enabled_supported":false,"target_temperature":90,"target_temperature_min":80,"target_temperature_max":100,"target_temperature_step":0.1,"ready_start_time":null}}
-
-[2025-11-29 13:00:04][DEBUG] getinformation iteration on {"code":"CMPreBrewing","index":1,"output":{"available_modes":["PreBrewing","Disabled"],"mode":"PreBrewing","times":{"pre_infusion":[],"pre_brewing":[{"dose_index":"ByGroup","seconds":{"In":2,"Out":7},"seconds_min":{"In":1,"Out":1},"seconds_max":{"In":9,"Out":9},"seconds_step":{"In":0.1,"Out":0.1}}]},"dose_index_supported":false}}
-[2025-11-29 13:00:04][DEBUG] getinformation iteration on {"code":"CMBrewByWeightDoses","index":1,"output":{"scale_connected":false,"available_modes":["Continuous"],"mode":"Continuous","doses":{"dose_1":{"dose":30,"dose_min":5,"dose_max":100,"dose_step":0},"dose_2":{"dose":32,"dose_min":5,"dose_max":100,"dose_step":0}}}}
-[2025-11-29 13:00:04][DEBUG] getinformation bbw dose A= bbw dose B= scale connected=
-[2025-11-29 13:00:04][DEBUG] getinformation iteration on {"code":"CMBackFlush","index":1,"output":{"status":"Off","last_cleaning_start_time":"2025-11-16T15:34:24.415000+00:00"}}
-[2025-11-29 13:00:04][DEBUG] getinformation backflush status=Off
-[2025-11-29 13:00:04][DEBUG] getinformation .  days difference=0
-[2025-11-29 13:00:04][DEBUG] getinformation iteration on {"code":"ThingScale","index":1,"output":{"name":"LMZ-745F90","connected":false,"battery_level":86,"calibration_required":false}}
-[2025-11-29 13:00:04][DEBUG] getinformation scale battery=
-[2025-11-29 13:00:04][DEBUG] daemon callback run finished
-[2025-11-29 13:00:05][DEBUG] senf payload to daemon  "{\"command\":\"lm\",\"function\":\"settings\",\"id\":5,\"serial\":\"LM049632\",\"apikey\":\"lsBCzx625hBOxVDeFjz4D1AYccnVtsdJ80jiMBU8ejtEHhg6
+[Sat Nov 29 13:26:06.939524 2025] [php:error] [pid 280490:tid 280490] [client 127.0.0.1:38592]
+ PHP Fatal error:  Uncaught Error: Object of class jee4lm5 could not be converted to string in 
+ /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php:936\nStack 
+ trace:\n#0 /var/www/html/plugins/jee4lm5/core/php/jee4lm5d.php(74):
+  jee4lm5::processthingSchedule()\n#1 {main}\n  thrown in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php on line 936
