@@ -928,7 +928,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
     public static function processthingSchedule($eq, $arr){
-    log::add(__CLASS__, 'debug', 'settings='.$arr);
+    #log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
       if ($arr1["smart_wake_up_sleep_supported"]) {
@@ -947,7 +947,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 
   public static function processthingSettings($eq, $arr){
-    log::add(__CLASS__, 'debug', 'settings='.$arr);
+    #log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
       $eq->checkAndUpdateCmd('plumbedin',$arr1['is_plumbed_in']?1:0);
@@ -978,7 +978,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr1)
   {
-        log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
+        #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
         foreach($arr1['widgets'] as $w) { 
         log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
         switch ($w["code"]) {
