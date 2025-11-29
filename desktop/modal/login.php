@@ -24,9 +24,9 @@ if (!isConnect('admin')) {
 <form class="form-horizontal">
   <fieldset>
     <div class="form-group netatmomode internal">
-      <label class="col-sm-2 control-label">{{Nom d'utilisateur}}</label>
+      <label class="col-sm-2 control-label">{{Adresse email}}</label>
       <div class="col-sm-3">
-        <input type="text" class="form-control" id="in_jee4lmLogin_username" placeholder="{{Nom d'utilisateur sur le cloud La Marzocco 2025}}" />
+        <input type="text" class="form-control" id="in_jee4lmLogin_username" placeholder="{{Nom utilisateur sur le cloud La Marzocco 2025}}" />
       </div>
     </div>
     <div class="form-group netatmomode internal">
