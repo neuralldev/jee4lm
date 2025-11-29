@@ -1035,14 +1035,14 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             }
             break;
           case "CMSteamBoilerTemperature":
-           log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
+            log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
             if ($w['output']['targetTemperatureSupported'])
               $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
             $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>Off' : "<span style='color:green'><br\>Allumé</span>");
             break;
           case "CMNoWater":
-         log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
+            log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
             $this->checkAndUpdateCmd('tankStatus',$$w['output']['allarm']?1:0);
             break;
           case "CMBackFlush":
@@ -1056,7 +1056,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $this->checkAndUpdateCmd('last_backflush', $szDays);
             break;
           case "CMBrewByWeightDoses":
-            / log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
+            log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scaleConnected']);
             $this->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
             $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['Dose1']['dose']);
             $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['Dose2']['dose']);
@@ -1072,7 +1072,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['seconds']['Out']);
             break;
           case "ThingScale":
-            //log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
+            log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['batteryLevel']);
             $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
             if($w['output']['connected'] && $w['output']['batteryLevel']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
               $this->checkAndUpdateCmd('scalebattery',$w['output']['batteryLevel']);
