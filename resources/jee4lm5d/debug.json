@@ -1,5 +1,67 @@
-[Sat Nov 29 13:26:06.939524 2025] [php:error] [pid 280490:tid 280490] [client 127.0.0.1:38592]
- PHP Fatal error:  Uncaught Error: Object of class jee4lm5 could not be converted to string in 
- /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php:936\nStack 
- trace:\n#0 /var/www/html/plugins/jee4lm5/core/php/jee4lm5d.php(74):
-  jee4lm5::processthingSchedule()\n#1 {main}\n  thrown in /var/www/html/plugins/jee4lm5/core/class/jee4lm5.class.php on line 936
+settings=
+
+
+{
+  "serial_number": "LM049632",
+  "type": "CoffeeMachine",
+  "name": "LM049632",
+  "location": "HOME_OR_DWELLING_SPACE",
+  "model_code": "LINEAMINI",
+  "model_name": "Linea Mini",
+  "connected": true,
+  "connection_date": "2025-11-23T12:36:03.908000+00:00",
+  "offline_mode": false,
+  "require_firmware_update": false,
+  "available_firmware_update": false,
+  "coffee_station": {
+    "id": "e04ac102-2f69-4455-9eb5-c434c8b34754",
+    "name": "My coffee station",
+    "coffeeMachine": {
+      "serialNumber": "LM049632",
+      "type": "CoffeeMachine",
+      "name": "LM049632",
+      "location": "HOME_OR_DWELLING_SPACE",
+      "modelCode": "LINEAMINI",
+      "modelName": "LINEA MINI",
+      "gatewayHw": "Esp32",
+      "connected": true,
+      "connectionDate": 1763901363908,
+      "offlineMode": false,
+      "requireFirmwareUpdate": false,
+      "availableFirmwareUpdate": false,
+      "imageUrl": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+      "imageUrlList": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+      "imageUrlDetail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+      "bleAuthToken": null
+    },
+    "grinders": [],
+    "accessories": [
+      {
+        "type": "ScaleAcaiaLunar",
+        "name": "LMZ-745F90",
+        "connected": false,
+        "batteryLevel": null,
+        "imageUrl": null,
+        "imageUrlList": null,
+        "imageUrlDetail": null
+      }
+    ]
+  },
+  "image_url": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+  "image_url_list": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+  "image_url_detail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+  "ble_auth_token": null,
+  "smart_wake_up_sleep_supported": true,
+  "smart_wake_up_sleep": {
+    "smart_stand_by_enabled": true,
+    "smart_stand_by_minutes": 10,
+    "smart_stand_by_minutes_min": 1,
+    "smart_stand_by_minutes_max": 240,
+    "smart_stand_by_minutes_step": 1,
+    "smart_stand_by_after": "LastBrewing",
+    "schedules": [],
+    "schedules_dict": {}
+  }
+}
+[2025-11-29 13:30:06][DEBUG] msmartstandby update
+
