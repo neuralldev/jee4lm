@@ -1014,12 +1014,12 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             // now update display of temperature readdiness
             break;
           case "CMCoffeeBoiler":
-            $this->checkAndUpdateCmd('coffeetarget',$w['output']['targetTemperature']);
+            $this->checkAndUpdateCmd('coffeetarget',$w['output']['target_temperature']);
             switch($w['output']['status']) {
               case "HeatingUp":
-                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['temperature']);
+                $this->checkAndUpdateCmd('coffeecurrent',0);
                 $this->checkAndUpdateCmd('coffeeenabled',1);
-                $d = $w['output']['readyStartTime'];
+                $d = $w['output']['ready_start_time'];
                 $currentTimestamp = time();
                 $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
                 $differenceInSeconds = 0;
@@ -1036,7 +1036,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
                 $this->checkAndUpdateCmd('displaycoffee',$displayDifference);
                 break;
               case "Ready":
-                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['targetTemperature']);
+                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['target_temperature']);
                 $this->checkAndUpdateCmd('coffeeenabled',1);
                 $this->checkAndUpdateCmd('displaycoffee','<span style="color:green"><br\>Prêt</span>');
                 break;
