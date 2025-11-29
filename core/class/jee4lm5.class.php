@@ -982,9 +982,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function RefreshThingDashboardInformation($arr1)
   {
-        if ($$this->getConfiguration('init')==1) {
-          $$this->setConfiguration('init',0);
-          jee4lm5::DoCreateThing($$this, $arr1);
+        if ($this->getConfiguration('init')==1) {
+          $this->setConfiguration('init',0);
+          jee4lm5::DoCreateThing($this, $arr1);
         }
 
         #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
