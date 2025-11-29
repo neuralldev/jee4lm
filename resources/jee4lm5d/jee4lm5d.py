@@ -182,7 +182,7 @@ class Jee4LM(BaseDaemon):
                             await self.machine.get_dashboard()
                         except Exception as e:
                             self._logger.debug('get dashboard had an error') # 
-                        #await self.send_to_jeedom({'id':message["id"], 'cmd': 'dash', 'dash': r.to_json()})
+                        await self.send_to_jeedom({'id':message["id"],'dash': self.machine.dashboard.to_json()})
                     case 'settings':
                         self._logger.debug(f'BT command u={message["function"]} m={message["serial"]}') # 
                         self._logger.debug('reading serial') # 
