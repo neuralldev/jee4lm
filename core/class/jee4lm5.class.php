@@ -186,9 +186,8 @@ const
   }
 
   
-  public static function DoCreateThing($_eq, $payload) 
+  public static function DoCreateThing($_eq, $data) 
   {  
-    $data = $payload;
     // fetch information from feedback and create object
     if ($data != '' && $_eq instanceof jee4lm5) {
       foreach ($data['widgets'] as $w) {
@@ -760,7 +759,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
           $eqLogic->setName($machines['name']);
           $eqLogic->setCategory('heating', 1);
           $eqLogic->setIsVisible(1);
-          log::add(__CLASS__, 'debug', 'create eqlogif for uuid '.$uuid);
+          log::add(__CLASS__, 'debug', 'create eqlogic for uuid '.$uuid);
         } else
           log::add(__CLASS__, 'debug', $uuid.' uuid already exists, update only');
         $eqLogic->setConfiguration('type', $machines['type']);
@@ -782,9 +781,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         }
         // now get configuration of machine
         $eqLogic->setConfiguration('serialNumber', $machines['coffee_station']['coffeeMachine']['serialNumber']);
+        $eqLogic->setConfiguration('init',1);
         $eqLogic->save();
         // create commands before setting display
-        jee4lm5::DoCreateThing($eqLogic, $data);
+//        jee4lm5::DoCreateThing($eqLogic, $data);
         
         // set display
         $display_map = [
@@ -953,6 +953,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   public static function processthingSettings($eq, $arr){
     #log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
+    if ($eq->getConfiguration('init')==1) {
+      $eq->setConfiguration('init',0);
+      jee4lm5::DoCreateThing($eq, $arr1);
+    }
     if ($arr1 != null) {
       $eq->checkAndUpdateCmd('plumbedin',$arr1['is_plumbed_in']?1:0);
         log::add(__CLASS__, 'debug', 'getinformation plumbed in=' . $arr1['isPlumbedIn']?1:0);
