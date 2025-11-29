@@ -1061,7 +1061,9 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
           case "CMBackFlush":
             $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
             log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-            $b = date("d", $w['output']['last_cleaning_start_time']);
+            $dateTimeString = $w['output']['last_cleaning_start_time']; // La chaîne ISO 8601
+            $unixTimestamp = strtotime($dateTimeString); // Conversion en timestamp Unix
+            $b = date("d", $unixTimestamp);
             $no = date("d");
             $daysDifference = $no-$b;
             $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
@@ -1069,7 +1071,8 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $this->checkAndUpdateCmd('last_backflush', $szDays);
             break;
           case "CMBrewByWeightDoses":
-            log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['Dose1']['dose']. " bbw dose B=".$w['output']['doses']['Dose2']['dose']. " scale connected=".$w['output']['scale_connected']);
+            log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['dose_1']['dose']. " bbw dose B=".$w['output']['doses']['dose_2']['dose']. " scale connected=".$w['output']['scale_connected']?'yes':'no');
+            $this->checkAndUpdateCmd('isscaleconnected',$w['output']['scale_connected']?1:0);
             $this->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
             $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['dose_1']['dose']);
             $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['dose_2']['dose']);
