@@ -1094,10 +1094,15 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             break; 
           case "CMPreBrewing": //premouillage
             $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
-            if ($w['output']['mode']=="PreBrewing") // if prebrew disable preinfusion
-              $this->checkAndUpdateCmd('preinfusionmode',0);
-            $this->checkAndUpdateCmd('prewettime',$w['output']['times']['PreBrewing'][0]['seconds']['In']);
-            $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['PreBrewing'][0]['seconds']['Out']);
+            if ($w['output']['mode']=="PreBrewing") {// if prebrew disable preinfusion
+              $this->checkAndUpdateCmd('preinfusionmode',0);            
+              $this->checkAndUpdateCmd('prewettime',$w['output']['times']['pre_brewing'][0]['seconds']['In']);
+              $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['pre_brewing'][0]['seconds']['Out']);
+            } else {
+              $this->checkAndUpdateCmd('preinfusionmode',1);            
+              $this->checkAndUpdateCmd('prewettime',$w['output']['times']['pre_infusion'][0]['seconds']['In']);
+              $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['pre_infusion'][0]['seconds']['Out']);
+            }
             break;
           case "ThingScale":
             log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['battery_level']);

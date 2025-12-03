@@ -1,17 +1,23 @@
+
+settings
 {
-    "serialNumber": "LM049632",
+    "id": 6,
+    "settings": "{"serial_number": "LM049632", "type": "CoffeeMachine", "name": "LM049632", "location": "HOME_OR_DWELLING_SPACE", "model_code": "LINEAMINI", "model_name": "Linea Mini", "connected": true, "connection_date": "2025-12-02T06: 42: 14.776000+00: 00", "offline_mode": false, "require_firmware_update": false, "available_firmware_update": false, "coffee_station": {"id": "e04ac102-2f69-4455-9eb5-c434c8b34754", "name": "My coffee station", "coffeeMachine": {"serialNumber": "LM049632", "type": "CoffeeMachine", "name": "LM049632", "location": "HOME_OR_DWELLING_SPACE", "modelCode": "LINEAMINI", "modelName": "LINEA MINI", "gatewayHw": "Esp32", "connected": true, "connectionDate": 1764657734776, "offlineMode": false, "requireFirmwareUpdate": false, "availableFirmwareUpdate": false, "imageUrl": "https: //lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png", "imageUrlList": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png", "imageUrlDetail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png", "bleAuthToken": null}, "grinders": [], "accessories": [{"type": "ScaleAcaiaLunar", "name": "LMZ-745F90", "connected": false, "batteryLevel": null, "imageUrl": null, "imageUrlList": null, "imageUrlDetail": null}]}, "image_url": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png", "image_url_list": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png", "image_url_detail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png", "ble_auth_token": null, "actual_firmwares": [{"type": "Gateway", "build_version": "v5.4.13", "change_log": "What\\u2019s new in this version:\\n\\n* Resolved an issue where the gateway could unexpectedly disconnect in specific scenarios. Stability has been improved to ensure continuous operation without requiring a device reboot", "thing_model_code": "LineaMini", "status": "Updated", "available_update": null}, {"type": "Machine", "build_version": "v2.12", "change_log": "What\\u2019s new in this version:\\n\\n* New La Marzocco App compatibility", "thing_model_code": "LineaMini", "status": "Updated", "available_update": null}], "wifi_ssid": "Abracadabra.IoT", "wifi_rssi": -51, "plumb_in_supported": true, "is_plumbed_in": false, "cropster_supported": false, "cropster_active": false, "hemro_supported": false, "hemro_active": false, "factory_reset_supported": true, "auto_update_supported": true, "auto_update": true, "firmwares": {"Gateway": {"type": "Gateway", "build_version": "v5.4.13", "change_log": "What\\u2019s new in this version:\\n\\n* Resolved an issue where the gateway could unexpectedly disconnect in specific scenarios. Stability has been improved to ensure continuous operation without requiring a device reboot", "thing_model_code": "LineaMini", "status": "Updated", "available_update": null}, "Machine": {"type": "Machine", "build_version": "v2.12", "change_log": "What\\u2019s new in this version:\\n\\n* New La Marzocco App compatibility", "thing_model_code": "LineaMini", "status": "Updated", "available_update": null}}}"
+}
+
+    schedule={
+    "serial_number": "LM049632",
     "type": "CoffeeMachine",
     "name": "LM049632",
     "location": "HOME_OR_DWELLING_SPACE",
-    "modelCode": "LINEAMINI",
-    "modelName": "LINEA MINI",
-    "gatewayHw": "Esp32",
-    "connected": True,
-    "connectionDate": 1763901363908,
-    "offlineMode": False,
-    "requireFirmwareUpdate": False,
-    "availableFirmwareUpdate": False,
-    "coffeeStation": {
+    "model_code": "LINEAMINI",
+    "model_name": "Linea Mini",
+    "connected": true,
+    "connection_date": "2025-12-02T06:42:14.776000+00:00",
+    "offline_mode": false,
+    "require_firmware_update": false,
+    "available_firmware_update": false,
+    "coffee_station": {
         "id": "e04ac102-2f69-4455-9eb5-c434c8b34754",
         "name": "My coffee station",
         "coffeeMachine": {
@@ -22,172 +28,106 @@
             "modelCode": "LINEAMINI",
             "modelName": "LINEA MINI",
             "gatewayHw": "Esp32",
-            "connected": True,
-            "connectionDate": 1763901363908,
-            "offlineMode": False,
-            "requireFirmwareUpdate": False,
-            "availableFirmwareUpdate": False,
-            "imageUrl": "https: //lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+            "connected": true,
+            "connectionDate": 1764657734776,
+            "offlineMode": false,
+            "requireFirmwareUpdate": false,
+            "availableFirmwareUpdate": false,
+            "imageUrl": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
             "imageUrlList": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
             "imageUrlDetail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
-            "bleAuthToken": None
+            "bleAuthToken": null
         },
         "grinders": [],
         "accessories": [
             {
                 "type": "ScaleAcaiaLunar",
                 "name": "LMZ-745F90",
-                "connected": False,
-                "batteryLevel": None,
-                "imageUrl": None,
-                "imageUrlList": None,
-                "imageUrlDetail": None
+                "connected": false,
+                "batteryLevel": null,
+                "imageUrl": null,
+                "imageUrlList": null,
+                "imageUrlDetail": null
             }
         ]
     },
-    "imageUrl": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
-    "imageUrlList": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
-    "imageUrlDetail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
-    "bleAuthToken": None,
-    "widgets": [
-        {
-            "code": "CMMachineStatus",
-            "index": 1,
-            "output": {
-                "status": "StandBy",
-                "availableModes": [
-                    "BrewingMode",
-                    "StandBy"
-                ],
-                "mode": "StandBy",
-                "nextStatus": None,
-                "brewingStartTime": None,
-                "lastCoffee": None,
-                "lastFlush": {
-                    "time": 1764317215882,
-                    "extractionSeconds": 2.5739998817443848,
-                    "doseMode": "MassType",
-                    "doseIndex": "DoseA",
-                    "doseValue": 0,
-                    "doseValueNumerator": None
-                }
-            },
-            "tutorialUrl": None
-        },
-        {
-            "code": "CMCoffeeBoiler",
-            "index": 1,
-            "output": {
-                "status": "StandBy",
-                "enabled": True,
-                "enabledSupported": False,
-                "targetTemperature": 90.0,
-                "targetTemperatureMin": 80,
-                "targetTemperatureMax": 100,
-                "targetTemperatureStep": 0.1,
-                "readyStartTime": None
-            },
-            "tutorialUrl": None
-        },
-        {
-            "code": "CMSteamBoilerTemperature",
-            "index": 1,
-            "output": {
-                "status": "Off",
-                "enabled": False,
-                "enabledSupported": True,
-                "targetTemperature": 0.0,
-                "targetTemperatureSupported": False,
-                "targetTemperatureMin": 95,
-                "targetTemperatureMax": 140,
-                "targetTemperatureStep": 0.1,
-                "readyStartTime": None
-            },
-            "tutorialUrl": None
-        },
-        {
-            "code": "CMPreBrewing",
-            "index": 1,
-            "output": {
-                "availableModes": [
-                    "PreBrewing",
-                    "Disabled"
-                ],
-                "mode": "PreBrewing",
-                "times": {
-                    "PreBrewing": [
-                        {
-                            "doseIndex": "ByGroup",
-                            "seconds": {
-                                "In": 2.0,
-                                "Out": 7.0
-                            },
-                            "secondsMin": {
-                                "In": 1,
-                                "Out": 1
-                            },
-                            "secondsMax": {
-                                "In": 9,
-                                "Out": 9
-                            },
-                            "secondsStep": {
-                                "In": 0.1,
-                                "Out": 0.1
-                            }
-                        }
-                    ]
-                },
-                "doseIndexSupported": False
-            },
-            "tutorialUrl": "https://www.lamarzocco.com/it/en/app/support/brewing-features/#gs3-av-linea-micra-linea-mini-home"
-        },
-        {
-            "code": "CMBrewByWeightDoses",
-            "index": 1,
-            "output": {
-                "scaleConnected": False,
-                "availableModes": [
-                    "Continuous"
-                ],
-                "mode": "Continuous",
-                "doses": {
-                    "Dose1": {
-                        "dose": 30.0,
-                        "doseMin": 5,
-                        "doseMax": 100,
-                        "doseStep": 0.1
+    "image_url": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+    "image_url_list": "https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png",
+    "image_url_detail": "https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png",
+    "ble_auth_token": null,
+    "smart_wake_up_sleep_supported": true,
+    "smart_wake_up_sleep": {
+        "smart_stand_by_enabled": true,
+        "smart_stand_by_minutes": 10,
+        "smart_stand_by_minutes_min": 1,
+        "smart_stand_by_minutes_max": 240,
+        "smart_stand_by_minutes_step": 1,
+        "smart_stand_by_after": "LastBrewing",
+        "schedules": [],
+        "schedules_dict": {}
+    }
+}
+
+
+
+{
+    "code": "CMPreBrewing",
+    "index": 1,
+    "output": {
+        "available_modes": [
+            "PreBrewing",
+            "Disabled"
+        ],
+        "mode": "PreBrewing",
+        "times": {
+            "pre_infusion": [],
+            "pre_brewing": [
+                {
+                    "dose_index": "ByGroup",
+                    "seconds": {
+                        "In": 2,
+                        "Out": 9
                     },
-                    "Dose2": {
-                        "dose": 32.0,
-                        "doseMin": 5,
-                        "doseMax": 100,
-                        "doseStep": 0.1
+                    "seconds_min": {
+                        "In": 1,
+                        "Out": 1
+                    },
+                    "seconds_max": {
+                        "In": 9,
+                        "Out": 9
+                    },
+                    "seconds_step": {
+                        "In": 0.1,
+                        "Out": 0.1
                     }
                 }
-            },
-            "tutorialUrl": "http://lamarzocco.com/it/en/app/support/brew-by-weight"
+            ]
         },
-        {
-            "code": "CMBackFlush",
-            "index": 1,
-            "output": {
-                "lastCleaningStartTime": 1763307264415,
-                "status": "Off"
+        "dose_index_supported": false
+    }
+}
+{
+    "code": "CMBrewByWeightDoses",
+    "index": 1,
+    "output": {
+        "scale_connected": false,
+        "available_modes": [
+            "Continuous"
+        ],
+        "mode": "Continuous",
+        "doses": {
+            "dose_1": {
+                "dose": 30,
+                "dose_min": 5,
+                "dose_max": 100,
+                "dose_step": 0
             },
-            "tutorialUrl": "http://lamarzocco.com/it/en/app/support/cleaning-and-backflush/#linea-mini"
-        },
-        {
-            "code": "ThingScale",
-            "index": 1,
-            "output": {
-                "name": "LMZ-745F90",
-                "connected": False,
-                "batteryLevel": 86.0,
-                "calibrationRequired": False,
-                "forceConnectSupported": False
-            },
-            "tutorialUrl": "http://lamarzocco.com/it/en/app/support/training-scale-location/#linea-mini"
+            "dose_2": {
+                "dose": 32,
+                "dose_min": 5,
+                "dose_max": 100,
+                "dose_step": 0
+            }
         }
-    ],
-    "runningCommands": []
+    }
 }
