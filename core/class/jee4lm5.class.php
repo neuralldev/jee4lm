@@ -203,8 +203,8 @@ const
             $_eq->AddCommand("Dose 2", 'bbwdoseB', 'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive", "g", 0);
             $_eq->AddAction("jee4lm_bbwA", "BBW Dose 1", "button", "", 1);
             $_eq->AddAction("jee4lm_bbwB", "BBW Dose 2", "button", "", 1);
-            $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose 1", "button", "", 1, "slider", 5, 100, 0.5);
-            $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose 2", "button", "", 1, "slider", 5, 100, 0.5);
+            $_eq->AddAction("jee4lm_doseA_slider", "Régler Dose 1", "button", "", 1, "slider", $w["output"]["doses"]["Dose1"]["doseMin"], $w["output"]["doses"]["Dose1"]["doseMax"], $w["output"]["doses"]["Dose1"]["doseStep"]);
+            $_eq->AddAction("jee4lm_doseB_slider", "Régler Dose 2", "button", "", 1, "slider", $w["output"]["doses"]["Dose2"]["doseMin"], $w["output"]["doses"]["Dose1"]["doseMax"], $w["output"]["doses"]["Dose1"]["doseStep"]);
             $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
             $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
             break;
@@ -237,8 +237,8 @@ const
             $_eq->AddCommand("Prétrempage", 'prewet', 'info', 'binary', "ENERGY_STATE", null, null, 0);
             $_eq->AddCommand("Prétrempage durée", 'prewettime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
             $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null, 's', 'THERMOSTAT_SETPOINT', 0);
-            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["In"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["In"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["In"]["secondsStep"]["PreBrewing"]);
-            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["Out"]["secondsMin"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsMax"]["PreBrewing"], $w["output"]["times"]["Out"]["secondsStep"]["PreBrewing"]);
+            $_eq->AddAction("jee4lm_prewet_slider", "Régler consigne mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["PreBrewing"]["secondsMin"]["In"], $w["output"]["times"]["PreBrewing"]["secondsMax"]["In"], $w["output"]["times"]["PreBrewing"]["secondsStep"]["In"]);
+            $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider", $w["output"]["times"]["PreBrewing"]["secondsMin"]["Out"], $w["output"]["times"]["PreBrewing"]["secondsMax"]["Out"], $w["output"]["times"]["PreBrewing"]["secondsStep"]["Out"]);
             $_eq->AddAction("jee4lm_prewet_on", "Prémouillage on","binarySwitch", "ENERGY_ON", 1);
             $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
           case "CMPreExtraction":
