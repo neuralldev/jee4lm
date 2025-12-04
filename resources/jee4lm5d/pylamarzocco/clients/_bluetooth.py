@@ -13,12 +13,6 @@ from bleak import BaseBleakScanner, BleakClient, BleakError, BleakScanner, BLEDe
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak_retry_connector import BleakClientWithServiceCache, establish_connection
 
-#from bleak.backends.scanner import BaseBleakScanner
-#from bleak import BleakClient, BleakScanner
-#from bleak.exc import BleakError
-#from bleak.backends.characteristic import BleakGATTCharacteristic
-#from bleak.backends.device import BLEDevice
-
 from pylamarzocco.const import (
     BluetoothReadSetting,
     BoilerType,
@@ -84,12 +78,12 @@ class LaMarzoccoBluetoothClient:
             ble_token: Authentication token for the device
         """
         self._ble_token = ble_token
-        self._ble_token = ble_token
         self._address = ble_device.address
         self._ble_device = ble_device
-        self._client: BleakClient | None = None
+        self._client: BleakClientWithServiceCache | None = None
         self._lock: asyncio.Lock = asyncio.Lock()
         self._disconnect_task: asyncio.Task[None] | None = None
+
 
 
     @property
@@ -107,32 +101,22 @@ class LaMarzoccoBluetoothClient:
             
             _logger.debug("Connecting to Bluetooth device %s", self._address)
             try:
-                # Use BleakClient directly and attempt to connect (retry a few times)
-                self._client = BleakClient(self._ble_device)
-                for attempt in range(3):
-                    try:
-                        await self._client.connect()
-                        break
-                    except (BleakError, TimeoutError) as e:
-                        _logger.debug("Connection attempt %s failed: %s", attempt + 1, e)
-                        if attempt == 2:
-                            raise
-                        await asyncio.sleep(1)
+                self._client = await establish_connection(
+                    BleakClientWithServiceCache,
+                    self._ble_device,
+                    self._ble_device.name or "Unknown",
+                    max_attempts=3,
+                )
                 await self._authenticate()
             except (BleakError, TimeoutError, BluetoothConnectionFailed) as e:
                 _logger.error("Failed to connect to Bluetooth device: %s", e)
-                # Ensure client is cleaned up on failure
-                if self._client is not None:
-                    try:
-                        await self._client.disconnect()
-                    except Exception:
-                        pass
-                    self._client = None
+                self._client = None
                 raise
             else:
                 _logger.debug("Successfully connected to Bluetooth device %s", self._address)
                 # Start the disconnect timer
                 self._reset_disconnect_timer()
+
     def _reset_disconnect_timer(self) -> None:
         """Reset the auto-disconnect timer."""
         # Cancel existing timer if any

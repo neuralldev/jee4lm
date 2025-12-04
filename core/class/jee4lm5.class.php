@@ -6,69 +6,12 @@ const
   PLUGINNAME = 'jee4lm5',
   LMMODELCODE = ['LINEAMINI'],
   JEEDOM_DAEMON_PORT = '50044',
-  JEEDOM_DAEMON_HOST = '192.168.1.113',
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,  # 4 hours
   PENDING_COMMAND_TIMEOUT = 10;
 
   class jee4lm5 extends eqLogic
 {
-  /**
-   * build path to rest api to local machine or remote web site depending on prensence of ip address
-   * @param mixed $_serial
-   * @param mixed $_ip
-   * @return mixed
-   */
 
-  public static function getPath($_serial) {
-    return 'things/' . $_serial;
-  }
-
-  public static function request($_path, $_data = null, $_type = 'GET', $_header = null)
-  {
-    // Utiliser cURL ou une autre méthode pour appeler l'API de La Marzocco
-   log::add(__CLASS__, 'debug', 'request query url='.$_path." with data=".$_data." and type=".$_type);
-   
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $_path);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $_header == null ? ["Content-Type: application/json"] : $_header);
-    switch ($_type) {
-      case "POST":
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $_data);
-        break;
-      case "PUT":
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_setopt($ch, CURLOPT_ENCODING, "");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($_data));
-        break;
-      default:
-        break;
-    }
-    $response = curl_exec($ch);
-    if (!$response) {
-      log::add(__CLASS__, 'debug', 'request error, cannot fetch info');
-      $error_msg = curl_error($ch);
-      $err_no = curl_errno($ch);
-      log::add(__CLASS__, 'debug', "request error no=$err_no message=$error_msg");
-      if ($err_no != 0) {// connection problem 
-        curl_close($ch);
-        return null;
-      }
-    } 
-    curl_close($ch);
-    return json_decode($response, true);
-  }
-
-
-  /**
-   * Login is the login API to get the token based on the credential from the Web/App 
-   * if the login succeeds, it sets the fields with both the access_token and the refresh token for renewal
-   * in the appropriate plugin global variables
-   * @param mixed $_username
-   * @param mixed $_password
-   * @return mixed
-   */
   public static function login($_username, $_password)
   {
 
@@ -135,37 +78,10 @@ const
    } //foreach
   }
 
-  /**
-   * does nothing, here for backwards compatibiliy
-   * @param mixed $_options
-   * @return void
-   */
   public static function pull($_options = null)
   {
   }
 
-  /**
-   * fonction nécessaire à jeedom pour nettoyer les commandes dans la fonction de remplacement 
-   * @return array<mixed|string>[]
-   */
-  
-  /**
-   * used to set visible state (0=invisible/1=visible) of a jeedom equipment by logicalID
-   * @param mixed $_logicalId
-   * @param mixed $_state
-   * @return bool
-   */
-  private function toggleVisible($_logicalId, $_state)
-  {
-    $Command = $this->getCmd(null, $_logicalId);
-    if (is_object($Command)) {
-      log::add(__CLASS__, 'debug', 'toggle visible state of ' . $_logicalId . " to " . $_state);
-      $Command->setIsVisible($_state);
-      $Command->save();
-      return true;
-    }
-    return false;
-  }
   /**
    * Refresh function from Jeedom to refresh all values
    * @return void
@@ -296,34 +212,7 @@ const
   }
 
 
-  /**
-   * AddCommand function adds/update an information on an existing command inside an equipment
-   * it allows to initialize a lot of optional paramters to display the command properly
-   * @param mixed $_Name
-   * @param mixed $_logicalId
-   * @param mixed $_Type
-   * @param mixed $_SubType
-   * @param mixed $_Template
-   * @param mixed $_unite
-   * @param mixed $_generic_type
-   * @param mixed $_IsVisible
-   * @param mixed $_icon
-   * @param mixed $_forceLineB
-   * @param mixed $_valuemin
-   * @param mixed $_valuemax
-   * @param mixed $_order
-   * @param mixed $_IsHistorized
-   * @param mixed $_repeatevent
-   * @param mixed $_iconname
-   * @param mixed $_calculValueOffset
-   * @param mixed $_historizeRound
-   * @param mixed $_noiconname
-   * @param mixed $_warning
-   * @param mixed $_danger
-   * @param mixed $_invert
-   * @return mixed
-   */
-  
+ 
   public function AddCommand(
     $_Name,
     $_logicalId,
@@ -611,31 +500,18 @@ const
     self::deamon_send($payload);
   }
 
-  /**
-   * Set the Dose to use with Group on Brew By Weight on Linea Mini. On Mini, 
-   * Dose 1 and 2 hold the two possible values offered by BBW. 
-   * this API is not used on Micra.
-   * @param mixed $weight
-   * @param mixed $dose
-   * @return void
-   */
-  public function CoffeeMachineBrewByWeightSettingDoses($_weight, $_dose)
+    public function CoffeeMachineBrewByWeightSettingDoses($_weight, $_dose)
   {
     log::add(__CLASS__, 'debug', "select active Dose");
     $serial = $this->getConfiguration('serialNumber');
     // fetch actual doses 
-    $dose1= 0+$_dose=="Dose1" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
-    $dose2= 0+$_dose=="Dose2" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
+    $dose1= 0+$_dose=="bbwdoseA" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
+    $dose2= 0+$_dose=="bbwdoseB" ? $_weight : cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
     $payload = ["command"=>"lm", "function" => "CoffeeMachineBrewByWeightSettingDoses", "value" => $$dose1, "value2"=>$dose2, "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
   } 
 
-  /**
-   * Summary of CoffeeMachineBrewByWeightChangeMode
-   * @param mixed $_dose
-   * @return void
-   */
-  public function CoffeeMachineBrewByWeightChangeMode($_dose)
+    public function CoffeeMachineBrewByWeightChangeMode($_dose)
   {
     log::add(__CLASS__, 'debug', "set bbw mode to $_dose");
     $serial = $this->getConfiguration('serialNumber');
@@ -643,12 +519,6 @@ const
     self::deamon_send($payload);
   }  
 
-  /**
-   * Summary of CoffeeMachinePreBrewingChangeTimes
-   * @param int $_time 
-   * @param int $_hold
-   * @return void
-   */
   public function CoffeeMachinePreBrewingChangeTimes($_time, $_hold) {
     log::add(__CLASS__, 'debug', "set prebrew start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
@@ -656,11 +526,6 @@ const
     self::deamon_send($payload);
   }
 
-  /**
-   * Start the Backflush. I recommend using the app for this purpose, it is much more convenient
-   * as it monitors the backflush and this is not.
-   * @return void
-   */
   public function CoffeeMachineBackFlushStartCleaning()
   {
     log::add(__CLASS__, 'debug', 'backflush start');
@@ -669,14 +534,6 @@ const
     self::deamon_send($payload);
  }
 
-
-  /**
-   * set the auto-standby mode of the machine.
-   * @param bool $_enable   true or false
-   * @param int $_miutes    number of minutes before standby
-   * @param mixed $_after   event after what time starts LAST_BREW = "LastBrewing", POWER_ON = "PowerOn";
-   * @return void
-   */
   public function CoffeeMachineSettingSmartStandBy($_enable, $_minutes, $_after)
   {
 
@@ -685,7 +542,6 @@ const
     $payload = ["command"=>"lm", "function" => "CoffeeMachineSettingSmartStandBy", "value" => $$_enable ?1:0, "value2" => $_minutes, "value3" => $_after,  "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
   }
-
 
   public function CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options) {
     $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
@@ -716,28 +572,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $payload = ["command"=>"lm", "function" => "detect"];
     self::deamon_send($payload);
   }
-
-  /*
-   [{
-  'serial_number': 'LM049632', 
-  'type': 'CoffeeMachine', 
-  'name': 'LM049632', 
-  'location': 'HOME_OR_DWELLING_SPACE', 
-  'model_code': 'LINEAMINI', 
-  'model_name': 'Linea Mini', 
-  'connected': True, 'connection_date': '2025-11-23T12:36:03.908000+00:00',
-  'offline_mode': False, 'require_firmware_update': False, 'available_firmware_update': False, 
-  'coffee_station': {'id': 'e04ac102-2f69-4455-9eb5-c434c8b34754', 'name': 'My coffee station', 
-  'coffeeMachine': {'serialNumber': 'LM049632', 'type': 'CoffeeMachine', 'name': 'LM049632', 'location': 'HOME_OR_DWELLING_SPACE', 
-  'modelCode': 'LINEAMINI', 'modelName': 'LINEA MINI', 
-  'gatewayHw': 'Esp32', 'connected': True, 'connectionDate': 1763901363908, 
-  'offlineMode': False, 'requireFirmwareUpdate': False, 
-  'availableFirmwareUpdate': False, 
-  'imageUrl': 'https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png', 
-  'imageUrlList': 'https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png', 
-  'imageUrlDetail': 'https://lion.lamarzocco.io/img/thing-model/detail/lineamini/lineamini-1-c-nero_op.png', 
-  'bleAuthToken': None}, 'grinders': [], 
-  'accessories': [{'type': 'ScaleAcaiaLunar', 'name': 'LMZ-745F90', 'connected': False, 'batteryLevel': None, 'imageUrl': None, 'imageUrlList': None, 'imageUrlDetail': None}]}, 'image_url': 'https://lion.lamarzocco.io/img/thing-model/list/lineamini/lineamini-1-c-nero_op.png', 'ble_auth_token': None}]}*/
 
   public static function processdetect($data)
   {
@@ -855,7 +689,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
               "style::td::1::1" => "font-size:larger;",
               "text::td::1::1" => "<br>Réservoir à eau<br>",
               "text::td::1::3" => "<br>Balance connectée<br>",
-              "text::td::1::2" => '<img src="'.$machines['imageUrl'].'" height=85% width=85%>',
+              "text::td::1::2" => '<img src="'.$machines['image_url'].'" height=85% width=85%>',
               //"text::td::1::2"=>"Chaudière à café",
 //              "text::td::3::3"=>"Chaudière à vapeur",
               "style::td::3::1" => "font-size:1.5em;height:3em;vertical-align:top;",
@@ -927,7 +761,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $payload = ["command"=>"lm", "function" => "schedule", "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
   }
-
     public static function processthingSchedule($eq, $arr){
     log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
@@ -1067,7 +900,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
             $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>Off' : "<span style='color:green'><br\>Allumé</span>");
             break;
           case "CMNoWater":
-            log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['allarm']);
+            log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['alarm']);
             $this->checkAndUpdateCmd('tankStatus',$$w['output']['allarm']?1:0);
             break;
           case "CMBackFlush":
@@ -1126,14 +959,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
    */
   public function getjee4lm()
   {
-    //    log::add(__CLASS__, 'debug', "getjee4lm");
-    //$this->checkAndUpdateCmd(__CLASS__, "");
   }
-
-  /**
-   * Jeedom specific function to define inline widgets from the plugin
-   * @return array[]
-   */
 
 
   public static function templateWidget()
@@ -1294,10 +1120,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     return $r;
   }
 
-  /**
-   * Returns plugin version
-   * @return mixed
-   */
+  
   public static function getPluginVersion()
   {
     $pluginVersion = '0.0.0';
@@ -1321,10 +1144,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     return $pluginVersion;
   }
 
-  /**
-   * Summary of deamon_info
-   * @return array
-   */
+  
   public static function deamon_info() {
     $return = [
       'log' => __CLASS__,
@@ -1361,13 +1181,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         system::getCmdPython3(__CLASS__) : 'python3 ';
     }
 
-  /**
-   * start the demon when it is asked from GUI or when jeedom is started
-   * there is no parameter to send as demon does not require custom information 
-   * the demon is just a loop that calls the callback function every 5 secondes when it is activated
-   * @throws \Exception
-   * @return bool
-   */
   public static function deamon_start() {
     self::deamon_stop();
     $deamon_info = self::deamon_info();
@@ -1391,6 +1204,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $cmd .= ' --pid ' . jeedom::getTmpFolder(__CLASS__) . '/'.PLUGINNAME.'d.pid'; // et on précise le chemin vers le pid file (ne pas modifier)
     log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/".PLUGINNAME."d.py");
     $result = exec($cmd . ' >> ' . log::getPathToLog(''.PLUGINNAME.'d') . ' 2>&1 &');     
+    log::add(__CLASS__, 'info', 'resultat = '.$result);
     while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') 
@@ -1426,17 +1240,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     }
     
   }
-  /**
-   * Send a payload to daemon running in background. 
-   * message accepted are 'cmd=poll' or 'cmd=stop' with 'id=eqID' encapsulated as json array
-   * demon start to query LM every 5 secondes for updating information on the local ip address when poll is selected
-   * when cmd=stop is sent, the demon stops to ask status every 5 seconds to machine
-   * example of string is json_encode(['cmd'=>'poll','id'=>1],true) to foll for eqlogic 1 status
-   * status is fetched based on configuration ip address (host info) if valid
-   * @param mixed $_params
-   * @throws \Exception
-   * @return void
-   */
+
   public static function deamon_send($_params) {
     $deamon_info = self::deamon_info();
     if ($deamon_info['state'] != 'ok') 
@@ -1464,9 +1268,6 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
   }
 }
 
-/**
- * Specific class for commands execution
- */
 class jee4lm5Cmd extends cmd
 {
   public function dontRemoveCmd()
@@ -1480,11 +1281,6 @@ class jee4lm5Cmd extends cmd
     return is_object($r) && $r->execCmd() != $_expected_value;
   }
 
-  /**
-   * Loop of command execution where it switches the command to the right function
-   * @param mixed $_options
-   * @return bool
-   */
   public function execute($_options = null)
   {
     $action = $this->getLogicalId();
@@ -1564,7 +1360,4 @@ class jee4lm5Cmd extends cmd
         return true;
     }
   }
-
 }
-
-
