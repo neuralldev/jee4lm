@@ -1299,11 +1299,15 @@ class jee4lm5Cmd extends cmd
       case 'getStatus':
         return $$eq->getThingDashboard();
       case 'jee4lm_on':
+      case 'jee4lm_auto':
+        $b = $action == 'jee4lm_on';
+        $eq->CoffeeMachineChangeMode(true);
+        return true;
       case 'jee4lm_off':
         $b = $action == 'jee4lm_on';
-        $eq->CoffeeMachineChangeMode($b);
+        $eq->CoffeeMachineChangeMode(false);
         return true;
-      case 'jee4lm_steam_on':
+        case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = $action == 'jee4lm_steam_on';
         $eq->CoffeeMachineSettingSteamBoilerEnabled($b);
