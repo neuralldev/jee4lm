@@ -38,6 +38,7 @@ class Jee4LM(BaseDaemon):
     installation_key:InstallationKey
     machine:Optional[LaMarzoccoMachine] = None 
     genrationofkey:bool = False
+    dashboard_task = None
     
     def __init__(self) -> None:
         
