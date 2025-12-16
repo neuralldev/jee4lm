@@ -87,15 +87,15 @@ class Jee4LM(BaseDaemon):
         self._logger.info("python part correctly started")
             
  
-    async def _dash_loop(self):
-        self._logger.info("Starting 5-second dashboard loop...")
+    async def _dash_loop(self, id:int):
+        self._logger.info(f"Starting 5-second dashboard loop in {id}...")
         while True:
             try:
                 if self.machine and self.machine.serial_number:
                     self._logger.debug('Executing scheduled dash update.')
                     try:                  
                         await self.machine.get_dashboard()
-                        await self.send_to_jeedom({'cmd': 'dash_update', 'dash': self.machine.dashboard.to_json()})
+                        await self.send_to_jeedom({'id':id, 'cmd': 'dash_update', 'dash': self.machine.dashboard.to_json()})
                     except Exception as e:
                         self._logger.error(f'Error getting dashboard in loop: {e}')
                 else:
@@ -188,7 +188,7 @@ class Jee4LM(BaseDaemon):
                         if not self.dashboard_task_running:
                             self._logger.info("Creating new dashboard loop task.")
                             self.dashboard_task_running = True
-                            self.dashboard_task = asyncio.create_task(self._dash_loop())
+                            self.dashboard_task = asyncio.create_task(self._dash_loop(message["id"]))
                         else:
                             self._logger.info("Dashboard loop task is already running.")
                     case 'off':
