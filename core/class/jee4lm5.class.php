@@ -429,7 +429,7 @@ const
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $payload = ["command"=>"lm", "function" => "CoffeeMachineChangeMode", "value" => ($_toggle ? 1 : 0), "id" =>$this->getId(), "serial" => $serial];
+    $payload = ["command"=>"lm", "function" => ($_toggle ? 'on' : 'off'), "value" => "notused", "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
