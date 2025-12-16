@@ -1,7 +1,6 @@
-import logging
-import asyncio
 from globals import INSTALLKEYFILE, INSTALLCREDENTIALFILE, READY
 import asyncio
+from asyncio import Task
 import uuid
 import os
 import json
@@ -38,7 +37,8 @@ class Jee4LM(BaseDaemon):
     installation_key:InstallationKey
     machine:Optional[LaMarzoccoMachine] = None 
     genrationofkey:bool = False
-    dashboard_task = None
+    dashboard_task:Task
+    dashboard_task_running:bool = False
     
     def __init__(self) -> None:
         
@@ -185,20 +185,21 @@ class Jee4LM(BaseDaemon):
                         if not self.machine:
                             self.machine = LaMarzoccoMachine(m, self.client)
                             self._logger.debug('Machine object created for dash loop.')
-                        if self.dashboard_task is None or self.dashboard_task.done():
+                        if not self.dashboard_task_running:
                             self._logger.info("Creating new dashboard loop task.")
+                            self.dashboard_task_running = True
                             self.dashboard_task = asyncio.create_task(self._dash_loop())
                         else:
                             self._logger.info("Dashboard loop task is already running.")
                     case 'off':
                         # machine is off, kill background loop
                         self._logger.debug(f'BT command u={message["function"]}: Stopping dash loop.')
-                        if self.dashboard_task is not None and not self.dashboard_task.done():
+                        if self.dashboard_task_running and not self.dashboard_task.done():
                             self._logger.info("Cancelling dashboard loop task.")
                             self.dashboard_task.cancel()
-                            self.dashboard_task = None
                         else:
                             self._logger.info("No active dashboard loop task to stop.") 
+                        self.dashboard_task_running = False
                     case 'detect':
                         self._logger.debug(f'BT command u={message["function"]}') # 
                         async with self.session:
