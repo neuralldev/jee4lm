@@ -429,7 +429,7 @@ const
   {
     log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
     $serial = $this->getConfiguration('serialNumber');
-    $payload = ["command"=>"lm", "function" => "CoffeeMachineChangeMode", "value" => ($_toggle ? 1 : 0), "id" =>$this->getId(), "serial" => $serial];
+    $payload = ["command"=>"lm", "function" => ($_toggle ? 'on' : 'off'), "value" => "notused", "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
@@ -1299,11 +1299,15 @@ class jee4lm5Cmd extends cmd
       case 'getStatus':
         return $$eq->getThingDashboard();
       case 'jee4lm_on':
+      case 'jee4lm_auto':
+        $b = $action == 'jee4lm_on';
+        $eq->CoffeeMachineChangeMode(true);
+        return true;
       case 'jee4lm_off':
         $b = $action == 'jee4lm_on';
-        $eq->CoffeeMachineChangeMode($b);
+        $eq->CoffeeMachineChangeMode(false);
         return true;
-      case 'jee4lm_steam_on':
+        case 'jee4lm_steam_on':
       case 'jee4lm_steam_off':
         $b = $action == 'jee4lm_steam_on';
         $eq->CoffeeMachineSettingSteamBoilerEnabled($b);
