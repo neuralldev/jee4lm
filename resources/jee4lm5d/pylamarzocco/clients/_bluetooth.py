@@ -27,7 +27,7 @@ from pylamarzocco.models import (
     BluetoothSmartStandbyDetails,
 )
 
-_logger = logging.getLogger(__name__)
+#self._logger = logging.getLogger(__name__)
 
 READ_CHARACTERISTIC = "0a0b7847-e12b-09a8-b04b-8e0922a9abab"
 WRITE_CHARACTERISTIC = "0b0b7847-e12b-09a8-b04b-8e0922a9abab"
@@ -99,7 +99,7 @@ class LaMarzoccoBluetoothClient:
                 self._reset_disconnect_timer()
                 return
             
-            _logger.debug("Connecting to Bluetooth device %s", self._address)
+            self._logger.debug("Connecting to Bluetooth device %s", self._address)
             try:
                 self._client = await establish_connection(
                     BleakClientWithServiceCache,
@@ -109,11 +109,11 @@ class LaMarzoccoBluetoothClient:
                 )
                 await self._authenticate()
             except (BleakError, TimeoutError, BluetoothConnectionFailed) as e:
-                _logger.error("Failed to connect to Bluetooth device: %s", e)
+                self._logger.error("Failed to connect to Bluetooth device: %s", e)
                 self._client = None
                 raise
             else:
-                _logger.debug("Successfully connected to Bluetooth device %s", self._address)
+                self._logger.debug("Successfully connected to Bluetooth device %s", self._address)
                 # Start the disconnect timer
                 self._reset_disconnect_timer()
 
@@ -134,7 +134,7 @@ class LaMarzoccoBluetoothClient:
             # Timer was reset, this is normal
             pass
         else:
-            _logger.debug("Auto-disconnect timer expired, disconnecting from %s", self._address)
+            self._logger.debug("Auto-disconnect timer expired, disconnecting from %s", self._address)
             await self.disconnect()
 
     async def _disconnect_internal(self) -> None:
@@ -145,11 +145,11 @@ class LaMarzoccoBluetoothClient:
             self._disconnect_task = None
 
         if self._client is not None and self._client.is_connected:
-            _logger.debug("Disconnecting from Bluetooth device %s", self._address)
+            self._logger.debug("Disconnecting from Bluetooth device %s", self._address)
             try:
                 await self._client.disconnect()
             except Exception as e:
-                _logger.error("Error disconnecting from Bluetooth device: %s", e)
+                self._logger.error("Error disconnecting from Bluetooth device: %s", e)
             finally:
                 self._client = None
 
@@ -337,7 +337,7 @@ class LaMarzoccoBluetoothClient:
         # append trailing zeros to message
         message += b"\x00"
 
-        _logger.debug("Sending bluetooth message: %s to %s", message, characteristic)
+        self._logger.debug("Sending bluetooth message: %s to %s", message, characteristic)
 
         settings_characteristic = await self._resolve_characteristic(characteristic)
 
@@ -372,7 +372,7 @@ class LaMarzoccoBluetoothClient:
         if resolved_characteristic is not None:
             return resolved_characteristic
 
-        _logger.debug(
+        self._logger.debug(
             "Characteristic %s not found in cache, clearing cache and retrying.",
             characteristic,
         )
@@ -385,7 +385,7 @@ class LaMarzoccoBluetoothClient:
             return resolved_characteristic
 
         # Can't resolve characteristic - clear cache and schedule disconnect
-        _logger.info(
+        self._logger.info(
             "Could not find characteristic %s on machine. Clearing cache and disconnecting.",
             characteristic,
         )

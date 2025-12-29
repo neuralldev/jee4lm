@@ -20,7 +20,7 @@ from pylamarzocco.models import (
     WebSocketDetails,
 )
 
-_LOGGER = logging.getLogger(__name__)
+#self._logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound="LaMarzoccoThing") 
 # _R: Type de retour de la fonction décorée.

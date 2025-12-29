@@ -62,7 +62,7 @@ from pylamarzocco.util import (
     is_success,
 )
 
-_LOGGER = logging.getLogger(__name__)
+#self._logger = logging.getLogger(__name__)
 
 
 TOKEN_TIME_TO_REFRESH = 10 * 60  # 10 minutes before expiration
@@ -117,7 +117,7 @@ class LaMarzoccoCloudClient:
             ) from ex
 
         if is_success(response):
-            _LOGGER.info("Registration successful.")
+            self._logger.info("Registration successful.")
             return
 
         if response.status == 401:
@@ -144,7 +144,7 @@ class LaMarzoccoCloudClient:
 
     async def _async_sign_in(self) -> AccessToken:
         """Get a new access token."""
-        _LOGGER.debug("Getting new access token")
+        self._logger.debug("Getting new access token")
         return await self.__async_get_token(
             f"{CUSTOMER_APP_URL}/auth/signin",
             SigninTokenRequest(
@@ -156,7 +156,7 @@ class LaMarzoccoCloudClient:
         """Refresh a access token."""
         if not self._access_token:
             raise ValueError("No access token available")
-        _LOGGER.debug("Refreshing access token")
+        self._logger.debug("Refreshing access token")
         return await self.__async_get_token(
             f"{CUSTOMER_APP_URL}/auth/refreshtoken",
             RefreshTokenRequest(
@@ -222,8 +222,8 @@ class LaMarzoccoCloudClient:
         # ensure status code indicates success
         if is_success(response):
             json_response = await response.json()
-            _LOGGER.debug("Request to %s successful", url)
-            _LOGGER.debug("Response: %s", json_response)
+            self._logger.debug("Request to %s successful", url)
+            self._logger.debug("Response: %s", json_response)
             return json_response
 
         if response.status == 401:
@@ -349,22 +349,22 @@ class LaMarzoccoCloudClient:
                             ):
                                 break
                     except asyncio.CancelledError:
-                        _LOGGER.debug("WebSocket cancellation requested")
+                        self._logger.debug("WebSocket cancellation requested")
                         await self.websocket.disconnect()
                         raise
             except InvalidURL:
-                _LOGGER.error("Invalid URL for websocket.")
+                self._logger.error("Invalid URL for websocket.")
                 auto_reconnect = False
             except TimeoutError:
-                _LOGGER.debug("Websocket disconnected: Connection timed out")
+                self._logger.debug("Websocket disconnected: Connection timed out")
             except ClientError as err:
-                _LOGGER.debug("Websocket disconnected: Could not connect: %s", err)
+                self._logger.debug("Websocket disconnected: Could not connect: %s", err)
                 auto_reconnect = False
             except asyncio.CancelledError:
-                _LOGGER.debug("WebSocket cancellation successful")
+                self._logger.debug("WebSocket cancellation successful")
                 auto_reconnect = False
             except Exception:  # pylint: disable=broad-except
-                _LOGGER.exception("Websocket disconnected with error")
+                self._logger.exception("Websocket disconnected with error")
                 auto_reconnect = False
             finally:
                 if disconnect_callback is not None:
@@ -386,16 +386,16 @@ class LaMarzoccoCloudClient:
                 "Authorization": f"Bearer {await self.async_get_access_token()}",
             },
         )
-        _LOGGER.debug("Connecting to websocket.")
+        self._logger.debug("Connecting to websocket.")
         await ws.send_str(connect_msg)
 
         msg = await ws.receive()
-        _LOGGER.debug("Received websocket message: %s", msg.data)
+        self._logger.debug("Received websocket message: %s", msg.data)
         result, _, _ = decode_stomp_ws_message(str(msg.data))
         if result is not StompMessageType.CONNECTED:
             raise ClientConnectionError("No connected message")
 
-        _LOGGER.debug("Subscribing to websocket.")
+        self._logger.debug("Subscribing to websocket.")
         subscription_id = str(uuid.uuid4())
         subscribe_msg = encode_stomp_ws_message(
             StompMessageType.SUBSCRIBE,
@@ -409,7 +409,7 @@ class LaMarzoccoCloudClient:
         await ws.send_str(subscribe_msg)
 
         async def disconnect_websocket() -> None:
-            _LOGGER.debug("Disconnecting websocket")
+            self._logger.debug("Disconnecting websocket")
             if ws.closed:
                 return
             disconnect_msg = encode_stomp_ws_message(
@@ -432,26 +432,26 @@ class LaMarzoccoCloudClient:
     ) -> bool:
         """Handle receiving a websocket message. Return True for disconnect."""
         if msg.type in (WSMsgType.CLOSING, WSMsgType.CLOSED):
-            _LOGGER.debug("Websocket disconnected gracefully")
+            self._logger.debug("Websocket disconnected gracefully")
             return True
         if msg.type == WSMsgType.ERROR:
-            _LOGGER.warning("Websocket disconnected with error %s", ws.exception())
+            self._logger.warning("Websocket disconnected with error %s", ws.exception())
             return True
-        _LOGGER.debug("Received websocket message: %s", msg)
+        self._logger.debug("Received websocket message: %s", msg)
         try:
             msg_type, _, data = decode_stomp_ws_message(str(msg.data))
             if msg_type is StompMessageType.ERROR:
-                _LOGGER.warning("Websocket error message: %s", data)
+                self._logger.warning("Websocket error message: %s", data)
             elif msg_type is not StompMessageType.MESSAGE:
-                _LOGGER.warning("Non MESSAGE-type message: %s", msg.data)
+                self._logger.warning("Non MESSAGE-type message: %s", msg.data)
             else:
                 self.__parse_websocket_message(data, notification_callback)
         except ValueError as ex:
-            _LOGGER.warning(
+            self._logger.warning(
                 "Error parsing websocket message: %s. Message was: %s", ex, msg.data
             )
         except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.exception("Error during callback: %s", ex)
+            self._logger.exception("Error during callback: %s", ex)
         return False
 
     def __parse_websocket_message(
@@ -498,7 +498,7 @@ class LaMarzoccoCloudClient:
             # Wait for the future to be completed or timeout
             pending_result = await wait_for(future, PENDING_COMMAND_TIMEOUT)
         except TimeoutError:
-            _LOGGER.debug("Timed out waiting for websocket condition")
+            self._logger.debug("Timed out waiting for websocket condition")
             self._pending_commands.pop(cr.id, None)
             return False
 
@@ -507,7 +507,7 @@ class LaMarzoccoCloudClient:
 
         if pending_result.status is CommandStatus.SUCCESS:
             return True
-        _LOGGER.debug(
+        self._logger.debug(
             "Command to %s failed with status %s, error_details: %s",
             command,
             pending_result.status,

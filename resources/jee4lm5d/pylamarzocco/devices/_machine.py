@@ -37,7 +37,7 @@ from pylamarzocco.models import (
 
 from ._thing import LaMarzoccoThing, cloud_only, models_supported
 
-_LOGGER = logging.getLogger(__name__)
+#self._logger = logging.getLogger(__name__)
 
 
 STEAM_LEVEL_MAPPING = {
@@ -78,7 +78,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         try:
             capabilities = await self._bluetooth_client.get_machine_capabilities()
         except (BleakError, BluetoothConnectionFailed) as exc:
-            _LOGGER.error("Failed to get machine capabilities from Bluetooth: %s", exc)
+            self._logger.error("Failed to get machine capabilities from Bluetooth: %s", exc)
             raise
 
         # Update dashboard with capabilities information
@@ -87,7 +87,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         try:
             self.dashboard.model_code = ModelCode[capabilities.family.name]
         except KeyError:
-            _LOGGER.warning(
+            self._logger.warning(
                 "Could not map model_name %s to model_code", capabilities.family
             )
 
@@ -100,7 +100,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         try:
             machine_mode = await self._bluetooth_client.get_machine_mode()
         except (BleakError, BluetoothConnectionFailed) as exc:
-            _LOGGER.error("Failed to get machine mode from Bluetooth: %s", exc)
+            self._logger.error("Failed to get machine mode from Bluetooth: %s", exc)
             raise
 
         # Initialize or update machine status widget
@@ -124,7 +124,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         try:
             boilers = await self._bluetooth_client.get_boilers()
         except (BleakError, BluetoothConnectionFailed) as exc:
-            _LOGGER.error("Failed to get boilers from Bluetooth: %s", exc)
+            self._logger.error("Failed to get boilers from Bluetooth: %s", exc)
             raise
 
         for boiler in boilers:
@@ -202,7 +202,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         try:
             tank_status = await self._bluetooth_client.get_tank_status()
         except (BleakError, BluetoothConnectionFailed) as exc:
-            _LOGGER.error("Failed to get tank status from Bluetooth: %s", exc)
+            self._logger.error("Failed to get tank status from Bluetooth: %s", exc)
             raise
 
         # Initialize or update no water widget
@@ -442,7 +442,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         if self._bluetooth_client is not None:
             func = getattr(self._bluetooth_client, command)
             try:
-                _LOGGER.debug(
+                self._logger.debug(
                     "Sending command %s over bluetooth with params %s",
                     command,
                     str(bt_kwargs),
@@ -455,19 +455,19 @@ class LaMarzoccoMachine(LaMarzoccoThing):
                 msg = "Could not send command to bluetooth device, even though initalized."
 
                 if self._cloud_client is None:
-                    _LOGGER.error(
+                    self._logger.error(
                         "%s Cloud client not initialized, cannot fallback. Full error %s",
                         msg,
                         exc,
                     )
                     return False
 
-                _LOGGER.warning("%s Falling back to cloud", msg)
-                _LOGGER.debug("Full error: %s", exc)
+                self._logger.warning("%s Falling back to cloud", msg)
+                self._logger.debug("Full error: %s", exc)
 
         # no bluetooth or failed, try with cloud
         if self._cloud_client is not None:
-            _LOGGER.debug(
+            self._logger.debug(
                 "Sending command %s over cloud with params %s",
                 command,
                 str(cl_kwargs),
