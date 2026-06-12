@@ -1,9 +1,7 @@
 <?php
 /**
- * 
- * This script handles AJAX requests for the JEE4LM application.
- * 
- * @throws Exception If an error occurs during the execution of the try block.
+ * AJAX handler for jee4lm5 plugin.
+ * All daemon calls are fire-and-forget — success is returned immediately after dispatch.
  */
 try {
     require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
@@ -13,7 +11,7 @@ try {
         throw new Exception(__('401 - {{Accès non autorisé}}', __FILE__));
     }
 
-    // necessary for jeedom 4.5 which does not use jquery anymore
+    // Jeedom 4.5+ sends JSON body instead of form POST
     $data = json_decode(file_get_contents('php://input'), true);
     if (is_array($data)) {
         foreach ($data as $key => $value) {
@@ -22,27 +20,26 @@ try {
     }
 
     $action = init('action');
-    log::add('jee4lm5', 'debug', ' action request = (' . $action. ')');
+    log::add('jee4lm5', 'debug', 'ajax action=' . $action);
+
     switch ($action) {
+
         case 'login':
-            if (jee4lm5::login(init('username'), init('password'))) {
-                ajax::success();
-            } else {
-                throw new Exception(__('informations de connexion incorrectes', __FILE__));
-            }
+            // Fire-and-forget to daemon — login() always returns '' (no sync result)
+            jee4lm5::login(init('username'), init('password'));
+            ajax::success();
             break;
 
         case 'sync':
-            if (jee4lm5::detect()) {
-                ajax::success();
-            } else {
-                throw new Exception(__("la détection ne peut se faire qu'une fois la connexion réussie", __FILE__));
-            }
+            // Fire-and-forget to daemon — detect() returns void
+            jee4lm5::detect();
+            ajax::success();
             break;
 
         default:
             throw new Exception(__('Aucune méthode correspondant à : ', __FILE__) . $action);
     }
+
 } catch (Exception $e) {
     ajax::error(displayException($e), $e->getCode());
 }

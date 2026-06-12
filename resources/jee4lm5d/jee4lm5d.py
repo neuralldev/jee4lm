@@ -2,14 +2,13 @@ from globals import INSTALLKEYFILE, INSTALLCREDENTIALFILE
 import asyncio
 from asyncio import Task
 import uuid
-import os
 import json
 from pathlib import Path
-
 from dataclasses import dataclass
 from typing import Optional
 
-from pylamarzocco.const import PreExtractionMode
+from pylamarzocco.const import PreExtractionMode, MachineMode, WidgetType
+from pylamarzocco.models._config import MachineStatus  # pas nécessaire, juste pour référence
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
 from pylamarzocco.util import InstallationKey, generate_installation_key
 from mashumaro.mixins.json import DataClassJSONMixin
@@ -38,13 +37,12 @@ class Jee4LM(BaseDaemon):
             on_start_cb=self.on_start,
         )
 
-        self.serial: str = ""
         self.credential = JeeCredential()
         self.installation_key: Optional[InstallationKey] = None
         self.client: Optional[LaMarzoccoCloudClient] = None
-        self.machine: Optional[LaMarzoccoMachine] = None
-        self.dashboard_task: Optional[Task] = None
-        self._connected: bool = False
+        # machine keyed by serial — supports multiple machines in theory
+        self._machines: dict[str, LaMarzoccoMachine] = {}
+        self._dash_tasks: dict[str, Task] = {}  # serial -> running loop task
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -53,34 +51,34 @@ class Jee4LM(BaseDaemon):
     async def on_start(self) -> None:
         self._logger.info("daemon starting")
 
-        # 1. Load or generate installation key
+        # Load or generate installation key
         first_registration = not self._load_install_key()
         if first_registration:
-            self._logger.info("no installation key — generating")
             if not self._save_install_key():
-                self._logger.error("cannot write installation key, check permissions")
+                self._logger.error("cannot write installation key — check permissions")
                 await self.stop()
                 return
+            self._logger.info("installation key generated")
 
-        # 2. Load credentials (may be absent on very first run)
-        has_creds = self._load_credential() and self.credential.isinit()
-        if not has_creds:
-            self._logger.warning("no credentials yet — waiting for login command")
+        # Load credentials — may be absent on first run, daemon stays up and waits
+        if self._load_credential() and self.credential.isinit():
+            self._logger.info("credentials loaded")
+        else:
+            self._logger.warning("no credentials — daemon waiting for login command")
 
-        # 3. Build cloud client (pylamarzocco manages its own ClientSession)
+        # Build cloud client (pylamarzocco manages its own ClientSession)
         self.client = LaMarzoccoCloudClient(
             username=self.credential.username,
             password=self.credential.password,
             installation_key=self.installation_key,
         )
 
-        # 4. Register on first run
-        if first_registration:
-            self._logger.info("registering client with LM cloud")
+        if first_registration and self.credential.isinit():
             try:
                 await self.client.async_register_client()
+                self._logger.info("client registered with LM cloud")
             except Exception as e:
-                self._logger.error(f"registration failed: {e}")
+                self._logger.error(f"cloud registration failed: {e}")
                 await self.stop()
                 return
 
@@ -88,51 +86,67 @@ class Jee4LM(BaseDaemon):
 
     async def on_stop(self) -> None:
         self._logger.info("daemon stopping")
-        self._cancel_dash_loop()
+        for task in self._dash_tasks.values():
+            if not task.done():
+                task.cancel()
+        self._dash_tasks.clear()
+
+    # ------------------------------------------------------------------
+    # Machine helper
+    # ------------------------------------------------------------------
+
+    def _get_machine(self, serial: str) -> LaMarzoccoMachine:
+        """Return cached machine or create a new one for this serial."""
+        if serial not in self._machines:
+            self._logger.debug(f"creating machine object serial={serial}")
+            self._machines[serial] = LaMarzoccoMachine(serial, self.client)
+        return self._machines[serial]
 
     # ------------------------------------------------------------------
     # Dashboard polling loop
     # ------------------------------------------------------------------
 
-    async def _dash_loop(self, eq_id: int) -> None:
-        """Poll dashboard every 5 s and push updates to Jeedom."""
-        self._logger.info(f"dashboard loop started for eq {eq_id}")
+    def _start_dash_loop(self, serial: str, eq_id: int) -> None:
+        """Start polling loop for serial if not already running."""
+        task = self._dash_tasks.get(serial)
+        if task is None or task.done():
+            self._logger.info(f"starting dashboard loop serial={serial} eq={eq_id}")
+            self._dash_tasks[serial] = asyncio.create_task(
+                self._dash_loop(serial, eq_id)
+            )
+
+    def _stop_dash_loop(self, serial: str) -> None:
+        task = self._dash_tasks.pop(serial, None)
+        if task and not task.done():
+            self._logger.info(f"stopping dashboard loop serial={serial}")
+            task.cancel()
+
+    async def _dash_loop(self, serial: str, eq_id: int) -> None:
+        machine = self._get_machine(serial)
         try:
             while True:
                 try:
-                    await self.machine.get_dashboard()
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
                         "cmd": "dash_update",
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except asyncio.CancelledError:
                     raise
                 except Exception as e:
-                    self._logger.error(f"dashboard loop poll error: {e}")
+                    self._logger.error(f"dashboard poll error serial={serial}: {e}")
                 await asyncio.sleep(5)
         except asyncio.CancelledError:
-            self._logger.info("dashboard loop cancelled")
+            self._logger.info(f"dashboard loop cancelled serial={serial}")
 
-    def _ensure_dash_loop(self, eq_id: int) -> None:
-        """Start dash loop if not already running or if previous task is dead."""
-        if self.dashboard_task is None or self.dashboard_task.done():
-            self._logger.info(f"starting dashboard loop for eq {eq_id}")
-            self.dashboard_task = asyncio.create_task(self._dash_loop(eq_id))
-
-    def _cancel_dash_loop(self) -> None:
-        if self.dashboard_task and not self.dashboard_task.done():
-            self.dashboard_task.cancel()
-            self.dashboard_task = None
-
-    # ------------------------------------------------------------------
-    # Machine helper — ensure machine object exists
-    # ------------------------------------------------------------------
-
-    def _ensure_machine(self, serial: str) -> None:
-        if self.machine is None or self.machine.serial_number != serial:
-            self._logger.debug(f"creating machine object for serial {serial}")
-            self.machine = LaMarzoccoMachine(serial, self.client)
+    def _machine_is_on(self, machine: LaMarzoccoMachine) -> bool:
+        """Return True if dashboard reports machine not in standby."""
+        try:
+            status = machine.dashboard.config.get(WidgetType.CM_MACHINE_STATUS)
+            return status is not None and status.mode != MachineMode.STANDBY
+        except Exception:
+            return False
 
     # ------------------------------------------------------------------
     # Credential / install key persistence
@@ -143,8 +157,9 @@ class Jee4LM(BaseDaemon):
         if not path.exists():
             return False
         try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-            self.installation_key = InstallationKey.from_dict(data)
+            self.installation_key = InstallationKey.from_dict(
+                json.loads(path.read_text(encoding="utf-8"))
+            )
             return True
         except Exception as e:
             self._logger.error(f"error reading installation key: {e}")
@@ -152,9 +167,10 @@ class Jee4LM(BaseDaemon):
 
     def _save_install_key(self) -> bool:
         self.installation_key = generate_installation_key(str(uuid.uuid4()).lower())
-        path = self.data_dir / INSTALLKEYFILE
         try:
-            path.write_text(str(self.installation_key.to_json()), encoding="utf-8")
+            (self.data_dir / INSTALLKEYFILE).write_text(
+                str(self.installation_key.to_json()), encoding="utf-8"
+            )
             return True
         except Exception as e:
             self._logger.error(f"error writing installation key: {e}")
@@ -172,10 +188,11 @@ class Jee4LM(BaseDaemon):
             return False
 
     def _save_credential(self, username: str, password: str) -> None:
-        path = self.data_dir / INSTALLCREDENTIALFILE
         try:
-            payload = json.dumps({"username": username, "password": password})
-            path.write_text(payload, encoding="utf-8")
+            (self.data_dir / INSTALLCREDENTIALFILE).write_text(
+                json.dumps({"username": username, "password": password}),
+                encoding="utf-8",
+            )
             self._logger.info("credentials saved")
         except Exception as e:
             self._logger.error(f"error saving credentials: {e}")
@@ -203,7 +220,7 @@ class Jee4LM(BaseDaemon):
                 self._logger.info("credentials updated — restarting daemon")
                 await self.stop()
 
-            # ---- discovery ------------------------------------------
+            # ---- discovery (no serial yet) --------------------------
             case "detect":
                 try:
                     things = await self.client.list_things()
@@ -214,168 +231,163 @@ class Jee4LM(BaseDaemon):
                 except Exception as e:
                     self._logger.error(f"detect failed: {e}")
 
-            # ---- dashboard loop control (machine power state) --------
-            case "on":
-                # Machine reported as ON: ensure loop is running
-                self._ensure_machine(serial)
-                self._ensure_dash_loop(eq_id)
-
-            case "off":
-                # Machine reported as OFF: stop loop
-                self._cancel_dash_loop()
-
-            # ---- one-shot reads --------------------------------------
+            # ---- one-shot reads (serial required) -------------------
             case "dash":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.get_dashboard()
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
+                    # Auto-start loop if machine is on
+                    if self._machine_is_on(machine):
+                        self._start_dash_loop(serial, eq_id)
                 except Exception as e:
                     self._logger.error(f"get_dashboard failed: {e}")
 
             case "settings":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.get_settings()
+                    await machine.get_settings()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "settings": self.machine.settings.to_json(),
+                        "settings": machine.settings.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"get_settings failed: {e}")
 
             case "schedule":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.get_schedule()
+                    await machine.get_schedule()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "schedule": self.machine.schedule.to_json(),
+                        "schedule": machine.schedule.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"get_schedule failed: {e}")
 
             # ---- machine commands ------------------------------------
             case "CoffeeMachineChangeMode":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 enabled = bool(message.get("value", 0))
                 try:
-                    await self.machine.set_power(enabled)
-                    await self.machine.get_dashboard()
+                    await machine.set_power(enabled)
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
+                    # Drive the dash loop from power state
+                    if enabled:
+                        self._start_dash_loop(serial, eq_id)
+                    else:
+                        self._stop_dash_loop(serial)
                 except Exception as e:
                     self._logger.error(f"set_power failed: {e}")
 
             case "CoffeeMachineSettingSteamBoilerEnabled":
-                self._ensure_machine(serial)
-                enabled = bool(message.get("value", 0))
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.set_steam(enabled)
-                    await self.machine.get_dashboard()
+                    await machine.set_steam(bool(message.get("value", 0)))
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"set_steam failed: {e}")
 
             case "CoffeeMachineSettingCoffeeBoilerTargetTemperature":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.set_coffee_target_temperature(float(message["value"]))
-                    await self.machine.get_dashboard()
+                    await machine.set_coffee_target_temperature(float(message["value"]))
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"set_coffee_target_temperature failed: {e}")
 
             case "CoffeeMachineSettingSteamBoilerTargetTemperature":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.set_steam_target_temperature(float(message["value"]))
-                    await self.machine.get_dashboard()
+                    await machine.set_steam_target_temperature(float(message["value"]))
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"set_steam_target_temperature failed: {e}")
 
             case "CoffeeMachinePreInfusionChangeMode":
-                self._ensure_machine(serial)
-                mode = PreExtractionMode.DISABLED if not message.get("value") else PreExtractionMode.PREINFUSION
+                machine = self._get_machine(serial)
+                mode = PreExtractionMode.PREINFUSION if message.get("value") else PreExtractionMode.DISABLED
                 try:
-                    await self.machine.set_pre_extraction_mode(mode)
-                    await self.machine.get_dashboard()
+                    await machine.set_pre_extraction_mode(mode)
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"set_pre_extraction_mode (infusion) failed: {e}")
 
             case "CoffeeMachinePreBrewingChangeMode":
-                self._ensure_machine(serial)
-                mode = PreExtractionMode.DISABLED if not message.get("value") else PreExtractionMode.PREBREWING
+                machine = self._get_machine(serial)
+                mode = PreExtractionMode.PREBREWING if message.get("value") else PreExtractionMode.DISABLED
                 try:
-                    await self.machine.set_pre_extraction_mode(mode)
-                    await self.machine.get_dashboard()
+                    await machine.set_pre_extraction_mode(mode)
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"set_pre_extraction_mode (brewing) failed: {e}")
 
             case "CoffeeMachinePreBrewingChangeTimes":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.set_pre_extraction_times(
+                    await machine.set_pre_extraction_times(
                         float(message["value"]),
                         float(message["value2"]),
                     )
-                    await self.machine.get_dashboard()
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"set_pre_extraction_times failed: {e}")
 
             case "CoffeeMachineBrewByWeightSettingDoses":
-                self._ensure_machine(serial)
-                # doses are sent as a pair; machine API may vary — log only for now
+                # TODO: implement when pylamarzocco exposes BBW dose setting
                 self._logger.debug(
                     f"BBW doses: value={message.get('value')} value2={message.get('value2')}"
                 )
 
             case "CoffeeMachineBackFlushStartCleaning":
-                self._ensure_machine(serial)
+                machine = self._get_machine(serial)
                 try:
-                    await self.machine.start_backflush()
-                    await self.machine.get_dashboard()
+                    await machine.start_backflush()
+                    await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
-                        "dash": self.machine.dashboard.to_json(),
+                        "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
                     self._logger.error(f"start_backflush failed: {e}")
 
             case "CoffeeMachineSettingSmartStandBy":
-                self._ensure_machine(serial)
+                # TODO: implement when pylamarzocco exposes smartstandby API
                 self._logger.debug(
                     f"smartstandby: enable={message.get('value')} "
                     f"minutes={message.get('value2')} after={message.get('value3')}"
                 )
-                # TODO: implement when pylamarzocco exposes the call
 
             case _:
                 self._logger.error(f"unknown function: {fn}")

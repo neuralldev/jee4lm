@@ -36,7 +36,6 @@ if (!isConnect()) {
         <a class="btn btn-default" id="bt_syncWithLMCloud"><i class="fas fa-sync"></i> {{Détecter mes équipements}}</a>
       </div>
     </div>
-   </div>
   </fieldset>
 </form>
 
@@ -58,19 +57,18 @@ document.getElementById('bt_syncWithLMCloud').addEventListener('click', function
     type: "POST",
     url: "plugins/jee4lm5/core/ajax/jee4lm5.ajax.php",
     data: {
-        action: "sync"
+      action: "sync"
     },
     dataType: 'json',
     global: false,
-    error: function(error) {
-        jeedomUtils.showAlert({ message: error.message, level: 'danger' });
-        domUtils.hideLoading();
+    error: function (error) {
+      jeedomUtils.showAlert({ message: error.message, level: 'danger' });
+      domUtils.hideLoading();
     },
-    success: function(data) {
+    success: function (data) {
       jeedomUtils.showAlert({ message: '{{Détection réussie, regardez les logs}}', level: 'success' });
       domUtils.hideLoading();
     }
   });
 });
-
 </script>

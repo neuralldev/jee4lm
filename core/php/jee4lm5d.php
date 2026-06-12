@@ -16,64 +16,69 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
- require_once dirname(__FILE__) . "/../../../../core/php/core.inc.php";
+require_once dirname(__FILE__) . "/../../../../core/php/core.inc.php";
 
+// Validate daemon API key
 if (!jeedom::apiAccess(init('apikey'), 'jee4lm5')) {
-//	echo 'Clef API non valide, vous n\'etes pas autorisé à effectuer cette action';
-	die();
+    die();
 }
 
 log::add('jee4lm5', 'debug', 'callback incoming message');
 
+// Connectivity test from daemon startup
 if (init('test') != '') {
-	log::add('jee4lm5', 'debug', 'callback ack');
-	echo 'OK';
-	die();
+    log::add('jee4lm5', 'debug', 'callback ack');
+    echo 'OK';
+    die();
 }
 
 $result = json_decode(file_get_contents("php://input"), true);
-	
+
 if (!is_array($result)) {
-	log::add('jee4lm5', 'error', 'daemon callback incoming message not an array ='.$result.", expecting id to refresh parameter");
-	die();
+    log::add('jee4lm5', 'error', 'callback: message is not a valid JSON array, got=' . print_r($result, true));
+    die();
 }
 
-foreach($result as $key => $value )
-	log::add('jee4lm5', 'debug', 'daemon callback received='.$key);
+foreach ($result as $key => $value) {
+    log::add('jee4lm5', 'debug', 'callback key=' . $key);
+}
 
-if (isset($result['cmd']) && $result["cmd"]=="detect") {
-	log::add('jee4lm5', 'error', 'daemon callback received dectect request feedback');
-	jee4lm5::processdetect($result["things"]);
-} else {
+// Detect response — no eq id needed, processes list of discovered machines
+if (isset($result['cmd']) && $result['cmd'] === 'detect') {
+    log::add('jee4lm5', 'debug', 'callback: detect response received'); // FIX #2+#3: was 'error' + typo
+    jee4lm5::processdetect($result['things']);
+    die();
+}
+
+// All other responses require an eq id
 if (!isset($result['id'])) {
-	log::add('jee4lm5', 'error', 'daemon callback id not set');
-	die();
+    log::add('jee4lm5', 'error', 'callback: id not set in message');
+    die();
 }
 
 $eq = jee4lm5::byId($result['id']);
-
-if ($eq==null) {
-	log::add('jee4lm5', 'warning', 'daemon callback eqlogic not found');
-	die();
+if ($eq === null) {
+    log::add('jee4lm5', 'warning', 'callback: eqlogic id=' . $result['id'] . ' not found');
+    die();
 }
 
-log::add('jee4lm5', 'debug', 'daemon callback, refreshing...');
+log::add('jee4lm5', 'debug', 'callback: routing for eq=' . $result['id']);
 
+// FIX #4: explicit if/elseif chain instead of dangling if/else nesting
 if (isset($result['run'])) {
-	$eq->setConfiguration("daemon", $result['run']);
-	log::add('jee4lm5', 'debug', 'daemon callback check as run' . $result['run']);
-	$eq->save();
+    // Daemon heartbeat / status flag
+    $eq->setConfiguration('daemon', $result['run']);
+    $eq->save();
+    log::add('jee4lm5', 'debug', 'callback: daemon run flag=' . $result['run']);
+} elseif (isset($result['settings'])) {
+    jee4lm5::processthingSettings($eq, $result['settings']);
+} elseif (isset($result['schedule'])) {
+    jee4lm5::processthingSchedule($eq, $result['schedule']);
+} elseif (isset($result['dash'])) {
+    // Handles both one-shot 'dash' responses and polling loop 'dash_update' messages
+    jee4lm5::doRefreshDashboard($eq, $result['dash']);
 } else {
-	if (isset($result['settings']))
-		jee4lm5::processthingSettings($eq, $result["settings"]);
-	else
-		if (isset($result['dash']))
-			jee4lm5::doRefreshDashboard($eq, $result["dash"]);
-		else
-		if (isset($result['schedule']))
-			jee4lm5::processthingSchedule($eq, $result["schedule"]);
-}
-log::add('jee4lm5', 'debug', 'daemon callback run finished');
-
+    log::add('jee4lm5', 'warning', 'callback: unhandled message keys=' . implode(',', array_keys($result)));
 }
 
+log::add('jee4lm5', 'debug', 'callback: done');
