@@ -2,8 +2,8 @@ aiohappyeyeballs==2.6.1
 aiohttp==3.13.2
 aiosignal==1.4.0
 attrs==25.4.0
-bleak==2.0.0
-bleak-retry-connector==4.4.4
+bleak>=2.0.0
+bleak-retry-connectorQ>=4.4.4
 cffi==2.0.0
 cryptography==46.0.3
 frozenlist==1.8.0

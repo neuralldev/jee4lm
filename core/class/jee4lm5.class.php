@@ -33,49 +33,30 @@ const
    */
   public static function cron()
   {
-    log::add(__CLASS__, 'debug', 'cron start');
-
-    // suspension des tests pendant une tranche horaire où la machine à café ne sera jamais utilisée.
-    // cette section devra évoluer pour saisie de la tranche dans le plugin
-
-    $heureActuelle = date('H');
-    $minuteActuelle = date('i');
-
-    // Tester si l'heure est entre 22h et 6h
+    $heureActuelle = (int)date('H');
+    $minuteActuelle = (int)date('i');
+ 
     if ($heureActuelle >= 22 || $heureActuelle < 6) {
-          log::add(__CLASS__, 'debug', 'cron exit out of hours ('.$heureActuelle.')');
+      log::add(__CLASS__, 'debug', 'cron: out of hours, skipping');
       return;
-    } else {
-      log::add(__CLASS__, 'debug', 'cron in hours ('.$heureActuelle.')');
     }
-
+ 
     foreach (jee4lm5::byType(__CLASS__, true) as $jee4lm) {
-      // for each serial found, check the machine state
-      if ($jee4lm->getConfiguration('serialNumber') != '') {
-        $id=$jee4lm->getId();
-
-        $m = cmd::byEqLogicIdAndLogicalId($id, 'machinemode');
-        log::add(__CLASS__, 'debug', "cron eqID=$id state=".$m->execCmd());
-        // ensure we call getThingDashboard only on jee4lm5 instances (avoid calling unknown method on base eqLogic)
-        if ($jee4lm instanceof jee4lm5) {
-          $jee4lm->getThingDashboard();
-        } else {
-          log::add(__CLASS__, 'debug', 'cron: object is not instance of jee4lm5, skipping dashboard update');
-        }
-
-        if ($minuteActuelle % 2 == 0) { // every 2 minutes
-          if ($jee4lm instanceof jee4lm5) {
-            sleep(2);
-            $jee4lm->getThingSettings();
-            sleep(2);
-            $jee4lm->getThingSchedule();
-          } else {
-            log::add(__CLASS__, 'debug', 'cron: object is not instance of jee4lm5, skipping settings/schedule update');
-          }
-        } 
-      } else
-        log::add(__CLASS__, 'debug', 'equipment has no serial number, cron skiped');
-   } //foreach
+      if (!($jee4lm instanceof jee4lm5)) continue;
+      if ($jee4lm->getConfiguration('serialNumber') == '') {
+        log::add(__CLASS__, 'debug', 'cron: no serial, skipping');
+        continue;
+      }
+ 
+      // Always refresh dashboard (fire-and-forget to daemon)
+      $jee4lm->getThingDashboard();
+ 
+      // Settings + schedule every 2 minutes — no sleep needed, daemon is async
+      if ($minuteActuelle % 2 === 0) {
+        $jee4lm->getThingSettings();
+        $jee4lm->getThingSchedule();
+      }
+    }
   }
 
   public static function pull($_options = null)
@@ -427,13 +408,19 @@ const
   
   public function CoffeeMachineChangeMode($_toggle)
   {
-    log::add(__CLASS__, 'debug', 'set coffee boiler '.$_toggle ? 'ON' : 'OFF');
+    log::add(__CLASS__, 'debug', 'CoffeeMachineChangeMode ' . ($_toggle ? 'ON' : 'OFF'));
     $serial = $this->getConfiguration('serialNumber');
-    $payload = ["command"=>"lm", "function" => ($_toggle ? 'on' : 'off'), "value" => "notused", "id" =>$this->getId(), "serial" => $serial];
+    $payload = [
+      "command"  => "lm",
+      "function" => "CoffeeMachineChangeMode",   // was 'on'/'off' — FIXED
+      "value"    => ($_toggle ? 1 : 0),
+      "id"       => $this->getId(),
+      "serial"   => $serial,
+    ];
     self::deamon_send($payload);
     $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
   }
-
+  
   /**
    * Switch Steam ON/OFF according to a boolean value
    * @param mixed $_toggle
