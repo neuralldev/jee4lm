@@ -12,7 +12,7 @@ const
   class jee4lm5 extends eqLogic
 {
 
-  public static function login($_username, $_password)
+  public static function login(string $_username, string $_password): string
   {
 
     log::add(__CLASS__, 'debug', 'login start');
@@ -84,6 +84,11 @@ const
   }
 
   
+  /**
+   * DoCreateThing is called when creating an equipment from the dashboard, it creates all commands based on the information received from the machine and stored in $data
+   * @param jee4lm5 $_eq the equipment being created
+   * @param mixed $data the information received from the machine to create commands, it contains at least a "widgets" array with all widgets and their configuration to create commands accordingly
+   */
   public static function DoCreateThing($_eq, $data) 
   {  
     // fetch information from feedback and create object
@@ -193,30 +198,55 @@ const
   }
 
 
- 
+ /**
+  * AddCommand allows to add/update a command to an equipment using optional parameters
+  * @param mixed $_Name the name of the command to add
+  * @param mixed $_logicalId the logical ID of the command to add, it should be unique for each command of the equipment
+  * @param mixed $_Type the type of the command to add, it can be "info" or "action", default is "info"
+  * @param mixed $_SubType the subtype of the command to add, it can be "binary", "numeric", "string", "other", default is "binary"
+  * @param mixed $_Template the template to use for the command, it can be null for default template or a custom template defined in the plugin, default is null
+  * @param mixed $_unite the unit to use for the command, it can be null for no unit or a string for the unit, default is null
+  * @param mixed $_generic_type the generic type to use for the command, it can be null for no generic type or a string for the generic type, default is null
+  * @param mixed $_IsVisible the visibility of the command, it can be 1 for visible or 0 for hidden, default is 1
+  * @param mixed $_icon the icon to use for the command, it can be 'default' for no icon or a string for the icon class, default is 'default'
+  * @param mixed $_forceLineB the force return line before display for the command, it can be 'default' for no change or 1 for force return line before, default is 'default'
+  * @param mixed $_valuemin the minimum value for the command, it can be 'default' for no change or a numeric value for the minimum value, default is 'default'
+  * @param mixed $_valuemax the maximum value for the command, it can be 'default' for no change or a numeric value for the maximum value, default is 'default'
+  * @param mixed $_order the order of the command, it can be null for no change or a numeric value for the order, default is null
+  * @param mixed $_IsHistorized the historization of the command, it can be 1 for historized or 0 for not historized, default is 0
+  * @param mixed $_repeatevent the repeat event management for the command, it can be true for never repeat event or false for default behavior, default is false
+  * @param mixed $_iconname the display of icon and name on dashboard for the command, it can be 'default' for no change or 1 for display both icon and name, default is 'default'
+  * @param mixed $_calculValueOffset the value offset to apply to the command value, it can be null for no offset or a numeric value for the offset, default is null
+  * @param mixed $_historizeRound the historization round to apply to the command value, it can be null for no round or a numeric value for the round, default is null
+  * @param mixed $_noiconname the display of icon and name on dashboard for the command, it can be null for no change or 1 for hide both icon and name, default is null
+  * @param mixed $_warning the warning threshold for the command value, it can be null for no warning or a numeric value for the warning threshold, default is null
+  * @param mixed $_danger the danger threshold for the command value, it can be null for no danger or a numeric value for the danger threshold, default is null
+  * @param mixed $_invert the invert binary display for the command, it can be null for no change or 1 for invert display, default is null
+  * @return jee4lm5Cmd the command object created or updated
+  */
   public function AddCommand(
     $_Name,
     $_logicalId,
-    $_Type = 'info',
-    $_SubType = 'binary',
-    $_Template = null,
-    $_unite = null,
-    $_generic_type = null,
-    $_IsVisible = 1,
-    $_icon = 'default',
-    $_forceLineB = 'default',
-    $_valuemin = 'default',
-    $_valuemax = 'default',
-    $_order = null,
-    $_IsHistorized = 0,
-    $_repeatevent = false,
-    $_iconname = 0,
-    $_calculValueOffset = null,
-    $_historizeRound = null,
-    $_noiconname = 0,
-    $_warning = null,
-    $_danger = null,
-    $_invert = 0
+     $_Type = 'info',
+     $_SubType = 'binary',
+     $_Template = null,
+     $_unite = null,
+     $_generic_type = null,
+     $_IsVisible = 1,
+     $_icon = 'default',
+     $_forceLineB = 'default',
+     $_valuemin = 'default',
+     $_valuemax = 'default',
+     $_order = null,
+     $_IsHistorized = 0,
+     $_repeatevent = false,
+     $_iconname = 0,
+     $_calculValueOffset = null,
+     $_historizeRound = null,
+     $_noiconname = 0,
+     $_warning = null,
+     $_danger = null,
+     $_invert = 0
   ) {
     $createCmd = true;
     log::add(__CLASS__, 'debug', 'add command ' . $_Name . ' logicalId=' . $_logicalId . ' type=' . $_Type . ' subtype=' . $_SubType);
@@ -406,7 +436,7 @@ const
     self::deamon_send($payload);
   }
   
-  public function CoffeeMachineChangeMode($_toggle)
+  public function CoffeeMachineChangeMode(string $_toggle)
   {
     log::add(__CLASS__, 'debug', 'CoffeeMachineChangeMode ' . ($_toggle ? 'ON' : 'OFF'));
     $serial = $this->getConfiguration('serialNumber');
@@ -438,7 +468,6 @@ const
   /**
    * set the LM boiler target temperature for coffee or steam boiler according to $type value
    * @param mixed $_value value in celsius
-   * @param mixed $_identifier by default this is coffee boiler temperature 
    * @return void
    */
   public function CoffeeMachineSettingCoffeeBoilerTargetTemperature($_value)
@@ -452,7 +481,6 @@ const
     /**
    * set the LM boiler target temperature for coffee or steam boiler according to $type value
    * @param mixed $_value value in celsius
-   * @param mixed $_identifier by default this is coffee boiler temperature 
    * @return void
    */
   public function CoffeeMachineSettingSteamBoilerTargetTemperature($_value)
@@ -487,6 +515,11 @@ const
     self::deamon_send($payload);
   }
 
+  /**
+   * @param mixed $_weight weight in grams
+   * @param mixed $_dose dose identifier
+   * @return void
+   */
     public function CoffeeMachineBrewByWeightSettingDoses($_weight, $_dose)
   {
     log::add(__CLASS__, 'debug', "select active Dose");
@@ -498,6 +531,10 @@ const
     self::deamon_send($payload);
   } 
 
+  /**
+   * @param mixed $_dose dose identifier
+   * @return void
+   */
     public function CoffeeMachineBrewByWeightChangeMode($_dose)
   {
     log::add(__CLASS__, 'debug', "set bbw mode to $_dose");
@@ -506,13 +543,21 @@ const
     self::deamon_send($payload);
   }  
 
-  public function CoffeeMachinePreBrewingChangeTimes($_time, $_hold) {
+  /**
+   * @param mixed $_time time value
+   * @param mixed $_hold hold value
+   * @return void
+   */
+  public function CoffeeMachinePreBrewingChangeTimes( $_time, $_hold) {
     log::add(__CLASS__, 'debug', "set prebrew start t=$_time h=$_hold");
     $serial = $this->getConfiguration('serialNumber');
     $payload = ["command"=>"lm", "function" => "CoffeeMachinePreBrewingChangeTimes", "value" => $_time, "value2" => $_hold, "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
   }
 
+  /**
+   * @return void
+   */
   public function CoffeeMachineBackFlushStartCleaning()
   {
     log::add(__CLASS__, 'debug', 'backflush start');
@@ -521,7 +566,10 @@ const
     self::deamon_send($payload);
  }
 
-  public function CoffeeMachineSettingSmartStandBy($_enable, $_minutes, $_after)
+ /**  
+  * 
+  */
+  public function CoffeeMachineSettingSmartStandBy(int $_enable, int $_minutes, int $_after)
   {
 
     log::add(__CLASS__, 'debug', 'change smartstandbytimes');
@@ -530,12 +578,23 @@ const
     self::deamon_send($payload);
   }
 
+  /**
+   * @param mixed $eq
+   * @param mixed $_options
+   * @return void
+   */
   public function CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options) {
     $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
     $from = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyafter')->execCmd();
     $after = $_options;
     return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
   }
+
+  /**
+   * @param mixed $eq
+   * @param mixed $_options
+   * @return void
+   */
   public function CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options) {
     $b =  cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeup')->execCmd();
     $after = cmd::byEqLogicIdAndLogicalId($eq, 'smartwakeupstandbyminutes')->execCmd();
@@ -543,14 +602,24 @@ const
     return $eq->CoffeeMachineSettingSmartStandBy($b,$from, $after);
   }
 
-  public function CoffeeMachineSettingPreInfusionEnabled($eq, $b) {// to be done
-    $this->checkAndUpdateCmd('preinfusionmode', $b);
+  /**
+   * @param mixed $eq
+   * @param mixed $_options
+   * @return void
+   */
+  public function CoffeeMachineSettingPreInfusionEnabled($eq, $_options) {// to be done
+    $this->checkAndUpdateCmd('preinfusionmode', $_options);
     return true;
   }
 
-public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
-    $this->checkAndUpdateCmd('prewet', $b);
-    return $eq->CoffeeMachinePreBrewingChangeMode($b);
+  /**
+   * @param mixed $eq
+   * @param mixed $_options
+   * @return void
+   */
+  public function CoffeeMachineSettingPreWetEnabled($eq, $_options) {
+    $this->checkAndUpdateCmd('prewet', $_options);
+    return $eq->CoffeeMachinePreBrewingChangeMode($_options);
   }
 
   public static function detect()
@@ -560,6 +629,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     self::deamon_send($payload);
   }
 
+  /**
+   * @param mixed $data
+   * @return void
+   */
   public static function processdetect($data)
   {
     log::add(__CLASS__, 'debug', '[detect] receveived data');
@@ -715,8 +788,10 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
         
         log::add(__CLASS__, 'debug', 'eqlogic saved');
          
-        // read information for the first time
-        $eqLogic->getThingDashboard();
+        // read information for the first time (call if available)
+        if (is_object($eqLogic) && method_exists($eqLogic, 'getThingDashboard')) {
+          $eqLogic->getThingDashboard();
+        }
 
       }
       log::add(__CLASS__, 'debug', 'loop to next machine');
@@ -733,6 +808,13 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
 
   /**
    * updateDisplay is used to update the display of a command
+   * mixed $_cmd is the logicalID of the command to update
+   * mixed $_key is the display key to update
+   * mixed $_value is the value to set for the display key
+   * @param mixed $_cmd
+   * @param mixed $_key
+   * @param mixed $_value
+   * @return void
    */
   public function updateDisplay($_cmd, $_key, $_value) {
 //    log::add(__CLASS__, 'debug', 'update display for '.$_cmd.'='.$_value);
@@ -748,7 +830,13 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     $payload = ["command"=>"lm", "function" => "schedule", "id" =>$this->getId(), "serial" => $serial];
     self::deamon_send($payload);
   }
-    public static function processthingSchedule($eq, $arr){
+
+  /**
+   * @param jee4lm5 $eq
+   * @param mixed $arr
+   * @return void
+   */
+  public static function processthingSchedule($eq, $arr){
     log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
     if ($arr1 != null) {
@@ -771,6 +859,12 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     self::deamon_send($payload);
   }
 
+  /**
+   * update settings information such as firmware version and plumbed in status
+   * @param eqLogic $eq
+   * @param mixed $arr
+   * @return void
+   */
   public static function processthingSettings($eq, $arr){
     #log::add(__CLASS__, 'debug', 'settings='.$arr);
     $arr1 = json_decode($arr, true);
@@ -791,153 +885,161 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     }
   }
 
+  /**
+   * @param jee4lm5 $eq
+   * @param mixed $arr
+   * @return void
+   */
   public static function doRefreshDashboard($eq, $arr) {
     log::add(__CLASS__, 'debug', 'refresh dashboard for eq ' . $eq->getId());
-    $eq->RefreshThingDashboardInformation(json_decode($arr,true));
+    $eq->RefreshThingDashboardInformation($eq, json_decode($arr,true));
   }
 
   /**
    * Refreshes the main counters and not all the information, this is mostly used when there is no
    * local ip defined and the machine is turned on. it mainly fetches the boiler temperature growth and on/off state
+   * @param jee4lm5 $eq
+   * @param mixed $arr1
    * @return bool
    */
-  public function RefreshThingDashboardInformation($arr1)
+  public static function RefreshThingDashboardInformation($eq, $arr1)
   {
-        if ($first = $this->getConfiguration('init')==1) {
-          $this->setConfiguration('init',0);
-          jee4lm5::DoCreateThing($this, $arr1);
-        };
+    if ($first = $eq->getConfiguration('init')==1) {
+      $eq->setConfiguration('init',0);
+      jee4lm5::DoCreateThing($eq, $arr1);
+    };
 
-        $_last_autorefresh=$this->getConfiguration('autorefresh');
-        #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
-        foreach($arr1['widgets'] as $w) { 
-        log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
-        switch ($w["code"]) {
-          case "CMMachineStatus":
-            $cmdOn = $this->getCmd(null, 'jee4lm_on');
-            $cmdOff = $this->getCmd(null, 'jee4lm_off');
-            switch($w['output']['status']) {
-              case "PoweredOn":
-              case "BrewingMode":
-                log::add(__CLASS__, 'debug', 'LM is on');
-                $this->checkAndUpdateCmd('hbmode', 'heat');
-                $this->checkAndUpdateCmd('machinemode', 1);
-                $cmdOn->setIsVisible(0);
-                $cmdOff->setIsVisible(1);
-                $cmdOn->save();
-                $cmdOff->save();
-                $autorefresh = true;
-                break;
-              case "StandBy":
-                log::add(__CLASS__, 'debug', 'LM is off');
-                $this->checkAndUpdateCmd('bbwfree',1);
-                $this->checkAndUpdateCmd('machinemode', 0);
-                $this->checkAndUpdateCmd('hbmode', 'off');
-                $cmdOn->setIsVisible(1);
-                $cmdOff->setIsVisible(0);
-                $cmdOn->save();
-                $cmdOff->save();
-                $autorefresh = false;
-                break;
-              default:
-              log::add(__CLASS__, 'debug', 'getinformation machine status unknown');
+    $_last_autorefresh=$eq->getConfiguration('autorefresh');
+    $autorefresh = $_last_autorefresh;
+    #log::add(__CLASS__, 'debug', 'getinformation start '.json_encode($arr1));
+    foreach($arr1['widgets'] as $w) { 
+      log::add(__CLASS__, 'debug', 'getinformation iteration on ' . json_encode($w));
+      switch ($w["code"]) {
+        case "CMMachineStatus":
+          $cmdOn = $eq->getCmd(null, 'jee4lm_on');
+          $cmdOff = $eq->getCmd(null, 'jee4lm_off');
+          switch($w['output']['status']) {
+            case "PoweredOn":
+            case "BrewingMode":
+              log::add(__CLASS__, 'debug', 'LM is on');
+              $eq->checkAndUpdateCmd('hbmode', 'heat');
+              $eq->checkAndUpdateCmd('machinemode', 1);
+              $cmdOn->setIsVisible(0);
+              $cmdOff->setIsVisible(1);
+              $cmdOn->save();
+              $cmdOff->save();
+              $autorefresh = true;
               break;
-            }
-            // now update display of temperature readdiness
+            case "StandBy":
+              log::add(__CLASS__, 'debug', 'LM is off');
+              $eq->checkAndUpdateCmd('bbwfree',1);
+              $eq->checkAndUpdateCmd('machinemode', 0);
+              $eq->checkAndUpdateCmd('hbmode', 'off');
+              $cmdOn->setIsVisible(1);
+              $cmdOff->setIsVisible(0);
+              $cmdOn->save();
+              $cmdOff->save();
+              $autorefresh = false;
+              break;
+            default:
+            log::add(__CLASS__, 'debug', 'getinformation machine status unknown');
             break;
-          case "CMCoffeeBoiler":
-            $this->checkAndUpdateCmd('coffeetarget',$w['output']['target_temperature']);
-            switch($w['output']['status']) {
-              case "HeatingUp":
-                $this->checkAndUpdateCmd('coffeecurrent',0);
-                $this->checkAndUpdateCmd('coffeeenabled',1);
-                $d = $w['output']['ready_start_time'];
-                $currentTimestamp = time();
-                $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
-                $differenceInSeconds = 0;
-                log::add(__CLASS__, 'debug', 'getinformation coffee ready in '.$differenceInMinutes.' minutes'. 'difference in seconds ='.$differenceInSeconds);
-                if ($differenceInMinutes==0 && $differenceInSeconds<=30) {
-                  $displayDifference = '<span style="color:green"><br\>Prêt < 30s </span>';
-                } else {
-                  if($differenceInMinutes <= 1.5) {
-                    $differenceInMinutes = 0;
-                    $differenceInSeconds = $differenceInMinutes * 60;
-                  }
-                  $displayDifference = '<span style="color:green"><br\>Prêt dans '.($differenceInSeconds > 0 ? $differenceInSeconds.'s' : $differenceInMinutes.'min').'</span>';
+          }
+          // now update display of temperature readdiness
+          break;
+        case "CMCoffeeBoiler":
+          $eq->checkAndUpdateCmd('coffeetarget',$w['output']['target_temperature']);
+          switch($w['output']['status']) {
+            case "HeatingUp":
+              $eq->checkAndUpdateCmd('coffeecurrent',0);
+              $eq->checkAndUpdateCmd('coffeeenabled',1);
+              $d = $w['output']['ready_start_time'];
+              $currentTimestamp = time();
+              $differenceInMinutes = round((($d / 1000 - $currentTimestamp) / 60) * 2) / 2;
+              $differenceInSeconds = 0;
+              log::add(__CLASS__, 'debug', 'getinformation coffee ready in '.$differenceInMinutes.' minutes'. 'difference in seconds ='.$differenceInSeconds);
+              if ($differenceInMinutes==0 && $differenceInSeconds<=30) {
+                $displayDifference = '<span style="color:green"><br\>Prêt < 30s </span>';
+              } else {
+                if($differenceInMinutes <= 1.5) {
+                  $differenceInMinutes = 0;
+                  $differenceInSeconds = $differenceInMinutes * 60;
                 }
-                $this->checkAndUpdateCmd('displaycoffee',$displayDifference);
-                break;
-              case "Ready":
-                $this->checkAndUpdateCmd('coffeecurrent',$w['output']['target_temperature']);
-                $this->checkAndUpdateCmd('coffeeenabled',1);
-                $this->checkAndUpdateCmd('displaycoffee','<span style="color:green"><br\>Prêt</span>');
-                break;
-              case "StandBy":
-              default:
-                $this->checkAndUpdateCmd('coffeecurrent',0);
-                $this->checkAndUpdateCmd('coffeeenabled',0);
-                $this->checkAndUpdateCmd('displaycoffee','<span style="color:red"><br\>Off</span>');
-            }
-            break;
-          case "CMSteamBoilerTemperature":
-            log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
-            $this->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
-            if ($w['output']['targetTemperatureSupported'])
-              $this->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
-            $this->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>Off' : "<span style='color:green'><br\>Allumé</span>");
-            break;
-          case "CMNoWater":
-            log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['alarm']);
-            $this->checkAndUpdateCmd('tankStatus',$$w['output']['allarm']?1:0);
-            break;
-          case "CMBackFlush":
-            $this->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
-            log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
-            $dateTimeString = $w['output']['last_cleaning_start_time']; // La chaîne ISO 8601
-            $unixTimestamp = strtotime($dateTimeString); // Conversion en timestamp Unix
-            $b = date("d", $unixTimestamp);
-            $no = date("d");
-            $daysDifference = $no-$b;
-            $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
-            log::add(__CLASS__, 'debug', 'getinformation backflush last days='. $daysDifference);
-            $this->checkAndUpdateCmd('last_backflush', $szDays);
-            break;
-          case "CMBrewByWeightDoses":
-            log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['dose_1']['dose']. " bbw dose B=".$w['output']['doses']['dose_2']['dose']. " scale connected=".$w['output']['scale_connected']?'yes':'no');
-            $this->checkAndUpdateCmd('isscaleconnected',$w['output']['scale_connected']?1:0);
-            $this->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
-            $this->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['dose_1']['dose']);
-            $this->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['dose_2']['dose']);
-            $this->checkAndUpdateCmd('bbwfree',$w['output']['mode']=="Continuous");
-            $this->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose1"?"":"_inactive");
-            $this->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose2"?"":"_inactive");
-            break; 
-          case "CMPreBrewing": //premouillage
-            $this->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
-            if ($w['output']['mode']=="PreBrewing") {// if prebrew disable preinfusion
-              $this->checkAndUpdateCmd('preinfusionmode',0);            
-              $this->checkAndUpdateCmd('prewettime',$w['output']['times']['pre_brewing'][0]['seconds']['In']);
-              $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['pre_brewing'][0]['seconds']['Out']);
-            } else {
-              $this->checkAndUpdateCmd('preinfusionmode',1);            
-              $this->checkAndUpdateCmd('prewettime',$w['output']['times']['pre_infusion'][0]['seconds']['In']);
-              $this->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['pre_infusion'][0]['seconds']['Out']);
-            }
-            break;
-          case "ThingScale":
-            log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['battery_level']);
-            $this->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
-            if($w['output']['connected'] && $w['output']['battery_level']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
-              $this->checkAndUpdateCmd('scalebattery',$w['output']['battery_level']);
-            break;
-        }
-      } //for each
-      if ($autorefresh != $_last_autorefresh or $first == 1) {
+                $displayDifference = '<span style="color:green"><br\>Prêt dans '.($differenceInSeconds > 0 ? $differenceInSeconds.'s' : $differenceInMinutes.'min').'</span>';
+              }
+              $eq->checkAndUpdateCmd('displaycoffee',$displayDifference);
+              break;
+            case "Ready":
+              $eq->checkAndUpdateCmd('coffeecurrent',$w['output']['target_temperature']);
+              $eq->checkAndUpdateCmd('coffeeenabled',1);
+              $eq->checkAndUpdateCmd('displaycoffee','<span style="color:green"><br\>Prêt</span>');
+              break;
+            case "StandBy":
+            default:
+              $eq->checkAndUpdateCmd('coffeecurrent',0);
+              $eq->checkAndUpdateCmd('coffeeenabled',0);
+              $eq->checkAndUpdateCmd('displaycoffee','<span style="color:red"><br\>Off</span>');
+          }
+          break;
+        case "CMSteamBoilerTemperature":
+          log::add(__CLASS__, 'debug', 'getinformation steam boiler temp=' . $w['output']['targetTemperature']);
+          $eq->checkAndUpdateCmd('steamstatus',$w['output']['status'] == 'On'?1:0);
+          if ($w['output']['targetTemperatureSupported'])
+            $eq->checkAndUpdateCmd('steamtarget',$w['output']['targetTemperature']);
+          $eq->checkAndUpdateCmd('displaysteam',$w['output']['status'] == 'Off' ? '<br\>Off' : "<span style='color:green'><br\>Allumé</span>");
+          break;
+        case "CMNoWater":
+          log::add(__CLASS__, 'debug', 'getinformation tank status=' . $w['output']['alarm']);
+          $eq->checkAndUpdateCmd('tankStatus',$w['output']['alarm']?1:0);
+          break;
+        case "CMBackFlush":
+          $eq->checkAndUpdateCmd('backflush',$w['output']['status'] == 'On' ? 1 : 0);
+          log::add(__CLASS__, 'debug', 'getinformation backflush status=' . $w['output']['status']);
+          $dateTimeString = $w['output']['last_cleaning_start_time']; // La chaîne ISO 8601
+          $unixTimestamp = strtotime($dateTimeString); // Conversion en timestamp Unix
+          $b = date("d", $unixTimestamp);
+          $no = date("d");
+          $daysDifference = $no-$b;
+          $szDays = ($daysDifference > 1 ? "il y a $daysDifference jours" : ($daysDifference == 0 ? "Aujourd'hui" : "hier"));
+          log::add(__CLASS__, 'debug', 'getinformation backflush last days='. $daysDifference);
+          $eq->checkAndUpdateCmd('last_backflush', $szDays);
+          break;
+        case "CMBrewByWeightDoses":
+          log::add(__CLASS__, 'debug', 'getinformation bbw dose A=' . $w['output']['doses']['dose_1']['dose']. " bbw dose B=".$w['output']['doses']['dose_2']['dose']. " scale connected=".$w['output']['scale_connected']?'yes':'no');
+          $eq->checkAndUpdateCmd('isscaleconnected',$w['output']['scale_connected']?1:0);
+          $eq->checkAndUpdateCmd('bbwmode',$w['output']['mode']);
+          $eq->checkAndUpdateCmd('bbwdoseA',$w['output']['doses']['dose_1']['dose']);
+          $eq->checkAndUpdateCmd('bbwdoseB',$w['output']['doses']['dose_2']['dose']);
+          $eq->checkAndUpdateCmd('bbwfree',$w['output']['mode']=="Continuous");
+          $eq->updatedisplay('bbwdoseA', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose1"?"":"_inactive");
+          $eq->updatedisplay('bbwdoseB', 'template', PLUGINNAME."::bbw_dose".$w['output']['mode']=="Dose2"?"":"_inactive");
+          break; 
+        case "CMPreBrewing": //premouillage
+          $eq->checkAndUpdateCmd('prewet',$w['output']['mode']=="PreBrewing"); // or Disabled
+          if ($w['output']['mode']=="PreBrewing") {// if prebrew disable preinfusion
+            $eq->checkAndUpdateCmd('preinfusionmode',0);            
+            $eq->checkAndUpdateCmd('prewettime',$w['output']['times']['pre_brewing'][0]['seconds']['In']);
+            $eq->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['pre_brewing'][0]['seconds']['Out']);
+          } else {
+            $eq->checkAndUpdateCmd('preinfusionmode',1);            
+            $eq->checkAndUpdateCmd('prewettime',$w['output']['times']['pre_infusion'][0]['seconds']['In']);
+            $eq->checkAndUpdateCmd('prewetholdtime',$w['output']['times']['pre_infusion'][0]['seconds']['Out']);
+          }
+          break;
+        case "ThingScale":
+          log::add(__CLASS__, 'debug', 'getinformation scale battery=' . $w['output']['battery_level']);
+          $eq->checkAndUpdateCmd('isscaleconnected',$w['output']['connected']?1:0);
+          if($w['output']['connected'] && $w['output']['battery_level']>0) // fetch battery only if scale is connected and battery is not null or zero else display last value
+            $eq->checkAndUpdateCmd('scalebattery',$w['output']['battery_level']);
+          break;
+      }
+    } //for each
+    if ($autorefresh != $_last_autorefresh or $first == 1) {
         $payload = ["cmd" => "lm","function" => $autorefresh ? "on" : "off"];
         jee4lm5::deamon_send(json_encode($payload));
-        $this->setConfiguration('autorefresh', $autorefresh);
-      }
-      return true;
+        $eq->setConfiguration('autorefresh', $autorefresh);
+    }
+    return true;
   }
 
   /**
@@ -1192,6 +1294,7 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     log::add(__CLASS__, 'info', 'Lancement démon:' . self::getPython3() . "{$path}/".PLUGINNAME."d.py");
     $result = exec($cmd . ' >> ' . log::getPathToLog(''.PLUGINNAME.'d') . ' 2>&1 &');     
     log::add(__CLASS__, 'info', 'resultat = '.$result);
+    $i=0;
     while ($i < 10) {
         $deamon_info = self::deamon_info();
         if ($deamon_info['state'] == 'ok') 
@@ -1228,6 +1331,11 @@ public function CoffeeMachineSettingPreWetEnabled($eq, $b) {
     
   }
 
+  /**
+   * send a message to the daemon
+   * @param mixed $_params the parameters to send
+   * @return void
+   */
   public static function deamon_send($_params) {
     $deamon_info = self::deamon_info();
     if ($deamon_info['state'] != 'ok') 
@@ -1262,6 +1370,11 @@ class jee4lm5Cmd extends cmd
     return $this->getLogicalId() == 'refresh';
   }
 
+  /**
+   * @param mixed $_logicalID
+   * @param mixed $_expected_value
+   * @return bool
+   */
   public function getLMValue($_logicalID, $_expected_value)
   {
     $r = cmd::byLogicalId($_logicalID);
