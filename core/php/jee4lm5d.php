@@ -43,9 +43,9 @@ foreach ($result as $key => $value) {
     log::add('jee4lm5', 'debug', 'callback key=' . $key);
 }
 
-// Detect response — no eq id needed, processes list of discovered machines
+// Detect response — no eq id needed
 if (isset($result['cmd']) && $result['cmd'] === 'detect') {
-    log::add('jee4lm5', 'debug', 'callback: detect response received'); // FIX #2+#3: was 'error' + typo
+    log::add('jee4lm5', 'debug', 'callback: detect response received');
     jee4lm5::processdetect($result['things']);
     die();
 }
@@ -64,9 +64,7 @@ if ($eq === null) {
 
 log::add('jee4lm5', 'debug', 'callback: routing for eq=' . $result['id']);
 
-// FIX #4: explicit if/elseif chain instead of dangling if/else nesting
 if (isset($result['run'])) {
-    // Daemon heartbeat / status flag
     $eq->setConfiguration('daemon', $result['run']);
     $eq->save();
     log::add('jee4lm5', 'debug', 'callback: daemon run flag=' . $result['run']);
@@ -75,8 +73,21 @@ if (isset($result['run'])) {
 } elseif (isset($result['schedule'])) {
     jee4lm5::processthingSchedule($eq, $result['schedule']);
 } elseif (isset($result['dash'])) {
-    // Handles both one-shot 'dash' responses and polling loop 'dash_update' messages
+    // Handles both one-shot 'dash' and polling loop 'dash_update' messages.
+    // checkAndUpdateCmd() inside doRefreshDashboard emits cmd::update events
+    // automatically when values change — Jeedom core notifies connected browsers.
+    // For commands that must always trigger a UI refresh even when value is stable
+    // (e.g. temperatures holding steady while machine is ready), we emit an
+    // eqLogic::update event explicitly so the dashboard polls again within 5s.
     jee4lm5::doRefreshDashboard($eq, $result['dash']);
+
+    // Force UI refresh on every dashboard push regardless of value changes.
+    // This ensures the browser reflects the 5s polling loop when machine is ON.
+    event::add('eqLogic::update', array(
+        'eqLogic_id' => $eq->getId(),
+        'visible'    => $eq->getIsVisible(),
+        'enable'     => $eq->getIsEnable(),
+    ));
 } else {
     log::add('jee4lm5', 'warning', 'callback: unhandled message keys=' . implode(',', array_keys($result)));
 }
