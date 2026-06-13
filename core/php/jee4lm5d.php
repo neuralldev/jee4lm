@@ -57,7 +57,7 @@ if (!isset($result['id'])) {
 }
 
 $eq = jee4lm5::byId($result['id']);
-if ($eq === null) {
+if ($eq === null || !is_object($eq)) {
     log::add('jee4lm5', 'warning', 'callback: eqlogic id=' . $result['id'] . ' not found');
     die();
 }
@@ -72,6 +72,11 @@ if (isset($result['run'])) {
     jee4lm5::processthingSettings($eq, $result['settings']);
 } elseif (isset($result['schedule'])) {
     jee4lm5::processthingSchedule($eq, $result['schedule']);
+} elseif (isset($result['dash'])) {
+    // Handles both one-shot 'dash' and polling loop 'dash_update' messages.
+    // checkAndUpdateCmd() inside doRefreshDashboard emits cmd::update events
+    // automatically when values change — Jeedom core notifies connected browsers.
+    jee4lm5::doRefreshDashboard($eq, $result['dash']);
 } else {
     log::add('jee4lm5', 'warning', 'callback: unhandled message keys=' . implode(',', array_keys($result)));
 }
