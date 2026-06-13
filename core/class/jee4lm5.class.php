@@ -1192,8 +1192,14 @@ class jee4lm5 extends eqLogic
     $cmd    .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd    .= ' --socketport '  . JEEDOM_DAEMON_PORT;
     $cmd    .= ' --apikey '      . jeedom::getApiKey(__CLASS__);
-    $cmd    .= ' --callback '    . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . '_ajax.php';
     $cmd    .= ' --pid '         . jeedom::getTmpFolder(__CLASS__) . '/' . PLUGINNAME . 'd.pid';
+
+    $callback = network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp');
+    if (empty($callback)) {
+        $callback = 'http://127.0.0.1:80';
+        log::add(__CLASS__, 'warning', 'network internal not configured, using fallback');
+    }
+    $cmd .= ' --callback ' . $callback . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . 'd.php';
     log::add(__CLASS__, 'info', "start daemon: $cmd");
     $result = exec($cmd . ' >> ' . log::getPathToLog('' . PLUGINNAME . 'd') . ' 2>&1 &');
     log::add(__CLASS__, 'info', "exec result=$result");
