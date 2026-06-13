@@ -1298,14 +1298,15 @@ class jee4lm5 extends eqLogic
       $replace['#name#']     = $this->getName();
       $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
 
-      // Inject cmd ids AND current values for initial render
+      // Inject cmd ids, current values (#val_xxx#) and states for CSS classes.
       $states = array();
       foreach ($this->getCmd() as $cmd) {
         $logicalId = $cmd->getLogicalId();
         $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
-        // Only read values for info commands — never execute action commands
         if ($cmd->getType() === 'info') {
-            $states[$logicalId] = $cmd->execCmd();
+            $v = $cmd->execCmd();
+            $states[$logicalId] = $v;
+            $replace['#val_' . $logicalId . '#'] = ($v === null) ? '' : $v;
         }
       }
 
@@ -1319,7 +1320,9 @@ class jee4lm5 extends eqLogic
       $replace['#lm_css_classes#'] = $cssClasses;
 
       $html = template_replace($replace, $template);
+      // Clean any unresolved placeholders so they never show raw
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
+      $html = preg_replace('/#val_[a-z0-9_]+#/', '', $html);
       return $html;
   }
 
