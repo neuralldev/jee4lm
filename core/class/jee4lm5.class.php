@@ -926,6 +926,8 @@ class jee4lm5 extends eqLogic
         // After to_dict() mashumaro uses Python field names: dose_1, dose_2
         // DoseMode: Continuous, PulsesType, Dose1, Dose2, MassType
         case "CMBrewByWeightDoses":
+          // Widget present => machine supports brew-by-weight
+          $eq->checkAndUpdateCmd('isbbw', 1);
           $eq->checkAndUpdateCmd('isscaleconnected', !empty($output['scale_connected']) ? 1 : 0);
           $eq->checkAndUpdateCmd('bbwmode',  $output['mode']);
           $eq->checkAndUpdateCmd('bbwdoseA', $output['doses']['dose_1']['dose']);
@@ -936,18 +938,19 @@ class jee4lm5 extends eqLogic
           break;
 
         // WidgetType::CM_PRE_BREWING = "CMPreBrewing"
-        // PreExtractionMode: PreInfusion, PreBrewing, Disabled
-        // times.pre_brewing[0].seconds is a raw dict from the API — keys are aliases 'In'/'Out'
-        // (mashumaro does not convert nested raw dict keys)
+        // mode is one of: PreBrewing | PreInfusion | Disabled
+        // times.pre_brewing[0].seconds is a raw dict — keys are aliases 'In'/'Out'
         case "CMPreBrewing":
-          $isPreBrew = ($output['mode'] === 'PreBrewing');
-          $eq->checkAndUpdateCmd('prewet', $isPreBrew ? 1 : 0);
-          if ($isPreBrew) {
-            $eq->checkAndUpdateCmd('preinfusionmode', 0);
-            $times = $output['times']['pre_brewing'][0]['seconds'] ?? null;
-          } else {
-            $eq->checkAndUpdateCmd('preinfusionmode', 1);
-            $times = $output['times']['pre_infusion'][0]['seconds'] ?? null;
+          $mode = $output['mode'];
+          $isPreBrew = ($mode === 'PreBrewing');
+          $isPreInf  = ($mode === 'PreInfusion');
+          $eq->checkAndUpdateCmd('prewet',          $isPreBrew ? 1 : 0);
+          $eq->checkAndUpdateCmd('preinfusionmode', $isPreInf  ? 1 : 0);
+          $times = null;
+          if (!empty($output['times']['pre_brewing'][0]['seconds'])) {
+            $times = $output['times']['pre_brewing'][0]['seconds'];
+          } elseif (!empty($output['times']['pre_infusion'][0]['seconds'])) {
+            $times = $output['times']['pre_infusion'][0]['seconds'];
           }
           if ($times !== null) {
             $eq->checkAndUpdateCmd('prewettime',     $times['In']);
@@ -1303,14 +1306,22 @@ class jee4lm5 extends eqLogic
       $replace['#name#']     = $this->getName();
       $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
 
-      // Inject cmd ids AND current values for initial render
+      // Inject cmd ids, current values (#val_xxx#), rendered sliders and states.
       $states = array();
       foreach ($this->getCmd() as $cmd) {
         $logicalId = $cmd->getLogicalId();
         $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
-        // Only read values for info commands — never execute action commands
         if ($cmd->getType() === 'info') {
-            $states[$logicalId] = $cmd->execCmd();
+            $v = $cmd->execCmd();
+            $states[$logicalId] = $v;
+            $replace['#val_' . $logicalId . '#'] = ($v === null) ? '' : $v;
+        } elseif ($cmd->getSubType() === 'slider') {
+            // Render full Jeedom slider markup so it is interactive.
+            // Hide the auto-generated name — the widget has its own label.
+            $cmd->setDisplay('showNameOndashboard', 0);
+            $cmd->setDisplay('showNameOnmobile', 0);
+            $cmd->setDisplay('showIconAndNamedashboard', 0);
+            $replace['#slider_' . $logicalId . '#'] = $cmd->toHtml($_version);
         }
       }
 
@@ -1324,7 +1335,10 @@ class jee4lm5 extends eqLogic
       $replace['#lm_css_classes#'] = $cssClasses;
 
       $html = template_replace($replace, $template);
+      // Clean any unresolved placeholders so they never show raw
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
+      $html = preg_replace('/#val_[a-z0-9_]+#/', '', $html);
+      $html = preg_replace('/#slider_[a-z0-9_]+#/', '', $html);
       return $html;
   }
 
