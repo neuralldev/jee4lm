@@ -49,38 +49,37 @@ class Jee4LM(BaseDaemon):
     # ------------------------------------------------------------------
 
     async def on_start(self) -> None:
-        self._logger.info("daemon starting")
-
-        # Load or generate installation key
         first_registration = not self._load_install_key()
         if first_registration:
             if not self._save_install_key():
-                self._logger.error("cannot write installation key — check permissions")
                 await self.stop()
                 return
-            self._logger.info("installation key generated")
 
-        # Load credentials — may be absent on first run, daemon stays up and waits
+        already_registered = (self.data_dir / "registered.json").exists()
+
         if self._load_credential() and self.credential.isinit():
-            self._logger.info("credentials loaded")
+            self.client = LaMarzoccoCloudClient(
+                username=self.credential.username,
+                password=self.credential.password,
+                installation_key=self.installation_key,
+            )
+            if not already_registered:
+                try:
+                    await self.client.async_register_client()
+                    (self.data_dir / "registered.json").write_text('{"registered":true}')
+                    self._logger.info("client registered")
+                except Exception as e:
+                    self._logger.error(f"registration failed: {e}")
+                    # Delete key to force fresh key on next start
+                    (self.data_dir / INSTALLKEYFILE).unlink(missing_ok=True)
+                    await self.stop()
+                    return
         else:
-            self._logger.warning("no credentials — daemon waiting for login command")
-
-        # Build cloud client (pylamarzocco manages its own ClientSession)
-        self.client = LaMarzoccoCloudClient(
-            username=self.credential.username,
-            password=self.credential.password,
-            installation_key=self.installation_key,
-        )
-
-        if first_registration and self.credential.isinit():
-            try:
-                await self.client.async_register_client()
-                self._logger.info("client registered with LM cloud")
-            except Exception as e:
-                self._logger.error(f"cloud registration failed: {e}")
-                await self.stop()
-                return
+            # No credentials yet — build client with empty creds, wait for login
+            self.client = LaMarzoccoCloudClient(
+                username="", password="",
+                installation_key=self.installation_key,
+            )
 
         self._logger.info("daemon ready")
 
