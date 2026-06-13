@@ -7,8 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
-from pylamarzocco.const import PreExtractionMode, MachineMode, WidgetType
-from pylamarzocco.models._config import MachineStatus  # pas nécessaire, juste pour référence
+from pylamarzocco.const import PreExtractionMode, MachineMode
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
 from pylamarzocco.util import InstallationKey, generate_installation_key
 from mashumaro.mixins.json import DataClassJSONMixin
@@ -49,38 +48,47 @@ class Jee4LM(BaseDaemon):
     # ------------------------------------------------------------------
 
     async def on_start(self) -> None:
+        self._logger.info("daemon starting")
+
+        # Load or generate installation key
         first_registration = not self._load_install_key()
         if first_registration:
             if not self._save_install_key():
+                self._logger.error("cannot write installation key — check permissions")
                 await self.stop()
                 return
+            self._logger.info("installation key generated")
 
-        already_registered = (self.data_dir / "registered.json").exists()
-        has_creds = self._load_credential() and self.credential.isinit()
-        self._logger.info(f"credentials loaded: {has_creds} username='{self.credential.username}'")
-        if  has_creds:
-            self.client = LaMarzoccoCloudClient(
-                username=self.credential.username,
-                password=self.credential.password,
-                installation_key=self.installation_key,
-            )
-            if not already_registered:
-                try:
-                    await self.client.async_register_client()
-                    (self.data_dir / "registered.json").write_text('{"registered":true}')
-                    self._logger.info("client registered")
-                except Exception as e:
-                    self._logger.error(f"registration failed: {e}")
-                    # Delete key to force fresh key on next start
-                    (self.data_dir / INSTALLKEYFILE).unlink(missing_ok=True)
-                    await self.stop()
-                    return
+        # Load credentials — may be absent on first run, daemon stays up and waits
+        if self._load_credential() and self.credential.isinit():
+            self._logger.info("credentials loaded")
         else:
-            # No credentials yet — build client with empty creds, wait for login
-            self.client = LaMarzoccoCloudClient(
-                username="", password="",
-                installation_key=self.installation_key,
-            )
+            self._logger.warning("no credentials — daemon waiting for login command")
+
+        # Build cloud client (pylamarzocco manages its own ClientSession)
+        self.client = LaMarzoccoCloudClient(
+            username=self.credential.username,
+            password=self.credential.password,
+            installation_key=self.installation_key,
+        )
+
+        # Register if not already confirmed — required before any API call.
+        # registered.json acts as a flag; if absent, registration is attempted
+        # regardless of whether the key file already existed.
+        already_registered = (self.data_dir / "registered.json").exists()
+        if not already_registered and self.credential.isinit():
+            try:
+                await self.client.async_register_client()
+                (self.data_dir / "registered.json").write_text('{"registered": true}')
+                self._logger.info("client registered with LM cloud")
+            except Exception as e:
+                self._logger.error(f"cloud registration failed: {e}")
+                # Delete install key to force fresh key+registration on next start
+                install_key_path = self.data_dir / INSTALLKEYFILE
+                if install_key_path.exists():
+                    install_key_path.unlink()
+                await self.stop()
+                return
 
         self._logger.info("daemon ready")
 
@@ -141,10 +149,10 @@ class Jee4LM(BaseDaemon):
             self._logger.info(f"dashboard loop cancelled serial={serial}")
 
     def _machine_is_on(self, machine: LaMarzoccoMachine) -> bool:
-        """Return True if dashboard reports machine not in standby."""
+        """Return True if the dashboard reports machine in brewing mode."""
         try:
-            status = machine.dashboard.config.get(WidgetType.CM_MACHINE_STATUS)
-            return status is not None and status.mode != MachineMode.STANDBY
+            return machine.dashboard.config is not None and \
+                machine.dashboard.machine_mode != MachineMode.STANDBY
         except Exception:
             return False
 
