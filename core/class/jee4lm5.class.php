@@ -100,8 +100,7 @@ class jee4lm5 extends eqLogic
             $w["output"]["doses"]["dose_2"]["dose_min"],
             $w["output"]["doses"]["dose_2"]["dose_max"],
             $w["output"]["doses"]["dose_2"]["dose_step"]);
-          $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
-          $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
+          // linksetpoint for BBW sliders done after save() below
           break;
 
         case "ThingScale":
