@@ -1187,7 +1187,7 @@ class jee4lm5 extends eqLogic
       return false;
     }
     $path    = realpath(dirname(__FILE__) . '/../../resources/');
-    $cmd     = 'python3 ' . $path . '/' . PLUGINNAME . '/'. PLUGINNAME. 'd.py';
+    $cmd     = 'python3 ' . $path . '/' . PLUGINNAME . 'd/'. PLUGINNAME. 'd.py';
     $cmd    .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd    .= ' --socketport '  . JEEDOM_DAEMON_PORT;
     $cmd    .= ' --apikey '      . jeedom::getApiKey(__CLASS__);
