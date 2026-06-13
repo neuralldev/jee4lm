@@ -93,13 +93,13 @@ class jee4lm5 extends eqLogic
           $_eq->AddAction("jee4lm_bbwA",       "BBW Dose 1",    "button", "", 1);
           $_eq->AddAction("jee4lm_bbwB",       "BBW Dose 2",    "button", "", 1);
           $_eq->AddAction("jee4lm_doseA_slider","Régler Dose 1", "button", "", 1, "slider",
-            $w["output"]["doses"]["Dose1"]["doseMin"],
-            $w["output"]["doses"]["Dose1"]["doseMax"],
-            $w["output"]["doses"]["Dose1"]["doseStep"]);
+            $w["output"]["doses"]["dose_1"]["dose_min"],
+            $w["output"]["doses"]["dose_1"]["dose_max"],
+            $w["output"]["doses"]["dose_1"]["dose_step"]);
           $_eq->AddAction("jee4lm_doseB_slider","Régler Dose 2", "button", "", 1, "slider",
-            $w["output"]["doses"]["Dose2"]["doseMin"],
-            $w["output"]["doses"]["Dose2"]["doseMax"],  // was incorrectly using Dose1 max
-            $w["output"]["doses"]["Dose2"]["doseStep"]);
+            $w["output"]["doses"]["dose_2"]["dose_min"],
+            $w["output"]["doses"]["dose_2"]["dose_max"],
+            $w["output"]["doses"]["dose_2"]["dose_step"]);
           $_eq->linksetpoint("jee4lm_doseA_slider", "bbwdoseA");
           $_eq->linksetpoint("jee4lm_doseB_slider", "bbwdoseB");
           break;
@@ -142,13 +142,13 @@ class jee4lm5 extends eqLogic
           $_eq->AddCommand("Prétrempage durée", 'prewettime',     'info', 'numeric', null,                       's',  'THERMOSTAT_SETPOINT',   0);
           $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null,                       's',  'THERMOSTAT_SETPOINT',   0);
           $_eq->AddAction("jee4lm_prewet_slider",      "Régler consigne mouillage",       "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider",
-            $w["output"]["times"]["PreBrewing"]["secondsMin"]["In"],
-            $w["output"]["times"]["PreBrewing"]["secondsMax"]["In"],
-            $w["output"]["times"]["PreBrewing"]["secondsStep"]["In"]);
+            $w["output"]["times"]["pre_brewing"][0]["seconds_min"]["In"],
+            $w["output"]["times"]["pre_brewing"][0]["seconds_max"]["In"],
+            $w["output"]["times"]["pre_brewing"][0]["seconds_step"]["In"]);
           $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider",
-            $w["output"]["times"]["PreBrewing"]["secondsMin"]["Out"],
-            $w["output"]["times"]["PreBrewing"]["secondsMax"]["Out"],
-            $w["output"]["times"]["PreBrewing"]["secondsStep"]["Out"]);
+            $w["output"]["times"]["pre_brewing"][0]["seconds_min"]["Out"],
+            $w["output"]["times"]["pre_brewing"][0]["seconds_max"]["Out"],
+            $w["output"]["times"]["pre_brewing"][0]["seconds_step"]["Out"]);
           $_eq->AddAction("jee4lm_prewet_on",  "Prémouillage on",  "binarySwitch", "ENERGY_ON",  1);
           $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
           break; // FIX #9: break was missing, causing fall-through into CMPreExtraction
@@ -560,7 +560,13 @@ class jee4lm5 extends eqLogic
       // FIX #11: DateTime::createFromFormat is a static factory, not an instance method
       // connection_date from to_dict() is a Python datetime serialized to ISO string by mashumaro
       $connDate = $machine['connection_date'] ?? null;
-      $d = $connDate ? DateTime::createFromFormat(DateTime::ATOM, $connDate) : false;
+      // mashumaro serializes datetime with microseconds: 2026-06-12T01:28:56.620000+00:00
+      // DateTime::ATOM does not handle .uuuuuu — try with then without microseconds
+      $d = false;
+      if ($connDate) {
+        $d = DateTime::createFromFormat('Y-m-d\TH:i:s.uP', $connDate)
+          ?: DateTime::createFromFormat('Y-m-d\TH:i:sP', $connDate);
+      }
       if ($d instanceof DateTime) {
         log::add(__CLASS__, 'debug', 'detect paired on ' . $d->format("d/m/Y"));
       } else {
@@ -918,8 +924,8 @@ class jee4lm5 extends eqLogic
 
         // WidgetType::CM_PRE_BREWING = "CMPreBrewing"
         // PreExtractionMode: PreInfusion, PreBrewing, Disabled
-        // times.pre_brewing[0].seconds.seconds_in / seconds_out  (SecondsInOut with alias In/Out)
-        // After to_dict() mashumaro uses Python field names: seconds_in, seconds_out
+        // times.pre_brewing[0].seconds is a raw dict from the API — keys are aliases 'In'/'Out'
+        // (mashumaro does not convert nested raw dict keys)
         case "CMPreBrewing":
           $isPreBrew = ($output['mode'] === 'PreBrewing');
           $eq->checkAndUpdateCmd('prewet', $isPreBrew ? 1 : 0);
@@ -931,8 +937,8 @@ class jee4lm5 extends eqLogic
             $times = $output['times']['pre_infusion'][0]['seconds'] ?? null;
           }
           if ($times !== null) {
-            $eq->checkAndUpdateCmd('prewettime',     $times['seconds_in']);
-            $eq->checkAndUpdateCmd('prewetholdtime', $times['seconds_out']);
+            $eq->checkAndUpdateCmd('prewettime',     $times['In']);
+            $eq->checkAndUpdateCmd('prewetholdtime', $times['Out']);
           }
           break;
 
@@ -1181,32 +1187,18 @@ class jee4lm5 extends eqLogic
   public static function deamon_start($_automatic = false)
   {
     self::deamon_stop();
-    
-    // Kill any lingering process on the daemon port before starting
-    $port = JEEDOM_DAEMON_PORT;
-    exec("fuser -k {$port}/tcp 2>/dev/null");
-    sleep(1); // let the port be released
-   
-
     $deamon_info = self::deamon_info();
     if ($deamon_info['launchable'] !== 'ok') {
       log::add(__CLASS__, 'error', __('Daemon non lançable', __FILE__) . ' : ' . $deamon_info['launchable']);
       return false;
     }
     $path    = realpath(dirname(__FILE__) . '/../../resources/');
-    $pythonpath = $path . '/python_venv/bin/python3';
-    $cmd     = $pythonpath . ' ' . $path . '/' . PLUGINNAME . 'd/'. PLUGINNAME. 'd.py';
+    $cmd     = 'python3 ' . $path . '/' . PLUGINNAME . 'd.py';
     $cmd    .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd    .= ' --socketport '  . JEEDOM_DAEMON_PORT;
     $cmd    .= ' --apikey '      . jeedom::getApiKey(__CLASS__);
+    $cmd    .= ' --callback '    . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . '_ajax.php';
     $cmd    .= ' --pid '         . jeedom::getTmpFolder(__CLASS__) . '/' . PLUGINNAME . 'd.pid';
-
-    $callback = network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp');
-    if (empty($callback)) {
-        $callback = 'http://127.0.0.1:80';
-        log::add(__CLASS__, 'warning', 'network internal not configured, using fallback');
-    }
-    $cmd .= ' --callback ' . $callback . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . 'd.php';
     log::add(__CLASS__, 'info', "start daemon: $cmd");
     $result = exec($cmd . ' >> ' . log::getPathToLog('' . PLUGINNAME . 'd') . ' 2>&1 &');
     log::add(__CLASS__, 'info', "exec result=$result");
