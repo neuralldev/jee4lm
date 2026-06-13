@@ -777,6 +777,31 @@
   seedFromDom();
   updateStates();
 
+  // Wire custom action buttons to Jeedom command execution.
+  // In a custom eqLogic template the core does not auto-bind clicks on our
+  // buttons, so we delegate clicks on [data-type="action"] elements that carry
+  // a numeric data-cmd_id and call jeedom.cmd.execute ourselves.
+  w.addEventListener('click', function(ev) {
+    var btn = ev.target.closest('[data-type="action"][data-cmd_id]');
+    if (!btn || !w.contains(btn)) return;
+    var cmdId = btn.dataset.cmd_id;
+    // Skip sliders (handled by their own Jeedom markup) and non-numeric ids
+    if (!cmdId || !/^\d+$/.test(cmdId)) return;
+    if (btn.dataset.subtype === 'slider') return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    jeedom.cmd.execute({
+      id: cmdId,
+      error: function(err) {
+        if (typeof notify === 'function') notify('Erreur', err.message, 'error');
+      },
+      success: function() {
+        // Optimistic: refresh states shortly after; daemon push will follow
+        setTimeout(updateStates, 300);
+      }
+    });
+  });
+
   // React to Jeedom cmd updates (Jeedom 4.5 fires jeedom.cmd.update)
   $(document).off('jeedom.cmd.update.lm' + uid)
     .on('jeedom.cmd.update.lm' + uid, function(e, data) {
