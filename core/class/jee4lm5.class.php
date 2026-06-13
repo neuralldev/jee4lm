@@ -1181,6 +1181,13 @@ class jee4lm5 extends eqLogic
   public static function deamon_start($_automatic = false)
   {
     self::deamon_stop();
+    
+    // Kill any lingering process on the daemon port before starting
+    $port = JEEDOM_DAEMON_PORT;
+    exec("fuser -k {$port}/tcp 2>/dev/null");
+    sleep(1); // let the port be released
+   
+
     $deamon_info = self::deamon_info();
     if ($deamon_info['launchable'] !== 'ok') {
       log::add(__CLASS__, 'error', __('Daemon non lançable', __FILE__) . ' : ' . $deamon_info['launchable']);
