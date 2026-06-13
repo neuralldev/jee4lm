@@ -101,6 +101,19 @@
         <span class="lm-meta-label lm-ml">Pause</span>
         <span class="cmd lm-time-val" data-cmd_id="#cmd_prewetholdtime_id#">#val_prewetholdtime#</span>s
       </div>
+      <!-- Prewet timing sliders — accessible directly when prewet active -->
+      <div class="lm-prewet-sliders lm-when-prewet-on">
+        <div class="lm-setting-row">
+          <label>Mouillage</label>
+          <div class="cmd" data-type="action" data-subtype="slider"
+            data-cmd_id="#cmd_jee4lm_prewet_slider_id#"></div>
+        </div>
+        <div class="lm-setting-row">
+          <label>Pause</label>
+          <div class="cmd" data-type="action" data-subtype="slider"
+            data-cmd_id="#cmd_jee4lm_prewet_time_slider_id#"></div>
+        </div>
+      </div>
     </div>
     <!-- PreInfusion (plombé) -->
     <div class="lm-preinfusion" id="lm-preinfusion-#id#">
@@ -183,17 +196,7 @@
           data-cmd_id="#cmd_jee4lm_steam_slider_id#"></div>
       </div>
 
-      <div class="lm-setting-row lm-when-prewet-on">
-        <label>Mouillage</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_prewet_slider_id#"></div>
-      </div>
-
-      <div class="lm-setting-row lm-when-prewet-on">
-        <label>Pause</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_prewet_time_slider_id#"></div>
-      </div>
+      <!-- Prewet timing sliders moved to prewet section above -->
 
       <!-- Dose sliders moved to BBW section (always visible when balance present) -->
 
@@ -532,6 +535,14 @@
 }
 .lm-btn-small:hover { border-color: var(--lm-red); color: var(--lm-red); }
 .lm-btn-off { color: var(--lm-muted); }
+.lm-btn-small.lm-btn-active {
+  background: var(--lm-red);
+  border-color: var(--lm-red);
+  color: #fff;
+  font-weight: 600;
+}
+.lm-prewet-sliders { margin-top: 6px; }
+.lm-prewet-sliders .lm-setting-row { border-bottom: none; padding: 3px 0; }
 .lm-btn-danger {
   background: transparent;
   border: 1px solid var(--lm-red);
@@ -587,6 +598,7 @@
     fwversion:     '#cmd_fwversion_id#',
     gwversion:     '#cmd_gwversion_id#',
     tankStatus:    '#cmd_tankStatus_id#',
+    preinfusionmode: '#cmd_preinfusionmode_id#',
     hbmode:        '#cmd_hbmode_id#',
   };
 
@@ -706,6 +718,17 @@
     var dB = document.getElementById('lm-doseB-' + uid);
     if (dA) dA.querySelector('.lm-dose-btn').classList.toggle('lm-dose-active', mode === 'Dose1');
     if (dB) dB.querySelector('.lm-dose-btn').classList.toggle('lm-dose-active', mode === 'Dose2');
+
+    // Highlight active ON/OFF toggle buttons to reflect current state
+    function markToggle(onId, offId, isOn) {
+      var onBtn  = document.querySelector('.cmd[data-cmd_id="' + onId + '"]');
+      var offBtn = document.querySelector('.cmd[data-cmd_id="' + offId + '"]');
+      if (onBtn)  onBtn.classList.toggle('lm-btn-active', isOn);
+      if (offBtn) offBtn.classList.toggle('lm-btn-active', !isOn);
+    }
+    markToggle('#cmd_jee4lm_steam_on_id#',  '#cmd_jee4lm_steam_off_id#',  steamOn);
+    markToggle('#cmd_jee4lm_prewet_on_id#', '#cmd_jee4lm_prewet_off_id#', prewet);
+    markToggle('#cmd_jee4lm_preextraction_on_id#', '#cmd_jee4lm_preextraction_off_id#', val(CMD.preinfusionmode) == '1');
   }
 
   // Settings toggle
