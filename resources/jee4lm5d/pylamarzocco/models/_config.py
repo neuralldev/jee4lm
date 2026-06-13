@@ -370,7 +370,7 @@ class RinseFlush(BaseWidgetOutput):
     time_seconds: float = field(metadata=field_options(alias="timeSeconds"))
     time_seconds_min: int = field(metadata=field_options(alias="timeSecondsMin"))
     time_seconds_max: int = field(metadata=field_options(alias="timeSecondsMax"))
-    time_seconds_step: int = field(metadata=field_options(alias="timeSecondsStep"))
+    time_seconds_step: float = field(metadata=field_options(alias="timeSecondsStep"))
 
 
 @dataclass(kw_only=True)
@@ -491,7 +491,7 @@ class BaseDoseSettings(DataClassJSONMixin):
     dose: float
     dose_min: float = field(metadata=field_options(alias="doseMin"))
     dose_max: float = field(metadata=field_options(alias="doseMax"))
-    dose_step: int = field(metadata=field_options(alias="doseStep"))
+    dose_step: float = field(metadata=field_options(alias="doseStep"))
 
 
 @dataclass(kw_only=True)
