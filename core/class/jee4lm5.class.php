@@ -1309,6 +1309,10 @@ class jee4lm5 extends eqLogic
             $v = $cmd->execCmd();
             $states[$logicalId] = $v;
             $replace['#val_' . $logicalId . '#'] = ($v === null) ? '' : $v;
+        } elseif ($cmd->getSubType() === 'slider') {
+            // Render the full Jeedom slider markup so it is interactive.
+            // A bare <div class="cmd" data-subtype="slider"> is NOT hydrated.
+            $replace['#slider_' . $logicalId . '#'] = $cmd->toHtml($_version);
         }
       }
 
@@ -1325,6 +1329,7 @@ class jee4lm5 extends eqLogic
       // Clean any unresolved placeholders so they never show raw
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
       $html = preg_replace('/#val_[a-z0-9_]+#/', '', $html);
+      $html = preg_replace('/#slider_[a-z0-9_]+#/', '', $html);
       return $html;
   }
 

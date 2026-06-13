@@ -117,13 +117,11 @@
       <div class="lm-prewet-sliders lm-when-prewet-on">
         <div class="lm-setting-row">
           <label>Mouillage</label>
-          <div class="cmd" data-type="action" data-subtype="slider"
-            data-cmd_id="#cmd_jee4lm_prewet_slider_id#"></div>
+          #slider_jee4lm_prewet_slider#
         </div>
         <div class="lm-setting-row">
           <label>Pause</label>
-          <div class="cmd" data-type="action" data-subtype="slider"
-            data-cmd_id="#cmd_jee4lm_prewet_time_slider_id#"></div>
+          #slider_jee4lm_prewet_time_slider#
         </div>
       </div>
     </div>
@@ -175,13 +173,11 @@
     <div class="lm-bbw-sliders">
       <div class="lm-setting-row">
         <label>Dose 1</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_doseA_slider_id#"></div>
+        #slider_jee4lm_doseA_slider#
       </div>
       <div class="lm-setting-row">
         <label>Dose 2</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_doseB_slider_id#"></div>
+        #slider_jee4lm_doseB_slider#
       </div>
     </div>
   </div>
@@ -198,14 +194,12 @@
 
       <div class="lm-setting-row">
         <label>Café</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_coffee_slider_id#"></div>
+        #slider_jee4lm_coffee_slider#
       </div>
 
       <div class="lm-setting-row lm-when-steam-on">
         <label>Vapeur</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_steam_slider_id#"></div>
+        #slider_jee4lm_steam_slider#
       </div>
 
       <!-- Prewet timing sliders moved to prewet section above -->
@@ -224,8 +218,7 @@
       </div>
       <div class="lm-setting-row lm-when-smartwakeup">
         <label>Durée</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_smartwakeupstandbyminutes_slider_id#"></div>
+        #slider_jee4lm_smartwakeupstandbyminutes_slider#
       </div>
       <div class="lm-setting-row lm-when-smartwakeup">
         <label>Depuis</label>
@@ -485,6 +478,12 @@
   padding-top: 6px;
 }
 .lm-bbw-sliders .lm-setting-row { border-bottom: none; padding: 3px 0; }
+/* Jeedom-rendered sliders fill the row next to their label */
+.lm-setting-row > .cmd,
+.lm-setting-row > .eqLogic-widget,
+.lm-prewet-sliders .cmd,
+.lm-bbw-sliders .cmd { flex: 1; min-width: 0; }
+.lm-setting-row input[type=range] { width: 100%; }
 
 /* SETTINGS */
 .lm-settings-wrap {
