@@ -581,47 +581,42 @@
     hbmode:        '#cmd_hbmode_id#',
   };
 
-  // Cache of cmd values, hydrated from server then kept fresh by updates
+  // Cache of cmd values, seeded from server-injected text then kept fresh by updates
   var VALUES = {};
 
-  // Read current cmd value — from cache, falling back to DOM text content
+  // Read current cmd value — from cache, falling back to DOM text content.
+  // Never returns the literal string "undefined".
   function val(cmdId) {
-      if (VALUES[cmdId] !== undefined) return String(VALUES[cmdId]);
+      if (VALUES[cmdId] !== undefined && VALUES[cmdId] !== null) {
+          return String(VALUES[cmdId]);
+      }
       var el = document.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
       if (!el) return '';
-      return el.dataset.value !== undefined
-          ? el.dataset.value
-          : el.textContent.trim();
+      if (el.dataset.value !== undefined && el.dataset.value !== 'undefined') {
+          return el.dataset.value;
+      }
+      var t = el.textContent.trim();
+      return (t === 'undefined') ? '' : t;
   }
 
-  // Fetch all info cmd values from Jeedom and populate cache + DOM text.
-  // This is the reliable way in Jeedom 4.5 for a custom eqLogic template.
-  function hydrateValues() {
-      var ids = Object.values(CMD).filter(function(x) { return x && x !== ''; });
-      ids.forEach(function(cmdId) {
-          jeedom.cmd.byId({
-              id: cmdId,
-              error: function() {},
-              success: function(cmd) {
-                  if (!cmd) return;
-                  VALUES[cmdId] = cmd.state;
-                  // Update text in any span bound to this cmd that is value-only
-                  var els = document.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
-                  els.forEach(function(el) {
-                      if (el.classList.contains('lm-keep-suffix')) return;
-                      el.dataset.value = cmd.state;
-                  });
-                  updateStates();
-              }
-          });
+  // Seed cache from the values PHP injected as element text on first render.
+  function seedFromDom() {
+      Object.values(CMD).forEach(function(cmdId) {
+          if (!cmdId) return;
+          var el = document.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
+          if (el && el.children.length === 0) {
+              var t = el.textContent.trim();
+              if (t && t !== 'undefined') VALUES[cmdId] = t;
+          }
       });
   }
 
-  // Push a value into all value-display spans bound to a cmd
+  // Push a value into all value-display spans bound to a cmd.
+  // Skips empty/undefined to avoid wiping server-injected text.
   function setText(cmdId, text) {
+      if (text === '' || text === 'undefined' || text === undefined || text === null) return;
       var els = document.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
       els.forEach(function(el) {
-          // Only update leaf spans that display a value (no child elements)
           if (el.children.length === 0) el.textContent = text;
       });
   }
@@ -714,9 +709,9 @@
     if (chev) chev.classList.toggle('lm-open', !open);
   };
 
-  // Initial render from server-injected #val_xxx# text, then hydrate fresh values
+  // Seed cache from server-injected values, then render
+  seedFromDom();
   updateStates();
-  hydrateValues();
 
   // React to Jeedom cmd updates (Jeedom 4.5 fires jeedom.cmd.update)
   $(document).off('jeedom.cmd.update.lm' + uid)
