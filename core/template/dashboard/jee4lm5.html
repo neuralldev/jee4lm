@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="lm-mode-label" id="lm-mode-#id#">
-        <span class="cmd" data-cmd_id="#cmd_hbmode_id#"></span>
+        <span class="cmd" data-cmd_id="#cmd_hbmode_id#">#val_hbmode#</span>
       </div>
     </div>
     <div class="lm-header-right">
@@ -37,7 +37,7 @@
       </div>
       <div class="lm-last-backflush">
         <span class="lm-meta-label">Backflush</span>
-        <span class="cmd" data-cmd_id="#cmd_last_backflush_id#"></span>
+        <span class="cmd" data-cmd_id="#cmd_last_backflush_id#">#val_last_backflush#</span>
       </div>
     </div>
   </div>
@@ -52,12 +52,12 @@
       <div class="lm-boiler-data">
         <div class="lm-boiler-label">Café</div>
         <!-- ON: show current temp -->
-        <div class="lm-temp-current lm-when-on cmd" data-cmd_id="#cmd_coffeecurrent_id#"></div>
+        <div class="lm-temp-current lm-when-on cmd" data-cmd_id="#cmd_coffeecurrent_id#">#val_coffeecurrent#</div>
         <!-- Always: target -->
         <div class="lm-temp-target">
-          <span class="cmd" data-cmd_id="#cmd_coffeetarget_id#"></span>°C
+          <span class="cmd" data-cmd_id="#cmd_coffeetarget_id#">#val_coffeetarget#</span>°C
         </div>
-        <div class="lm-boiler-status cmd" data-cmd_id="#cmd_displaycoffee_id#"></div>
+        <div class="lm-boiler-status cmd" data-cmd_id="#cmd_displaycoffee_id#">#val_displaycoffee#</div>
       </div>
     </div>
     <!-- Steam boiler -->
@@ -65,11 +65,11 @@
       <div class="lm-boiler-icon"><i class="fas fa-wind"></i></div>
       <div class="lm-boiler-data">
         <div class="lm-boiler-label">Vapeur</div>
-        <div class="lm-temp-current lm-when-on cmd" data-cmd_id="#cmd_steamcurrent_id#"></div>
+        <div class="lm-temp-current lm-when-on cmd" data-cmd_id="#cmd_steamcurrent_id#">#val_steamcurrent#</div>
         <div class="lm-temp-target lm-when-steam-on">
-          <span class="cmd" data-cmd_id="#cmd_steamtarget_id#"></span>°C
+          <span class="cmd" data-cmd_id="#cmd_steamtarget_id#">#val_steamtarget#</span>°C
         </div>
-        <div class="lm-boiler-status cmd" data-cmd_id="#cmd_displaysteam_id#"></div>
+        <div class="lm-boiler-status cmd" data-cmd_id="#cmd_displaysteam_id#">#val_displaysteam#</div>
       </div>
       <div class="lm-steam-toggle">
         <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
@@ -97,9 +97,9 @@
       </div>
       <div class="lm-prewet-times lm-when-prewet-on">
         <span class="lm-meta-label">Mouillage</span>
-        <span class="cmd lm-time-val" data-cmd_id="#cmd_prewettime_id#"></span>s
+        <span class="cmd lm-time-val" data-cmd_id="#cmd_prewettime_id#">#val_prewettime#</span>s
         <span class="lm-meta-label lm-ml">Pause</span>
-        <span class="cmd lm-time-val" data-cmd_id="#cmd_prewetholdtime_id#"></span>s
+        <span class="cmd lm-time-val" data-cmd_id="#cmd_prewetholdtime_id#">#val_prewetholdtime#</span>s
       </div>
     </div>
     <!-- PreInfusion (plombé) -->
@@ -122,14 +122,14 @@
   <div class="lm-bbw" id="lm-bbw-#id#">
     <div class="lm-section-label">
       <i class="fas fa-balance-scale"></i>
-      <span class="cmd" data-cmd_id="#cmd_scalebattery_id#"></span>
+      <span class="cmd" data-cmd_id="#cmd_scalebattery_id#">#val_scalebattery#%</span>
       <span class="lm-scale-name cmd" data-cmd_id="#cmd_isscaleconnected_id#"></span>
     </div>
     <div class="lm-bbw-doses">
       <div class="lm-dose" id="lm-doseA-#id#">
         <button class="lm-dose-btn cmd tooltips" data-type="action" data-subtype="other"
           data-cmd_id="#cmd_jee4lm_bbwA_id#">
-          <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseA_id#"></span>g
+          <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseA_id#">#val_bbwdoseA#</span>g
         </button>
         <span class="lm-meta-label">Dose 1</span>
       </div>
@@ -137,13 +137,13 @@
       <div class="lm-dose" id="lm-doseB-#id#">
         <button class="lm-dose-btn cmd tooltips" data-type="action" data-subtype="other"
           data-cmd_id="#cmd_jee4lm_bbwB_id#">
-          <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseB_id#"></span>g
+          <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseB_id#">#val_bbwdoseB#</span>g
         </button>
         <span class="lm-meta-label">Dose 2</span>
       </div>
       <div class="lm-dose-sep">|</div>
       <div class="lm-dose">
-        <span class="cmd lm-bbw-mode" data-cmd_id="#cmd_bbwmode_id#"></span>
+        <span class="cmd lm-bbw-mode" data-cmd_id="#cmd_bbwmode_id#">#val_bbwmode#</span>
       </div>
     </div>
   </div>
@@ -231,9 +231,9 @@
       <!-- Firmware -->
       <div class="lm-fw">
         <span class="lm-meta-label">FW</span>
-        <span class="cmd" data-cmd_id="#cmd_fwversion_id#"></span>
+        <span class="cmd" data-cmd_id="#cmd_fwversion_id#">#val_fwversion#</span>
         <span class="lm-meta-label lm-ml">GW</span>
-        <span class="cmd" data-cmd_id="#cmd_gwversion_id#"></span>
+        <span class="cmd" data-cmd_id="#cmd_gwversion_id#">#val_gwversion#</span>
       </div>
 
     </div>
@@ -564,22 +564,66 @@
     smartwakeup:   '#cmd_smartwakeup_id#',
     coffeecurrent: '#cmd_coffeecurrent_id#',
     coffeetarget:  '#cmd_coffeetarget_id#',
+    steamcurrent:  '#cmd_steamcurrent_id#',
+    steamtarget:   '#cmd_steamtarget_id#',
+    bbwmode:       '#cmd_bbwmode_id#',
+    bbwdoseA:      '#cmd_bbwdoseA_id#',
+    bbwdoseB:      '#cmd_bbwdoseB_id#',
+    scalebattery:  '#cmd_scalebattery_id#',
+    prewettime:    '#cmd_prewettime_id#',
+    prewetholdtime:'#cmd_prewetholdtime_id#',
+    displaycoffee: '#cmd_displaycoffee_id#',
+    displaysteam:  '#cmd_displaysteam_id#',
+    last_backflush:'#cmd_last_backflush_id#',
+    fwversion:     '#cmd_fwversion_id#',
+    gwversion:     '#cmd_gwversion_id#',
     tankStatus:    '#cmd_tankStatus_id#',
     hbmode:        '#cmd_hbmode_id#',
   };
 
-  // Read current cmd value from Jeedom DOM
+  // Cache of cmd values, hydrated from server then kept fresh by updates
+  var VALUES = {};
+
+  // Read current cmd value — from cache, falling back to DOM text content
   function val(cmdId) {
-      // Jeedom injects current value in data-value attribute on .cmd elements
-      var el = document.querySelector(
-          '[data-cmd_id="' + cmdId + '"][data-value],' +
-          '.cmd[data-cmd_id="' + cmdId + '"]'
-      );
+      if (VALUES[cmdId] !== undefined) return String(VALUES[cmdId]);
+      var el = document.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
       if (!el) return '';
-      // Prefer data-value (set by Jeedom after hydration)
       return el.dataset.value !== undefined
           ? el.dataset.value
           : el.textContent.trim();
+  }
+
+  // Fetch all info cmd values from Jeedom and populate cache + DOM text.
+  // This is the reliable way in Jeedom 4.5 for a custom eqLogic template.
+  function hydrateValues() {
+      var ids = Object.values(CMD).filter(function(x) { return x && x !== ''; });
+      ids.forEach(function(cmdId) {
+          jeedom.cmd.byId({
+              id: cmdId,
+              error: function() {},
+              success: function(cmd) {
+                  if (!cmd) return;
+                  VALUES[cmdId] = cmd.state;
+                  // Update text in any span bound to this cmd that is value-only
+                  var els = document.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
+                  els.forEach(function(el) {
+                      if (el.classList.contains('lm-keep-suffix')) return;
+                      el.dataset.value = cmd.state;
+                  });
+                  updateStates();
+              }
+          });
+      });
+  }
+
+  // Push a value into all value-display spans bound to a cmd
+  function setText(cmdId, text) {
+      var els = document.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
+      els.forEach(function(el) {
+          // Only update leaf spans that display a value (no child elements)
+          if (el.children.length === 0) el.textContent = text;
+      });
   }
 
   // Update all conditional classes and ring
@@ -590,6 +634,23 @@
     var plumbed = val(CMD.plumbedin) == '1';
     var bbw     = val(CMD.isbbw) == '1';
     var wakeup  = val(CMD.smartwakeup) == '1';
+
+    // Inject text values into display spans
+    setText(CMD.coffeetarget,  val(CMD.coffeetarget));
+    setText(CMD.coffeecurrent, val(CMD.coffeecurrent));
+    setText(CMD.steamtarget,   val(CMD.steamtarget));
+    setText(CMD.steamcurrent,  val(CMD.steamcurrent));
+    setText(CMD.bbwdoseA,      val(CMD.bbwdoseA));
+    setText(CMD.bbwdoseB,      val(CMD.bbwdoseB));
+    setText(CMD.bbwmode,       val(CMD.bbwmode));
+    setText(CMD.prewettime,    val(CMD.prewettime));
+    setText(CMD.prewetholdtime,val(CMD.prewetholdtime));
+    setText(CMD.displaycoffee, val(CMD.displaycoffee));
+    setText(CMD.displaysteam,  val(CMD.displaysteam));
+    setText(CMD.last_backflush,val(CMD.last_backflush));
+    setText(CMD.fwversion,     val(CMD.fwversion));
+    setText(CMD.gwversion,     val(CMD.gwversion));
+    setText(CMD.hbmode,        val(CMD.hbmode));
 
     w.classList.toggle('state-on',          on);
     w.classList.toggle('state-steam-on',    steamOn);
@@ -653,21 +714,19 @@
     if (chev) chev.classList.toggle('lm-open', !open);
   };
 
-  // Initial render
+  // Initial render from server-injected #val_xxx# text, then hydrate fresh values
   updateStates();
+  hydrateValues();
 
-  // React to Jeedom cmd updates
-  $(document).on('jeedom.event.cmd', function(e, data) {
-    if (!data || !data.cmd_id) return;
-    var ids = Object.values(CMD);
-    if (ids.indexOf(String(data.cmd_id)) !== -1) {
-      // Au lieu de updateStates() immédiat
-      setTimeout(updateStates, 10);
-      // Et écouter aussi l'événement de fin de chargement des cmds
-      $(document).one('jeedom.cmd.refreshDone', function() {
+  // React to Jeedom cmd updates (Jeedom 4.5 fires jeedom.cmd.update)
+  $(document).off('jeedom.cmd.update.lm' + uid)
+    .on('jeedom.cmd.update.lm' + uid, function(e, data) {
+      if (!data || !data.cmd_id) return;
+      var ids = Object.values(CMD);
+      if (ids.indexOf(String(data.cmd_id)) !== -1) {
+          VALUES[data.cmd_id] = data.value;
           updateStates();
-      });
-    }
+      }
   });
 
 })();
