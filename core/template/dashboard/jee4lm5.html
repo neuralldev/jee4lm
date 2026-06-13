@@ -484,6 +484,27 @@
 .lm-prewet-sliders .cmd,
 .lm-bbw-sliders .cmd { flex: 1; min-width: 0; }
 .lm-setting-row input[type=range] { width: 100%; }
+/* Hide Jeedom's auto-generated command name/title inside our slider rows.
+   Jeedom wraps each cmd in elements bearing the command name as text; we hide
+   all direct text/title nodes and keep only the interactive control. */
+.lm-prewet-sliders .cmd .title,
+.lm-prewet-sliders .cmd .name,
+.lm-prewet-sliders .cmd > .cmdName,
+.lm-prewet-sliders .cmd legend,
+.lm-prewet-sliders .cmd label.control-label,
+.lm-bbw-sliders .cmd .title,
+.lm-bbw-sliders .cmd .name,
+.lm-bbw-sliders .cmd > .cmdName,
+.lm-bbw-sliders .cmd legend,
+.lm-bbw-sliders .cmd label.control-label,
+.lm-settings .cmd .title,
+.lm-settings .cmd .name,
+.lm-settings .cmd > .cmdName,
+.lm-settings .cmd legend,
+.lm-settings .cmd label.control-label { display: none !important; }
+/* Sliders for prewet/dose render inline; collapse Jeedom's default block spacing */
+.lm-prewet-sliders .cmd,
+.lm-bbw-sliders .cmd { margin: 0; padding: 0; }
 
 /* SETTINGS */
 .lm-settings-wrap {

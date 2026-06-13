@@ -86,6 +86,7 @@ class LaMarzoccoThing:
         """Initializes a new La Marzocco thing."""
 
         self.serial_number = serial_number
+        self._logger = logging.getLogger(__name__)
         self._cloud_client = cloud_client
         self._bluetooth_client = bluetooth_client
         self._update_callback: Callable[[ThingDashboardWebsocketConfig], Any] | None = (

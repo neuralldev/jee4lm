@@ -1312,6 +1312,10 @@ class jee4lm5 extends eqLogic
         } elseif ($cmd->getSubType() === 'slider') {
             // Render the full Jeedom slider markup so it is interactive.
             // A bare <div class="cmd" data-subtype="slider"> is NOT hydrated.
+            // Hide the auto-generated command name — the widget has its own label.
+            $cmd->setDisplay('showNameOndashboard', 0);
+            $cmd->setDisplay('showNameOnmobile', 0);
+            $cmd->setDisplay('showIconAndNamedashboard', 0);
             $replace['#slider_' . $logicalId . '#'] = $cmd->toHtml($_version);
         }
       }
