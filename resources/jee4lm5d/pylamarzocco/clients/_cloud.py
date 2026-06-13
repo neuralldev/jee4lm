@@ -124,7 +124,7 @@ class LaMarzoccoCloudClient:
         if response.status == 401:
             body = await response.text()
             self._logger.error(f"signin 401 body: {body}")
-            raise AuthFail(f"Invalid username or password — response: {body}")
+            raise AuthFail(f"register:Invalid username or password — response: {body}")
 
         raise RequestNotSuccessful(
             f"Request to auth endpoint failed with status code {response.status}"
@@ -185,7 +185,9 @@ class LaMarzoccoCloudClient:
             return AccessToken.from_dict(json_response)
 
         if response.status == 401:
-            raise AuthFail("Invalid username or password")
+            body = await response.text()
+            self._logger.error(f"signin 401 body: {body}")
+            raise AuthFail(f"gettoken:Invalid username or password — response: {body}")
 
         raise RequestNotSuccessful(
             f"Request t auth endpoint failed with status code {response.status}"
