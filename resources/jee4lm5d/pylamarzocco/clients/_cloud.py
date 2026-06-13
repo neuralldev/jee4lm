@@ -90,6 +90,7 @@ class LaMarzoccoCloudClient:
         self._access_token_lock = asyncio.Lock()
         self._pending_commands: dict[str, Future[CommandResponse]] = {}
         self.websocket = WebSocketDetails()
+        self._logger = logging.getLogger(__name__)
 
     # region Authentication
     async def async_register_client(self) -> None:
