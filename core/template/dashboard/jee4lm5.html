@@ -570,8 +570,16 @@
 
   // Read current cmd value from Jeedom DOM
   function val(cmdId) {
-    var el = document.querySelector('[data-cmd_id="' + cmdId + '"].cmd-value, .cmd[data-cmd_id="' + cmdId + '"]');
-    return el ? (el.dataset.value || el.textContent.trim()) : '';
+      // Jeedom injects current value in data-value attribute on .cmd elements
+      var el = document.querySelector(
+          '[data-cmd_id="' + cmdId + '"][data-value],' +
+          '.cmd[data-cmd_id="' + cmdId + '"]'
+      );
+      if (!el) return '';
+      // Prefer data-value (set by Jeedom after hydration)
+      return el.dataset.value !== undefined
+          ? el.dataset.value
+          : el.textContent.trim();
   }
 
   // Update all conditional classes and ring
@@ -654,7 +662,7 @@
     var ids = Object.values(CMD);
     if (ids.indexOf(String(data.cmd_id)) !== -1) {
       // Au lieu de updateStates() immédiat
-      setTimeout(updateStates, 500);
+      setTimeout(updateStates, 800);
       // Et écouter aussi l'événement de fin de chargement des cmds
       $(document).one('jeedom.cmd.refreshDone', function() {
           updateStates();

@@ -72,22 +72,6 @@ if (isset($result['run'])) {
     jee4lm5::processthingSettings($eq, $result['settings']);
 } elseif (isset($result['schedule'])) {
     jee4lm5::processthingSchedule($eq, $result['schedule']);
-} elseif (isset($result['dash'])) {
-    // Handles both one-shot 'dash' and polling loop 'dash_update' messages.
-    // checkAndUpdateCmd() inside doRefreshDashboard emits cmd::update events
-    // automatically when values change — Jeedom core notifies connected browsers.
-    // For commands that must always trigger a UI refresh even when value is stable
-    // (e.g. temperatures holding steady while machine is ready), we emit an
-    // eqLogic::update event explicitly so the dashboard polls again within 5s.
-    jee4lm5::doRefreshDashboard($eq, $result['dash']);
-
-    // Force UI refresh on every dashboard push regardless of value changes.
-    // This ensures the browser reflects the 5s polling loop when machine is ON.
-    event::add('eqLogic::update', array(
-        'eqLogic_id' => $eq->getId(),
-        'visible'    => $eq->getIsVisible(),
-        'enable'     => $eq->getIsEnable(),
-    ));
 } else {
     log::add('jee4lm5', 'warning', 'callback: unhandled message keys=' . implode(',', array_keys($result)));
 }
