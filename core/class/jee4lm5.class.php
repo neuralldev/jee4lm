@@ -100,7 +100,7 @@ class jee4lm5 extends eqLogic
             $w["output"]["doses"]["dose_2"]["dose_min"],
             $w["output"]["doses"]["dose_2"]["dose_max"],
             $w["output"]["doses"]["dose_2"]["dose_step"]);
-          // linksetpoint for BBW sliders done after save() below
+          // linksetpoint for BBW done after save() below
           break;
 
         case "ThingScale":
@@ -188,6 +188,8 @@ class jee4lm5 extends eqLogic
 
     $_eq->save();
 
+    $_eq->linksetpoint("jee4lm_doseA_slider",                    "bbwdoseA");
+    $_eq->linksetpoint("jee4lm_doseB_slider",                    "bbwdoseB");
     $_eq->linksetpoint("jee4lm_coffee_slider",                   "coffeetarget");
     $_eq->linksetpoint("jee4lm_steam_slider",                    "steamtarget");
     $_eq->linksetpoint("jee4lm_prewet_slider",                   "prewettime");
@@ -315,7 +317,7 @@ class jee4lm5 extends eqLogic
   {
     $set_setpoint = $_slider          !== null ? cmd::byEqLogicIdAndLogicalId($this->getId(), $_slider)          : null;
     $setpoint     = $_setpointlogicalID !== null ? cmd::byEqLogicIdAndLogicalId($this->getId(), $_setpointlogicalID) : null;
-    if ($set_setpoint === null || $setpoint === null) {
+    if (!is_object($set_setpoint) || !is_object($setpoint)) {
       log::add(__CLASS__, 'debug', "setpoint: command not found slider=$_slider target=$_setpointlogicalID");
     } else {
       $set_setpoint->setValue($setpoint->getId());
