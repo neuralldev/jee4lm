@@ -413,6 +413,7 @@ class jee4lm5 extends eqLogic
     $serial  = $this->getConfiguration('serialNumber');
     $payload = ["command" => "lm", "function" => "CoffeeMachineSettingCoffeeBoilerTargetTemperature", "value" => $_value, "id" => $this->getId(), "serial" => $serial];
     self::deamon_send($payload);
+    $this->checkAndUpdateCmd('coffeetarget', $_value);
   }
 
   public function CoffeeMachineSettingSteamBoilerTargetTemperature($_value)
@@ -421,6 +422,7 @@ class jee4lm5 extends eqLogic
     $serial  = $this->getConfiguration('serialNumber');
     $payload = ["command" => "lm", "function" => "CoffeeMachineSettingSteamBoilerTargetTemperature", "value" => $_value, "id" => $this->getId(), "serial" => $serial];
     self::deamon_send($payload);
+    $this->checkAndUpdateCmd('steamtarget', $_value);
   }
 
   public function CoffeeMachinePreInfusionChangeMode($_toggle)
@@ -448,6 +450,9 @@ class jee4lm5 extends eqLogic
     $dose2 = ($_dose == "bbwdoseB") ? $_weight : (float)cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
     $payload = ["command" => "lm", "function" => "CoffeeMachineBrewByWeightSettingDoses", "value" => $dose1, "value2" => $dose2, "id" => $this->getId(), "serial" => $serial];
     self::deamon_send($payload);
+    // Optimistic UI update: reflect the new dose immediately so the slider
+    // shows the change without waiting for the next dashboard poll.
+    $this->checkAndUpdateCmd($_dose, $_weight);
   }
 
   public function CoffeeMachineBrewByWeightChangeMode($_dose)
@@ -464,6 +469,8 @@ class jee4lm5 extends eqLogic
     $serial  = $this->getConfiguration('serialNumber');
     $payload = ["command" => "lm", "function" => "CoffeeMachinePreBrewingChangeTimes", "value" => $_time, "value2" => $_hold, "id" => $this->getId(), "serial" => $serial];
     self::deamon_send($payload);
+    $this->checkAndUpdateCmd('prewettime', $_time);
+    $this->checkAndUpdateCmd('prewetholdtime', $_hold);
   }
 
   public function CoffeeMachineBackFlushStartCleaning()
@@ -919,8 +926,6 @@ class jee4lm5 extends eqLogic
         // After to_dict() mashumaro uses Python field names: dose_1, dose_2
         // DoseMode: Continuous, PulsesType, Dose1, Dose2, MassType
         case "CMBrewByWeightDoses":
-          // Widget present => machine supports brew-by-weight
-          $eq->checkAndUpdateCmd('isbbw', 1);
           $eq->checkAndUpdateCmd('isscaleconnected', !empty($output['scale_connected']) ? 1 : 0);
           $eq->checkAndUpdateCmd('bbwmode',  $output['mode']);
           $eq->checkAndUpdateCmd('bbwdoseA', $output['doses']['dose_1']['dose']);
@@ -931,20 +936,18 @@ class jee4lm5 extends eqLogic
           break;
 
         // WidgetType::CM_PRE_BREWING = "CMPreBrewing"
-        // mode is one of: PreBrewing | PreInfusion | Disabled
-        // times.pre_brewing[0].seconds is a raw dict — keys are aliases 'In'/'Out'
+        // PreExtractionMode: PreInfusion, PreBrewing, Disabled
+        // times.pre_brewing[0].seconds is a raw dict from the API — keys are aliases 'In'/'Out'
+        // (mashumaro does not convert nested raw dict keys)
         case "CMPreBrewing":
-          $mode = $output['mode'];
-          $isPreBrew = ($mode === 'PreBrewing');
-          $isPreInf  = ($mode === 'PreInfusion');
-          $eq->checkAndUpdateCmd('prewet',          $isPreBrew ? 1 : 0);
-          $eq->checkAndUpdateCmd('preinfusionmode', $isPreInf  ? 1 : 0);
-          // Read times from whichever block is populated
-          $times = null;
-          if (!empty($output['times']['pre_brewing'][0]['seconds'])) {
-            $times = $output['times']['pre_brewing'][0]['seconds'];
-          } elseif (!empty($output['times']['pre_infusion'][0]['seconds'])) {
-            $times = $output['times']['pre_infusion'][0]['seconds'];
+          $isPreBrew = ($output['mode'] === 'PreBrewing');
+          $eq->checkAndUpdateCmd('prewet', $isPreBrew ? 1 : 0);
+          if ($isPreBrew) {
+            $eq->checkAndUpdateCmd('preinfusionmode', 0);
+            $times = $output['times']['pre_brewing'][0]['seconds'] ?? null;
+          } else {
+            $eq->checkAndUpdateCmd('preinfusionmode', 1);
+            $times = $output['times']['pre_infusion'][0]['seconds'] ?? null;
           }
           if ($times !== null) {
             $eq->checkAndUpdateCmd('prewettime',     $times['In']);
@@ -1300,23 +1303,14 @@ class jee4lm5 extends eqLogic
       $replace['#name#']     = $this->getName();
       $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
 
-      // Inject cmd ids, current values (#val_xxx#) and states for CSS classes.
+      // Inject cmd ids AND current values for initial render
       $states = array();
       foreach ($this->getCmd() as $cmd) {
         $logicalId = $cmd->getLogicalId();
         $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
+        // Only read values for info commands — never execute action commands
         if ($cmd->getType() === 'info') {
-            $v = $cmd->execCmd();
-            $states[$logicalId] = $v;
-            $replace['#val_' . $logicalId . '#'] = ($v === null) ? '' : $v;
-        } elseif ($cmd->getSubType() === 'slider') {
-            // Render the full Jeedom slider markup so it is interactive.
-            // A bare <div class="cmd" data-subtype="slider"> is NOT hydrated.
-            // Hide the auto-generated command name — the widget has its own label.
-            $cmd->setDisplay('showNameOndashboard', 0);
-            $cmd->setDisplay('showNameOnmobile', 0);
-            $cmd->setDisplay('showIconAndNamedashboard', 0);
-            $replace['#slider_' . $logicalId . '#'] = $cmd->toHtml($_version);
+            $states[$logicalId] = $cmd->execCmd();
         }
       }
 
@@ -1330,10 +1324,7 @@ class jee4lm5 extends eqLogic
       $replace['#lm_css_classes#'] = $cssClasses;
 
       $html = template_replace($replace, $template);
-      // Clean any unresolved placeholders so they never show raw
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
-      $html = preg_replace('/#val_[a-z0-9_]+#/', '', $html);
-      $html = preg_replace('/#slider_[a-z0-9_]+#/', '', $html);
       return $html;
   }
 
