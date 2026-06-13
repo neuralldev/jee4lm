@@ -56,8 +56,9 @@ class Jee4LM(BaseDaemon):
                 return
 
         already_registered = (self.data_dir / "registered.json").exists()
-
-        if self._load_credential() and self.credential.isinit():
+        has_creds = self._load_credential() and self.credential.isinit()
+        self._logger.info(f"credentials loaded: {has_creds} username='{self.credential.username}'")
+        if  has_creds:
             self.client = LaMarzoccoCloudClient(
                 username=self.credential.username,
                 password=self.credential.password,
