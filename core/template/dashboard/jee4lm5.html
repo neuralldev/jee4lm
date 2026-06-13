@@ -1,4 +1,4 @@
-<div class="#lm_css_classes#" id="lm-#id#">
+<div class="#lm_css_classes#" data-eqid="#id#">
 
   <!-- Hidden state carriers: non-visual cmds whose values drive conditional display.
        seedFromDom reads these so the JS knows machine/prewet/plumb/bbw state. -->
@@ -26,7 +26,7 @@
         <svg class="lm-ring" viewBox="0 0 64 64">
           <circle class="lm-ring-bg" cx="32" cy="32" r="28"/>
           <circle class="lm-ring-progress" cx="32" cy="32" r="28"
-            id="lm-ring-#id#"
+            data-el="lm-ring-el"
             stroke-dasharray="175.93"
             stroke-dashoffset="175.93"/>
         </svg>
@@ -34,11 +34,11 @@
           data-type="action"
           data-subtype="other"
           data-cmd_id="#cmd_jee4lm_on_id#|#cmd_jee4lm_off_id#"
-          id="lm-power-#id#">
+          data-el="lm-power-el">
           <i class="fas fa-power-off"></i>
         </div>
       </div>
-      <div class="lm-mode-label" id="lm-mode-#id#">
+      <div class="lm-mode-label" data-el="lm-mode-el">
         <span class="cmd" data-cmd_id="#cmd_hbmode_id#">#val_hbmode#</span>
       </div>
     </div>
@@ -73,7 +73,7 @@
       </div>
     </div>
     <!-- Steam boiler -->
-    <div class="lm-boiler lm-boiler-steam" id="lm-steam-#id#">
+    <div class="lm-boiler lm-boiler-steam" data-el="lm-steam-el">
       <div class="lm-boiler-icon"><i class="fas fa-wind"></i></div>
       <div class="lm-boiler-data">
         <div class="lm-boiler-label">Vapeur</div>
@@ -95,9 +95,9 @@
   <!-- ============================================================
        EXTRACTION MODE (conditionnel plumbedin)
   ============================================================ -->
-  <div class="lm-extraction" id="lm-extraction-#id#">
+  <div class="lm-extraction" data-el="lm-extraction-el">
     <!-- PreBrewing (non plombé) -->
-    <div class="lm-prewet" id="lm-prewet-#id#">
+    <div class="lm-prewet" data-el="lm-prewet-el">
       <div class="lm-section-label">
         <i class="fas fa-tachometer-alt"></i> Prétrempage
         <span class="lm-toggle-wrap">
@@ -126,7 +126,7 @@
       </div>
     </div>
     <!-- PreInfusion (plombé) -->
-    <div class="lm-preinfusion" id="lm-preinfusion-#id#">
+    <div class="lm-preinfusion" data-el="lm-preinfusion-el">
       <div class="lm-section-label">
         <i class="fas fa-water"></i> Préinfusion
         <span class="lm-toggle-wrap">
@@ -142,14 +142,14 @@
   <!-- ============================================================
        BBW (conditionnel isbbw)
   ============================================================ -->
-  <div class="lm-bbw" id="lm-bbw-#id#">
+  <div class="lm-bbw" data-el="lm-bbw-el">
     <div class="lm-section-label">
       <i class="fas fa-balance-scale"></i>
       <span class="cmd" data-cmd_id="#cmd_scalebattery_id#">#val_scalebattery#%</span>
       <span class="lm-scale-name cmd" data-cmd_id="#cmd_isscaleconnected_id#"></span>
     </div>
     <div class="lm-bbw-doses">
-      <div class="lm-dose" id="lm-doseA-#id#">
+      <div class="lm-dose" data-el="lm-doseA-el">
         <button class="lm-dose-btn cmd tooltips" data-type="action" data-subtype="other"
           data-cmd_id="#cmd_jee4lm_bbwA_id#">
           <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseA_id#">#val_bbwdoseA#</span>g
@@ -157,7 +157,7 @@
         <span class="lm-meta-label">Dose 1</span>
       </div>
       <div class="lm-dose-sep">|</div>
-      <div class="lm-dose" id="lm-doseB-#id#">
+      <div class="lm-dose" data-el="lm-doseB-el">
         <button class="lm-dose-btn cmd tooltips" data-type="action" data-subtype="other"
           data-cmd_id="#cmd_jee4lm_bbwB_id#">
           <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseB_id#">#val_bbwdoseB#</span>g
@@ -186,11 +186,11 @@
        RÉGLAGES (replié)
   ============================================================ -->
   <div class="lm-settings-wrap">
-    <button class="lm-settings-toggle" onclick="lmToggleSettings('#id#')">
+    <button class="lm-settings-toggle" onclick="lmToggleSettings(this)">
       <i class="fas fa-sliders-h"></i> Réglages
-      <i class="fas fa-chevron-down lm-chevron" id="lm-chev-#id#"></i>
+      <i class="fas fa-chevron-down lm-chevron" data-el="lm-chev-el"></i>
     </button>
-    <div class="lm-settings" id="lm-settings-#id#" style="display:none">
+    <div class="lm-settings" data-el="lm-settings-el" style="display:none">
 
       <div class="lm-setting-row">
         <label>Café</label>
@@ -603,7 +603,18 @@
 <script>
 (function() {
   var uid = '#id#';
-  var w   = document.getElementById('lm-' + uid);
+  // Jeedom may render this template twice (width-ref + display). Using a fixed
+  // id would create duplicate ids and break getElementById. Instead we select
+  // the nearest not-yet-initialized widget for this eqLogic and guard re-init.
+  var allW = document.querySelectorAll('.lm-widget[data-eqid="' + uid + '"]');
+  var w = null;
+  for (var i = 0; i < allW.length; i++) {
+      if (!allW[i].dataset.lmInit) { w = allW[i]; break; }
+  }
+  if (!w) { return; }            // all instances already initialized
+  w.dataset.lmInit = '1';
+  // Scope all lookups to this widget instance
+  function $w(sel) { return w.querySelector(sel); }
   if (!w) return;
 
   // Map cmd_id → logicalId for state-driven class updates
@@ -643,7 +654,7 @@
       if (VALUES[cmdId] !== undefined && VALUES[cmdId] !== null) {
           return String(VALUES[cmdId]);
       }
-      var el = document.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
+      var el = w.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
       if (!el) return '';
       if (el.dataset.value !== undefined && el.dataset.value !== 'undefined') {
           return el.dataset.value;
@@ -656,7 +667,7 @@
   function seedFromDom() {
       Object.values(CMD).forEach(function(cmdId) {
           if (!cmdId) return;
-          var el = document.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
+          var el = w.querySelector('.cmd[data-cmd_id="' + cmdId + '"]');
           if (el && el.children.length === 0) {
               var t = el.textContent.trim();
               if (t && t !== 'undefined') VALUES[cmdId] = t;
@@ -668,7 +679,7 @@
   // Skips empty/undefined to avoid wiping server-injected text.
   function setText(cmdId, text) {
       if (text === '' || text === 'undefined' || text === undefined || text === null) return;
-      var els = document.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
+      var els = w.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
       els.forEach(function(el) {
           if (el.children.length === 0) el.textContent = text;
       });
@@ -707,7 +718,7 @@
     w.classList.toggle('state-smartwakeup', wakeup);
 
     // Power button style
-    var pwrBtn = document.getElementById('lm-power-' + uid);
+    var pwrBtn = $w('[data-el="lm-power-el"]');
     if (pwrBtn) pwrBtn.classList.toggle('lm-on', on);
 
     // Switch power button target based on current state
@@ -718,13 +729,13 @@
     }
 
     // Show/hide extraction section
-    var prewetDiv   = document.getElementById('lm-prewet-' + uid);
-    var preinfDiv   = document.getElementById('lm-preinfusion-' + uid);
+    var prewetDiv   = $w('[data-el="lm-prewet-el"]');
+    var preinfDiv   = $w('[data-el="lm-preinfusion-el"]');
     if (prewetDiv)  prewetDiv.style.display  = plumbed ? 'none' : 'block';
     if (preinfDiv)  preinfDiv.style.display  = plumbed ? 'block' : 'none';
 
     // BBW section
-    var bbwDiv = document.getElementById('lm-bbw-' + uid);
+    var bbwDiv = $w('[data-el="lm-bbw-el"]');
     if (bbwDiv) bbwDiv.style.display = bbw ? 'block' : 'none';
 
     // Heating ring animation (coffee current vs target)
@@ -732,7 +743,7 @@
       var cur = parseFloat(val(CMD.coffeecurrent)) || 0;
       var tgt = parseFloat(val(CMD.coffeetarget))  || 93;
       var pct = Math.min(Math.max(cur / tgt, 0), 1);
-      var ring = document.getElementById('lm-ring-' + uid);
+      var ring = $w('[data-el="lm-ring-el"]');
       if (ring) {
         var circumference = 175.93;
         ring.style.strokeDashoffset = circumference * (1 - pct);
@@ -746,15 +757,15 @@
     // Dose active highlight
     var modeEl = w.querySelector('.lm-bbw-mode');
     var mode   = modeEl ? modeEl.textContent.trim() : '';
-    var dA = document.getElementById('lm-doseA-' + uid);
-    var dB = document.getElementById('lm-doseB-' + uid);
+    var dA = $w('[data-el="lm-doseA-el"]');
+    var dB = $w('[data-el="lm-doseB-el"]');
     if (dA) dA.querySelector('.lm-dose-btn').classList.toggle('lm-dose-active', mode === 'Dose1');
     if (dB) dB.querySelector('.lm-dose-btn').classList.toggle('lm-dose-active', mode === 'Dose2');
 
     // Highlight active ON/OFF toggle buttons to reflect current state
     function markToggle(onId, offId, isOn) {
-      var onBtn  = document.querySelector('.cmd[data-cmd_id="' + onId + '"]');
-      var offBtn = document.querySelector('.cmd[data-cmd_id="' + offId + '"]');
+      var onBtn  = w.querySelector('.cmd[data-cmd_id="' + onId + '"]');
+      var offBtn = w.querySelector('.cmd[data-cmd_id="' + offId + '"]');
       if (onBtn)  onBtn.classList.toggle('lm-btn-active', isOn);
       if (offBtn) offBtn.classList.toggle('lm-btn-active', !isOn);
     }
@@ -763,10 +774,12 @@
     markToggle('#cmd_jee4lm_preextraction_on_id#', '#cmd_jee4lm_preextraction_off_id#', val(CMD.preinfusionmode) == '1');
   }
 
-  // Settings toggle
-  window.lmToggleSettings = function(id) {
-    var s    = document.getElementById('lm-settings-' + id);
-    var chev = document.getElementById('lm-chev-' + id);
+  // Settings toggle — receives the clicked button, scopes to its widget
+  window.lmToggleSettings = function(btn) {
+    var widget = btn.closest('.lm-widget');
+    if (!widget) return;
+    var s    = widget.querySelector('[data-el="lm-settings-el"]');
+    var chev = widget.querySelector('[data-el="lm-chev-el"]');
     if (!s) return;
     var open = s.style.display !== 'none';
     s.style.display = open ? 'none' : 'block';
