@@ -846,6 +846,7 @@ class jee4lm5 extends eqLogic
         // WidgetType::CM_COFFEE_BOILER = "CMCoffeeBoiler"
         // BoilerStatus: StandBy, HeatingUp, Ready, NoWater, Off
         case "CMCoffeeBoiler":
+          log::add('jee4lm5', 'debug', 'coffeetarget=' . $output['target_temperature']);
           $eq->checkAndUpdateCmd('coffeetarget', $output['target_temperature']);
           $eq->checkAndUpdateCmd('coffeeenabled', !empty($output['enabled']) ? 1 : 0);
           switch ($output['status']) {
