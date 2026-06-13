@@ -653,7 +653,12 @@
     if (!data || !data.cmd_id) return;
     var ids = Object.values(CMD);
     if (ids.indexOf(String(data.cmd_id)) !== -1) {
-      setTimeout(updateStates, 50);
+      // Au lieu de updateStates() immédiat
+      setTimeout(updateStates, 500);
+      // Et écouter aussi l'événement de fin de chargement des cmds
+      $(document).one('jeedom.cmd.refreshDone', function() {
+          updateStates();
+      });
     }
   });
 

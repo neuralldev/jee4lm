@@ -1290,10 +1290,10 @@ class jee4lm5 extends eqLogic
       $replace['#name#']     = $this->getName();
       $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
 
-      foreach ($this->getCmd() as $cmd) {
+      foreach ($this->getCmd('info') as $cmd) {
           $replace['#cmd_' . $cmd->getLogicalId() . '_id#'] = $cmd->getId();
+          $replace['#' . $cmd->getLogicalId() . '#'] = $cmd->execCmd();
       }
-
       // Fallback empty string for any unresolved placeholder
       $html = template_replace($replace, $template);
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
