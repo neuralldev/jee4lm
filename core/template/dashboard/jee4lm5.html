@@ -1,5 +1,17 @@
 <div class="#lm_css_classes#" id="lm-#id#">
 
+  <!-- Hidden state carriers: non-visual cmds whose values drive conditional display.
+       seedFromDom reads these so the JS knows machine/prewet/plumb/bbw state. -->
+  <span class="cmd" data-cmd_id="#cmd_machinemode_id#" style="display:none">#val_machinemode#</span>
+  <span class="cmd" data-cmd_id="#cmd_steamenabled_id#" style="display:none">#val_steamenabled#</span>
+  <span class="cmd" data-cmd_id="#cmd_prewet_id#" style="display:none">#val_prewet#</span>
+  <span class="cmd" data-cmd_id="#cmd_preinfusionmode_id#" style="display:none">#val_preinfusionmode#</span>
+  <span class="cmd" data-cmd_id="#cmd_plumbedin_id#" style="display:none">#val_plumbedin#</span>
+  <span class="cmd" data-cmd_id="#cmd_isbbw_id#" style="display:none">#val_isbbw#</span>
+  <span class="cmd" data-cmd_id="#cmd_smartwakeup_id#" style="display:none">#val_smartwakeup#</span>
+  <span class="cmd" data-cmd_id="#cmd_tankStatus_id#" style="display:none">#val_tankStatus#</span>
+
+
   <!-- ============================================================
        HEADER
   ============================================================ -->

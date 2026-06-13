@@ -931,18 +931,20 @@ class jee4lm5 extends eqLogic
           break;
 
         // WidgetType::CM_PRE_BREWING = "CMPreBrewing"
-        // PreExtractionMode: PreInfusion, PreBrewing, Disabled
-        // times.pre_brewing[0].seconds is a raw dict from the API — keys are aliases 'In'/'Out'
-        // (mashumaro does not convert nested raw dict keys)
+        // mode is one of: PreBrewing | PreInfusion | Disabled
+        // times.pre_brewing[0].seconds is a raw dict — keys are aliases 'In'/'Out'
         case "CMPreBrewing":
-          $isPreBrew = ($output['mode'] === 'PreBrewing');
-          $eq->checkAndUpdateCmd('prewet', $isPreBrew ? 1 : 0);
-          if ($isPreBrew) {
-            $eq->checkAndUpdateCmd('preinfusionmode', 0);
-            $times = $output['times']['pre_brewing'][0]['seconds'] ?? null;
-          } else {
-            $eq->checkAndUpdateCmd('preinfusionmode', 1);
-            $times = $output['times']['pre_infusion'][0]['seconds'] ?? null;
+          $mode = $output['mode'];
+          $isPreBrew = ($mode === 'PreBrewing');
+          $isPreInf  = ($mode === 'PreInfusion');
+          $eq->checkAndUpdateCmd('prewet',          $isPreBrew ? 1 : 0);
+          $eq->checkAndUpdateCmd('preinfusionmode', $isPreInf  ? 1 : 0);
+          // Read times from whichever block is populated
+          $times = null;
+          if (!empty($output['times']['pre_brewing'][0]['seconds'])) {
+            $times = $output['times']['pre_brewing'][0]['seconds'];
+          } elseif (!empty($output['times']['pre_infusion'][0]['seconds'])) {
+            $times = $output['times']['pre_infusion'][0]['seconds'];
           }
           if ($times !== null) {
             $eq->checkAndUpdateCmd('prewettime',     $times['In']);
