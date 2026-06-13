@@ -1279,6 +1279,27 @@ class jee4lm5 extends eqLogic
   {
     return array('resources/venv');
   }
+
+  public function toHtml($_version = 'dashboard') {
+      $template = getTemplate('core', $_version, PLUGINNAME, __CLASS__);
+      if (empty($template)) {
+          return parent::toHtml($_version);
+      }
+      $replace = array();
+      $replace['#id#']       = $this->getId();
+      $replace['#name#']     = $this->getName();
+      $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
+
+      foreach ($this->getCmd() as $cmd) {
+          $replace['#cmd_' . $cmd->getLogicalId() . '_id#'] = $cmd->getId();
+      }
+
+      // Fallback empty string for any unresolved placeholder
+      $html = template_replace($replace, $template);
+      $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
+      return $html;
+  }
+
 }
 
 // ------------------------------------------------------------------

@@ -1,0 +1,661 @@
+<div class="lm-widget" id="lm-#id#">
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <div class="lm-header">
+    <div class="lm-header-img">
+      <img src="#imageUrl#" onerror="this.style.display='none'" />
+    </div>
+    <div class="lm-header-center">
+      <div class="lm-machine-name">#name#</div>
+      <div class="lm-power-wrap">
+        <!-- Heating ring SVG — animates when machine is ON and heating -->
+        <svg class="lm-ring" viewBox="0 0 64 64">
+          <circle class="lm-ring-bg" cx="32" cy="32" r="28"/>
+          <circle class="lm-ring-progress" cx="32" cy="32" r="28"
+            id="lm-ring-#id#"
+            stroke-dasharray="175.93"
+            stroke-dashoffset="175.93"/>
+        </svg>
+        <div class="lm-power-btn cmd tooltips #hbmode_state_class#"
+          data-type="action"
+          data-subtype="other"
+          data-cmd_id="#cmd_jee4lm_on_id#|#cmd_jee4lm_off_id#"
+          id="lm-power-#id#">
+          <i class="fas fa-power-off"></i>
+        </div>
+      </div>
+      <div class="lm-mode-label" id="lm-mode-#id#">
+        <span class="cmd" data-cmd_id="#cmd_hbmode_id#"></span>
+      </div>
+    </div>
+    <div class="lm-header-right">
+      <div class="lm-tank cmd tooltips" data-cmd_id="#cmd_tankStatus_id#">
+        <i class="fas fa-tint"></i>
+        <span class="lm-tank-label"></span>
+      </div>
+      <div class="lm-last-backflush">
+        <span class="lm-meta-label">Backflush</span>
+        <span class="cmd" data-cmd_id="#cmd_last_backflush_id#"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TEMPERATURES
+  ============================================================ -->
+  <div class="lm-temps">
+    <!-- Coffee boiler -->
+    <div class="lm-boiler lm-boiler-coffee">
+      <div class="lm-boiler-icon"><i class="fas fa-coffee"></i></div>
+      <div class="lm-boiler-data">
+        <div class="lm-boiler-label">Café</div>
+        <!-- ON: show current temp -->
+        <div class="lm-temp-current lm-when-on cmd" data-cmd_id="#cmd_coffeecurrent_id#"></div>
+        <!-- Always: target -->
+        <div class="lm-temp-target">
+          <span class="cmd" data-cmd_id="#cmd_coffeetarget_id#"></span>°C
+        </div>
+        <div class="lm-boiler-status cmd" data-cmd_id="#cmd_displaycoffee_id#"></div>
+      </div>
+    </div>
+    <!-- Steam boiler -->
+    <div class="lm-boiler lm-boiler-steam" id="lm-steam-#id#">
+      <div class="lm-boiler-icon"><i class="fas fa-wind"></i></div>
+      <div class="lm-boiler-data">
+        <div class="lm-boiler-label">Vapeur</div>
+        <div class="lm-temp-current lm-when-on cmd" data-cmd_id="#cmd_steamcurrent_id#"></div>
+        <div class="lm-temp-target lm-when-steam-on">
+          <span class="cmd" data-cmd_id="#cmd_steamtarget_id#"></span>°C
+        </div>
+        <div class="lm-boiler-status cmd" data-cmd_id="#cmd_displaysteam_id#"></div>
+      </div>
+      <div class="lm-steam-toggle">
+        <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
+          data-cmd_id="#cmd_jee4lm_steam_on_id#">ON</button>
+        <button class="lm-btn-small lm-btn-off cmd tooltips" data-type="action" data-subtype="other"
+          data-cmd_id="#cmd_jee4lm_steam_off_id#">OFF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       EXTRACTION MODE (conditionnel plumbedin)
+  ============================================================ -->
+  <div class="lm-extraction" id="lm-extraction-#id#">
+    <!-- PreBrewing (non plombé) -->
+    <div class="lm-prewet" id="lm-prewet-#id#">
+      <div class="lm-section-label">
+        <i class="fas fa-tachometer-alt"></i> Prétrempage
+        <span class="lm-toggle-wrap">
+          <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_prewet_on_id#">ON</button>
+          <button class="lm-btn-small lm-btn-off cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_prewet_off_id#">OFF</button>
+        </span>
+      </div>
+      <div class="lm-prewet-times lm-when-prewet-on">
+        <span class="lm-meta-label">Mouillage</span>
+        <span class="cmd lm-time-val" data-cmd_id="#cmd_prewettime_id#"></span>s
+        <span class="lm-meta-label lm-ml">Pause</span>
+        <span class="cmd lm-time-val" data-cmd_id="#cmd_prewetholdtime_id#"></span>s
+      </div>
+    </div>
+    <!-- PreInfusion (plombé) -->
+    <div class="lm-preinfusion" id="lm-preinfusion-#id#">
+      <div class="lm-section-label">
+        <i class="fas fa-water"></i> Préinfusion
+        <span class="lm-toggle-wrap">
+          <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_preextraction_on_id#">ON</button>
+          <button class="lm-btn-small lm-btn-off cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_preextraction_off_id#">OFF</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       BBW (conditionnel isbbw)
+  ============================================================ -->
+  <div class="lm-bbw" id="lm-bbw-#id#">
+    <div class="lm-section-label">
+      <i class="fas fa-balance-scale"></i>
+      <span class="cmd" data-cmd_id="#cmd_scalebattery_id#"></span>
+      <span class="lm-scale-name cmd" data-cmd_id="#cmd_isscaleconnected_id#"></span>
+    </div>
+    <div class="lm-bbw-doses">
+      <div class="lm-dose" id="lm-doseA-#id#">
+        <button class="lm-dose-btn cmd tooltips" data-type="action" data-subtype="other"
+          data-cmd_id="#cmd_jee4lm_bbwA_id#">
+          <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseA_id#"></span>g
+        </button>
+        <span class="lm-meta-label">Dose 1</span>
+      </div>
+      <div class="lm-dose-sep">|</div>
+      <div class="lm-dose" id="lm-doseB-#id#">
+        <button class="lm-dose-btn cmd tooltips" data-type="action" data-subtype="other"
+          data-cmd_id="#cmd_jee4lm_bbwB_id#">
+          <span class="cmd lm-dose-val" data-cmd_id="#cmd_bbwdoseB_id#"></span>g
+        </button>
+        <span class="lm-meta-label">Dose 2</span>
+      </div>
+      <div class="lm-dose-sep">|</div>
+      <div class="lm-dose">
+        <span class="cmd lm-bbw-mode" data-cmd_id="#cmd_bbwmode_id#"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       RÉGLAGES (replié)
+  ============================================================ -->
+  <div class="lm-settings-wrap">
+    <button class="lm-settings-toggle" onclick="lmToggleSettings('#id#')">
+      <i class="fas fa-sliders-h"></i> Réglages
+      <i class="fas fa-chevron-down lm-chevron" id="lm-chev-#id#"></i>
+    </button>
+    <div class="lm-settings" id="lm-settings-#id#" style="display:none">
+
+      <div class="lm-setting-row">
+        <label>Café</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_coffee_slider_id#"></div>
+      </div>
+
+      <div class="lm-setting-row lm-when-steam-on">
+        <label>Vapeur</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_steam_slider_id#"></div>
+      </div>
+
+      <div class="lm-setting-row lm-when-prewet-on">
+        <label>Mouillage</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_prewet_slider_id#"></div>
+      </div>
+
+      <div class="lm-setting-row lm-when-prewet-on">
+        <label>Pause</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_prewet_time_slider_id#"></div>
+      </div>
+
+      <div class="lm-setting-row lm-when-bbw">
+        <label>Dose 1</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_doseA_slider_id#"></div>
+      </div>
+
+      <div class="lm-setting-row lm-when-bbw">
+        <label>Dose 2</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_doseB_slider_id#"></div>
+      </div>
+
+      <!-- SmartWakeup -->
+      <div class="lm-setting-row lm-setting-smartwakeup">
+        <label>Réveil auto</label>
+        <span>
+          <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_smartwakeup_on_id#">ON</button>
+          <button class="lm-btn-small lm-btn-off cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_smartwakeup_off_id#">OFF</button>
+        </span>
+      </div>
+      <div class="lm-setting-row lm-when-smartwakeup">
+        <label>Durée</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_smartwakeupstandbyminutes_slider_id#"></div>
+      </div>
+      <div class="lm-setting-row lm-when-smartwakeup">
+        <label>Depuis</label>
+        <span>
+          <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_smartwakeup_after_lastbrew_id#">Dernier café</button>
+          <button class="lm-btn-small cmd tooltips" data-type="action" data-subtype="other"
+            data-cmd_id="#cmd_jee4lm_smartwakeup_after_poweron_id#">Allumage</button>
+        </span>
+      </div>
+
+      <!-- Backflush -->
+      <div class="lm-setting-row">
+        <label>Backflush</label>
+        <button class="lm-btn-danger cmd tooltips" data-type="action" data-subtype="other"
+          data-cmd_id="#cmd_start_backflush_id#">
+          <i class="fas fa-sync"></i> Démarrer
+        </button>
+      </div>
+
+      <!-- Firmware -->
+      <div class="lm-fw">
+        <span class="lm-meta-label">FW</span>
+        <span class="cmd" data-cmd_id="#cmd_fwversion_id#"></span>
+        <span class="lm-meta-label lm-ml">GW</span>
+        <span class="cmd" data-cmd_id="#cmd_gwversion_id#"></span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+.lm-widget {
+  --lm-red:    #E31E24;
+  --lm-black:  #1A1A1A;
+  --lm-card:   #2A2A2A;
+  --lm-border: #3A3A3A;
+  --lm-text:   #F5F5F0;
+  --lm-muted:  #888;
+  --lm-green:  #4CAF50;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--lm-black);
+  border-radius: 12px;
+  overflow: hidden;
+  color: var(--lm-text);
+  min-width: 320px;
+  max-width: 480px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* HEADER */
+.lm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #1A1A1A 60%, #2A0A0A);
+  border-bottom: 1px solid var(--lm-border);
+}
+.lm-header-img img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(227,30,36,0.3));
+}
+.lm-header-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.lm-machine-name {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--lm-muted);
+}
+.lm-power-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+.lm-ring {
+  position: absolute;
+  top: 0; left: 0;
+  width: 56px; height: 56px;
+  transform: rotate(-90deg);
+}
+.lm-ring-bg {
+  fill: none;
+  stroke: var(--lm-border);
+  stroke-width: 3;
+}
+.lm-ring-progress {
+  fill: none;
+  stroke: var(--lm-red);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+}
+.lm-power-btn {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: var(--lm-card);
+  border: 2px solid var(--lm-border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--lm-muted);
+  transition: all 0.2s;
+}
+.lm-power-btn.lm-on {
+  border-color: var(--lm-red);
+  color: var(--lm-red);
+  box-shadow: 0 0 12px rgba(227,30,36,0.4);
+}
+.lm-mode-label {
+  font-size: 10px;
+  color: var(--lm-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lm-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 11px;
+}
+.lm-tank { color: var(--lm-muted); }
+.lm-tank.lm-tank-warn { color: #FF9800; }
+.lm-last-backflush { text-align: right; }
+.lm-meta-label {
+  font-size: 10px;
+  color: var(--lm-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+}
+.lm-ml { margin-left: 8px; }
+
+/* TEMPERATURES */
+.lm-temps {
+  display: flex;
+  gap: 1px;
+  background: var(--lm-border);
+}
+.lm-boiler {
+  flex: 1;
+  background: var(--lm-card);
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.lm-boiler-icon {
+  font-size: 18px;
+  color: var(--lm-red);
+  margin-top: 2px;
+}
+.lm-boiler-data { flex: 1; }
+.lm-boiler-label {
+  font-size: 10px;
+  color: var(--lm-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+}
+.lm-temp-current {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--lm-red);
+  line-height: 1;
+}
+.lm-temp-target {
+  font-size: 13px;
+  color: var(--lm-text);
+  opacity: 0.7;
+}
+.lm-boiler-status {
+  font-size: 11px;
+  color: var(--lm-muted);
+  margin-top: 2px;
+}
+.lm-steam-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+/* EXTRACTION */
+.lm-extraction {
+  background: var(--lm-card);
+  border-top: 1px solid var(--lm-border);
+  padding: 10px 16px;
+}
+.lm-section-label {
+  font-size: 11px;
+  color: var(--lm-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.lm-toggle-wrap { margin-left: auto; display: flex; gap: 4px; }
+.lm-prewet-times {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.lm-time-val { color: var(--lm-text); font-weight: 600; }
+
+/* BBW */
+.lm-bbw {
+  background: var(--lm-card);
+  border-top: 1px solid var(--lm-border);
+  padding: 10px 16px;
+}
+.lm-bbw-doses {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+.lm-dose { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.lm-dose-btn {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--lm-black);
+  border: 2px solid var(--lm-border);
+  color: var(--lm-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lm-dose-btn.lm-dose-active {
+  border-color: var(--lm-red);
+  color: var(--lm-red);
+  box-shadow: 0 0 8px rgba(227,30,36,0.3);
+}
+.lm-dose-sep { color: var(--lm-border); }
+.lm-bbw-mode { font-size: 11px; color: var(--lm-muted); }
+
+/* SETTINGS */
+.lm-settings-wrap {
+  border-top: 1px solid var(--lm-border);
+}
+.lm-settings-toggle {
+  width: 100%;
+  background: var(--lm-black);
+  border: none;
+  color: var(--lm-muted);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+.lm-settings-toggle:hover { color: var(--lm-text); }
+.lm-chevron { margin-left: auto; transition: transform 0.2s; }
+.lm-chevron.lm-open { transform: rotate(180deg); }
+.lm-settings {
+  background: var(--lm-black);
+  padding: 8px 16px 12px;
+}
+.lm-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--lm-border);
+  font-size: 12px;
+}
+.lm-setting-row label {
+  min-width: 70px;
+  color: var(--lm-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.lm-fw {
+  padding-top: 8px;
+  font-size: 11px;
+  color: var(--lm-muted);
+}
+
+/* BUTTONS */
+.lm-btn-small {
+  background: var(--lm-card);
+  border: 1px solid var(--lm-border);
+  color: var(--lm-text);
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.lm-btn-small:hover { border-color: var(--lm-red); color: var(--lm-red); }
+.lm-btn-off { color: var(--lm-muted); }
+.lm-btn-danger {
+  background: transparent;
+  border: 1px solid var(--lm-red);
+  color: var(--lm-red);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.lm-btn-danger:hover { background: var(--lm-red); color: #fff; }
+
+/* CONDITIONAL VISIBILITY */
+.lm-when-on         { display: none; }
+.lm-when-steam-on   { display: none; }
+.lm-when-prewet-on  { display: none; }
+.lm-when-bbw        { display: none; }
+.lm-when-smartwakeup{ display: none; }
+
+.lm-widget.state-on        .lm-when-on        { display: block; }
+.lm-widget.state-steam-on  .lm-when-steam-on  { display: flex; }
+.lm-widget.state-prewet-on .lm-when-prewet-on { display: flex; }
+.lm-widget.state-bbw       .lm-when-bbw       { display: flex; }
+.lm-widget.state-smartwakeup .lm-when-smartwakeup { display: flex; }
+</style>
+
+<script>
+(function() {
+  var uid = '#id#';
+  var w   = document.getElementById('lm-' + uid);
+  if (!w) return;
+
+  // Map cmd_id → logicalId for state-driven class updates
+  var CMD = {
+    machinemode:   '#cmd_machinemode_id#',
+    steamenabled:  '#cmd_steamenabled_id#',
+    prewet:        '#cmd_prewet_id#',
+    plumbedin:     '#cmd_plumbedin_id#',
+    isbbw:         '#cmd_isbbw_id#',
+    smartwakeup:   '#cmd_smartwakeup_id#',
+    coffeecurrent: '#cmd_coffeecurrent_id#',
+    coffeetarget:  '#cmd_coffeetarget_id#',
+    tankStatus:    '#cmd_tankStatus_id#',
+    hbmode:        '#cmd_hbmode_id#',
+  };
+
+  // Read current cmd value from Jeedom DOM
+  function val(cmdId) {
+    var el = document.querySelector('[data-cmd_id="' + cmdId + '"].cmd-value, .cmd[data-cmd_id="' + cmdId + '"]');
+    return el ? (el.dataset.value || el.textContent.trim()) : '';
+  }
+
+  // Update all conditional classes and ring
+  function updateStates() {
+    var on      = val(CMD.machinemode) == '1';
+    var steamOn = val(CMD.steamenabled) == '1';
+    var prewet  = val(CMD.prewet) == '1';
+    var plumbed = val(CMD.plumbedin) == '1';
+    var bbw     = val(CMD.isbbw) == '1';
+    var wakeup  = val(CMD.smartwakeup) == '1';
+
+    w.classList.toggle('state-on',          on);
+    w.classList.toggle('state-steam-on',    steamOn);
+    w.classList.toggle('state-prewet-on',   prewet && !plumbed);
+    w.classList.toggle('state-bbw',         bbw);
+    w.classList.toggle('state-smartwakeup', wakeup);
+
+    // Power button style
+    var pwrBtn = document.getElementById('lm-power-' + uid);
+    if (pwrBtn) pwrBtn.classList.toggle('lm-on', on);
+
+    // Switch power button target based on current state
+    if (pwrBtn) {
+      pwrBtn.dataset.cmd_id = on
+        ? '#cmd_jee4lm_off_id#'
+        : '#cmd_jee4lm_on_id#';
+    }
+
+    // Show/hide extraction section
+    var prewetDiv   = document.getElementById('lm-prewet-' + uid);
+    var preinfDiv   = document.getElementById('lm-preinfusion-' + uid);
+    if (prewetDiv)  prewetDiv.style.display  = plumbed ? 'none' : 'block';
+    if (preinfDiv)  preinfDiv.style.display  = plumbed ? 'block' : 'none';
+
+    // BBW section
+    var bbwDiv = document.getElementById('lm-bbw-' + uid);
+    if (bbwDiv) bbwDiv.style.display = bbw ? 'block' : 'none';
+
+    // Heating ring animation (coffee current vs target)
+    if (on) {
+      var cur = parseFloat(val(CMD.coffeecurrent)) || 0;
+      var tgt = parseFloat(val(CMD.coffeetarget))  || 93;
+      var pct = Math.min(Math.max(cur / tgt, 0), 1);
+      var ring = document.getElementById('lm-ring-' + uid);
+      if (ring) {
+        var circumference = 175.93;
+        ring.style.strokeDashoffset = circumference * (1 - pct);
+      }
+    }
+
+    // Tank indicator
+    var tankEl = w.querySelector('.lm-tank');
+    if (tankEl) tankEl.classList.toggle('lm-tank-warn', val(CMD.tankStatus) == '1');
+
+    // Dose active highlight
+    var modeEl = w.querySelector('.lm-bbw-mode');
+    var mode   = modeEl ? modeEl.textContent.trim() : '';
+    var dA = document.getElementById('lm-doseA-' + uid);
+    var dB = document.getElementById('lm-doseB-' + uid);
+    if (dA) dA.querySelector('.lm-dose-btn').classList.toggle('lm-dose-active', mode === 'Dose1');
+    if (dB) dB.querySelector('.lm-dose-btn').classList.toggle('lm-dose-active', mode === 'Dose2');
+  }
+
+  // Settings toggle
+  window.lmToggleSettings = function(id) {
+    var s    = document.getElementById('lm-settings-' + id);
+    var chev = document.getElementById('lm-chev-' + id);
+    if (!s) return;
+    var open = s.style.display !== 'none';
+    s.style.display = open ? 'none' : 'block';
+    if (chev) chev.classList.toggle('lm-open', !open);
+  };
+
+  // Initial render
+  updateStates();
+
+  // React to Jeedom cmd updates
+  $(document).on('jeedom.event.cmd', function(e, data) {
+    if (!data || !data.cmd_id) return;
+    var ids = Object.values(CMD);
+    if (ids.indexOf(String(data.cmd_id)) !== -1) {
+      setTimeout(updateStates, 50);
+    }
+  });
+
+})();
+</script>
