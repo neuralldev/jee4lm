@@ -919,6 +919,8 @@ class jee4lm5 extends eqLogic
         // After to_dict() mashumaro uses Python field names: dose_1, dose_2
         // DoseMode: Continuous, PulsesType, Dose1, Dose2, MassType
         case "CMBrewByWeightDoses":
+          // Widget present => machine supports brew-by-weight
+          $eq->checkAndUpdateCmd('isbbw', 1);
           $eq->checkAndUpdateCmd('isscaleconnected', !empty($output['scale_connected']) ? 1 : 0);
           $eq->checkAndUpdateCmd('bbwmode',  $output['mode']);
           $eq->checkAndUpdateCmd('bbwdoseA', $output['doses']['dose_1']['dose']);
@@ -1296,19 +1298,14 @@ class jee4lm5 extends eqLogic
       $replace['#name#']     = $this->getName();
       $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
 
-      // Inject cmd ids, current values (as #val_xxx#) and data-value attributes.
-      // In Jeedom 4.5 a custom eqLogic template that only emits #cmd_xxx_id#
-      // loses automatic .cmd hydration, so we pre-render values server-side and
-      // also expose them via #val_xxx# placeholders for immediate display.
+      // Inject cmd ids AND current values for initial render
       $states = array();
       foreach ($this->getCmd() as $cmd) {
         $logicalId = $cmd->getLogicalId();
         $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
+        // Only read values for info commands — never execute action commands
         if ($cmd->getType() === 'info') {
-            $v = $cmd->execCmd();
-            $states[$logicalId] = $v;
-            // Formatted value for direct text injection
-            $replace['#val_' . $logicalId . '#'] = ($v === null) ? '' : $v;
+            $states[$logicalId] = $cmd->execCmd();
         }
       }
 
@@ -1322,9 +1319,7 @@ class jee4lm5 extends eqLogic
       $replace['#lm_css_classes#'] = $cssClasses;
 
       $html = template_replace($replace, $template);
-      // Clean any unresolved placeholders
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
-      $html = preg_replace('/#val_[a-z0-9_]+#/', '', $html);
       return $html;
   }
 

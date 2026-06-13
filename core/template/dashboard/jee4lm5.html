@@ -146,6 +146,19 @@
         <span class="cmd lm-bbw-mode" data-cmd_id="#cmd_bbwmode_id#">#val_bbwmode#</span>
       </div>
     </div>
+    <!-- Dose sliders — always accessible when balance present, machine on or off -->
+    <div class="lm-bbw-sliders">
+      <div class="lm-setting-row">
+        <label>Dose 1</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_doseA_slider_id#"></div>
+      </div>
+      <div class="lm-setting-row">
+        <label>Dose 2</label>
+        <div class="cmd" data-type="action" data-subtype="slider"
+          data-cmd_id="#cmd_jee4lm_doseB_slider_id#"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ============================================================
@@ -182,17 +195,7 @@
           data-cmd_id="#cmd_jee4lm_prewet_time_slider_id#"></div>
       </div>
 
-      <div class="lm-setting-row lm-when-bbw">
-        <label>Dose 1</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_doseA_slider_id#"></div>
-      </div>
-
-      <div class="lm-setting-row lm-when-bbw">
-        <label>Dose 2</label>
-        <div class="cmd" data-type="action" data-subtype="slider"
-          data-cmd_id="#cmd_jee4lm_doseB_slider_id#"></div>
-      </div>
+      <!-- Dose sliders moved to BBW section (always visible when balance present) -->
 
       <!-- SmartWakeup -->
       <div class="lm-setting-row lm-setting-smartwakeup">
@@ -461,6 +464,12 @@
 }
 .lm-dose-sep { color: var(--lm-border); }
 .lm-bbw-mode { font-size: 11px; color: var(--lm-muted); }
+.lm-bbw-sliders {
+  border-top: 1px solid var(--lm-border);
+  margin-top: 8px;
+  padding-top: 6px;
+}
+.lm-bbw-sliders .lm-setting-row { border-bottom: none; padding: 3px 0; }
 
 /* SETTINGS */
 .lm-settings-wrap {
