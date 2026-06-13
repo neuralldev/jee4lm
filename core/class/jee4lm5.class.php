@@ -1286,16 +1286,30 @@ class jee4lm5 extends eqLogic
       if (empty($template)) {
           return parent::toHtml($_version);
       }
+
       $replace = array();
       $replace['#id#']       = $this->getId();
       $replace['#name#']     = $this->getName();
       $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
 
-      foreach ($this->getCmd('info') as $cmd) {
-          $replace['#cmd_' . $cmd->getLogicalId() . '_id#'] = $cmd->getId();
-          $replace['#' . $cmd->getLogicalId() . '#'] = $cmd->execCmd();
+      // Inject cmd ids AND current values for initial render
+      $states = array();
+      foreach ($this->getCmd() as $cmd) {
+          $logicalId = $cmd->getLogicalId();
+          $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
+          // Store current value for state computation
+          $states[$logicalId] = $cmd->execCmd();
       }
-      // Fallback empty string for any unresolved placeholder
+
+      // Pre-compute CSS state classes for initial render
+      $cssClasses = 'lm-widget';
+      if (!empty($states['machinemode']))  $cssClasses .= ' state-on';
+      if (!empty($states['steamenabled'])) $cssClasses .= ' state-steam-on';
+      if (!empty($states['prewet']) && empty($states['plumbedin'])) $cssClasses .= ' state-prewet-on';
+      if (!empty($states['isbbw']))        $cssClasses .= ' state-bbw';
+      if (!empty($states['smartwakeup'])) $cssClasses .= ' state-smartwakeup';
+      $replace['#lm_css_classes#'] = $cssClasses;
+
       $html = template_replace($replace, $template);
       $html = preg_replace('/#cmd_[a-z0-9_]+_id#/', '', $html);
       return $html;
