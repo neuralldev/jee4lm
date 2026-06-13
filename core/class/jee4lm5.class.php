@@ -474,8 +474,12 @@ class jee4lm5 extends eqLogic
     self::deamon_send($payload);
   }
 
-  public function CoffeeMachineSettingSmartStandBy(bool $_enable, int $_minutes, string $_after)
-  {
+  public function CoffeeMachineSettingSmartStandBy(bool $_enable, int $_minutes, ?string $_after)
+{
+    if ($_after === null) {
+        log::add(__CLASS__, 'warning', 'CoffeeMachineSettingSmartStandBy: after is null, skipping');
+        return;
+    }
     log::add(__CLASS__, 'debug', "CoffeeMachineSettingSmartStandBy enable=$_enable minutes=$_minutes after=$_after");
     $serial  = $this->getConfiguration('serialNumber');
     // FIX #3: was $$_enable (variable variable)
@@ -1295,10 +1299,12 @@ class jee4lm5 extends eqLogic
       // Inject cmd ids AND current values for initial render
       $states = array();
       foreach ($this->getCmd() as $cmd) {
-          $logicalId = $cmd->getLogicalId();
-          $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
-          // Store current value for state computation
-          $states[$logicalId] = $cmd->execCmd();
+        $logicalId = $cmd->getLogicalId();
+        $replace['#cmd_' . $logicalId . '_id#'] = $cmd->getId();
+        // Only read values for info commands — never execute action commands
+        if ($cmd->getType() === 'info') {
+            $states[$logicalId] = $cmd->execCmd();
+        }
       }
 
       // Pre-compute CSS state classes for initial render
