@@ -1187,18 +1187,32 @@ class jee4lm5 extends eqLogic
   public static function deamon_start($_automatic = false)
   {
     self::deamon_stop();
+   
+    // Kill any lingering process on the daemon port before starting
+    $port = JEEDOM_DAEMON_PORT;
+    exec("fuser -k {$port}/tcp 2>/dev/null");
+    sleep(1); // let the port be released
+   
     $deamon_info = self::deamon_info();
     if ($deamon_info['launchable'] !== 'ok') {
       log::add(__CLASS__, 'error', __('Daemon non lançable', __FILE__) . ' : ' . $deamon_info['launchable']);
       return false;
     }
+    
     $path    = realpath(dirname(__FILE__) . '/../../resources/');
-    $cmd     = 'python3 ' . $path . '/' . PLUGINNAME . 'd.py';
+    $pythonpath = $path . '/python_venv/bin/python3';
+    $cmd     = $pythonpath . ' ' . $path . '/' . PLUGINNAME . 'd/'. PLUGINNAME. 'd.py';
     $cmd    .= ' --loglevel ' . log::convertLogLevel(log::getLogLevel(__CLASS__));
     $cmd    .= ' --socketport '  . JEEDOM_DAEMON_PORT;
     $cmd    .= ' --apikey '      . jeedom::getApiKey(__CLASS__);
-    $cmd    .= ' --callback '    . network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp') . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . '_ajax.php';
     $cmd    .= ' --pid '         . jeedom::getTmpFolder(__CLASS__) . '/' . PLUGINNAME . 'd.pid';
+
+    $callback = network::getNetworkAccess('internal', 'proto:127.0.0.1:port:comp');
+    if (empty($callback)) {
+        $callback = 'http://127.0.0.1:80';
+        log::add(__CLASS__, 'warning', 'network internal not configured, using fallback');
+    }
+    $cmd .= ' --callback ' . $callback . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . 'd.php';
     log::add(__CLASS__, 'info', "start daemon: $cmd");
     $result = exec($cmd . ' >> ' . log::getPathToLog('' . PLUGINNAME . 'd') . ' 2>&1 &');
     log::add(__CLASS__, 'info', "exec result=$result");
