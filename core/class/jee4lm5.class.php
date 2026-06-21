@@ -830,16 +830,12 @@ class jee4lm5 extends eqLogic
         // MachineState: StandBy, PoweredOn, Brewing, Off
         // MachineMode:  BrewingMode, EcoMode, StandBy
         case "CMMachineStatus":
-          $cmdOn  = $eq->getCmd(null, 'jee4lm_on');
-          $cmdOff = $eq->getCmd(null, 'jee4lm_off');
           switch ($output['status']) {
             case "PoweredOn":
             case "Brewing":
               log::add(__CLASS__, 'debug', 'machine is ON');
               $eq->checkAndUpdateCmd('hbmode',      'heat');
               $eq->checkAndUpdateCmd('machinemode',  1);
-              if (is_object($cmdOn))  { $cmdOn->setIsVisible(0);  $cmdOn->save(); }
-              if (is_object($cmdOff)) { $cmdOff->setIsVisible(1); $cmdOff->save(); }
               $autorefresh = true;
               break;
             case "StandBy":
@@ -847,8 +843,6 @@ class jee4lm5 extends eqLogic
               log::add(__CLASS__, 'debug', 'machine is OFF');
               $eq->checkAndUpdateCmd('machinemode',  0);
               $eq->checkAndUpdateCmd('hbmode',       'off');
-              if (is_object($cmdOn))  { $cmdOn->setIsVisible(1);  $cmdOn->save(); }
-              if (is_object($cmdOff)) { $cmdOff->setIsVisible(0); $cmdOff->save(); }
               $autorefresh = false;
               break;
           }
@@ -968,9 +962,7 @@ class jee4lm5 extends eqLogic
       }
     }
 
-    // FIX #2: drive dash loop via CoffeeMachineChangeMode instead of raw on/off daemon signal
     if ($autorefresh !== $last_autorefresh) {
-      $eq->CoffeeMachineChangeMode($autorefresh);
       $eq->setConfiguration('autorefresh', $autorefresh ? 1 : 0);
       $eq->save();
     }

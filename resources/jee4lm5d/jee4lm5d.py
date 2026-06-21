@@ -7,7 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
-from pylamarzocco.const import DoseMode, MachineMode, PreExtractionMode, SmartStandByType
+from pylamarzocco.const import DoseMode, MachineMode, MachineState, PreExtractionMode, SmartStandByType, WidgetType
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
 from pylamarzocco.util import InstallationKey, generate_installation_key
 from mashumaro.mixins.json import DataClassJSONMixin
@@ -282,12 +282,15 @@ class Jee4LM(BaseDaemon):
                 enabled = bool(message.get("value", 0))
                 try:
                     await machine.set_power(enabled)
-                    await machine.get_dashboard()
+                    # Optimistic local update — server command is Pending, skip get_dashboard()
+                    ms = machine.dashboard.config.get(WidgetType.CM_MACHINE_STATUS)
+                    if ms is not None:
+                        ms.status = MachineState.POWERED_ON if enabled else MachineState.STANDBY
+                        ms.mode   = MachineMode.BREWING_MODE if enabled else MachineMode.STANDBY
                     await self.send_to_jeedom({
                         "id": eq_id,
                         "dash": machine.dashboard.to_json(),
                     })
-                    # Drive the dash loop from power state
                     if enabled:
                         self._start_dash_loop(serial, eq_id)
                     else:
@@ -379,7 +382,8 @@ class Jee4LM(BaseDaemon):
                     dose2 = float(message["value2"])
                     self._logger.debug(f"BBW set doses: dose1={dose1} dose2={dose2}")
                     await machine.set_brew_by_weight_doses(dose1, dose2)
-                    await machine.get_dashboard()
+                    # No get_dashboard(): the command is Pending, server still has stale values.
+                    # set_brew_by_weight_doses already updated local model optimistically.
                     await self.send_to_jeedom({
                         "id": eq_id,
                         "dash": machine.dashboard.to_json(),
@@ -392,7 +396,7 @@ class Jee4LM(BaseDaemon):
                 try:
                     mode = DoseMode(message["value"])
                     await machine.set_brew_by_weight_dose_mode(mode)
-                    await machine.get_dashboard()
+                    # Same: optimistic local update already done, skip stale get_dashboard().
                     await self.send_to_jeedom({
                         "id": eq_id,
                         "dash": machine.dashboard.to_json(),
