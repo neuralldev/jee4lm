@@ -815,6 +815,24 @@
     });
   });
 
+  // Fix IEEE 754 display artifacts on range inputs (e.g. 34.199... instead of 34.2).
+  // Jeedom updates the adjacent display element synchronously; rAF lets us overwrite
+  // it after all oninput handlers have run, before the frame is painted.
+  w.addEventListener('input', function(ev) {
+    if (ev.target.type !== 'range') return;
+    var inp  = ev.target;
+    var step = parseFloat(inp.step);
+    if (!step || step === Math.floor(step)) return; // integer steps are exact
+    var decimals = (String(step).split('.')[1] || '').length;
+    requestAnimationFrame(function() {
+      var rounded = parseFloat(inp.value).toFixed(decimals);
+      var output = inp.parentNode.querySelector('output');
+      if (output) output.value = rounded;
+      var next = inp.nextElementSibling;
+      if (next && next.tagName !== 'INPUT') next.textContent = rounded;
+    });
+  });
+
   // React to Jeedom cmd updates (Jeedom 4.5 fires jeedom.cmd.update)
   $(document).off('jeedom.cmd.update.lm' + uid)
     .on('jeedom.cmd.update.lm' + uid, function(e, data) {
