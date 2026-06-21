@@ -336,6 +336,14 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         return result
 
     @cloud_only
+    async def set_bbw_doses(self, dose1: float, dose2: float) -> bool:
+        """Set brew-by-weight doses in grams. PATCH: not in upstream library."""
+        assert self._cloud_client
+        return await self._cloud_client.set_bbw_doses(
+            self.serial_number, dose1, dose2
+        )
+
+    @cloud_only
     async def start_backflush(self) -> bool:
         """Trigger the backflush."""
         assert self._cloud_client

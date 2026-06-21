@@ -655,6 +655,27 @@ class LaMarzoccoCloudClient:
             serial_number, "CoffeeMachineSetWakeUpSchedule", schedule.to_dict()
         )
 
+    async def set_bbw_doses(
+        self,
+        serial_number: str,
+        dose1: float,
+        dose2: float,
+    ) -> bool:
+        """Set brew-by-weight doses (Dose1 and Dose2) in grams.
+
+        PATCH: this method is not in the upstream pylamarzocco library.
+        Payload format is reverse-engineered from the BrewByWeightDoseSettings model.
+        """
+        data = {
+            "doses": {
+                "Dose1": {"dose": round(dose1, 1)},
+                "Dose2": {"dose": round(dose2, 1)},
+            }
+        }
+        return await self.__execute_command(
+            serial_number, "CoffeeMachineBrewByWeightSettingDoses", data
+        )
+
     async def update_firmware(
         self,
         serial_number: str,

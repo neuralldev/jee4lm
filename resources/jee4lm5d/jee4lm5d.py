@@ -373,10 +373,19 @@ class Jee4LM(BaseDaemon):
                     self._logger.error(f"set_pre_extraction_times failed: {e}")
 
             case "CoffeeMachineBrewByWeightSettingDoses":
-                # TODO: implement when pylamarzocco exposes BBW dose setting
-                self._logger.debug(
-                    f"BBW doses: value={message.get('value')} value2={message.get('value2')}"
-                )
+                machine = self._get_machine(serial)
+                try:
+                    dose1 = float(message["value"])
+                    dose2 = float(message["value2"])
+                    self._logger.debug(f"BBW set doses: dose1={dose1} dose2={dose2}")
+                    await machine.set_bbw_doses(dose1, dose2)
+                    await machine.get_dashboard()
+                    await self.send_to_jeedom({
+                        "id": eq_id,
+                        "dash": machine.dashboard.to_json(),
+                    })
+                except Exception as e:
+                    self._logger.error(f"set_bbw_doses failed: {e}")
 
             case "CoffeeMachineBackFlushStartCleaning":
                 machine = self._get_machine(serial)
