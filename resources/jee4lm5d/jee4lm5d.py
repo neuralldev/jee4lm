@@ -65,12 +65,16 @@ class Jee4LM(BaseDaemon):
         else:
             self._logger.warning("no credentials — daemon waiting for login command")
 
-        # Build cloud client (pylamarzocco manages its own ClientSession)
-        self.client = LaMarzoccoCloudClient(
-            username=self.credential.username,
-            password=self.credential.password,
-            installation_key=self.installation_key,
-        )
+        # Build cloud client only when credentials are available to avoid
+        # spurious auth attempts against the LM cloud API.
+        if self.credential.isinit():
+            self.client = LaMarzoccoCloudClient(
+                username=self.credential.username,
+                password=self.credential.password,
+                installation_key=self.installation_key,
+            )
+        else:
+            self.client = None
 
         # Register if not already confirmed — required before any API call.
         # registered.json acts as a flag; if absent, registration is attempted
@@ -220,11 +224,21 @@ class Jee4LM(BaseDaemon):
         eq_id = message.get("id")
         serial = message.get("serial", "")
 
+        # Block all cloud-dependent commands if credentials haven't been provided yet.
+        if fn != "login" and self.client is None:
+            self._logger.error(f"no cloud client yet (missing credentials) — ignoring {fn}")
+            return
+
         match fn:
 
             # ---- credentials ----------------------------------------
             case "login":
-                self._save_credential(message["username"], message["password"])
+                username = message.get("username", "")
+                password = message.get("password", "")
+                if not username or not password:
+                    self._logger.error("login: missing username or password")
+                    return
+                self._save_credential(username, password)
                 self._logger.info("credentials updated — restarting daemon")
                 await self.stop()
 
@@ -421,7 +435,11 @@ class Jee4LM(BaseDaemon):
                 try:
                     enabled = bool(int(message.get("value", 0)))
                     minutes = int(message.get("value2", 0))
-                    after = SmartStandByType(message.get("value3", "LastBrewing"))
+                    after_str = message.get("value3")
+                    if after_str is None:
+                        self._logger.warning("set_smart_standby: value3 absent, defaulting to LastBrewing")
+                        after_str = "LastBrewing"
+                    after = SmartStandByType(after_str)
                     await machine.set_smart_standby(enabled, minutes, after)
                     await machine.get_dashboard()
                     await self.send_to_jeedom({

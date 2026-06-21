@@ -53,7 +53,7 @@ class Thing(DataClassJSONMixin):
     connection_date: datetime = field(
         metadata=field_options(
             alias="connectionDate",
-            deserialize=lambda ts: datetime.fromtimestamp(ts / 1000, timezone.utc),
+            deserialize=lambda ts: datetime.fromtimestamp(ts / 1000, timezone.utc) if ts is not None else datetime.now(timezone.utc),
         ),
         default=datetime.now(timezone.utc),
     )

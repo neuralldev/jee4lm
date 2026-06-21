@@ -332,7 +332,9 @@ class jee4lm5 extends eqLogic
   {
     $v = $_options["slider"];
     log::add(__CLASS__, 'debug', "set_setpoint type=$_type logicalID=$_logicalID v=$v");
-    if ($v <= 0) return;
+    // Block negative values for all types; allow 0 for prewet timers (0s is valid).
+    if ($v < 0) return;
+    if ($v == 0 && $_type !== 'PrewetIn' && $_type !== 'PrewetOut') return;
     switch ($_type) {
       case "BbwDose":
         $this->CoffeeMachineBrewByWeightSettingDoses($v, $_logicalID);
@@ -344,11 +346,15 @@ class jee4lm5 extends eqLogic
         $this->CoffeeMachineSettingSteamBoilerTargetTemperature($v);
         break;
       case "PrewetIn":
-        $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewetholdtime')->execCmd();
+        $cmdHold = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewetholdtime');
+        if (!is_object($cmdHold)) return;
+        $d = $cmdHold->execCmd();
         $this->CoffeeMachinePreBrewingChangeTimes($v, $d);
         break;
       case "PrewetOut":
-        $d = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewettime')->execCmd();
+        $cmdWet = cmd::byEqLogicIdAndLogicalId($this->getId(), 'prewettime');
+        if (!is_object($cmdWet)) return;
+        $d = $cmdWet->execCmd();
         $this->CoffeeMachinePreBrewingChangeTimes($d, $v);
         break;
     }
@@ -445,9 +451,12 @@ class jee4lm5 extends eqLogic
   {
     log::add(__CLASS__, 'debug', "CoffeeMachineBrewByWeightSettingDoses dose=$_dose weight=$_weight");
     $serial = $this->getConfiguration('serialNumber');
-    // FIX #4: was $$dose1 (variable variable). Read current sibling dose from Jeedom state.
-    $dose1 = ($_dose == "bbwdoseA") ? $_weight : (float)cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA')->execCmd();
-    $dose2 = ($_dose == "bbwdoseB") ? $_weight : (float)cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB')->execCmd();
+    // Read current sibling dose from Jeedom state to send both values.
+    $cmdA = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseA');
+    $cmdB = cmd::byEqLogicIdAndLogicalId($this->getId(), 'bbwdoseB');
+    if (!is_object($cmdA) || !is_object($cmdB)) return;
+    $dose1 = ($_dose == "bbwdoseA") ? $_weight : (float)$cmdA->execCmd();
+    $dose2 = ($_dose == "bbwdoseB") ? $_weight : (float)$cmdB->execCmd();
     $payload = ["command" => "lm", "function" => "CoffeeMachineBrewByWeightSettingDoses", "value" => $dose1, "value2" => $dose2, "id" => $this->getId(), "serial" => $serial];
     self::deamon_send($payload);
     // Optimistic UI update: reflect the new dose immediately so the slider
@@ -504,18 +513,22 @@ class jee4lm5 extends eqLogic
 
   public function CoffeeMachineSettingSmartStandByAfterLastBrew($eq, $_options)
   {
-    $b     = (bool)cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeup')->execCmd();
-    $from  = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyafter')->execCmd();
-    $after = $_options;
-    return $eq->CoffeeMachineSettingSmartStandBy($b, (int)$from, $after);
+    $cmdB = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeup');
+    $cmdM = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyminutes');
+    if (!is_object($cmdB) || !is_object($cmdM)) return;
+    $b       = (bool)$cmdB->execCmd();
+    $minutes = (int)$cmdM->execCmd();
+    return $eq->CoffeeMachineSettingSmartStandBy($b, $minutes, "LastBrewing");
   }
 
   public function CoffeeMachineSettingSmartStandByAfterPowerOn($eq, $_options)
   {
-    $b      = (bool)cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeup')->execCmd();
-    $after  = (int)cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyminutes')->execCmd();
-    $from   = $_options;
-    return $eq->CoffeeMachineSettingSmartStandBy($b, $after, $from);
+    $cmdB = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeup');
+    $cmdM = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyminutes');
+    if (!is_object($cmdB) || !is_object($cmdM)) return;
+    $b       = (bool)$cmdB->execCmd();
+    $minutes = (int)$cmdM->execCmd();
+    return $eq->CoffeeMachineSettingSmartStandBy($b, $minutes, "PowerOn");
   }
 
   public function CoffeeMachineSettingPreInfusionEnabled($eq, $b)
@@ -682,7 +695,7 @@ class jee4lm5 extends eqLogic
           "style::td::1::1" => "font-size:larger;",
           "text::td::1::1"  => "<br>Réservoir à eau<br>",
           "text::td::1::3"  => "<br>Balance connectée<br>",
-          "text::td::1::2"  => '<img src="' . $imageUrl . '" height=85% width=85%>',
+          "text::td::1::2"  => '<img src="' . htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') . '" height=85% width=85%>',
           "style::td::3::1" => "font-size:1.5em;height:3em;vertical-align:top;",
           "style::td::3::2" => "font-size:1.5em;height:3em;vertical-align:top;",
           "style::td::3::3" => "font-size:1.5em;height:3em;vertical-align:top;",
@@ -703,7 +716,7 @@ class jee4lm5 extends eqLogic
 
       foreach ($display_map as $key => $map) {
         $r = cmd::byEqLogicIdAndLogicalId($eqLogic->getId(), $key);
-        if ($r != null) {
+        if (is_object($r)) {
           $displayStuff["layout::dashboard::table::cmd::" . $r->getId() . "::line"]   = $map[0];
           $displayStuff["layout::dashboard::table::cmd::" . $r->getId() . "::column"] = $map[1];
         }
@@ -946,7 +959,7 @@ class jee4lm5 extends eqLogic
           } elseif (!empty($output['times']['pre_infusion'][0]['seconds'])) {
             $times = $output['times']['pre_infusion'][0]['seconds'];
           }
-          if ($times !== null) {
+          if ($times !== null && isset($times['In'], $times['Out'])) {
             $eq->checkAndUpdateCmd('prewettime',     $times['In']);
             $eq->checkAndUpdateCmd('prewetholdtime', $times['Out']);
           }
@@ -1296,7 +1309,7 @@ class jee4lm5 extends eqLogic
       $replace = array();
       $replace['#id#']       = $this->getId();
       $replace['#name#']     = $this->getName();
-      $replace['#imageUrl#'] = $this->getConfiguration('imageUrl', '');
+      $replace['#imageUrl#'] = htmlspecialchars($this->getConfiguration('imageUrl', ''), ENT_QUOTES, 'UTF-8');
 
       // Inject cmd ids, current values (#val_xxx#), rendered sliders and states.
       $states = array();

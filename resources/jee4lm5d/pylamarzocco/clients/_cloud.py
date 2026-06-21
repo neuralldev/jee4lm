@@ -492,6 +492,8 @@ class LaMarzoccoCloudClient:
             method=HTTPMethod.POST,
             data=data,
         )
+        if not isinstance(response, list) or not response:
+            raise RequestNotSuccessful(f"unexpected command response format: {response!r}")
         cr = CommandResponse.from_dict(response[0])
         future: Future[CommandResponse] = Future()
         self._pending_commands[cr.id] = future

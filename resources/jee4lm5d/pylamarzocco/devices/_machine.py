@@ -313,7 +313,7 @@ class LaMarzoccoMachine(LaMarzoccoThing):
 
         return result
     
-    @models_supported((ModelCode.GS3, ModelCode.GS3_AV, ModelCode.GS3_MP))
+    @models_supported((ModelCode.GS3, ModelCode.GS3_AV, ModelCode.GS3_MP, ModelCode.LINEA_MINI))
     async def set_steam_target_temperature(self, temperature: float) -> bool:
         """Set the steam target temperature."""
 
