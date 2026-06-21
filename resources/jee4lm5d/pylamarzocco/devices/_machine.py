@@ -11,6 +11,7 @@ from pylamarzocco import LaMarzoccoBluetoothClient, LaMarzoccoCloudClient
 from pylamarzocco.const import (
     BoilerStatus,
     BoilerType,
+    DoseMode,
     MachineMode,
     MachineState,
     ModelCode,
@@ -21,6 +22,7 @@ from pylamarzocco.const import (
 )
 from pylamarzocco.exceptions import BluetoothConnectionFailed
 from pylamarzocco.models import (
+    BrewByWeightDoses,
     CoffeeAndFlushCounter,
     CoffeeAndFlushTrend,
     CoffeeBoiler,
@@ -336,12 +338,63 @@ class LaMarzoccoMachine(LaMarzoccoThing):
         return result
 
     @cloud_only
-    async def set_bbw_doses(self, dose1: float, dose2: float) -> bool:
-        """Set brew-by-weight doses in grams. PATCH: not in upstream library."""
+    async def set_brew_by_weight_dose_mode(self, mode: DoseMode) -> bool:
+        """Set the brew by weight dose mode (Linea Mini models only)."""
         assert self._cloud_client
-        return await self._cloud_client.set_bbw_doses(
-            self.serial_number, dose1, dose2
+        result = await self._cloud_client.change_brew_by_weight_dose_mode(
+            self.serial_number, mode
         )
+        if result and WidgetType.CM_BREW_BY_WEIGHT_DOSES in self.dashboard.config:
+            brew_by_weight = cast(
+                BrewByWeightDoses,
+                self.dashboard.config[WidgetType.CM_BREW_BY_WEIGHT_DOSES],
+            )
+            brew_by_weight.mode = mode
+        return result
+
+    @cloud_only
+    async def set_brew_by_weight_dose(self, dose: DoseMode, value: float) -> bool:
+        """Set a brew by weight dose value (Linea Mini models only)."""
+        assert self._cloud_client
+        if WidgetType.CM_BREW_BY_WEIGHT_DOSES not in self.dashboard.config:
+            return False
+        brew_by_weight = cast(
+            BrewByWeightDoses,
+            self.dashboard.config[WidgetType.CM_BREW_BY_WEIGHT_DOSES],
+        )
+        if dose == DoseMode.DOSE_1:
+            dose_1 = value
+            dose_2 = brew_by_weight.doses.dose_2.dose
+        elif dose == DoseMode.DOSE_2:
+            dose_1 = brew_by_weight.doses.dose_1.dose
+            dose_2 = value
+        else:
+            return False
+        result = await self._cloud_client.set_brew_by_weight_dose(
+            self.serial_number, dose_1, dose_2
+        )
+        if result:
+            if dose == DoseMode.DOSE_1:
+                brew_by_weight.doses.dose_1.dose = value
+            else:
+                brew_by_weight.doses.dose_2.dose = value
+        return result
+
+    @cloud_only
+    async def set_brew_by_weight_doses(self, dose_1: float, dose_2: float) -> bool:
+        """Set both BBW doses from explicit values (plugin use: PHP always sends both)."""
+        assert self._cloud_client
+        result = await self._cloud_client.set_brew_by_weight_dose(
+            self.serial_number, dose_1, dose_2
+        )
+        if result and WidgetType.CM_BREW_BY_WEIGHT_DOSES in self.dashboard.config:
+            brew_by_weight = cast(
+                BrewByWeightDoses,
+                self.dashboard.config[WidgetType.CM_BREW_BY_WEIGHT_DOSES],
+            )
+            brew_by_weight.doses.dose_1.dose = dose_1
+            brew_by_weight.doses.dose_2.dose = dose_2
+        return result
 
     @cloud_only
     async def start_backflush(self) -> bool:

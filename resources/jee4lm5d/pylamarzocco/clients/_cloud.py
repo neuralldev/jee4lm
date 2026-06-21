@@ -27,6 +27,7 @@ from pylamarzocco.const import (
     BASE_URL,
     CUSTOMER_APP_URL,
     CommandStatus,
+    DoseMode,
     PreExtractionMode,
     SmartStandByType,
     SteamTargetLevel,
@@ -655,25 +656,32 @@ class LaMarzoccoCloudClient:
             serial_number, "CoffeeMachineSetWakeUpSchedule", schedule.to_dict()
         )
 
-    async def set_bbw_doses(
+    async def set_brew_by_weight_dose(
         self,
         serial_number: str,
-        dose1: float,
-        dose2: float,
+        dose_1: float,
+        dose_2: float,
     ) -> bool:
-        """Set brew-by-weight doses (Dose1 and Dose2) in grams.
-
-        PATCH: this method is not in the upstream pylamarzocco library.
-        Payload format is reverse-engineered from the BrewByWeightDoseSettings model.
-        """
+        """Set the brew by weight doses (Linea Mini models only)."""
         data = {
             "doses": {
-                "Dose1": {"dose": round(dose1, 1)},
-                "Dose2": {"dose": round(dose2, 1)},
+                "Dose1": round(dose_1, 1),
+                "Dose2": round(dose_2, 1),
             }
         }
         return await self.__execute_command(
             serial_number, "CoffeeMachineBrewByWeightSettingDoses", data
+        )
+
+    async def change_brew_by_weight_dose_mode(
+        self,
+        serial_number: str,
+        mode: DoseMode,
+    ) -> bool:
+        """Change the brew by weight dose mode (Linea Mini models only)."""
+        data = {"mode": mode.value}
+        return await self.__execute_command(
+            serial_number, "CoffeeMachineBrewByWeightChangeMode", data
         )
 
     async def update_firmware(

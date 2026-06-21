@@ -7,7 +7,7 @@ from pathlib import Path
 from dataclasses import dataclass
 from typing import Optional
 
-from pylamarzocco.const import PreExtractionMode, MachineMode
+from pylamarzocco.const import DoseMode, MachineMode, PreExtractionMode, SmartStandByType
 from pylamarzocco import LaMarzoccoCloudClient, LaMarzoccoMachine
 from pylamarzocco.util import InstallationKey, generate_installation_key
 from mashumaro.mixins.json import DataClassJSONMixin
@@ -378,14 +378,27 @@ class Jee4LM(BaseDaemon):
                     dose1 = float(message["value"])
                     dose2 = float(message["value2"])
                     self._logger.debug(f"BBW set doses: dose1={dose1} dose2={dose2}")
-                    await machine.set_bbw_doses(dose1, dose2)
+                    await machine.set_brew_by_weight_doses(dose1, dose2)
                     await machine.get_dashboard()
                     await self.send_to_jeedom({
                         "id": eq_id,
                         "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
-                    self._logger.error(f"set_bbw_doses failed: {e}")
+                    self._logger.error(f"set_brew_by_weight_doses failed: {e}")
+
+            case "CoffeeMachineBrewByWeightChangeMode":
+                machine = self._get_machine(serial)
+                try:
+                    mode = DoseMode(message["value"])
+                    await machine.set_brew_by_weight_dose_mode(mode)
+                    await machine.get_dashboard()
+                    await self.send_to_jeedom({
+                        "id": eq_id,
+                        "dash": machine.dashboard.to_json(),
+                    })
+                except Exception as e:
+                    self._logger.error(f"set_brew_by_weight_dose_mode failed: {e}")
 
             case "CoffeeMachineBackFlushStartCleaning":
                 machine = self._get_machine(serial)
@@ -400,11 +413,19 @@ class Jee4LM(BaseDaemon):
                     self._logger.error(f"start_backflush failed: {e}")
 
             case "CoffeeMachineSettingSmartStandBy":
-                # TODO: implement when pylamarzocco exposes smartstandby API
-                self._logger.debug(
-                    f"smartstandby: enable={message.get('value')} "
-                    f"minutes={message.get('value2')} after={message.get('value3')}"
-                )
+                machine = self._get_machine(serial)
+                try:
+                    enabled = bool(int(message.get("value", 0)))
+                    minutes = int(message.get("value2", 0))
+                    after = SmartStandByType(message.get("value3", "LastBrewing"))
+                    await machine.set_smart_standby(enabled, minutes, after)
+                    await machine.get_dashboard()
+                    await self.send_to_jeedom({
+                        "id": eq_id,
+                        "dash": machine.dashboard.to_json(),
+                    })
+                except Exception as e:
+                    self._logger.error(f"set_smart_standby failed: {e}")
 
             case _:
                 self._logger.error(f"unknown function: {fn}")
