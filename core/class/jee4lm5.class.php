@@ -835,7 +835,6 @@ class jee4lm5 extends eqLogic
     foreach ($arr1['widgets'] as $w) {
       $code   = $w['code'];
       $output = $w['output'];
-      log::add(__CLASS__, 'debug', "RefreshThingDashboardInformation widget=$code");
 
       switch ($code) {
 
@@ -1234,9 +1233,9 @@ class jee4lm5 extends eqLogic
         log::add(__CLASS__, 'warning', 'network internal not configured, using fallback');
     }
     $cmd .= ' --callback ' . $callback . '/plugins/' . PLUGINNAME . '/core/php/' . PLUGINNAME . 'd.php';
-    log::add(__CLASS__, 'info', "start daemon: $cmd");
+    log::add(__CLASS__, 'debug', "start daemon: $cmd");
     $result = exec($cmd . ' >> ' . log::getPathToLog('' . PLUGINNAME . 'd') . ' 2>&1 &');
-    log::add(__CLASS__, 'info', "exec result=$result");
+    log::add(__CLASS__, 'debug', "exec result=$result");
 
     $i = 0;
     while ($i < 10) {

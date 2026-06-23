@@ -241,7 +241,7 @@ class Jee4LM(BaseDaemon):
     # ------------------------------------------------------------------
 
     async def on_message(self, message: dict) -> None:
-        self._logger.debug(f"on_message: {message}")
+        self._logger.debug(f"on_message fn={message.get('function', '?')} serial={message.get('serial', '')} id={message.get('id', '')}")
 
         if message.get("command") != "lm":
             self._logger.error(f"unknown command: {message.get('command')}")
