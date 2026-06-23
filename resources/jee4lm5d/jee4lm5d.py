@@ -152,6 +152,33 @@ class Jee4LM(BaseDaemon):
         except asyncio.CancelledError:
             self._logger.info(f"dashboard loop cancelled serial={serial}")
 
+    async def _await_command_confirmed(
+        self,
+        machine: LaMarzoccoMachine,
+        pre_snapshot: str,
+        interval: float = 2.5,
+        timeout: float = 10.0,
+    ) -> bool:
+        """
+        Poll get_dashboard() every `interval` seconds until the dashboard JSON
+        differs from `pre_snapshot` (command applied server-side) or `timeout` elapses.
+        The pre-snapshot must be taken BEFORE the command so the comparison detects
+        when the server stops returning the old (Pending) state.
+        """
+        loop = asyncio.get_event_loop()
+        deadline = loop.time() + timeout
+        while loop.time() < deadline:
+            await asyncio.sleep(interval)
+            try:
+                await machine.get_dashboard()
+                if machine.dashboard.to_json() != pre_snapshot:
+                    return True
+            except asyncio.CancelledError:
+                raise
+            except Exception as e:
+                self._logger.debug(f"confirmation poll error: {e}")
+        return False
+
     def _machine_is_on(self, machine: LaMarzoccoMachine) -> bool:
         """Return True if the dashboard reports machine in brewing mode."""
         try:
@@ -315,36 +342,39 @@ class Jee4LM(BaseDaemon):
             case "CoffeeMachineSettingSteamBoilerEnabled":
                 machine = self._get_machine(serial)
                 try:
+                    pre_snapshot = machine.dashboard.to_json()
                     await machine.set_steam(bool(message.get("value", 0)))
-                    await machine.get_dashboard()
-                    await self.send_to_jeedom({
-                        "id": eq_id,
-                        "dash": machine.dashboard.to_json(),
-                    })
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
+                    confirmed = await self._await_command_confirmed(machine, pre_snapshot)
+                    if not confirmed:
+                        self._logger.warning("set_steam: server did not confirm within 10s")
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
                     self._logger.error(f"set_steam failed: {e}")
 
             case "CoffeeMachineSettingCoffeeBoilerTargetTemperature":
                 machine = self._get_machine(serial)
                 try:
+                    pre_snapshot = machine.dashboard.to_json()
                     await machine.set_coffee_target_temperature(float(message["value"]))
-                    await machine.get_dashboard()
-                    await self.send_to_jeedom({
-                        "id": eq_id,
-                        "dash": machine.dashboard.to_json(),
-                    })
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
+                    confirmed = await self._await_command_confirmed(machine, pre_snapshot)
+                    if not confirmed:
+                        self._logger.warning("set_coffee_target_temperature: server did not confirm within 10s")
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
                     self._logger.error(f"set_coffee_target_temperature failed: {e}")
 
             case "CoffeeMachineSettingSteamBoilerTargetTemperature":
                 machine = self._get_machine(serial)
                 try:
+                    pre_snapshot = machine.dashboard.to_json()
                     await machine.set_steam_target_temperature(float(message["value"]))
-                    await machine.get_dashboard()
-                    await self.send_to_jeedom({
-                        "id": eq_id,
-                        "dash": machine.dashboard.to_json(),
-                    })
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
+                    confirmed = await self._await_command_confirmed(machine, pre_snapshot)
+                    if not confirmed:
+                        self._logger.warning("set_steam_target_temperature: server did not confirm within 10s")
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
                     self._logger.error(f"set_steam_target_temperature failed: {e}")
 
@@ -352,12 +382,13 @@ class Jee4LM(BaseDaemon):
                 machine = self._get_machine(serial)
                 mode = PreExtractionMode.PREINFUSION if message.get("value") else PreExtractionMode.DISABLED
                 try:
+                    pre_snapshot = machine.dashboard.to_json()
                     await machine.set_pre_extraction_mode(mode)
-                    await machine.get_dashboard()
-                    await self.send_to_jeedom({
-                        "id": eq_id,
-                        "dash": machine.dashboard.to_json(),
-                    })
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
+                    confirmed = await self._await_command_confirmed(machine, pre_snapshot)
+                    if not confirmed:
+                        self._logger.warning("set_pre_extraction_mode (infusion): server did not confirm within 10s")
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
                     self._logger.error(f"set_pre_extraction_mode (infusion) failed: {e}")
 
@@ -365,27 +396,29 @@ class Jee4LM(BaseDaemon):
                 machine = self._get_machine(serial)
                 mode = PreExtractionMode.PREBREWING if message.get("value") else PreExtractionMode.DISABLED
                 try:
+                    pre_snapshot = machine.dashboard.to_json()
                     await machine.set_pre_extraction_mode(mode)
-                    await machine.get_dashboard()
-                    await self.send_to_jeedom({
-                        "id": eq_id,
-                        "dash": machine.dashboard.to_json(),
-                    })
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
+                    confirmed = await self._await_command_confirmed(machine, pre_snapshot)
+                    if not confirmed:
+                        self._logger.warning("set_pre_extraction_mode (brewing): server did not confirm within 10s")
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
                     self._logger.error(f"set_pre_extraction_mode (brewing) failed: {e}")
 
             case "CoffeeMachinePreBrewingChangeTimes":
                 machine = self._get_machine(serial)
                 try:
+                    pre_snapshot = machine.dashboard.to_json()
                     await machine.set_pre_extraction_times(
                         float(message["value"]),
                         float(message["value2"]),
                     )
-                    await machine.get_dashboard()
-                    await self.send_to_jeedom({
-                        "id": eq_id,
-                        "dash": machine.dashboard.to_json(),
-                    })
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
+                    confirmed = await self._await_command_confirmed(machine, pre_snapshot)
+                    if not confirmed:
+                        self._logger.warning("set_pre_extraction_times: server did not confirm within 10s")
+                    await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
                     self._logger.error(f"set_pre_extraction_times failed: {e}")
 

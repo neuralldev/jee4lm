@@ -29,7 +29,9 @@ from pylamarzocco.models import (
     LastCoffeeList,
     MachineStatus,
     NoWater,
+    PreBrewing,
     PrebrewSettingTimes,
+    PreExtraction,
     SecondsInOut,
     SteamBoilerLevel,
     SteamBoilerTemperature,
@@ -406,9 +408,15 @@ class LaMarzoccoMachine(LaMarzoccoThing):
     async def set_pre_extraction_mode(self, mode: PreExtractionMode) -> bool:
         """Set the preextraction mode (prebrew/preinfusion)."""
         assert self._cloud_client
-        return await self._cloud_client.change_pre_extraction_mode(
+        result = await self._cloud_client.change_pre_extraction_mode(
             self.serial_number, mode
         )
+        if result:
+            if WidgetType.CM_PRE_BREWING in self.dashboard.config:
+                cast(PreBrewing, self.dashboard.config[WidgetType.CM_PRE_BREWING]).mode = mode
+            if WidgetType.CM_PRE_EXTRACTION in self.dashboard.config:
+                cast(PreExtraction, self.dashboard.config[WidgetType.CM_PRE_EXTRACTION]).mode = mode
+        return result
 
     @cloud_only
     async def set_pre_extraction_times(
@@ -416,12 +424,18 @@ class LaMarzoccoMachine(LaMarzoccoThing):
     ) -> bool:
         """Set the times for pre-extraction."""
         assert self._cloud_client
-        return await self._cloud_client.change_pre_extraction_times(
+        result = await self._cloud_client.change_pre_extraction_times(
             self.serial_number,
             PrebrewSettingTimes(
                 times=SecondsInOut(seconds_in=seconds_on, seconds_out=seconds_off)
             ),
         )
+        if result and WidgetType.CM_PRE_BREWING in self.dashboard.config:
+            pre_brew = cast(PreBrewing, self.dashboard.config[WidgetType.CM_PRE_BREWING])
+            if pre_brew.times.pre_brewing:
+                pre_brew.times.pre_brewing[0].seconds.seconds_in = seconds_on
+                pre_brew.times.pre_brewing[0].seconds.seconds_out = seconds_off
+        return result
 
     async def set_smart_standby(
         self, enabled: bool, minutes: int, mode: SmartStandByType
