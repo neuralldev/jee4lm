@@ -17,9 +17,9 @@
 	"hasOwnDeamon": true,
 	"maxDependancyInstallTime": 60,
 	"changelog_beta": "",
-	"changelog": "https:\/\/github.com\/neuralldev\/jee4lm\/template\/changelog",
+	"changelog": "https:\/\/github.com\/neuralldev\/jee4lm\/blob\/master\/docs\/fr_FR\/changelog.md",
 	"documentation_beta": "",
-	"documentation": "",
+	"documentation": "https:\/\/github.com\/neuralldev\/jee4lm\/blob\/master\/docs\/fr_FR\/index.md",
 	"link": {
 		"forum": "",
 		"video": ""
