@@ -135,6 +135,8 @@ class Jee4LM(BaseDaemon):
 
     async def _dash_loop(self, serial: str, eq_id: int) -> None:
         machine = self._get_machine(serial)
+        interval = 15.0
+        consecutive_errors = 0
         try:
             while True:
                 try:
@@ -144,11 +146,28 @@ class Jee4LM(BaseDaemon):
                         "cmd": "dash_update",
                         "dash": machine.dashboard.to_json(),
                     })
+                    if consecutive_errors > 0:
+                        self._logger.info(f"dashboard loop recovered serial={serial}")
+                    consecutive_errors = 0
+                    interval = 15.0
                 except asyncio.CancelledError:
                     raise
                 except Exception as e:
-                    self._logger.error(f"dashboard poll error serial={serial}: {e}")
-                await asyncio.sleep(5)
+                    consecutive_errors += 1
+                    self._logger.error(
+                        f"dashboard poll error serial={serial} (#{consecutive_errors}): {e}"
+                    )
+                    self._reset_token_on_403(e)
+                    if consecutive_errors >= 5:
+                        self._logger.warning(
+                            f"dashboard loop: {consecutive_errors} consecutive errors — "
+                            f"restarting daemon serial={serial}"
+                        )
+                        await self.stop()
+                        return
+                    interval = min(interval * 2, 300.0)
+                    self._logger.info(f"dashboard loop backing off to {interval:.0f}s serial={serial}")
+                await asyncio.sleep(interval)
         except asyncio.CancelledError:
             self._logger.info(f"dashboard loop cancelled serial={serial}")
 
@@ -176,8 +195,15 @@ class Jee4LM(BaseDaemon):
             except asyncio.CancelledError:
                 raise
             except Exception as e:
+                self._reset_token_on_403(e)
                 self._logger.debug(f"confirmation poll error: {e}")
         return False
+
+    def _reset_token_on_403(self, e: Exception) -> None:
+        """On 403, invalidate cached token so next API call triggers full re-auth."""
+        if "403" in str(e) and self.client is not None:
+            self.client._access_token = None
+            self._logger.info("token invalidated due to 403 — will re-authenticate on next call")
 
     def _machine_is_on(self, machine: LaMarzoccoMachine) -> bool:
         """Return True if the dashboard reports machine in brewing mode."""
@@ -278,6 +304,7 @@ class Jee4LM(BaseDaemon):
                         "things": [t.to_dict() for t in things],
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"detect failed: {e}")
 
             # ---- one-shot reads (serial required) -------------------
@@ -293,6 +320,7 @@ class Jee4LM(BaseDaemon):
                     if self._machine_is_on(machine):
                         self._start_dash_loop(serial, eq_id)
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"get_dashboard failed: {e}")
 
             case "settings":
@@ -304,6 +332,7 @@ class Jee4LM(BaseDaemon):
                         "settings": machine.settings.to_json(),
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"get_settings failed: {e}")
 
             case "schedule":
@@ -315,6 +344,7 @@ class Jee4LM(BaseDaemon):
                         "schedule": machine.schedule.to_json(),
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"get_schedule failed: {e}")
 
             # ---- machine commands ------------------------------------
@@ -337,6 +367,7 @@ class Jee4LM(BaseDaemon):
                     else:
                         self._stop_dash_loop(serial)
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_power failed: {e}")
 
             case "CoffeeMachineSettingSteamBoilerEnabled":
@@ -350,6 +381,7 @@ class Jee4LM(BaseDaemon):
                         self._logger.warning("set_steam: server did not confirm within 10s")
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_steam failed: {e}")
 
             case "CoffeeMachineSettingCoffeeBoilerTargetTemperature":
@@ -363,6 +395,7 @@ class Jee4LM(BaseDaemon):
                         self._logger.warning("set_coffee_target_temperature: server did not confirm within 10s")
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_coffee_target_temperature failed: {e}")
 
             case "CoffeeMachineSettingSteamBoilerTargetTemperature":
@@ -376,6 +409,7 @@ class Jee4LM(BaseDaemon):
                         self._logger.warning("set_steam_target_temperature: server did not confirm within 10s")
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_steam_target_temperature failed: {e}")
 
             case "CoffeeMachinePreInfusionChangeMode":
@@ -390,6 +424,7 @@ class Jee4LM(BaseDaemon):
                         self._logger.warning("set_pre_extraction_mode (infusion): server did not confirm within 10s")
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_pre_extraction_mode (infusion) failed: {e}")
 
             case "CoffeeMachinePreBrewingChangeMode":
@@ -404,6 +439,7 @@ class Jee4LM(BaseDaemon):
                         self._logger.warning("set_pre_extraction_mode (brewing): server did not confirm within 10s")
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_pre_extraction_mode (brewing) failed: {e}")
 
             case "CoffeeMachinePreBrewingChangeTimes":
@@ -420,6 +456,7 @@ class Jee4LM(BaseDaemon):
                         self._logger.warning("set_pre_extraction_times: server did not confirm within 10s")
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_pre_extraction_times failed: {e}")
 
             case "CoffeeMachineBrewByWeightSettingDoses":
@@ -436,6 +473,7 @@ class Jee4LM(BaseDaemon):
                         "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_brew_by_weight_doses failed: {e}")
 
             case "CoffeeMachineBrewByWeightChangeMode":
@@ -449,6 +487,7 @@ class Jee4LM(BaseDaemon):
                         "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_brew_by_weight_dose_mode failed: {e}")
 
             case "CoffeeMachineBackFlushStartCleaning":
@@ -461,6 +500,7 @@ class Jee4LM(BaseDaemon):
                         "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"start_backflush failed: {e}")
 
             case "CoffeeMachineSettingSmartStandBy":
@@ -480,6 +520,7 @@ class Jee4LM(BaseDaemon):
                         "dash": machine.dashboard.to_json(),
                     })
                 except Exception as e:
+                    self._reset_token_on_403(e)
                     self._logger.error(f"set_smart_standby failed: {e}")
 
             case _:
