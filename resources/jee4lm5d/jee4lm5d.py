@@ -356,7 +356,7 @@ class Jee4LM(BaseDaemon):
                 machine = self._get_machine(serial)
                 try:
                     pre_snapshot = machine.dashboard.to_json()
-                    await machine.set_coffee_target_temperature(float(message["value"]))
+                    await machine.set_coffee_target_temperature(float(message.get("value", 0)))
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                     confirmed = await self._await_command_confirmed(machine, pre_snapshot)
                     if not confirmed:
@@ -369,7 +369,7 @@ class Jee4LM(BaseDaemon):
                 machine = self._get_machine(serial)
                 try:
                     pre_snapshot = machine.dashboard.to_json()
-                    await machine.set_steam_target_temperature(float(message["value"]))
+                    await machine.set_steam_target_temperature(float(message.get("value", 0)))
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                     confirmed = await self._await_command_confirmed(machine, pre_snapshot)
                     if not confirmed:
@@ -411,8 +411,8 @@ class Jee4LM(BaseDaemon):
                 try:
                     pre_snapshot = machine.dashboard.to_json()
                     await machine.set_pre_extraction_times(
-                        float(message["value"]),
-                        float(message["value2"]),
+                        float(message.get("value", 0)),
+                        float(message.get("value2", 0)),
                     )
                     await self.send_to_jeedom({"id": eq_id, "dash": machine.dashboard.to_json()})
                     confirmed = await self._await_command_confirmed(machine, pre_snapshot)
@@ -425,8 +425,8 @@ class Jee4LM(BaseDaemon):
             case "CoffeeMachineBrewByWeightSettingDoses":
                 machine = self._get_machine(serial)
                 try:
-                    dose1 = float(message["value"])
-                    dose2 = float(message["value2"])
+                    dose1 = float(message.get("value", 0))
+                    dose2 = float(message.get("value2", 0))
                     self._logger.debug(f"BBW set doses: dose1={dose1} dose2={dose2}")
                     await machine.set_brew_by_weight_doses(dose1, dose2)
                     # No get_dashboard(): the command is Pending, server still has stale values.
@@ -441,7 +441,7 @@ class Jee4LM(BaseDaemon):
             case "CoffeeMachineBrewByWeightChangeMode":
                 machine = self._get_machine(serial)
                 try:
-                    mode = DoseMode(message["value"])
+                    mode = DoseMode(message.get("value", DoseMode.CONTINUOUS.value))
                     await machine.set_brew_by_weight_dose_mode(mode)
                     # Same: optimistic local update already done, skip stale get_dashboard().
                     await self.send_to_jeedom({

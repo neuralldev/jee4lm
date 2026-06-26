@@ -69,7 +69,7 @@ if (!isConnect('admin')) {
         jeedomUtils.showAlert({message: '{{Connexion réussie}}', level: 'success'});
     })
     .catch(error => {
-        handleAjaxError(null, null, error);
+        jeedomUtils.showAlert({message: error.message || String(error), level: 'danger'});
     });
   });
 </script>

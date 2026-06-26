@@ -44,12 +44,14 @@ class jee4lm5 extends eqLogic
         log::add(__CLASS__, 'debug', 'cron: no serial, skipping');
         continue;
       }
-      // Always refresh dashboard
-      $jee4lm->getThingDashboard();
-      // Settings + schedule every 2 minutes — no sleep needed, daemon is async
-      if ($minuteActuelle % 2 === 0) {
-        $jee4lm->getThingSettings();
-        $jee4lm->getThingSchedule();
+      try {
+        $jee4lm->getThingDashboard();
+        if ($minuteActuelle % 2 === 0) {
+          $jee4lm->getThingSettings();
+          $jee4lm->getThingSchedule();
+        }
+      } catch (Exception $e) {
+        log::add(__CLASS__, 'debug', 'cron: daemon unavailable — ' . $e->getMessage());
       }
     }
   }
@@ -745,7 +747,7 @@ class jee4lm5 extends eqLogic
   public function updateDisplay($_cmd, $_key, $_value)
   {
     $cmd = $this->getCmd(null, $_cmd);
-    if ($cmd != null) {
+    if (is_object($cmd)) {
       $cmd->setDisplay($_key, $_value);
       $cmd->save();
     }
@@ -1296,7 +1298,7 @@ class jee4lm5 extends eqLogic
 
   public static function backupExclude()
   {
-    return array('resources/venv');
+    return array('resources/python_venv');
   }
 
   public function toHtml($_version = 'dashboard') {
@@ -1420,13 +1422,14 @@ class jee4lm5Cmd extends cmd
 
       case 'jee4lm_smartwakeup_on':
       case 'jee4lm_smartwakeup_off':
-        // FIX #7: was comparing against 'jee4lm_smartstandby_on' (wrong name, always false)
-        $b    = ($action === 'jee4lm_smartwakeup_on');
-        $from = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyafter')->execCmd();
+        $b       = ($action === 'jee4lm_smartwakeup_on');
+        $cmdFrom = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyafter');
+        $cmdMin  = cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyminutes');
+        if (!is_object($cmdFrom) || !is_object($cmdMin)) return false;
         $eq->CoffeeMachineSettingSmartStandBy(
           $b,
-          (int)cmd::byEqLogicIdAndLogicalId($eq->getId(), 'smartwakeupstandbyminutes')->execCmd(),
-          (string)$from
+          (int)$cmdMin->execCmd(),
+          (string)$cmdFrom->execCmd()
         );
         return true;
 

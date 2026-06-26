@@ -1,13 +1,13 @@
 {
 	"id": "jee4lm5",
 	"name": "jee4lm5",
-	"pluginVersion": "4.5",
+	"pluginVersion": "4.6",
 	"description": {
 		"fr_FR": "Ce plugin permet de se connecter via le cloud LaMarzocco 2025"
 	},
 	"licence": "AGPL",
 	"author": "neuralldev",
-	"require": "4.4",
+	"require": "4.6",
 	"os" : {
 		"min" : 11,
 		"max" : 12
