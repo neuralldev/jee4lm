@@ -1,9 +1,23 @@
+# --- Secrets / runtime state (never commit) ---
 data/lm.java
+data/*.json
 resources/jee4lm5d/installation_key.json
 resources/jee4lm5d/credential.json
-*.pyc
+
+# --- Dev artefacts ---
+resources/jee4lm5d/debug.json
+resources/requirements-----.txt
 test.py
+*.pyc
+__pycache__/
 .venv
+
+# --- Editor / OS ---
 .vscode
 *-workspace
+.DS_Store
+.idea
+
+# --- Agent context (not shipped to the market) ---
 CLAUDE.md
+.claude/
