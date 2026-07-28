@@ -1,16 +1,16 @@
 {
 	"id": "jee4lm5",
-	"name": "jee4lm5",
+	"name": "La Marzocco",
 	"pluginVersion": "4.6",
 	"description": {
-		"fr_FR": "Ce plugin permet de se connecter via le cloud LaMarzocco 2025"
+		"fr_FR": "Pilotez votre machine espresso La Marzocco depuis Jeedom, via le cloud officiel La Marzocco.\n\nDéveloppé et validé sur Linea Mini, compatible Micra et GS3 (toutes les spécificités GS3 ne sont pas couvertes).\n\nFonctionnalités :\n- Allumage et extinction de la machine, avec suivi de la progression de chauffe\n- Chaudière café : consigne et température réelle, statut (éteinte, en chauffe, prête)\n- Chaudière vapeur : activation et consigne selon le modèle\n- Prétrempage et préinfusion : activation, durée de mouillage et durée de pause\n- Brew By Weight avec balance Acaia Lunar : doses A et B, mode continu, état de connexion et niveau de batterie de la balance\n- Smart Standby : mise en veille automatique, durée et déclencheur (dernier café ou allumage)\n- Cycle de backflush et alerte manque d'eau\n\nUn widget dashboard dédié regroupe l'ensemble des commandes et se met à jour en temps réel.\n\nLes commandes utilisent les types génériques Jeedom : elles remontent directement vers HomeKit, Alexa ou Google Assistant via Homebridge, sous forme de thermostats pour les chaudières et d'interrupteurs pour l'allumage et la sélection de dose.\n\nUn compte La Marzocco (celui de l'application mobile) et une machine connectée au cloud sont nécessaires. Le plugin s'appuie sur un démon Python installé automatiquement avec les dépendances."
 	},
 	"licence": "GPL",
 	"author": "neuralldev",
 	"require": "4.6",
 	"os" : {
 		"min" : 11,
-		"max" : 12
+		"max" : 12.99
 	},
 	"category": "automation",
 	"hasDependency": true,
