@@ -3,7 +3,7 @@
 Plugin **Jeedom 4.6** pour piloter une machine espresso **La Marzocco** via le cloud
 La Marzocco, avec support du **Brew By Weight** (balance Acaia Lunar).
 
-- **Version plugin** : 4.6 · **Licence** : AGPL · **Auteur** : neuralldev
+- **Version plugin** : 4.6 · **Licence** : [GPL v3](LICENSE) · **Auteur** : neuralldev
 - **Documentation utilisateur** : [docs/fr_FR/index.md](docs/fr_FR/index.md)
 - **Changelog** : [docs/fr_FR/changelog.md](docs/fr_FR/changelog.md)
 

@@ -5,7 +5,7 @@
 	"description": {
 		"fr_FR": "Ce plugin permet de se connecter via le cloud LaMarzocco 2025"
 	},
-	"licence": "AGPL",
+	"licence": "GPL",
 	"author": "neuralldev",
 	"require": "4.6",
 	"os" : {
