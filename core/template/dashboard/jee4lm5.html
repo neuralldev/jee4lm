@@ -681,6 +681,9 @@
       if (text === '' || text === 'undefined' || text === undefined || text === null) return;
       var els = w.querySelectorAll('.cmd[data-cmd_id="' + cmdId + '"]');
       els.forEach(function(el) {
+          // displaycoffee/displaysteam carry markup (<span style=...>), so they
+          // must be injected as HTML — textContent would show the raw tags.
+          if (/<[a-z][\s\S]*>/i.test(text)) { el.innerHTML = text; return; }
           if (el.children.length === 0) el.textContent = text;
       });
   }
@@ -833,15 +836,34 @@
     });
   });
 
-  // React to Jeedom cmd updates (Jeedom 4.5 fires jeedom.cmd.update)
-  $(document).off('jeedom.cmd.update.lm' + uid)
-    .on('jeedom.cmd.update.lm' + uid, function(e, data) {
-      if (!data || !data.cmd_id) return;
-      var ids = Object.values(CMD);
-      if (ids.indexOf(String(data.cmd_id)) !== -1) {
-          VALUES[data.cmd_id] = data.value;
-          updateStates();
-      }
+  // React to Jeedom cmd updates.
+  // Jeedom core (>=4.6, js/cmd.class.js) does NOT fire a jQuery event: it keeps a
+  // registry jeedom.cmd.update[cmd_id] = [fn, ...] filled by addUpdateFunction(),
+  // and jeedom.cmd.refreshValue() calls those functions when a value arrives.
+  //
+  // The widget can be rendered several times (width-ref + display) but core
+  // dedupes identical callbacks by fn.toString(), so a per-instance callback
+  // would only ever be registered once. Instead we keep a per-eqLogic list of
+  // instance appliers and register a single dispatcher that feeds them all.
+  window.lmWidgetSinks = window.lmWidgetSinks || {};
+  var sinks = window.lmWidgetSinks[uid] = window.lmWidgetSinks[uid] || [];
+  sinks.push(function(cmdId, value) {
+    if (!w.isConnected) return false;      // instance removed from DOM: drop it
+    VALUES[cmdId] = value;
+    updateStates();
+    return true;
+  });
+
+  Object.values(CMD).forEach(function(cmdId) {
+    // Core dedupes identical callbacks by fn.toString(), so re-renders of this
+    // same widget do not stack duplicate dispatchers.
+    if (!cmdId || !/^\d+$/.test(cmdId)) return;
+    jeedom.cmd.addUpdateFunction(cmdId, function(_options) {
+      var list = window.lmWidgetSinks[uid] || [];
+      window.lmWidgetSinks[uid] = list.filter(function(fn) {
+        return fn(String(_options.cmd_id), _options.value);
+      });
+    });
   });
 
 })();
