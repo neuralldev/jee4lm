@@ -3,7 +3,7 @@
 Ce plugin permet de piloter une **La Marzocco Linea Mini** depuis **Jeedom 4.6**, via le cloud La Marzocco. Il supporte également la balance connectée **Acaia Lunar** pour le Brew By Weight (BBW).
 
 - Dépôt : [github.com/neuralldev/jee4lm](https://github.com/neuralldev/jee4lm)
-- Changelog : [voir le changelog](https://github.com/neuralldev/jee4lm/blob/master/docs/fr_FR/changelog.md)
+- Changelog : [voir le changelog](https://github.com/neuralldev/jee4lm/blob/dev/docs/fr_FR/changelog.md)
 
 ---
 
