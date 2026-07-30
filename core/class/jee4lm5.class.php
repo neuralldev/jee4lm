@@ -111,7 +111,10 @@ class jee4lm5 extends eqLogic
         case "ThingScale":
           log::add(__CLASS__, 'debug', 'scale');
           $_eq->setConfiguration("scalename", $w["output"]["name"]);
-          $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", 'BATTERY', 1, 'default', 'default', '0', '100');
+          // No BATTERY generic type on purpose: HomeKit would attach the scale
+          // battery to the machine accessory and flag it low whenever the
+          // scale is off.
+          $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", null, 1, 'default', 'default', '0', '100');
           break;
 
         case "CMCoffeeBoiler":
