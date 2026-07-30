@@ -177,8 +177,9 @@ class jee4lm5 extends eqLogic
     // HomeKit current heating state: same 'heat'/'off' payload as hbmode, but
     // read through THERMOSTAT_STATE_NAME (THERMOSTAT_STATE binary is unused).
     $_eq->AddCommand("Etat HomeKit",     'hbstate',     'info', 'string', null,                           null, "THERMOSTAT_STATE_NAME", 0);
-    // Exposed as a contact sensor so "group ready" can trigger automations.
-    $_eq->AddCommand("Groupe prêt",      'coffeeready', 'info', 'binary', null,                           null, "OPENING",        0);
+    // Occupancy rather than contact: HomeKit flags an open contact with an
+    // alert badge, which is wrong for a "ready" state.
+    $_eq->AddCommand("Groupe prêt",      'coffeeready', 'info', 'binary', null,                           null, "OCCUPANCY",      0);
     $_eq->AddCommand("SmartWakeup",                  'smartwakeup',                'info', 'binary', null, null, null,           0);
     $_eq->AddCommand("SmartWakeup durée",            'smartwakeupstandbyminutes',  'info', 'numeric',null, null, null,           0);
     $_eq->AddCommand("SmartWakeup depuis",           'smartwakeupstandbyafter',    'info', 'string', PLUGINNAME . "::smartwakeup", null, null, 1);
@@ -271,7 +272,9 @@ class jee4lm5 extends eqLogic
     }
     if ($_calculValueOffset !== null) $Command->setConfiguration('calculValueOffset', $_calculValueOffset);
     if ($_historizeRound !== null)    $Command->setConfiguration('historizeRound',    $_historizeRound);
-    if ($_generic_type !== null)      $Command->setGeneric_type($_generic_type);
+    // Always assign: a null must clear a stale generic type on an existing
+    // command, not silently keep it.
+    $Command->setGeneric_type($_generic_type);
     if ($_repeatevent === true && $_Type == 'info') $Command->setConfiguration('repeatEventManagement', 'never');
     if ($_valuemin !== 'default') $Command->setConfiguration('minValue', $_valuemin);
     if ($_valuemax !== 'default') $Command->setConfiguration('maxValue', $_valuemax);
@@ -315,7 +318,8 @@ class jee4lm5 extends eqLogic
       $command->setTemplate('dashboard', $_template);
       $command->setTemplate('mobile',    $_template);
     }
-    if ($_generic_type !== null) $command->setGeneric_type($_generic_type);
+    // Same as AddCommand: null must actively clear, not skip.
+    $command->setGeneric_type($_generic_type);
     if ($_min !== null) $command->setConfiguration('minValue', $_min);
     if ($_max !== null) $command->setConfiguration('maxValue', $_max);
     if ($_step !== null) $command->setDisplay('parameters', array('step' => $_step));
@@ -929,6 +933,9 @@ class jee4lm5 extends eqLogic
               $eq->checkAndUpdateCmd('machinemode',  0);
               $eq->checkAndUpdateCmd('hbmode',       'off');
               $eq->checkAndUpdateCmd('hbstate',      'off');
+              // The boiler widget may be absent from the payload when the
+              // machine is off, so clear readiness from here too.
+              $eq->checkAndUpdateCmd('coffeeready',  0);
               $autorefresh = false;
               break;
           }
