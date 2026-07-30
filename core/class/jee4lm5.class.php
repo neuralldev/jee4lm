@@ -7,7 +7,10 @@ const
   LMMODELCODE = ['LINEAMINI'],
   JEEDOM_DAEMON_PORT = '50044',
   TOKEN_TIME_TO_REFRESH = 4 * 60 * 60,
-  PENDING_COMMAND_TIMEOUT = 10;
+  PENDING_COMMAND_TIMEOUT = 10,
+  // Assumed room temperature: the cloud API no longer reports the group
+  // temperature, so the heat-up ramp starts from this value.
+  AMBIENT_TEMPERATURE = 20;
 
 class jee4lm5 extends eqLogic
 {
@@ -90,8 +93,8 @@ class jee4lm5 extends eqLogic
           $_eq->AddCommand("Balance connectée", 'isscaleconnected','info', 'binary',  PLUGINNAME . "::bbw",              null, null,                1);
           $_eq->AddCommand("BBW Etat",          'bbwmode',         'info', 'string',  null,                              null, null,                0);
           $_eq->AddCommand("Continu",           'bbwfree',         'info', 'binary',  PLUGINNAME . "::bbw_nodose",       null, null,                1, 'default', 'default', 'default', 'default', null, 0, false, null, null, null, 0);
-          $_eq->AddCommand("Dose 1",            'bbwdoseA',        'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive","g",  0);
-          $_eq->AddCommand("Dose 2",            'bbwdoseB',        'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive","g",  0);
+          $_eq->AddCommand("Dose 1",            'bbwdoseA',        'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive","g",  null, 0);
+          $_eq->AddCommand("Dose 2",            'bbwdoseB',        'info', 'numeric', PLUGINNAME . "::bbw_dose_inactive","g",  null, 0);
           $_eq->AddAction("jee4lm_bbwA",       "BBW Dose 1",    "button", "", 1);
           $_eq->AddAction("jee4lm_bbwB",       "BBW Dose 2",    "button", "", 1);
           $_eq->AddAction("jee4lm_doseA_slider","Régler Dose 1", "button", "", 1, "slider",
@@ -108,14 +111,14 @@ class jee4lm5 extends eqLogic
         case "ThingScale":
           log::add(__CLASS__, 'debug', 'scale');
           $_eq->setConfiguration("scalename", $w["output"]["name"]);
-          $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", 'tile', 1, null, null, 'default', 'default', '0', '100');
+          $_eq->AddCommand("Batterie Balance", 'scalebattery', 'info', 'numeric', null, "%", 'BATTERY', 1, 'default', 'default', '0', '100');
           break;
 
         case "CMCoffeeBoiler":
           log::add(__CLASS__, 'debug', 'coffee');
-          $_eq->AddCommand("Cafetière activée",          'coffeeenabled', 'info', 'binary',  null, null,  'THERMOSTAT_STATE',    0);
+          $_eq->AddCommand("Cafetière activée",          'coffeeenabled', 'info', 'binary',  null, null,  null,                  0);
           $_eq->AddCommand("Cafetière temperature cible",'coffeetarget',  'info', 'numeric', null, '°C', 'THERMOSTAT_SETPOINT', 0);
-          $_eq->AddCommand("Cafetière temperature actuelle",'coffeecurrent','info','numeric',null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
+          $_eq->AddCommand("Cafetière température estimée",'coffeecurrent','info','numeric',null, '°C', 'THERMOSTAT_TEMPERATURE', 0);
           $_eq->AddCommand("Chaudière café",             'displaycoffee', 'info', 'string',  null, null,  null,                  1);
           $_eq->AddAction("jee4lm_coffee_slider", "Régler consigne café", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider",
             $w["output"]["targetTemperatureMin"],
@@ -125,11 +128,11 @@ class jee4lm5 extends eqLogic
 
         case "CMSteamBoilerTemperature":
           log::add(__CLASS__, 'debug', 'steam');
-          $_eq->AddCommand("Vapeur activée",           'steamenabled',  'info', 'binary',  PLUGINNAME . "::steam", null,  'THERMOSTAT_STATE',    0, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
-          $_eq->AddCommand("Vapeur temperature cible", 'steamtarget',   'info', 'numeric', null,                   '°C', 'THERMOSTAT_SETPOINT', 0);
-          $_eq->AddCommand("Vapeur température actuelle",'steamcurrent','info', 'numeric', null,                   '°C', 'THERMOSTAT_TEMPERATURE', 0);
+          $_eq->AddCommand("Vapeur activée",           'steamenabled',  'info', 'binary',  PLUGINNAME . "::steam", null,  null,                  0, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
+          $_eq->AddCommand("Vapeur temperature cible", 'steamtarget',   'info', 'numeric', null,                   '°C', null,                  0);
+          $_eq->AddCommand("Vapeur température actuelle",'steamcurrent','info', 'numeric', null,                   '°C', null,                  0);
           $_eq->AddCommand("Chaudière Vapeur",         'displaysteam',  'info', 'string',  null,                   null,  null,                  1);
-          $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", "THERMOSTAT_SET_SETPOINT", 1, "slider",
+          $_eq->AddAction("jee4lm_steam_slider", "Régler consigne vapeur", "button", null, 1, "slider",
             $w["output"]["targetTemperatureMin"],
             $w["output"]["targetTemperatureMax"],
             $w["output"]["targetTemperatureStep"]);
@@ -139,26 +142,26 @@ class jee4lm5 extends eqLogic
 
         case "CMPreBrewing":
           log::add(__CLASS__, 'debug', 'pretrempage');
-          $_eq->AddCommand("Prétrempage",       'prewet',         'info', 'binary',  "ENERGY_STATE",             null, null,                    0);
-          $_eq->AddCommand("Prétrempage durée", 'prewettime',     'info', 'numeric', null,                       's',  'THERMOSTAT_SETPOINT',   0);
-          $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null,                       's',  'THERMOSTAT_SETPOINT',   0);
-          $_eq->AddAction("jee4lm_prewet_slider",      "Régler consigne mouillage",       "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider",
+          $_eq->AddCommand("Prétrempage",       'prewet',         'info', 'binary',  null,                       null, null,                    0);
+          $_eq->AddCommand("Prétrempage durée", 'prewettime',     'info', 'numeric', null,                       's',  null,                    0);
+          $_eq->AddCommand("Prétrempage pause", 'prewetholdtime', 'info', 'numeric', null,                       's',  null,                    0);
+          $_eq->AddAction("jee4lm_prewet_slider",      "Régler consigne mouillage",       "slider", null, 1, "slider",
             $w["output"]["times"]["pre_brewing"][0]["seconds_min"]["In"],
             $w["output"]["times"]["pre_brewing"][0]["seconds_max"]["In"],
             $w["output"]["times"]["pre_brewing"][0]["seconds_step"]["In"]);
-          $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "slider", "THERMOSTAT_SET_SETPOINT", 1, "slider",
+          $_eq->AddAction("jee4lm_prewet_time_slider", "Régler consigne pause mouillage", "slider", null, 1, "slider",
             $w["output"]["times"]["pre_brewing"][0]["seconds_min"]["Out"],
             $w["output"]["times"]["pre_brewing"][0]["seconds_max"]["Out"],
             $w["output"]["times"]["pre_brewing"][0]["seconds_step"]["Out"]);
-          $_eq->AddAction("jee4lm_prewet_on",  "Prémouillage on",  "binarySwitch", "ENERGY_ON",  1);
-          $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
+          $_eq->AddAction("jee4lm_prewet_on",  "Prémouillage on",  "binarySwitch", null, 1);
+          $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", null, 1);
           break; // FIX #9: break was missing, causing fall-through into CMPreExtraction
 
         case "CMPreExtraction":
           log::add(__CLASS__, 'debug', 'preinfusion');
           $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 0);
-          $_eq->AddAction("jee4lm_preextraction_on",  "Prémouillage on",  "binarySwitch", "ENERGY_ON",  1);
-          $_eq->AddAction("jee4lm_preextraction_off", "Prémouillage off", "binarySwitch", "ENERGY_OFF", 1);
+          $_eq->AddAction("jee4lm_preextraction_on",  "Prémouillage on",  "binarySwitch", null, 1);
+          $_eq->AddAction("jee4lm_preextraction_off", "Prémouillage off", "binarySwitch", null, 1);
           break;
       }
     }
@@ -167,22 +170,29 @@ class jee4lm5 extends eqLogic
     $_eq->AddCommand("Etat Backflush",    'backflush',   'info', 'binary', null,                           null, null,             0);
     $_eq->AddCommand("Dernier Backflush", 'last_backflush','info','string',PLUGINNAME . "::backflush",     null, null,             1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
     $_eq->AddCommand("Réservoir plein",   'tankStatus',  'info', 'binary', PLUGINNAME . "::tankStatus",    null, null,             1, 'default', 'default', 'default', 'default', null, 0, false, 0, null, null, 0);
-    $_eq->AddCommand("Etat",             'machinemode', 'info', 'binary', PLUGINNAME . "::main",           null, 'THERMOSTAT_STATE', 0);
+    $_eq->AddCommand("Etat",             'machinemode', 'info', 'binary', PLUGINNAME . "::main",           null, null,             0);
     $_eq->AddCommand("Version Firmware", 'fwversion',   'info', 'string', null,                           null, null,             1);
     $_eq->AddCommand("Version Gateway",  'gwversion',   'info', 'string', null,                           null, null,             1);
     $_eq->AddCommand("Mode",             'hbmode',      'info', 'string', null,                           null, "THERMOSTAT_MODE", 0);
-    $_eq->AddCommand("SmartWakeup",                  'smartwakeup',                'info', 'binary', null, null, "ENERGY_STATE", 0);
+    // HomeKit current heating state: same 'heat'/'off' payload as hbmode, but
+    // read through THERMOSTAT_STATE_NAME (THERMOSTAT_STATE binary is unused).
+    $_eq->AddCommand("Etat HomeKit",     'hbstate',     'info', 'string', null,                           null, "THERMOSTAT_STATE_NAME", 0);
+    // Exposed as a contact sensor so "group ready" can trigger automations.
+    $_eq->AddCommand("Groupe prêt",      'coffeeready', 'info', 'binary', null,                           null, "OPENING",        0);
+    $_eq->AddCommand("SmartWakeup",                  'smartwakeup',                'info', 'binary', null, null, null,           0);
     $_eq->AddCommand("SmartWakeup durée",            'smartwakeupstandbyminutes',  'info', 'numeric',null, null, null,           0);
     $_eq->AddCommand("SmartWakeup depuis",           'smartwakeupstandbyafter',    'info', 'string', PLUGINNAME . "::smartwakeup", null, null, 1);
 
-    $_eq->AddAction("jee4lm_test",      "TEST",           "",                           "button",        0);
-    $_eq->AddAction("jee4lm_on",        "heat",           PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
-    $_eq->AddAction("jee4lm_off",       "off",            PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 1);
-    $_eq->AddAction("jee4lm_auto",      "Auto",           PLUGINNAME . "::main on off", "THERMOSTAT_MODE", 0);
+    $_eq->AddAction("jee4lm_test",      "TEST",           null,                         null,            0);
+    // Mapped to the HomeKit Chauf/Off/Clim slots in the Homebridge plugin UI.
+    // hbmode must echo these command names exactly for the reverse lookup.
+    $_eq->AddAction("jee4lm_on",        "heat",           PLUGINNAME . "::main on off", "THERMOSTAT_SET_MODE", 1);
+    $_eq->AddAction("jee4lm_off",       "off",            PLUGINNAME . "::main on off", "THERMOSTAT_SET_MODE", 1);
+    $_eq->AddAction("jee4lm_auto",      "Auto",           PLUGINNAME . "::main on off", "THERMOSTAT_SET_MODE", 0);
     $_eq->AddAction("refresh",          __('Rafraichir', __FILE__));
     $_eq->AddAction("start_backflush",  "Démarrer backflush", PLUGINNAME . "::backflush on off");
-    $_eq->AddAction("jee4lm_smartwakeup_on",                 "Réveil on",    "binarySwitch", "ENERGY_ON",  1);
-    $_eq->AddAction("jee4lm_smartwakeup_off",                "Réveil off",   "binarySwitch", "ENERGY_OFF", 1);
+    $_eq->AddAction("jee4lm_smartwakeup_on",                 "Réveil on",    "binarySwitch", null, 1);
+    $_eq->AddAction("jee4lm_smartwakeup_off",                "Réveil off",   "binarySwitch", null, 1);
     $_eq->AddAction("jee4lm_smartwakeupstandbyminutes_slider","Régler durée", "slider",       null,         1, "slider", 0, 240, 10);
     $_eq->AddAction("jee4lm_smartwakeup_after_lastbrew", "Dernier café");
     $_eq->AddAction("jee4lm_smartwakeup_after_poweron",  "Allumage");
@@ -362,6 +372,63 @@ class jee4lm5 extends eqLogic
     }
   }
 
+  /**
+   * Synthesize a plausible "current temperature" while the boiler heats up.
+   * The cloud API no longer reports the group temperature, only an ETA, so we
+   * interpolate from the starting temperature to the target over the window
+   * the machine announced when the heat-up began. Latched state lives in the
+   * eqLogic configuration (rampStartTs / rampStartTemp / rampReadyTs).
+   */
+  public function rampCoffeeTemperature($_readyTs, $_target)
+  {
+    $now        = time();
+    $startTs    = (int)$this->getConfiguration('rampStartTs', 0);
+    $readyTsRef = (int)$this->getConfiguration('rampReadyTs', 0);
+    $startTemp  = (float)$this->getConfiguration('rampStartTemp', AMBIENT_TEMPERATURE);
+
+    $cmd  = cmd::byEqLogicIdAndLogicalId($this->getId(), 'coffeecurrent');
+    $prev = is_object($cmd) ? (float)$cmd->execCmd() : 0;
+
+    if ($startTs == 0 || $readyTsRef == 0) {
+      // New heat-up cycle: latch the starting point and the announced ETA.
+      $startTemp  = ($prev > AMBIENT_TEMPERATURE && $prev < $_target) ? $prev : AMBIENT_TEMPERATURE;
+      $startTs    = $now;
+      $readyTsRef = $_readyTs;
+      $this->setConfiguration('rampStartTs',   $startTs);
+      $this->setConfiguration('rampStartTemp', $startTemp);
+      $this->setConfiguration('rampReadyTs',   $readyTsRef);
+      $this->save();
+    } elseif ($_readyTs > $readyTsRef + 60) {
+      // The machine pushed its ETA back: stretch the ramp rather than let the
+      // interpolation run ahead of reality.
+      $readyTsRef = $_readyTs;
+      $this->setConfiguration('rampReadyTs', $readyTsRef);
+      $this->save();
+    }
+
+    $span = $readyTsRef - $startTs;
+    if ($span <= 0) return $_target;
+
+    $p = max(0, min(1, ($now - $startTs) / $span));
+    $t = $startTemp + $p * ($_target - $startTemp);
+    // Never let the displayed temperature go backwards during a heat-up.
+    if ($prev > $t && $prev <= $_target) $t = $prev;
+
+    return round($t, 1);
+  }
+
+  /**
+   * Drop the latched ramp state once the boiler is ready or powered down.
+   */
+  public function clearCoffeeRamp()
+  {
+    if ((int)$this->getConfiguration('rampStartTs', 0) === 0) return;
+    $this->setConfiguration('rampStartTs',   0);
+    $this->setConfiguration('rampReadyTs',   0);
+    $this->setConfiguration('rampStartTemp', 0);
+    $this->save();
+  }
+
   // ------------------------------------------------------------------
   // Daemon command senders
   // ------------------------------------------------------------------
@@ -404,7 +471,8 @@ class jee4lm5 extends eqLogic
       "serial"   => $serial,
     ];
     self::deamon_send($payload);
-    $this->checkAndUpdateCmd('hbmode', $_toggle ? 'heat' : 'off');
+    $this->checkAndUpdateCmd('hbmode',  $_toggle ? 'heat' : 'off');
+    $this->checkAndUpdateCmd('hbstate', $_toggle ? 'heat' : 'off');
   }
 
   public function CoffeeMachineSettingSteamBoilerEnabled(bool $_toggle)
@@ -649,6 +717,8 @@ class jee4lm5 extends eqLogic
         'coffeetarget'             => array(3, 1),
         'start_backflush'          => array(2, 1),
         'machinemode'              => array(1, 1),
+        'hbstate'                  => array(1, 1),
+        'coffeeready'              => array(3, 1),
         'backflush'                => array(2, 1),
         'last_backflush'           => array(2, 1),
         'jee4lm_off'               => array(2, 2),
@@ -849,6 +919,7 @@ class jee4lm5 extends eqLogic
             case "Brewing":
               log::add(__CLASS__, 'debug', 'machine is ON');
               $eq->checkAndUpdateCmd('hbmode',      'heat');
+              $eq->checkAndUpdateCmd('hbstate',     'heat');
               $eq->checkAndUpdateCmd('machinemode',  1);
               $autorefresh = true;
               break;
@@ -857,6 +928,7 @@ class jee4lm5 extends eqLogic
               log::add(__CLASS__, 'debug', 'machine is OFF');
               $eq->checkAndUpdateCmd('machinemode',  0);
               $eq->checkAndUpdateCmd('hbmode',       'off');
+              $eq->checkAndUpdateCmd('hbstate',      'off');
               $autorefresh = false;
               break;
           }
@@ -865,14 +937,16 @@ class jee4lm5 extends eqLogic
         // WidgetType::CM_COFFEE_BOILER = "CMCoffeeBoiler"
         // BoilerStatus: StandBy, HeatingUp, Ready, NoWater, Off
         case "CMCoffeeBoiler":
-          log::add('jee4lm5', 'debug', 'coffeetarget=' . $output['target_temperature']);
-          $eq->checkAndUpdateCmd('coffeetarget', $output['target_temperature']);
+          $target = $output['target_temperature'];
+          log::add('jee4lm5', 'debug', 'coffeetarget=' . $target);
+          $eq->checkAndUpdateCmd('coffeetarget', $target);
           $eq->checkAndUpdateCmd('coffeeenabled', !empty($output['enabled']) ? 1 : 0);
+          $eq->checkAndUpdateCmd('coffeeready', $output['status'] === 'Ready' ? 1 : 0);
+          // ready_start_time is a Python datetime — serialized as ISO string by mashumaro
+          $readyTs = isset($output['ready_start_time']) ? strtotime($output['ready_start_time']) : 0;
           switch ($output['status']) {
             case "HeatingUp":
-              $eq->checkAndUpdateCmd('coffeecurrent', 0);
-              // ready_start_time is a Python datetime — serialized as ISO string by mashumaro
-              $readyTs = isset($output['ready_start_time']) ? strtotime($output['ready_start_time']) : 0;
+              $eq->checkAndUpdateCmd('coffeecurrent', $eq->rampCoffeeTemperature($readyTs, $target));
               $diffMin = $readyTs > 0 ? round((($readyTs - time()) / 60) * 2) / 2 : 0;
               if ($diffMin <= 0) {
                 $display = '<span style="color:green"><br/>Prêt</span>';
@@ -885,11 +959,13 @@ class jee4lm5 extends eqLogic
               $eq->checkAndUpdateCmd('displaycoffee', $display);
               break;
             case "Ready":
-              $eq->checkAndUpdateCmd('coffeecurrent', $output['target_temperature']);
+              $eq->clearCoffeeRamp();
+              $eq->checkAndUpdateCmd('coffeecurrent', $target);
               $eq->checkAndUpdateCmd('displaycoffee', '<span style="color:green"><br/>Prêt</span>');
               break;
             default: // StandBy, Off, NoWater
-              $eq->checkAndUpdateCmd('coffeecurrent', 0);
+              $eq->clearCoffeeRamp();
+              $eq->checkAndUpdateCmd('coffeecurrent', AMBIENT_TEMPERATURE);
               $eq->checkAndUpdateCmd('displaycoffee', '<span style="color:red"><br/>Off</span>');
           }
           break;
