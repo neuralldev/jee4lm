@@ -23,6 +23,17 @@ function jee4lm5_install()
 
 function jee4lm5_update()
 {
+  // Clear the BATTERY generic type set on scalebattery by earlier versions:
+  // HomeKit attaches it to the machine accessory and reports a low battery
+  // whenever the scale is off.
+  foreach (eqLogic::byType('jee4lm5') as $eq) {
+    $cmd = $eq->getCmd('info', 'scalebattery');
+    if (is_object($cmd) && $cmd->getGeneric_type() == 'BATTERY') {
+      $cmd->setGeneric_type(null);
+      $cmd->save();
+      log::add('jee4lm5', 'info', 'update: type générique BATTERY retiré de scalebattery (eq ' . $eq->getId() . ')');
+    }
+  }
 }
 
 function jee4lm5_remove()
