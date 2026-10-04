@@ -2,25 +2,10 @@
     "pre-install": {
     },
     "apt": {
-        "python3-pip": {}
+        "curl": {},
+        "ca-certificates": {}
     },
-    "pip3": {
-        "jeedomdaemon": {},
-        "bleak": {},
-        "bleak-retry-connector": {},
-        "aiohappyeyeballs": {},
-        "aiohttp": {},
-        "aiosignal": {},
-        "attrs": {},
-        "cffi": {},
-        "cryptography": {},
-        "frozenlist": {},
-        "idna": {},
-        "mashumaro": {},
-        "multidict": {},
-        "propcache": {},
-        "pycparser": {},
-        "typing_extensions": {},
-        "yarl": {}
+    "post-install": {
+        "script": "plugins/jee4lm5/resources/install_venv.sh"
     }
-  }
+}

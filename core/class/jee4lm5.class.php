@@ -1384,7 +1384,7 @@ class jee4lm5 extends eqLogic
 
   public static function backupExclude()
   {
-    return array('resources/python_venv');
+    return array('resources/python_venv', 'resources/.uv', 'resources/.python');
   }
 
   public function toHtml($_version = 'dashboard') {

@@ -1,0 +1,6 @@
+jeedomdaemon
+bleak
+bleak-retry-connector
+aiohttp
+cryptography
+mashumaro
