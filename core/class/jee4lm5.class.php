@@ -158,13 +158,17 @@ class jee4lm5 extends eqLogic
             $w["output"]["times"]["pre_brewing"][0]["seconds_step"]["Out"]);
           $_eq->AddAction("jee4lm_prewet_on",  "Prémouillage on",  "binarySwitch", null, 1);
           $_eq->AddAction("jee4lm_prewet_off", "Prémouillage off", "binarySwitch", null, 1);
+          // Pre-infusion is reported as a mode of this widget (PreBrewing | PreInfusion | Disabled)
+          $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 0);
+          $_eq->AddAction("jee4lm_preextraction_on",  "Préinfusion on",  "binarySwitch", null, 1);
+          $_eq->AddAction("jee4lm_preextraction_off", "Préinfusion off", "binarySwitch", null, 1);
           break; // FIX #9: break was missing, causing fall-through into CMPreExtraction
 
         case "CMPreExtraction":
           log::add(__CLASS__, 'debug', 'preinfusion');
           $_eq->AddCommand("Préinfusion", 'preinfusionmode', 'info', 'binary', null, null, null, 0);
-          $_eq->AddAction("jee4lm_preextraction_on",  "Prémouillage on",  "binarySwitch", null, 1);
-          $_eq->AddAction("jee4lm_preextraction_off", "Prémouillage off", "binarySwitch", null, 1);
+          $_eq->AddAction("jee4lm_preextraction_on",  "Préinfusion on",  "binarySwitch", null, 1);
+          $_eq->AddAction("jee4lm_preextraction_off", "Préinfusion off", "binarySwitch", null, 1);
           break;
       }
     }
